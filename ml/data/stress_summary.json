@@ -1,0 +1,17 @@
+{
+  "observations": 22272,
+  "ground_truth_rows": 5880,
+  "sensors": 9,
+  "label_distribution": {
+    "SAFE": 0.673,
+    "CRITICAL": 0.25,
+    "WARNING": 0.077
+  },
+  "density_mean": 0.384,
+  "density_max": 1.0,
+  "seconds": 1.0,
+  "files": [
+    "ml/data/stress_observations.csv.gz",
+    "ml/data/stress_ground_truth.csv.gz"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "project": "CrowdPulse Macau",
+  "privacy_mode": true,
+  "density_index": {
+    "kind": "relative",
+    "range": [0.0, 1.0],
+    "note": "Relative crowd-density index: 0.0 = nearly empty, 1.0 = extreme crowding. It is NOT persons per square metre. It is computed as person_count / calibrated_visible_capacity for each sensor and averaged per zone."
+  },
+  "congestion_thresholds": {
+    "label": "experimental prototype thresholds",
+    "warning": 0.45,
+    "critical": 0.70,
+    "note": "Density-index thresholds used to label SAFE / WARNING / CRITICAL. They are prototype settings chosen for the synthetic simulation and must be calibrated against real measurements before operational use."
+  },
+  "forecast_horizons_min": [5, 10, 15],
+  "confidence": {
+    "low_confidence_threshold": 0.60,
+    "ood_confidence_multiplier": 0.70,
+    "min_reliability_for_prediction": 0.25
+  },
+  "reliability": {
+    "stale_after_s": 45,
+    "min_motion_stability": 0.75,
+    "max_gps_accuracy_m": 30.0,
+    "min_vision_confidence": 0.40,
+    "disagreement_penalty_scale": 2.0,
+    "weights": {
+      "online": 0.35,
+      "stability": 0.20,
+      "obstruction": 0.20,
+      "gps": 0.10,
+      "vision": 0.15
+    }
+  },
+  "sensor": {
+    "observation_interval_s": 5,
+    "min_interval_s": 1,
+    "max_interval_s": 5,
+    "zone_assignment_radius_m": 120.0
+  },
+  "aggregation": {
+    "bin_seconds": 60,
+    "lag_bins": 3,
+    "history_bins_for_features": 6
+  },
+  "ood": {
+    "method": "isolation_forest",
+    "contamination": 0.02,
+    "score_threshold": null,
+    "message": "Conditions differ from training data. Prediction reliability may be reduced."
+  },
+  "intervention": {
+    "recommend_when": ["CRITICAL"],
+    "monitor_when": ["WARNING"],
+    "assumed_redirect_inflow_reduction": 0.30,
+    "accessibility": {
+      "stairs_penalty": 0.5,
+      "length_penalty_per_100m": 0.1,
+      "steep_penalty": 0.3
+    }
+  },
+  "live_simulation": {
+    "enabled_by_default": true,
+    "scenario": "golden_week_demo",
+    "acceleration": 6.0,
+    "tick_s": 1.0
+  },
+  "languages": ["zh", "en", "pt"]
+}

@@ -1,0 +1,221 @@
+{
+  "note": "Conceptual zone graph for the Macau historic tourist district. Coordinates are approximate centroids for a prototype; capacities are relative simulation parameters (not surveyed values).",
+  "zones": [
+    {
+      "id": "ruins_st_paul",
+      "name": "Ruins of St. Paul's",
+      "lat": 22.1975,
+      "lon": 113.5409,
+      "capacity": 900,
+      "kind": "attraction",
+      "entry": true,
+      "polygon_radius_m": 45
+    },
+    {
+      "id": "jesus_square",
+      "name": "Company of Jesus Square",
+      "lat": 22.1969,
+      "lon": 113.54075,
+      "capacity": 700,
+      "kind": "square",
+      "entry": false,
+      "polygon_radius_m": 40
+    },
+    {
+      "id": "rua_sao_paulo",
+      "name": "Rua de S. Paulo (corridor)",
+      "lat": 22.1959,
+      "lon": 113.5404,
+      "capacity": 450,
+      "kind": "corridor",
+      "entry": false,
+      "polygon_radius_m": 35
+    },
+    {
+      "id": "st_dominic",
+      "name": "St. Dominic's Square",
+      "lat": 22.1943,
+      "lon": 113.5399,
+      "capacity": 900,
+      "kind": "square",
+      "entry": false,
+      "polygon_radius_m": 40
+    },
+    {
+      "id": "senado_square",
+      "name": "Senado Square",
+      "lat": 22.1934,
+      "lon": 113.5397,
+      "capacity": 1600,
+      "kind": "square",
+      "entry": false,
+      "polygon_radius_m": 55
+    },
+    {
+      "id": "almeida_ribeiro",
+      "name": "Avenida de Almeida Ribeiro",
+      "lat": 22.1928,
+      "lon": 113.5392,
+      "capacity": 1500,
+      "kind": "avenue",
+      "entry": true,
+      "polygon_radius_m": 50
+    },
+    {
+      "id": "tercena_corridor",
+      "name": "Rua da Tercena corridor (alternate route)",
+      "lat": 22.1947,
+      "lon": 113.5386,
+      "capacity": 450,
+      "kind": "corridor",
+      "entry": false,
+      "polygon_radius_m": 35
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_ruins_jesus",
+      "from": "ruins_st_paul",
+      "to": "jesus_square",
+      "length_m": 90,
+      "capacity_per_min": 220,
+      "has_stairs": true,
+      "steep": true,
+      "name": "St. Paul's steps"
+    },
+    {
+      "id": "e_jesus_ruasp",
+      "from": "jesus_square",
+      "to": "rua_sao_paulo",
+      "length_m": 120,
+      "capacity_per_min": 180,
+      "has_stairs": false,
+      "steep": false,
+      "name": "Rua de S. Paulo (upper)"
+    },
+    {
+      "id": "e_ruasp_dominic",
+      "from": "rua_sao_paulo",
+      "to": "st_dominic",
+      "length_m": 190,
+      "capacity_per_min": 170,
+      "has_stairs": false,
+      "steep": false,
+      "name": "Rua de S. Paulo (lower)"
+    },
+    {
+      "id": "e_dominic_senado",
+      "from": "st_dominic",
+      "to": "senado_square",
+      "length_m": 110,
+      "capacity_per_min": 260,
+      "has_stairs": false,
+      "steep": false,
+      "name": "Largo de S. Domingos link"
+    },
+    {
+      "id": "e_senado_almeida",
+      "from": "senado_square",
+      "to": "almeida_ribeiro",
+      "length_m": 80,
+      "capacity_per_min": 320,
+      "has_stairs": false,
+      "steep": false,
+      "name": "Senado Square south exit"
+    },
+    {
+      "id": "e_ruasp_tercena",
+      "from": "rua_sao_paulo",
+      "to": "tercena_corridor",
+      "length_m": 160,
+      "capacity_per_min": 120,
+      "has_stairs": false,
+      "steep": false,
+      "name": "Rua da Tercena west link"
+    },
+    {
+      "id": "e_tercena_almeida",
+      "from": "tercena_corridor",
+      "to": "almeida_ribeiro",
+      "length_m": 260,
+      "capacity_per_min": 140,
+      "has_stairs": false,
+      "steep": false,
+      "name": "Rua dos Ervanarios descent"
+    }
+  ],
+  "sensors": [
+    {
+      "sensor_id": "node-a1f3",
+      "zone_id": "ruins_st_paul",
+      "lat": 22.19745,
+      "lon": 113.541,
+      "heading_deg": 200,
+      "visible_fraction": 0.35
+    },
+    {
+      "sensor_id": "node-b7c2",
+      "zone_id": "ruins_st_paul",
+      "lat": 22.1976,
+      "lon": 113.54075,
+      "heading_deg": 140,
+      "visible_fraction": 0.3
+    },
+    {
+      "sensor_id": "node-c9d4",
+      "zone_id": "jesus_square",
+      "lat": 22.19692,
+      "lon": 113.5408,
+      "heading_deg": 20,
+      "visible_fraction": 0.4
+    },
+    {
+      "sensor_id": "node-d2e8",
+      "zone_id": "rua_sao_paulo",
+      "lat": 22.19588,
+      "lon": 113.54045,
+      "heading_deg": 210,
+      "visible_fraction": 0.45
+    },
+    {
+      "sensor_id": "node-e5f1",
+      "zone_id": "st_dominic",
+      "lat": 22.19432,
+      "lon": 113.53995,
+      "heading_deg": 190,
+      "visible_fraction": 0.35
+    },
+    {
+      "sensor_id": "node-f8a6",
+      "zone_id": "senado_square",
+      "lat": 22.19345,
+      "lon": 113.5396,
+      "heading_deg": 160,
+      "visible_fraction": 0.25
+    },
+    {
+      "sensor_id": "node-a4b9",
+      "zone_id": "senado_square",
+      "lat": 22.1933,
+      "lon": 113.53985,
+      "heading_deg": 350,
+      "visible_fraction": 0.3
+    },
+    {
+      "sensor_id": "node-b1c5",
+      "zone_id": "almeida_ribeiro",
+      "lat": 22.19282,
+      "lon": 113.53925,
+      "heading_deg": 10,
+      "visible_fraction": 0.3
+    },
+    {
+      "sensor_id": "node-c6d0",
+      "zone_id": "tercena_corridor",
+      "lat": 22.19472,
+      "lon": 113.53865,
+      "heading_deg": 180,
+      "visible_fraction": 0.45
+    }
+  ]
+}

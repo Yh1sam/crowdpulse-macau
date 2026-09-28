@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crowdpulse.example/schemas/sensor_observation.schema.json",
+  "title": "SensorObservation",
+  "description": "Anonymous, numerical-only crowd observation emitted by a CrowdPulse smartphone sensor node. Contains no images, no identifiers of individuals, no biometrics.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sensor_id", "timestamp", "latitude", "longitude", "location_accuracy_m", "heading_deg", "device_motion_stability", "person_count", "estimated_density", "flow_direction_deg", "flow_speed_mps", "vision_confidence", "camera_obstructed", "model_version"],
+  "properties": {
+    "sensor_id": {"type": "string", "pattern": "^node-[a-z0-9]{4,32}$", "description": "Anonymous node identifier (random, not tied to a person or device serial)."},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+    "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+    "location_accuracy_m": {"type": "number", "minimum": 0, "maximum": 10000},
+    "heading_deg": {"type": "number", "minimum": 0, "maximum": 360, "description": "Compass direction the camera faces."},
+    "device_motion_stability": {"type": "number", "minimum": 0, "maximum": 1, "description": "1.0 = perfectly still; low values mean the device is being moved."},
+    "person_count": {"type": "integer", "minimum": 0, "maximum": 5000, "description": "Number of anonymous person detections in the current frame window."},
+    "estimated_density": {"type": "number", "minimum": 0, "maximum": 1, "description": "Relative density index 0..1 (NOT persons per square metre)."},
+    "flow_direction_deg": {"type": "number", "minimum": 0, "maximum": 360, "description": "Dominant pedestrian movement direction (compass degrees)."},
+    "flow_speed_mps": {"type": "number", "minimum": 0, "maximum": 10},
+    "vision_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "camera_obstructed": {"type": "boolean"},
+    "model_version": {"type": "string", "maxLength": 64},
+    "mode": {"type": "string", "enum": ["live", "video", "simulated"], "description": "Optional: how the observation was produced."},
+    "zone_hint": {"type": "string", "maxLength": 64, "description": "Optional operator-configured zone id; the backend still validates by GPS."}
+  }
+}
