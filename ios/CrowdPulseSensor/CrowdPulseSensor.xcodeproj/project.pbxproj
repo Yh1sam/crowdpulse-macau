@@ -19,9 +19,12 @@
 		93C51239DFE845F43EF9B5C7 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08CC6AF50BCA8E67FD0C2E5 /* DebugView.swift */; };
 		94C9B9860FF41C6726A61301 /* PrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A95319F8659301E15E2747 /* PrivacyView.swift */; };
 		95889C9B4A124596BAC5EFAE /* SensorLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF085DA1E7EE4A4D7C6713A7 /* SensorLogicTests.swift */; };
+		A7918BD14FB7CAD3F75A8BF6 /* PersonDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649A21557D1813B13C5FA61F /* PersonDetector.swift */; };
+		A93DF95D5D57312334990ECD /* yolo11n.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 4955C9FAC23C67805509C489 /* yolo11n.mlpackage */; };
 		B6B4E04E37D7FCCB6D5D9238 /* SensorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8F0E613E2D7F1DABA1628F /* SensorSettings.swift */; };
 		CD7E117316E31DF57A093C11 /* LocationMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFCC83DB5CF760C93393B51 /* LocationMonitor.swift */; };
 		D23B2945C7A720210D63823D /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC10582F73DC5C195444D3C /* Uploader.swift */; };
+		EC4364A86F631281183C3DD8 /* crossing_t32.png in Resources */ = {isa = PBXBuildFile; fileRef = 6CB1DE845B9F5FD1F8E2DE67 /* crossing_t32.png */; };
 		EDCA6779F80DF3997A991874 /* FlowEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593249D29571C9C154F26459 /* FlowEstimator.swift */; };
 		F824628E3A08EB62FEF96E6F /* SensorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA9F7FFF1B72FFD5BD00351F /* SensorNode.swift */; };
 /* End PBXBuildFile section */
@@ -42,8 +45,11 @@
 		221FB7D4BBE05C2769722A95 /* CrowdPulseSensorTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CrowdPulseSensorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		25362901795D69B4CD04012E /* sample_crowd.mp4 */ = {isa = PBXFileReference; path = sample_crowd.mp4; sourceTree = "<group>"; };
 		2EC10582F73DC5C195444D3C /* Uploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uploader.swift; sourceTree = "<group>"; };
+		4955C9FAC23C67805509C489 /* yolo11n.mlpackage */ = {isa = PBXFileReference; path = yolo11n.mlpackage; sourceTree = "<group>"; };
 		4C58CF6E1928916D37931E3F /* SensorObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorObservation.swift; sourceTree = "<group>"; };
 		593249D29571C9C154F26459 /* FlowEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowEstimator.swift; sourceTree = "<group>"; };
+		649A21557D1813B13C5FA61F /* PersonDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonDetector.swift; sourceTree = "<group>"; };
+		6CB1DE845B9F5FD1F8E2DE67 /* crossing_t32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = crossing_t32.png; sourceTree = "<group>"; };
 		721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		735C25FDB75EF589DEB114AF /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		7C8F0E613E2D7F1DABA1628F /* SensorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSettings.swift; sourceTree = "<group>"; };
@@ -80,6 +86,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		2759E5605BE808F5340C8C39 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6CB1DE845B9F5FD1F8E2DE67 /* crossing_t32.png */,
+			);
+			name = Resources;
+			path = Tests/Resources;
+			sourceTree = "<group>";
+		};
 		299566B022EABEF506DE8D6E /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -104,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				25362901795D69B4CD04012E /* sample_crowd.mp4 */,
+				4955C9FAC23C67805509C489 /* yolo11n.mlpackage */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -123,6 +139,7 @@
 				593249D29571C9C154F26459 /* FlowEstimator.swift */,
 				FCFCC83DB5CF760C93393B51 /* LocationMonitor.swift */,
 				7CF837DCB86B6225680F7EAC /* MotionMonitor.swift */,
+				649A21557D1813B13C5FA61F /* PersonDetector.swift */,
 				EA9F7FFF1B72FFD5BD00351F /* SensorNode.swift */,
 				7C8F0E613E2D7F1DABA1628F /* SensorSettings.swift */,
 				2EC10582F73DC5C195444D3C /* Uploader.swift */,
@@ -136,6 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				7523E0B1C04165495311A9A3 /* Resources */,
+				2759E5605BE808F5340C8C39 /* Resources */,
 				299566B022EABEF506DE8D6E /* Sources */,
 				B03C38E6CD153E35B67F134F /* Tests */,
 				1ACB32FE57BC18372842E198 /* Products */,
@@ -168,6 +186,7 @@
 			buildConfigurationList = 97E66EADDB714FEF07352EBA /* Build configuration list for PBXNativeTarget "CrowdPulseSensorTests" */;
 			buildPhases = (
 				73026A582298295C291DAA9A /* Sources */,
+				6A3EAC227152BEB2FC8D949B /* Resources */,
 			);
 			buildRules = (
 			);
@@ -221,6 +240,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6A3EAC227152BEB2FC8D949B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EC4364A86F631281183C3DD8 /* crossing_t32.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E892D37A1B555132018107D4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -243,6 +270,7 @@
 				634AE1DD87E461E9FA54A5A1 /* LiveView.swift in Sources */,
 				CD7E117316E31DF57A093C11 /* LocationMonitor.swift in Sources */,
 				04EDDCE36D61733A48873ECF /* MotionMonitor.swift in Sources */,
+				A7918BD14FB7CAD3F75A8BF6 /* PersonDetector.swift in Sources */,
 				94C9B9860FF41C6726A61301 /* PrivacyView.swift in Sources */,
 				F824628E3A08EB62FEF96E6F /* SensorNode.swift in Sources */,
 				4ACD0F52F8CBA9DEE0395799 /* SensorObservation.swift in Sources */,
@@ -251,6 +279,7 @@
 				D23B2945C7A720210D63823D /* Uploader.swift in Sources */,
 				1E5D4177E6ADBE655B6A0414 /* VideoFrameSource.swift in Sources */,
 				8E39B183DA7C42740284CBF2 /* VisionProcessor.swift in Sources */,
+				A93DF95D5D57312334990ECD /* yolo11n.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,7 @@
 import XCTest
 import CoreGraphics
+import CoreVideo
+import ImageIO
 @testable import CrowdPulseSensor
 
 final class SensorLogicTests: XCTestCase {
@@ -50,6 +52,67 @@ final class SensorLogicTests: XCTestCase {
         XCTAssertEqual(MotionMonitor.stabilityScore(accelMagnitudes: Array(repeating: 1.0, count: 30), gyroRates: Array(repeating: 0.0, count: 30)), 1.0, accuracy: 1e-9)
         let shaky = (0..<30).map { 1.0 + 0.3 * sin(Double($0)) }
         XCTAssertLessThan(MotionMonitor.stabilityScore(accelMagnitudes: shaky, gyroRates: Array(repeating: 1.5, count: 30)), 0.5)
+    }
+
+    // MARK: detector
+
+    private func pixelBuffer(from cg: CGImage) -> CVPixelBuffer {
+        var pb: CVPixelBuffer?
+        CVPixelBufferCreate(nil, cg.width, cg.height, kCVPixelFormatType_32BGRA, [kCVPixelBufferCGImageCompatibilityKey: true, kCVPixelBufferCGBitmapContextCompatibilityKey: true] as CFDictionary, &pb)
+        let buf = pb!
+        CVPixelBufferLockBaseAddress(buf, [])
+        let ctx = CGContext(data: CVPixelBufferGetBaseAddress(buf), width: cg.width, height: cg.height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(buf),
+                            space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
+        CVPixelBufferUnlockBaseAddress(buf, [])
+        return buf
+    }
+
+    func testBundledYOLOModelLoads() {
+        let d = CoreMLPersonDetector.bundledDefault()
+        XCTAssertNotNil(d, "yolo11n.mlmodelc must be compiled into the app bundle")
+        XCTAssertEqual(d?.identifier, "yolo11n")
+        XCTAssertEqual(SensorSettings.modelVersion(detector: "yolo11n"), "ios-yolo11n-0.2")
+    }
+
+    func testYOLOFindsPeopleOnRealCrossingFrame() throws {
+        // Frame 324 of the CC0 Yonge & Dundas clip (scramble peak): 62 people by hand, 21 in the near field.
+        let url = try XCTUnwrap(Bundle(for: SensorLogicTests.self).url(forResource: "crossing_t32", withExtension: "png"))
+        let src = try XCTUnwrap(CGImageSourceCreateWithURL(url as CFURL, nil))
+        let cg = try XCTUnwrap(CGImageSourceCreateImageAtIndex(src, 0, nil))
+        let yolo = try XCTUnwrap(CoreMLPersonDetector.bundledDefault())
+        let boxes = try yolo.detect(pixelBuffer(from: cg), orientation: .up)
+        XCTAssertGreaterThanOrEqual(boxes.count, 10, "YOLO11n should find at least 10 people on the busiest frame")
+        for b in boxes {
+            XCTAssertTrue(b.rect.minX >= -0.01 && b.rect.maxX <= 1.01 && b.rect.minY >= -0.01 && b.rect.maxY <= 1.01, "boxes must be normalised to the frame")
+            XCTAssertGreaterThanOrEqual(b.confidence, 0.25)
+        }
+    }
+
+    func testDetectorsReturnNothingOnBlankFrame() throws {
+        let ctx = CGContext(data: nil, width: 640, height: 360, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.setFillColor(gray: 0.5, alpha: 1); ctx.fill(CGRect(x: 0, y: 0, width: 640, height: 360))
+        let pb = pixelBuffer(from: ctx.makeImage()!)
+        XCTAssertEqual(try XCTUnwrap(CoreMLPersonDetector.bundledDefault()).detect(pb, orientation: .up).count, 0)
+        XCTAssertEqual(try AppleHumanDetector().detect(pb, orientation: .up).count, 0)
+    }
+
+    private final class FailingDetector: PersonDetector {
+        let identifier = "failing"
+        struct Boom: Error {}
+        func detect(_ pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation) throws -> [PersonBox] { throw Boom() }
+    }
+
+    func testInferenceFailureIsReportedNotSilentlyZero() throws {
+        let ctx = CGContext(data: nil, width: 64, height: 64, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        let pb = pixelBuffer(from: ctx.makeImage()!)
+        let exp = expectation(description: "processed")
+        var result: DetectionResult?
+        VisionProcessor(detector: FailingDetector()).process(pixelBuffer: pb, orientation: .up, visibleCapacity: 40) { r in result = r; exp.fulfill() }
+        wait(for: [exp], timeout: 5)
+        let r = try XCTUnwrap(result)
+        XCTAssertNotNil(r.inferenceError)
+        XCTAssertLessThanOrEqual(r.visionConfidence, 0.05, "a failed inference must floor the confidence so the backend discounts it")
     }
 
     func testUploaderBuffersWhenOffline() {

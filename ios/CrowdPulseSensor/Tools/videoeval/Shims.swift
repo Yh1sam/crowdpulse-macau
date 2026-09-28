@@ -1,4 +1,2 @@
-// Minimal stand-ins so the iOS sources compile into a macOS command-line tool.
+// Stand-ins so the iOS sources compile into a macOS command-line tool (kept for future shims).
 import Foundation
-
-let SensorSettings_modelVersion = "ios-vision-0.1"

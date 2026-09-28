@@ -89,13 +89,24 @@ Low-confidence gating: predictions flagged for human review (≈2% of all) are r
 
 ## Real-video result (not synthetic)
 
-`experiments/video_eval.py` runs the exact on-device Vision code the app uses over a CC0 street-crossing clip (Yonge & Dundas, Toronto; 640×360, 10 fps) and compares it with 11 hand-counted frames. Result: Apple's built-in human-rectangle detector finds about **34% of the people within ~15 m** (MAE ≈ 7 people, r ≈ 0.6) and only **8% of everyone in a wide street scene**; a higher input resolution (1280 px) does not help, and the full-body variant is worse (7%). Inference cost is ≈7 ms per frame on a Mac. This is the project's most important limitation: the phone pipeline is a working end-to-end prototype, but counting accuracy needs a dedicated crowd detector (CoreML YOLO-class or density-map model) before real use. Figure: `experiments/results/video/video_count_accuracy.png`, table: `experiments/results/video/summary.md`.
+`experiments/video_eval.py` runs the app's own detection code (`PersonDetector` + `VisionProcessor`, compiled into a Mac harness) over a CC0 street-crossing clip (Yonge & Dundas, Toronto; 640×360, 10 fps) and compares it with 11 hand-counted frames. The app now uses a **YOLO11n CoreML person detector** (5 MB, on-device) instead of Apple's built-in human detector:
+
+| detector | near field (within ~20 m): error per frame | near field: share of people found | dense frames: share found | whole street scene: share found |
+|---|---|---|---|---|
+| Apple built-in (previous) | 3.0 people | 55% | 61% | 9% |
+| YOLO11n CoreML (new default) | 1.5 people | 97% | 82% | 27% |
+
+YOLO11s (18 MB) was no better than YOLO11n, so the smaller model ships. Inference is about 6 ms per frame on a Mac; phone speed is not yet measured. Remaining limits: dense crowds still hide people from a single low camera (82% found at the scramble peak), and people ~50 m away are mostly missed (27%), so phones must be placed close to and above the crowd they measure. With one clip and 11 labelled frames these numbers are indicative, not a benchmark. Figures: `experiments/results/video/`, table: `experiments/results/video/summary.md`.
+
+**Correction:** the first version of this evaluation reported 34% / 8% for Apple's detector. Those hand counts were attached to the wrong video times (ffmpeg's sampler takes the last frame of each 5 s interval, 2.4 s after the label), and the near-field definition was not one the detectors could be scored against. The script now verifies frame alignment pixel-for-pixel and uses a stated geometric near-field rule; the table above is the corrected result.
+
+**Licence:** YOLO11 weights are AGPL-3.0 (Ultralytics). That is fine for this open-source prototype; a closed-source or App Store deployment needs an Ultralytics licence or a permissively licensed detector. Apple's built-in detector remains selectable in the app's Setup page and is the automatic fallback.
 
 ## Limitations (honest summary)
 
 - All accuracy numbers come from a simulator that we wrote; real-world accuracy is unknown until the controlled experiments in `docs/experiment-protocol.md` are run.
 - The density index is relative (0–1), not persons per m². Thresholds are experimental.
-- Camera person detection undercounts in dense crowds (occlusion); the timeline figure shows observed density saturating near 0.8 while the simulated truth reaches 1.0.
+- Camera person detection undercounts in dense crowds (occlusion). This is measured on real video (YOLO11n finds about 82% of people in the densest frames) and modelled in the simulator (observed density saturates near 0.8 while simulated truth reaches 1.0).
 - The WARNING class (transitional) is the hardest: F1 ≈ 0.73–0.77 vs ≈0.90 for CRITICAL.
 - Intervention effects are assumptions (30% inflow diversion), not validated causal estimates.
 - One phone sees one part of a zone; the zone estimate depends on calibration of each phone's visible capacity.

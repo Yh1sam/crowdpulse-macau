@@ -18,6 +18,8 @@ struct DebugView: View {
                     row("heading", String(format: "%.1f° (±%.0f)", node.location.headingDeg, node.location.headingAccuracy))
                 }
                 Section("Vision") {
+                    row("detector", node.vision.detector.identifier)
+                    if let err = node.latest?.inferenceError { row("inference error", err) }
                     row("frame rate", String(format: "%.1f FPS", node.latest?.fps ?? 0))
                     row("inference latency", String(format: "%.0f ms", node.latest?.latencyMs ?? 0))
                     row("detections", "\(node.latest?.personCount ?? 0)")

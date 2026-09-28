@@ -20,11 +20,14 @@ struct DetectionResult {
     var latencyMs: Double
     var fps: Double
     var timestamp: Date
+    /// Set when the detector failed on this frame; counts are then meaningless and confidence is floored.
+    var inferenceError: String? = nil
 }
 
-/// Runs Apple Vision's human-rectangle detector on-device. Frames are never stored.
+/// Runs an on-device person detector over frames and derives anonymous crowd statistics.
+/// Frames are never stored.
 final class VisionProcessor {
-    private let request: VNDetectHumanRectanglesRequest
+    let detector: PersonDetector
     private let ciContext = CIContext(options: [.cacheIntermediates: false])
     private var previousCentroids: [CGPoint] = []
     private var previousTime: Date?
@@ -32,36 +35,39 @@ final class VisionProcessor {
     private let queue = DispatchQueue(label: "crowdpulse.vision", qos: .userInitiated)
     private(set) var isBusy = false
 
-    /// `upperBodyOnly` is more robust in crowds where legs are occluded (default); the full-body
-    /// detector is kept as an evaluation option (see Tools/videoeval).
-    init(upperBodyOnly: Bool = true) {
-        request = VNDetectHumanRectanglesRequest()
-        request.upperBodyOnly = upperBodyOnly
+    init(detector: PersonDetector) {
+        self.detector = detector
+    }
+
+    /// Default: bundled YOLO11n CoreML detector, falling back to Apple's built-in human detector.
+    convenience init() {
+        self.init(detector: CoreMLPersonDetector.bundledDefault() ?? AppleHumanDetector())
     }
 
     /// Analyse a pixel buffer asynchronously; `completion` runs on the vision queue.
-    func process(pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation, visibleCapacity: Double, completion: @escaping (DetectionResult) -> Void) {
+    /// `frameTime` lets video sources supply presentation time so flow speed is correct when
+    /// frames are processed faster or slower than real time.
+    func process(pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation, visibleCapacity: Double, frameTime: Date? = nil, completion: @escaping (DetectionResult) -> Void) {
         guard !isBusy else { return }
         isBusy = true
         queue.async { [self] in
             let t0 = Date()
-            let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
             var boxes: [CGRect] = []
             var confidences: [Double] = []
+            var inferenceError: String?
             do {
-                try handler.perform([request])
-                for obs in request.results ?? [] {
-                    // Vision uses a bottom-left origin; flip to top-left for the overlay/flow.
-                    let b = obs.boundingBox
-                    boxes.append(CGRect(x: b.minX, y: 1 - b.maxY, width: b.width, height: b.height))
-                    confidences.append(Double(obs.confidence))
+                for p in try detector.detect(pixelBuffer, orientation: orientation) {
+                    boxes.append(p.rect)
+                    confidences.append(p.confidence)
                 }
             } catch {
-                // keep going: an inference failure yields an empty, low-confidence result
+                // An inference failure must not look like an empty street: report it and floor the confidence
+                // so the backend's reliability weighting discounts this observation.
+                inferenceError = error.localizedDescription
             }
             let brightness = VisionProcessor.meanLuma(pixelBuffer, context: ciContext)
             let obstructed = brightness < 0.06 || brightness > 0.98
-            let now = Date()
+            let now = frameTime ?? Date()
             let dt = previousTime.map { now.timeIntervalSince($0) } ?? 0
             let centroids = boxes.map { CGPoint(x: $0.midX, y: $0.midY) }
             let flow = FlowEstimator.estimate(previous: previousCentroids, current: centroids, dt: dt)
@@ -75,13 +81,14 @@ final class VisionProcessor {
             let density = min(1.0, Double(count) / max(1.0, visibleCapacity))
             // vision confidence: mean detector confidence, reduced by crowding (occlusion) and darkness
             let meanConf = confidences.isEmpty ? (obstructed ? 0.1 : 0.7) : confidences.reduce(0, +) / Double(confidences.count)
-            let vision = max(0.05, min(0.99, meanConf * (1 - 0.3 * density) * (brightness < 0.15 ? 0.6 : 1.0)))
+            let vision = inferenceError != nil ? 0.05 : max(0.05, min(0.99, meanConf * (1 - 0.3 * density) * (brightness < 0.15 ? 0.6 : 1.0)))
             // release the busy flag BEFORE the callback so a synchronous caller can submit the next frame
             isBusy = false
             completion(DetectionResult(boxes: boxes, personCount: count, densityIndex: density, boxAreaFraction: area,
                                        flowImageDeg: flow?.directionImageDeg, flowNormPerSec: flow?.magnitudeNormPerSec,
                                        flowConfidence: flow?.confidence ?? 0, visionConfidence: vision, obstructed: obstructed,
-                                       meanBrightness: brightness, latencyMs: Date().timeIntervalSince(t0) * 1000, fps: fps, timestamp: now))
+                                       meanBrightness: brightness, latencyMs: Date().timeIntervalSince(t0) * 1000, fps: fps, timestamp: now,
+                                       inferenceError: inferenceError))
         }
     }
 

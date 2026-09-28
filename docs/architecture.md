@@ -4,7 +4,7 @@
 
 ```
 ┌──────────────────────────── iOS sensor node (per phone) ────────────────────────────┐
-│ AVFoundation camera ─► Vision human-rectangle detector ─► anonymous boxes            │
+│ camera / video ─► on-device person detector (YOLO11n CoreML) ─► anonymous boxes      │
 │                                   │  count · box-area density proxy · centroid flow  │
 │ CoreMotion (accel/gyro) ─► stability score        CoreLocation ─► GPS + heading      │
 │                                   ▼                                                  │
@@ -38,7 +38,7 @@
 
 | component | stack | key modules |
 |---|---|---|
-| iOS sensor node | Swift, SwiftUI, AVFoundation, Vision, CoreMotion, CoreLocation | `ios/CrowdPulseSensor/` — `VisionProcessor`, `MotionMonitor`, `LocationMonitor`, `Uploader` |
+| iOS sensor node | Swift, SwiftUI, AVFoundation, Vision, CoreMotion, CoreLocation | `ios/CrowdPulseSensor/` — `PersonDetector` (YOLO11n CoreML, Apple fallback), `VisionProcessor`, `MotionMonitor`, `LocationMonitor`, `Uploader`; `Tools/videoeval` runs the same code over video on a Mac |
 | backend | Python 3.12, FastAPI, SQLAlchemy 2, Pydantic 2, SQLite (Postgres/Supabase via `DATABASE_URL`) | `backend/app/services/engine.py`, `prediction.py`, `intervention.py`, `live_sim.py` |
 | ML | pandas, numpy, scikit-learn | `ml/pipeline/{aggregation,features,ood,explain}.py`, `ml/training/train.py`, `ml/evaluation/evaluate.py` |
 | synthetic data | pure Python | `ml/synthetic/{simulator,scenarios,generate}.py` |
@@ -68,4 +68,4 @@
 - Aggregation of 312k observations → 81k zone-minute states: ≈1.3 s (vectorised pandas).
 - Backend refresh (aggregate recent window + 21 predictions + explanations): ≈100–250 ms; API reads < 50 ms.
 - Training all models for three horizons: ≈70 s.
-- iOS Vision human-rectangle detection: typically 8–20 FPS on an iPhone 12-class device at 640×480 (frames are throttled to 10 FPS to save battery).
+- On-device detection, measured on a Mac with the app's own code: YOLO11n ≈6 ms per 640×360 frame, Apple's built-in detector ≈5 ms. Phone frame rate has not been measured yet; the app throttles to 10 FPS.

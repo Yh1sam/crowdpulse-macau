@@ -13,6 +13,7 @@ struct SetupView: View {
                     Button("Regenerate id") { settings.regenerateId() }
                     TextField("Zone hint (optional, e.g. senado_square)", text: $settings.zoneHint).autocapitalization(.none)
                     Picker("Mode", selection: $settings.mode) { ForEach(SensorSettings.SensorMode.allCases) { Text($0.rawValue.capitalized).tag($0) } }
+                    Picker("Detector", selection: $settings.detector) { ForEach(SensorSettings.DetectorChoice.allCases) { Text($0.label).tag($0) } }
                 }
                 Section("Backend") {
                     TextField("Backend URL", text: $settings.backendURL).keyboardType(.URL).autocapitalization(.none)

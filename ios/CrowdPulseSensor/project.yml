@@ -19,6 +19,9 @@ targets:
       - path: Sources
       - path: Resources/sample_crowd.mp4
         buildPhase: resources
+      # YOLO11n person detector (AGPL-3.0, see Tools/export_yolo.py). Xcode compiles it to yolo11n.mlmodelc.
+      - path: Resources/yolo11n.mlpackage
+        buildPhase: sources
     info:
       path: Sources/Info.plist
       properties:
@@ -42,6 +45,9 @@ targets:
     platform: iOS
     sources:
       - path: Tests
+        excludes: [Resources]
+      - path: Tests/Resources/crossing_t32.png
+        buildPhase: resources
     dependencies:
       - target: CrowdPulseSensor
     settings:

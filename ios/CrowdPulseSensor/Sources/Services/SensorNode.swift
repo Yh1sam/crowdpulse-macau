@@ -10,7 +10,8 @@ import ImageIO
 final class SensorNode: ObservableObject {
     let settings: SensorSettings
     let camera = CameraService()
-    let vision = VisionProcessor()
+    /// Rebuilt on every start() so a detector change in Setup takes effect.
+    private(set) var vision = VisionProcessor(detector: AppleHumanDetector())
     let motion = MotionMonitor()
     let location = LocationMonitor()
     let uploader = Uploader()
@@ -41,12 +42,13 @@ final class SensorNode: ObservableObject {
         running = true
         motion.start()
         location.start()
+        let detectorName = makeProcessor()
         switch settings.mode {
         case .live:
             camera.requestAccess { [weak self] ok in
                 guard let self else { return }
                 self.cameraAuthorized = ok
-                if ok { self.camera.configure(); self.camera.start(); self.mlStatus = "Vision human detector (on-device)" }
+                if ok { self.camera.configure(); self.camera.start(); self.mlStatus = "\(detectorName) on camera (on-device)" }
                 else { self.mlStatus = "camera permission denied" }
             }
         case .video:
@@ -55,7 +57,7 @@ final class SensorNode: ObservableObject {
                 v.frameHandler = { [weak self] pb, o in self?.handleFrame(pb, o) }
                 v.start()
                 video = v
-                mlStatus = "Vision human detector on pre-recorded video (CC0 sample clip)"
+                mlStatus = "\(detectorName) on pre-recorded video (CC0 sample clip)"
             } else {
                 mlStatus = "sample video missing from bundle"
             }
@@ -77,6 +79,23 @@ final class SensorNode: ObservableObject {
     }
 
     func restartTimer() { if running { scheduleTimer() } }
+
+    /// Build the frame processor for the chosen detector. Falls back to Apple's built-in detector
+    /// if the CoreML model cannot be loaded, and says so in the status line.
+    private func makeProcessor() -> String {
+        switch settings.detector {
+        case .yolo11n:
+            if let yolo = CoreMLPersonDetector.bundledDefault() {
+                vision = VisionProcessor(detector: yolo)
+                return "YOLO11n person detector"
+            }
+            vision = VisionProcessor(detector: AppleHumanDetector())
+            return "Apple human detector (YOLO11n model missing, fallback)"
+        case .apple:
+            vision = VisionProcessor(detector: AppleHumanDetector())
+            return "Apple human detector"
+        }
+    }
 
     private func scheduleTimer() {
         timer?.invalidate()
@@ -113,7 +132,7 @@ final class SensorNode: ObservableObject {
         let n = Double(max(1, window.count))
         let count = Int((window.map { Double($0.personCount) }.reduce(0, +) / n).rounded())
         let density = window.map { $0.densityIndex }.reduce(0, +) / n
-        let vision = window.map { $0.visionConfidence }.reduce(0, +) / n
+        let visionConf = window.map { $0.visionConfidence }.reduce(0, +) / n
         let obstructed = window.filter { $0.obstructed }.count * 2 > window.count
         // flow: confidence-weighted circular mean of image directions, then rotate by the compass heading
         var sx = 0.0, sy = 0.0, wsum = 0.0, speedSum = 0.0
@@ -128,8 +147,8 @@ final class SensorNode: ObservableObject {
             headingDeg: location.headingDeg, deviceMotionStability: motion.stability,
             personCount: count, estimatedDensity: density,
             flowDirectionDeg: FlowEstimator.compassDirection(imageDeg: imageDir, cameraHeadingDeg: location.headingDeg),
-            flowSpeedMps: speedMps, visionConfidence: vision, cameraObstructed: obstructed,
-            modelVersion: SensorSettings.modelVersion, mode: settings.mode.rawValue,
+            flowSpeedMps: speedMps, visionConfidence: visionConf, cameraObstructed: obstructed,
+            modelVersion: SensorSettings.modelVersion(detector: settings.mode == .simulated ? "simulated" : vision.detector.identifier), mode: settings.mode.rawValue,
             zoneHint: settings.zoneHint.isEmpty ? nil : settings.zoneHint).clamped()
         _ = last
         lastObservation = obs

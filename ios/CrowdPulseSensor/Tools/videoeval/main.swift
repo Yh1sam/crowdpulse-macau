@@ -41,7 +41,21 @@ output.alwaysCopiesSampleData = false
 reader.add(output)
 reader.startReading()
 
-let vision = VisionProcessor(upperBodyOnly: !CommandLine.arguments.contains("--full-body"))
+// --detector apple (default upper-body; add --full-body) | coreml --model path/to/model.mlmodelc [--conf 0.25] [--iou 0.7]
+let detectorKind = arg("--detector", "apple")!
+let detector: PersonDetector
+if detectorKind == "coreml" {
+    guard let modelPath = arg("--model") else { print("--model <compiled .mlmodelc> required for --detector coreml"); exit(2) }
+    let url = URL(fileURLWithPath: modelPath)
+    let conf = Double(arg("--conf", "0.25")!)!, iou = Double(arg("--iou", "0.7")!)!
+    detector = try! CoreMLPersonDetector(compiledModelURL: url, identifier: url.deletingPathExtension().lastPathComponent, confidenceThreshold: conf, iouThreshold: iou)
+} else {
+    detector = AppleHumanDetector(upperBodyOnly: !CommandLine.arguments.contains("--full-body"))
+}
+let vision = VisionProcessor(detector: detector)
+let boxesOut = arg("--boxes-out")   // JSON with the boxes of every analysed frame (near-field scoring, overlays)
+var boxDump: [[String: Any]] = []
+let videoEpoch = Date(timeIntervalSince1970: 1_800_000_000)
 var csv = "t_sec,person_count,density_index,box_area_fraction,flow_img_deg,flow_norm_per_s,flow_conf,vision_conf,brightness,obstructed,latency_ms\n"
 var frameResults: [(Double, DetectionResult)] = []
 var lastT = -1.0
@@ -54,10 +68,13 @@ while let sb = output.copyNextSampleBuffer() {
     lastT = pts
     let sem = DispatchSemaphore(value: 0)
     var res: DetectionResult?
-    vision.process(pixelBuffer: pb, orientation: .up, visibleCapacity: capacity) { r in res = r; sem.signal() }
+    vision.process(pixelBuffer: pb, orientation: .up, visibleCapacity: capacity, frameTime: videoEpoch.addingTimeInterval(pts)) { r in res = r; sem.signal() }
     sem.wait()
     guard let r = res else { continue }
     frameResults.append((pts, r))
+    if boxesOut != nil {
+        boxDump.append(["t_sec": (pts * 1000).rounded() / 1000, "boxes": r.boxes.map { [$0.minX, $0.minY, $0.width, $0.height] }])
+    }
     csv += String(format: "%.2f,%d,%.4f,%.4f,%@,%@,%.3f,%.3f,%.3f,%d,%.1f\n", pts, r.personCount, r.densityIndex, r.boxAreaFraction,
                   r.flowImageDeg.map { String(format: "%.1f", $0) } ?? "", r.flowNormPerSec.map { String(format: "%.4f", $0) } ?? "",
                   r.flowConfidence, r.visionConfidence, r.meanBrightness, r.obstructed ? 1 : 0, r.latencyMs)
@@ -65,7 +82,11 @@ while let sb = output.copyNextSampleBuffer() {
 }
 try! csv.write(toFile: outPath, atomically: true, encoding: .utf8)
 let wall = Date().timeIntervalSince(t0)
-print("analysed \(analysed) frames in \(String(format: "%.1f", wall)) s (\(String(format: "%.1f", Double(analysed) / max(wall, 0.001))) FPS) -> \(outPath)")
+print("[\(detector.identifier)] analysed \(analysed) frames in \(String(format: "%.1f", wall)) s (\(String(format: "%.1f", Double(analysed) / max(wall, 0.001))) FPS) -> \(outPath)")
+if let boxesOut {
+    let data = try! JSONSerialization.data(withJSONObject: ["detector": detector.identifier, "frames": boxDump], options: [.prettyPrinted])
+    try! data.write(to: URL(fileURLWithPath: boxesOut))
+}
 
 // ---- aggregate into SensorObservations exactly like SensorNode.emitObservation ----
 if let obsPath {
@@ -88,7 +109,7 @@ if let obsPath {
         observations.append(SensorObservation(sensorId: sensorId, timestamp: start.addingTimeInterval(tEnd), latitude: lat, longitude: lon, locationAccuracyM: 5,
                                               headingDeg: heading, deviceMotionStability: 0.98, personCount: count, estimatedDensity: density,
                                               flowDirectionDeg: FlowEstimator.compassDirection(imageDeg: imageDir, cameraHeadingDeg: heading), flowSpeedMps: speed,
-                                              visionConfidence: visionC, cameraObstructed: obstructed, modelVersion: SensorSettings_modelVersion, mode: "video", zoneHint: nil).clamped())
+                                              visionConfidence: visionC, cameraObstructed: obstructed, modelVersion: "ios-\(detector.identifier)-0.2", mode: "video", zoneHint: nil).clamped())
         window.removeAll()
     }
     for (t, r) in frameResults {

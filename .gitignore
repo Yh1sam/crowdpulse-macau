@@ -28,3 +28,8 @@ experiments/datasets/video/*.webm
 experiments/datasets/video/*.mp4
 experiments/datasets/video/frames/
 experiments/datasets/video/observations.json
+experiments/datasets/video/boxes_*.json
+experiments/datasets/video/exact/
+experiments/datasets/video/kerb_frames/
+*.db-wal
+*.db-shm
