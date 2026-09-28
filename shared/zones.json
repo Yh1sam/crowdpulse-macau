@@ -16,7 +16,7 @@
       "name": "Company of Jesus Square",
       "lat": 22.1969,
       "lon": 113.54075,
-      "capacity": 700,
+      "capacity": 1000,
       "kind": "square",
       "entry": false,
       "polygon_radius_m": 40
@@ -36,7 +36,7 @@
       "name": "St. Dominic's Square",
       "lat": 22.1943,
       "lon": 113.5399,
-      "capacity": 900,
+      "capacity": 1100,
       "kind": "square",
       "entry": false,
       "polygon_radius_m": 40
@@ -46,7 +46,7 @@
       "name": "Senado Square",
       "lat": 22.1934,
       "lon": 113.5397,
-      "capacity": 1600,
+      "capacity": 1200,
       "kind": "square",
       "entry": false,
       "polygon_radius_m": 55

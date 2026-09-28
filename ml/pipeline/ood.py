@@ -44,8 +44,8 @@ class OODDetector:
             if c in X.columns:
                 col = X[c].dropna()
                 if len(col):
-                    lo, hi = float(col.quantile(0.005)), float(col.quantile(0.995))
-                    pad = 0.1 * (hi - lo)
+                    lo, hi = float(col.quantile(0.001)), float(col.quantile(0.999))
+                    pad = 0.25 * (hi - lo)
                     self.ranges[c] = (lo - pad, hi + pad)
         return self
 
@@ -64,10 +64,12 @@ class OODDetector:
                 continue
             if v < lo or v > hi:
                 reasons.append(f"{c}={v:.3f} outside training range [{lo:.3f}, {hi:.3f}]")
+        n_range = len(reasons)
         forest_flag = score < self.threshold
         if forest_flag:
             reasons.append(f"isolation-forest anomaly score {score:.3f} below threshold {self.threshold:.3f}")
-        return {"is_ood": bool(forest_flag or len(reasons) > 0), "score": score, "threshold": self.threshold, "reasons": reasons}
+        # flag when the forest fires, or when at least two features are simultaneously out of range
+        return {"is_ood": bool(forest_flag or n_range >= 2), "score": score, "threshold": self.threshold, "reasons": reasons}
 
     def save(self, path: str) -> None:
         joblib.dump(self, path)

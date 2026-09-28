@@ -1,15 +1,15 @@
 {
-  "observations": 311784,
+  "observations": 311409,
   "ground_truth_rows": 82320,
   "sensors": 9,
   "label_distribution": {
-    "SAFE": 0.825,
-    "CRITICAL": 0.126,
-    "WARNING": 0.049
+    "SAFE": 0.859,
+    "CRITICAL": 0.089,
+    "WARNING": 0.052
   },
-  "density_mean": 0.237,
+  "density_mean": 0.208,
   "density_max": 1.0,
-  "seconds": 11.3,
+  "seconds": 12.0,
   "files": [
     "ml/data/synthetic_observations.csv.gz",
     "ml/data/synthetic_ground_truth.csv.gz"

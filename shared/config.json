@@ -46,7 +46,7 @@
   },
   "ood": {
     "method": "isolation_forest",
-    "contamination": 0.02,
+    "contamination": 0.01,
     "score_threshold": null,
     "message": "Conditions differ from training data. Prediction reliability may be reduced."
   },

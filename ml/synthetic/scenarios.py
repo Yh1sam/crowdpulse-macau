@@ -65,11 +65,14 @@ def golden_week_demo(start_utc: datetime | None = None, sensor_interval_s: int =
         duration_min=120,
         sensor_interval_s=sensor_interval_s,
         day_type="golden_week",
-        arrival_scale=1.1,
+        arrival_scale=0.8,
         warmup_min=90,
         initial_fill=0.15,
+        sensor_dropout_p=0.001,
+        obstruction_p=0.0015,
+        disturbance_p=0.0015,
     )
-    p.event_ends.append({"time_min": 19, "zone_id": "st_dominic", "people": 900})
+    p.event_ends.append({"time_min": 19, "zone_id": "st_dominic", "people": 1200})
     p.surges.append({"time_min": 21, "zone_id": "almeida_ribeiro", "people": 420})
     p.surges.append({"time_min": 27, "zone_id": "almeida_ribeiro", "people": 300})
     return p
