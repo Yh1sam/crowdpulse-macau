@@ -1,0 +1,12 @@
+t_sec,actual,estimated,estimated_max,vision_conf,notes
+0,32,3.8333333333333335,4,0.7615,"3 in foreground crossing, ~25 on far sidewalk, ~4 right; far sidewalk counted approximately from 640x360 frame"
+5,36,3.4545454545454546,5,0.7209090909090908,"1 close-up, ~28 far sidewalk, ~5 right group, 2 left"
+10,26,0.7272727272727273,2,0.6672727272727272,"2 foreground, 2 right, ~22 far sidewalk (fewer visible: vehicles occlude)"
+15,35,0.9090909090909091,2,0.6843636363636364,"2 foreground crossing, 3 right, ~30 far sidewalk"
+20,40,2.090909090909091,3,0.7449090909090909,"~8 on crossing near/mid, ~30 far sidewalk, cyclist excluded"
+25,60,3.1818181818181817,4,0.7105454545454545,"scramble phase: ~10 near, ~15 mid, ~35 far sidewalk"
+30,62,6.7272727272727275,8,0.7007272727272728,"scramble phase peak: ~14 near, ~12 mid, ~35 far sidewalk (heavy overlap)"
+35,52,9.454545454545455,10,0.687,"~10 near, ~8 mid, ~35 far sidewalk"
+40,42,5.2727272727272725,7,0.6882727272727271,"~9 mid on crossing, ~30 far sidewalk, 1 cyclist excluded"
+45,38,1.0,2,0.6479999999999999,"1 close-up back, 4 crossing, ~28 far sidewalk, 3 cyclists excluded"
+50,38,1.8181818181818181,4,0.6623636363636364,"4 near, ~28 far sidewalk, ~3 right, 1 cyclist excluded"

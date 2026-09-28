@@ -45,6 +45,7 @@ Confidence gating (threshold 0.60 on effective confidence = model probability ×
 | Single-sensor dropout | phone battery / network | zone becomes stale; no prediction | staleness, "INSUFFICIENT DATA — HUMAN REVIEW" | buffer + retry on phone; ≥2 phones per critical zone |
 | Unusual day (parade, closure) | patterns absent from training | accuracy falls | OOD flag, low confidence | human review; retrain with new data |
 | Synthetic-to-real gap | training data is simulated | real accuracy unknown | controlled experiments (protocol in docs) | collect real data, retrain, report honestly |
+| Built-in detector misses most people beyond a few metres (measured) | `VNDetectHumanRectanglesRequest` needs people tens of pixels tall; far figures are 5–10 px | on a CC0 street-crossing clip it detects ≈34% of near-field people (MAE ≈7) and ≈8% of the whole frame; 1280 px input does not help | `experiments/video_eval.py` against hand-counted frames | replace with a CoreML crowd detector (YOLO-class) or a density-map model; place phones 2–3 m high looking along corridors so people stay within ~15 m; calibrate visible capacity per node |
 
 ## Fairness considerations
 

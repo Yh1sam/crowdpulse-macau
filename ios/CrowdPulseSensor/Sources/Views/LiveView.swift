@@ -9,7 +9,12 @@ struct LiveView: View {
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
-                if settings.mode == .live { CameraPreview(session: node.camera.session) } else { Color.black.overlay(Text("simulated mode").foregroundStyle(.white)) }
+                switch settings.mode {
+                case .live: CameraPreview(session: node.camera.session)
+                case .video:
+                    if let f = node.videoFrame { Image(decorative: f, scale: 1).resizable().aspectRatio(contentMode: .fill) } else { Color.black.overlay(Text("loading video…").foregroundStyle(.white)) }
+                case .simulated: Color.black.overlay(Text("simulated mode").foregroundStyle(.white))
+                }
                 GeometryReader { geo in
                     ForEach(Array((node.latest?.boxes ?? []).enumerated()), id: \.offset) { _, b in
                         Rectangle().stroke(Color.green, lineWidth: 2)

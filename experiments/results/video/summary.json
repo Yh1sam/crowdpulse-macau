@@ -1,0 +1,106 @@
+{
+  "640px, upper-body (app default)": {
+    "near_count": {
+      "n": 11,
+      "mae": 7.009641873278238,
+      "bias": -6.775482093663913,
+      "detected_fraction_pct": 34.04397961920086,
+      "pearson_r": 0.5974748789004589,
+      "actual_range": [
+        3,
+        26
+      ],
+      "latency_ms_mean": 7.1
+    },
+    "actual_count": {
+      "n": 11,
+      "mae": 38.41184573002755,
+      "bias": -38.41184573002755,
+      "detected_fraction_pct": 8.344836652862684,
+      "pearson_r": 0.633085481259513,
+      "actual_range": [
+        26,
+        62
+      ],
+      "latency_ms_mean": 7.1
+    }
+  },
+  "640px, full-body": {
+    "near_count": {
+      "n": 11,
+      "mae": 9.545454545454547,
+      "bias": -9.545454545454547,
+      "detected_fraction_pct": 7.079646017699115,
+      "pearson_r": -0.02169667431583441,
+      "actual_range": [
+        3,
+        26
+      ],
+      "latency_ms_mean": 7.4
+    },
+    "actual_count": {
+      "n": 11,
+      "mae": 41.18181818181818,
+      "bias": -41.18181818181818,
+      "detected_fraction_pct": 1.7353579175704987,
+      "pearson_r": -0.0021850611110794255,
+      "actual_range": [
+        26,
+        62
+      ],
+      "latency_ms_mean": 7.4
+    }
+  },
+  "1280px, upper-body": {
+    "near_count": {
+      "n": 11,
+      "mae": 6.950413223140495,
+      "bias": -6.669421487603305,
+      "detected_fraction_pct": 35.07642799678198,
+      "pearson_r": 0.5861797748984451,
+      "actual_range": [
+        3,
+        26
+      ],
+      "latency_ms_mean": 7.9
+    },
+    "actual_count": {
+      "n": 11,
+      "mae": 38.305785123966935,
+      "bias": -38.305785123966935,
+      "detected_fraction_pct": 8.597909682508382,
+      "pearson_r": 0.6341641556380606,
+      "actual_range": [
+        26,
+        62
+      ],
+      "latency_ms_mean": 7.9
+    }
+  },
+  "1280px, full-body": {
+    "near_count": {
+      "n": 11,
+      "mae": 9.644628099173552,
+      "bias": -9.644628099173552,
+      "detected_fraction_pct": 6.114239742558326,
+      "pearson_r": 0.17381881614716568,
+      "actual_range": [
+        3,
+        26
+      ],
+      "latency_ms_mean": 7.4
+    },
+    "actual_count": {
+      "n": 11,
+      "mae": 41.280991735537185,
+      "bias": -41.280991735537185,
+      "detected_fraction_pct": 1.4987182015381582,
+      "pearson_r": 0.1862066586555303,
+      "actual_range": [
+        26,
+        62
+      ],
+      "latency_ms_mean": 7.4
+    }
+  }
+}

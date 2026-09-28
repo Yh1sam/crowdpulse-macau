@@ -18,7 +18,7 @@ final class SensorSettings: ObservableObject {
     @Published var mode: SensorMode { didSet { save() } }
 
     enum SensorMode: String, CaseIterable, Identifiable, Codable {
-        case live, simulated
+        case live, video, simulated
         var id: String { rawValue }
     }
 

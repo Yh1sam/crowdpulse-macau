@@ -9,7 +9,7 @@
 | 3 dashboard | done | 8 pages, live map, approve/reject flow |
 | 4 iOS sensor app | done (camera, GPS, heading, motion, upload, buffer) | `ios/CrowdPulseSensor` |
 | 5 vision | done (Vision human rectangles, count, density proxy, centroid flow) | `VisionProcessor.swift` |
-| 6 real experiments | protocol + tooling ready, not yet run | `docs/experiment-protocol.md`, `/experiments/*` endpoints |
+| 6 real experiments | video benchmark done (CC0 crossing clip, 11 hand-counted frames); school experiment not yet run | `experiments/results/video/summary.md`, `docs/experiment-protocol.md`, `/experiments/*` endpoints |
 | 7 responsible AI | done | confidence gating, OOD, explanations, accessibility penalty, zh/en/pt notices, audit log |
 | 8 polish | partial | evaluation figures, README, demo scenario |
 
@@ -26,7 +26,7 @@ Deep learning, microservices, Kubernetes, blockchain, an LLM "for the sake of AI
 
 ## Scientific sub-questions and what the prototype says
 
-1. *How accurately can phones estimate crowd state?* Simulated sensing error gives density MAE ≈0.03 and 96.8% state agreement with truth; real numbers await the school experiment.
+1. *How accurately can phones estimate crowd state?* Simulated sensing error gives density MAE ≈0.03 and 96.8% state agreement with truth. The first real measurement (CC0 crossing video, 11 hand-counted frames) shows the built-in Apple Vision detector finds only ≈34% of near-field people and ≈8% of a wide scene: the sensing layer, not the forecasting layer, is the bottleneck. Say this plainly; it is the most credible thing in the pitch.
 2. *How early can congestion be predicted?* +15 min macro-F1 0.865 (synthetic), CRITICAL recall ≈0.92.
 3. *How does sensor failure affect reliability?* Reliability score drops with dropout/obstruction/movement; unreliable zones lose confidence and fall back to human review (tested).
 4. *Can confidence estimation prevent unsafe AI recommendations?* Flagged predictions are right ≈55% of the time vs ≈97% for confident ones; low-confidence CRITICAL forecasts produce "increase monitoring" recommendations instead of redirects.

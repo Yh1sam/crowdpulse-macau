@@ -87,6 +87,10 @@ Environment variables (all optional, prefix `CROWDPULSE_`): `DATABASE_URL` (defa
 
 Low-confidence gating: predictions flagged for human review (≈2% of all) are right only ~55% of the time versus ~97% for the rest. On the rain + closure + surge stress day, macro-F1 drops to ≈0.61–0.64 and the OOD detector flags ≈14% of inputs (vs ≈1–2% on normal days). Full tables and figures: `experiments/results/latest/`, and the dashboard's Evaluation page. These are **synthetic** results; see the model card for what they do and do not show.
 
+## Real-video result (not synthetic)
+
+`experiments/video_eval.py` runs the exact on-device Vision code the app uses over a CC0 street-crossing clip (Yonge & Dundas, Toronto; 640×360, 10 fps) and compares it with 11 hand-counted frames. Result: Apple's built-in human-rectangle detector finds about **34% of the people within ~15 m** (MAE ≈ 7 people, r ≈ 0.6) and only **8% of everyone in a wide street scene**; a higher input resolution (1280 px) does not help, and the full-body variant is worse (7%). Inference cost is ≈7 ms per frame on a Mac. This is the project's most important limitation: the phone pipeline is a working end-to-end prototype, but counting accuracy needs a dedicated crowd detector (CoreML YOLO-class or density-map model) before real use. Figure: `experiments/results/video/video_count_accuracy.png`, table: `experiments/results/video/summary.md`.
+
 ## Limitations (honest summary)
 
 - All accuracy numbers come from a simulator that we wrote; real-world accuracy is unknown until the controlled experiments in `docs/experiment-protocol.md` are run.

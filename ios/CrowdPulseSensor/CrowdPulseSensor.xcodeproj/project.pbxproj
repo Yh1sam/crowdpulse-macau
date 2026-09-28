@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		04EDDCE36D61733A48873ECF /* MotionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF837DCB86B6225680F7EAC /* MotionMonitor.swift */; };
 		18D4A23564ABB449B32D3A3C /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9922A4B943228B2C20987C4 /* CameraService.swift */; };
+		1E5D4177E6ADBE655B6A0414 /* VideoFrameSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07BA7400DA276CE84C535D4A /* VideoFrameSource.swift */; };
 		30575EF243E7429971C9B91F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C25FDB75EF589DEB114AF /* SetupView.swift */; };
 		4ACD0F52F8CBA9DEE0395799 /* SensorObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C58CF6E1928916D37931E3F /* SensorObservation.swift */; };
 		634AE1DD87E461E9FA54A5A1 /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73F97F16D0F1D60F6B0A008 /* LiveView.swift */; };
 		6C30C2BA8CC7D505E16399F5 /* CrowdPulseSensorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6DA7E4360C1350E17F49F1A /* CrowdPulseSensorApp.swift */; };
+		6F4E1953EF7DEE87A0642FB8 /* sample_crowd.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 25362901795D69B4CD04012E /* sample_crowd.mp4 */; };
 		8E39B183DA7C42740284CBF2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */; };
 		93C51239DFE845F43EF9B5C7 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08CC6AF50BCA8E67FD0C2E5 /* DebugView.swift */; };
 		94C9B9860FF41C6726A61301 /* PrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A95319F8659301E15E2747 /* PrivacyView.swift */; };
@@ -36,7 +38,9 @@
 
 /* Begin PBXFileReference section */
 		03A95319F8659301E15E2747 /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
+		07BA7400DA276CE84C535D4A /* VideoFrameSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFrameSource.swift; sourceTree = "<group>"; };
 		221FB7D4BBE05C2769722A95 /* CrowdPulseSensorTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CrowdPulseSensorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		25362901795D69B4CD04012E /* sample_crowd.mp4 */ = {isa = PBXFileReference; path = sample_crowd.mp4; sourceTree = "<group>"; };
 		2EC10582F73DC5C195444D3C /* Uploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uploader.swift; sourceTree = "<group>"; };
 		4C58CF6E1928916D37931E3F /* SensorObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorObservation.swift; sourceTree = "<group>"; };
 		593249D29571C9C154F26459 /* FlowEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowEstimator.swift; sourceTree = "<group>"; };
@@ -96,6 +100,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		7523E0B1C04165495311A9A3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				25362901795D69B4CD04012E /* sample_crowd.mp4 */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		B03C38E6CD153E35B67F134F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +126,7 @@
 				EA9F7FFF1B72FFD5BD00351F /* SensorNode.swift */,
 				7C8F0E613E2D7F1DABA1628F /* SensorSettings.swift */,
 				2EC10582F73DC5C195444D3C /* Uploader.swift */,
+				07BA7400DA276CE84C535D4A /* VideoFrameSource.swift */,
 				721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */,
 			);
 			path = Services;
@@ -122,6 +135,7 @@
 		D3BFE5AB0B10B524FA5FEDCA = {
 			isa = PBXGroup;
 			children = (
+				7523E0B1C04165495311A9A3 /* Resources */,
 				299566B022EABEF506DE8D6E /* Sources */,
 				B03C38E6CD153E35B67F134F /* Tests */,
 				1ACB32FE57BC18372842E198 /* Products */,
@@ -136,6 +150,7 @@
 			buildConfigurationList = 21D06FCA571737269556174D /* Build configuration list for PBXNativeTarget "CrowdPulseSensor" */;
 			buildPhases = (
 				6408C37944BFDBDF4F43FAA7 /* Sources */,
+				E892D37A1B555132018107D4 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -205,6 +220,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		E892D37A1B555132018107D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F4E1953EF7DEE87A0642FB8 /* sample_crowd.mp4 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		6408C37944BFDBDF4F43FAA7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -223,6 +249,7 @@
 				B6B4E04E37D7FCCB6D5D9238 /* SensorSettings.swift in Sources */,
 				30575EF243E7429971C9B91F /* SetupView.swift in Sources */,
 				D23B2945C7A720210D63823D /* Uploader.swift in Sources */,
+				1E5D4177E6ADBE655B6A0414 /* VideoFrameSource.swift in Sources */,
 				8E39B183DA7C42740284CBF2 /* VisionProcessor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

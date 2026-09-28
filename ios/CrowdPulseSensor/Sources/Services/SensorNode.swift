@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import CoreGraphics
+import CoreImage
 import CoreVideo
 import ImageIO
 
@@ -20,6 +21,11 @@ final class SensorNode: ObservableObject {
     @Published var lastObservation: SensorObservation?
     @Published var observationsBuilt = 0
     @Published var mlStatus = "idle"
+    /// Latest decoded frame in video mode (for the on-screen preview only).
+    @Published var videoFrame: CGImage?
+    private var video: VideoFrameSource?
+    private let previewContext = CIContext(options: [.cacheIntermediates: false])
+    private var previewTick = 0
 
     private var timer: Timer?
     private var simTick = 0
@@ -35,14 +41,25 @@ final class SensorNode: ObservableObject {
         running = true
         motion.start()
         location.start()
-        if settings.mode == .live {
+        switch settings.mode {
+        case .live:
             camera.requestAccess { [weak self] ok in
                 guard let self else { return }
                 self.cameraAuthorized = ok
                 if ok { self.camera.configure(); self.camera.start(); self.mlStatus = "Vision human detector (on-device)" }
                 else { self.mlStatus = "camera permission denied" }
             }
-        } else {
+        case .video:
+            if let url = VideoFrameSource.bundledSample() {
+                let v = VideoFrameSource(url: url)
+                v.frameHandler = { [weak self] pb, o in self?.handleFrame(pb, o) }
+                v.start()
+                video = v
+                mlStatus = "Vision human detector on pre-recorded video (CC0 sample clip)"
+            } else {
+                mlStatus = "sample video missing from bundle"
+            }
+        case .simulated:
             mlStatus = "simulated detections (no camera)"
         }
         scheduleTimer()
@@ -51,6 +68,8 @@ final class SensorNode: ObservableObject {
     func stop() {
         running = false
         camera.stop()
+        video?.stop()
+        video = nil
         motion.stop()
         location.stop()
         timer?.invalidate()
@@ -69,6 +88,12 @@ final class SensorNode: ObservableObject {
     private nonisolated func handleFrame(_ pb: CVPixelBuffer, _ orientation: CGImagePropertyOrientation) {
         Task { @MainActor in
             let cap = self.settings.visibleCapacity
+            if self.settings.mode == .video {
+                self.previewTick += 1
+                if self.previewTick % 2 == 0, let cg = self.previewContext.createCGImage(CIImage(cvPixelBuffer: pb), from: CIImage(cvPixelBuffer: pb).extent) {
+                    self.videoFrame = cg
+                }
+            }
             self.vision.process(pixelBuffer: pb, orientation: orientation, visibleCapacity: cap) { result in
                 Task { @MainActor in
                     self.latest = result
@@ -104,7 +129,7 @@ final class SensorNode: ObservableObject {
             personCount: count, estimatedDensity: density,
             flowDirectionDeg: FlowEstimator.compassDirection(imageDeg: imageDir, cameraHeadingDeg: location.headingDeg),
             flowSpeedMps: speedMps, visionConfidence: vision, cameraObstructed: obstructed,
-            modelVersion: SensorSettings.modelVersion, mode: settings.mode == .live ? "live" : "simulated",
+            modelVersion: SensorSettings.modelVersion, mode: settings.mode.rawValue,
             zoneHint: settings.zoneHint.isEmpty ? nil : settings.zoneHint).clamped()
         _ = last
         lastObservation = obs

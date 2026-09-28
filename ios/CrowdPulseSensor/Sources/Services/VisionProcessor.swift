@@ -32,9 +32,11 @@ final class VisionProcessor {
     private let queue = DispatchQueue(label: "crowdpulse.vision", qos: .userInitiated)
     private(set) var isBusy = false
 
-    init() {
+    /// `upperBodyOnly` is more robust in crowds where legs are occluded (default); the full-body
+    /// detector is kept as an evaluation option (see Tools/videoeval).
+    init(upperBodyOnly: Bool = true) {
         request = VNDetectHumanRectanglesRequest()
-        request.upperBodyOnly = true   // more robust in crowds where legs are occluded
+        request.upperBodyOnly = upperBodyOnly
     }
 
     /// Analyse a pixel buffer asynchronously; `completion` runs on the vision queue.
@@ -42,7 +44,6 @@ final class VisionProcessor {
         guard !isBusy else { return }
         isBusy = true
         queue.async { [self] in
-            defer { isBusy = false }
             let t0 = Date()
             let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
             var boxes: [CGRect] = []
@@ -75,6 +76,8 @@ final class VisionProcessor {
             // vision confidence: mean detector confidence, reduced by crowding (occlusion) and darkness
             let meanConf = confidences.isEmpty ? (obstructed ? 0.1 : 0.7) : confidences.reduce(0, +) / Double(confidences.count)
             let vision = max(0.05, min(0.99, meanConf * (1 - 0.3 * density) * (brightness < 0.15 ? 0.6 : 1.0)))
+            // release the busy flag BEFORE the callback so a synchronous caller can submit the next frame
+            isBusy = false
             completion(DetectionResult(boxes: boxes, personCount: count, densityIndex: density, boxAreaFraction: area,
                                        flowImageDeg: flow?.directionImageDeg, flowNormPerSec: flow?.magnitudeNormPerSec,
                                        flowConfidence: flow?.confidence ?? 0, visionConfidence: vision, obstructed: obstructed,

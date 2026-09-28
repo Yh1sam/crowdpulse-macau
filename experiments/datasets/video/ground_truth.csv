@@ -1,0 +1,12 @@
+t_sec,actual_count,near_count,notes
+0,32,3,"whole frame: 3 in foreground crossing, ~25 on far sidewalk, ~4 right (far sidewalk counted approximately from the 640x360 frame). near = on the crossing / within ~15 m"
+5,36,3,"1 close-up, 2 left near; ~28 far sidewalk, ~5 right group"
+10,26,4,"2 foreground, 2 right near; ~22 far sidewalk (vehicles occlude)"
+15,35,5,"2 foreground crossing, 3 right near; ~30 far sidewalk"
+20,40,8,"8 on the crossing; ~30 far sidewalk; cyclist excluded"
+25,60,25,"scramble phase: ~10 near, ~15 mid crossing; ~35 far sidewalk"
+30,62,26,"scramble peak: ~14 near, ~12 mid (heavy overlap); ~35 far sidewalk"
+35,52,18,"~10 near, ~8 mid; ~35 far sidewalk"
+40,42,9,"~9 mid on crossing; ~30 far sidewalk; 1 cyclist excluded"
+45,38,5,"1 close-up back, 4 crossing; ~28 far sidewalk; 3 cyclists excluded"
+50,38,7,"4 near, ~3 right near; ~28 far sidewalk; 1 cyclist excluded"

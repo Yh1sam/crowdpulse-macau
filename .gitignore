@@ -24,3 +24,7 @@ ios/**/*.xcodeproj/project.xcworkspace/xcuserdata/
 !.env.example
 # OS
 .DS_Store
+experiments/datasets/video/*.webm
+experiments/datasets/video/*.mp4
+experiments/datasets/video/frames/
+experiments/datasets/video/observations.json
