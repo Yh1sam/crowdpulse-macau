@@ -1,20 +1,42 @@
 """Database tables. Only numerical / categorical metadata is stored - never images."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, Float, Index, Integer, String, Text, TypeDecorator, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.app.db import Base
+
+
+class UTCDateTime(TypeDecorator):
+    """Timezone-aware UTC datetimes on every backend. SQLite drops tzinfo, which would make
+    the API emit naive timestamps that browsers interpret as local time."""
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
 
 
 class Sensor(Base):
     __tablename__ = "sensors"
     sensor_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     zone_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    first_seen: Mapped[datetime] = mapped_column(UTCDateTime())
+    last_seen: Mapped[datetime] = mapped_column(UTCDateTime())
     last_lat: Mapped[float] = mapped_column(Float)
     last_lon: Mapped[float] = mapped_column(Float)
     last_accuracy_m: Mapped[float] = mapped_column(Float)
@@ -34,8 +56,8 @@ class Observation(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     sensor_id: Mapped[str] = mapped_column(String(64), index=True)
     zone_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
-    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    timestamp: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
+    received_at: Mapped[datetime] = mapped_column(UTCDateTime())
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
     location_accuracy_m: Mapped[float] = mapped_column(Float)
@@ -57,7 +79,7 @@ class ZoneState(Base):
     __tablename__ = "zone_states"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     zone_id: Mapped[str] = mapped_column(String(64), index=True)
-    bin_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    bin_start: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
     density: Mapped[float] = mapped_column(Float)
     person_count_visible: Mapped[float] = mapped_column(Float)
     flow_direction_deg: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -85,9 +107,9 @@ class Prediction(Base):
     __tablename__ = "predictions"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     zone_id: Mapped[str] = mapped_column(String(64), index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
     horizon_min: Mapped[int] = mapped_column(Integer)
-    target_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    target_time: Mapped[datetime] = mapped_column(UTCDateTime())
     status: Mapped[str] = mapped_column(String(32))  # ok | insufficient_data | fallback
     predicted_class: Mapped[str | None] = mapped_column(String(16), nullable=True)
     probabilities: Mapped[dict] = mapped_column(JSON, default=dict)
@@ -112,7 +134,7 @@ class Alert(Base):
     __tablename__ = "alerts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     zone_id: Mapped[str] = mapped_column(String(64), index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
     level: Mapped[str] = mapped_column(String(16))  # info | warning | critical | human_review | sensor
     title: Mapped[str] = mapped_column(String(200))
     message: Mapped[str] = mapped_column(Text)
@@ -127,7 +149,7 @@ class Intervention(Base):
     __tablename__ = "interventions"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     zone_id: Mapped[str] = mapped_column(String(64), index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
     status: Mapped[str] = mapped_column(String(16), default="pending")  # pending | approved | rejected | expired
     kind: Mapped[str] = mapped_column(String(32))
     title: Mapped[str] = mapped_column(String(200))
@@ -144,17 +166,17 @@ class Intervention(Base):
     assumed_effect: Mapped[dict] = mapped_column(JSON, default=dict)
     projected_after: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     prediction_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     decided_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
     decision_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     effect_applied: Mapped[bool] = mapped_column(Boolean, default=False)
-    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
 
 
 class AuditLog(Base):
     __tablename__ = "audit_log"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    timestamp: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
     actor: Mapped[str] = mapped_column(String(64))
     action: Mapped[str] = mapped_column(String(64))
     target_type: Mapped[str] = mapped_column(String(32))
@@ -167,7 +189,7 @@ class GroundTruth(Base):
     __tablename__ = "ground_truth"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     zone_id: Mapped[str] = mapped_column(String(64), index=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    timestamp: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
     actual_count: Mapped[int] = mapped_column(Integer)
     actual_class: Mapped[str | None] = mapped_column(String(16), nullable=True)
     condition: Mapped[str | None] = mapped_column(String(64), nullable=True)

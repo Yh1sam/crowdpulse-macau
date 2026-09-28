@@ -1,0 +1,477 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04EDDCE36D61733A48873ECF /* MotionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF837DCB86B6225680F7EAC /* MotionMonitor.swift */; };
+		18D4A23564ABB449B32D3A3C /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9922A4B943228B2C20987C4 /* CameraService.swift */; };
+		30575EF243E7429971C9B91F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735C25FDB75EF589DEB114AF /* SetupView.swift */; };
+		4ACD0F52F8CBA9DEE0395799 /* SensorObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C58CF6E1928916D37931E3F /* SensorObservation.swift */; };
+		634AE1DD87E461E9FA54A5A1 /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73F97F16D0F1D60F6B0A008 /* LiveView.swift */; };
+		6C30C2BA8CC7D505E16399F5 /* CrowdPulseSensorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6DA7E4360C1350E17F49F1A /* CrowdPulseSensorApp.swift */; };
+		8E39B183DA7C42740284CBF2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */; };
+		93C51239DFE845F43EF9B5C7 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08CC6AF50BCA8E67FD0C2E5 /* DebugView.swift */; };
+		94C9B9860FF41C6726A61301 /* PrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A95319F8659301E15E2747 /* PrivacyView.swift */; };
+		95889C9B4A124596BAC5EFAE /* SensorLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF085DA1E7EE4A4D7C6713A7 /* SensorLogicTests.swift */; };
+		B6B4E04E37D7FCCB6D5D9238 /* SensorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8F0E613E2D7F1DABA1628F /* SensorSettings.swift */; };
+		CD7E117316E31DF57A093C11 /* LocationMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFCC83DB5CF760C93393B51 /* LocationMonitor.swift */; };
+		D23B2945C7A720210D63823D /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC10582F73DC5C195444D3C /* Uploader.swift */; };
+		EDCA6779F80DF3997A991874 /* FlowEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593249D29571C9C154F26459 /* FlowEstimator.swift */; };
+		F824628E3A08EB62FEF96E6F /* SensorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA9F7FFF1B72FFD5BD00351F /* SensorNode.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B07661FF7D7EE7C6BE469EEC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 694191534CD2769E8B639F36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9ECB131542A353A88A7440D6;
+			remoteInfo = CrowdPulseSensor;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		03A95319F8659301E15E2747 /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
+		221FB7D4BBE05C2769722A95 /* CrowdPulseSensorTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CrowdPulseSensorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2EC10582F73DC5C195444D3C /* Uploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uploader.swift; sourceTree = "<group>"; };
+		4C58CF6E1928916D37931E3F /* SensorObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorObservation.swift; sourceTree = "<group>"; };
+		593249D29571C9C154F26459 /* FlowEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowEstimator.swift; sourceTree = "<group>"; };
+		721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
+		735C25FDB75EF589DEB114AF /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		7C8F0E613E2D7F1DABA1628F /* SensorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSettings.swift; sourceTree = "<group>"; };
+		7CF837DCB86B6225680F7EAC /* MotionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionMonitor.swift; sourceTree = "<group>"; };
+		89DB41C8193983F835E0679F /* CrowdPulseSensor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CrowdPulseSensor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B73F97F16D0F1D60F6B0A008 /* LiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveView.swift; sourceTree = "<group>"; };
+		C000B1223033F82C8F8E2FA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CF085DA1E7EE4A4D7C6713A7 /* SensorLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorLogicTests.swift; sourceTree = "<group>"; };
+		D08CC6AF50BCA8E67FD0C2E5 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
+		D9922A4B943228B2C20987C4 /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+		E6DA7E4360C1350E17F49F1A /* CrowdPulseSensorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrowdPulseSensorApp.swift; sourceTree = "<group>"; };
+		EA9F7FFF1B72FFD5BD00351F /* SensorNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNode.swift; sourceTree = "<group>"; };
+		FCFCC83DB5CF760C93393B51 /* LocationMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationMonitor.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		159796458300F31CB169015F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D08CC6AF50BCA8E67FD0C2E5 /* DebugView.swift */,
+				B73F97F16D0F1D60F6B0A008 /* LiveView.swift */,
+				03A95319F8659301E15E2747 /* PrivacyView.swift */,
+				735C25FDB75EF589DEB114AF /* SetupView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		1ACB32FE57BC18372842E198 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				89DB41C8193983F835E0679F /* CrowdPulseSensor.app */,
+				221FB7D4BBE05C2769722A95 /* CrowdPulseSensorTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		299566B022EABEF506DE8D6E /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				E6DA7E4360C1350E17F49F1A /* CrowdPulseSensorApp.swift */,
+				C000B1223033F82C8F8E2FA0 /* Info.plist */,
+				4D0DD2A1A1339B389D114D38 /* Models */,
+				BF3D570FCD3EBF77E7515B32 /* Services */,
+				159796458300F31CB169015F /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		4D0DD2A1A1339B389D114D38 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				4C58CF6E1928916D37931E3F /* SensorObservation.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B03C38E6CD153E35B67F134F /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				CF085DA1E7EE4A4D7C6713A7 /* SensorLogicTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		BF3D570FCD3EBF77E7515B32 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				D9922A4B943228B2C20987C4 /* CameraService.swift */,
+				593249D29571C9C154F26459 /* FlowEstimator.swift */,
+				FCFCC83DB5CF760C93393B51 /* LocationMonitor.swift */,
+				7CF837DCB86B6225680F7EAC /* MotionMonitor.swift */,
+				EA9F7FFF1B72FFD5BD00351F /* SensorNode.swift */,
+				7C8F0E613E2D7F1DABA1628F /* SensorSettings.swift */,
+				2EC10582F73DC5C195444D3C /* Uploader.swift */,
+				721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		D3BFE5AB0B10B524FA5FEDCA = {
+			isa = PBXGroup;
+			children = (
+				299566B022EABEF506DE8D6E /* Sources */,
+				B03C38E6CD153E35B67F134F /* Tests */,
+				1ACB32FE57BC18372842E198 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9ECB131542A353A88A7440D6 /* CrowdPulseSensor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21D06FCA571737269556174D /* Build configuration list for PBXNativeTarget "CrowdPulseSensor" */;
+			buildPhases = (
+				6408C37944BFDBDF4F43FAA7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CrowdPulseSensor;
+			packageProductDependencies = (
+			);
+			productName = CrowdPulseSensor;
+			productReference = 89DB41C8193983F835E0679F /* CrowdPulseSensor.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F08F946F9CF2E3533095E79C /* CrowdPulseSensorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97E66EADDB714FEF07352EBA /* Build configuration list for PBXNativeTarget "CrowdPulseSensorTests" */;
+			buildPhases = (
+				73026A582298295C291DAA9A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C99970DC65F785CD4C0AEF9C /* PBXTargetDependency */,
+			);
+			name = CrowdPulseSensorTests;
+			packageProductDependencies = (
+			);
+			productName = CrowdPulseSensorTests;
+			productReference = 221FB7D4BBE05C2769722A95 /* CrowdPulseSensorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		694191534CD2769E8B639F36 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					9ECB131542A353A88A7440D6 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					F08F946F9CF2E3533095E79C = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = BA562EE6DCC12ABB9EAEFAE8 /* Build configuration list for PBXProject "CrowdPulseSensor" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D3BFE5AB0B10B524FA5FEDCA;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 1ACB32FE57BC18372842E198 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9ECB131542A353A88A7440D6 /* CrowdPulseSensor */,
+				F08F946F9CF2E3533095E79C /* CrowdPulseSensorTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6408C37944BFDBDF4F43FAA7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18D4A23564ABB449B32D3A3C /* CameraService.swift in Sources */,
+				6C30C2BA8CC7D505E16399F5 /* CrowdPulseSensorApp.swift in Sources */,
+				93C51239DFE845F43EF9B5C7 /* DebugView.swift in Sources */,
+				EDCA6779F80DF3997A991874 /* FlowEstimator.swift in Sources */,
+				634AE1DD87E461E9FA54A5A1 /* LiveView.swift in Sources */,
+				CD7E117316E31DF57A093C11 /* LocationMonitor.swift in Sources */,
+				04EDDCE36D61733A48873ECF /* MotionMonitor.swift in Sources */,
+				94C9B9860FF41C6726A61301 /* PrivacyView.swift in Sources */,
+				F824628E3A08EB62FEF96E6F /* SensorNode.swift in Sources */,
+				4ACD0F52F8CBA9DEE0395799 /* SensorObservation.swift in Sources */,
+				B6B4E04E37D7FCCB6D5D9238 /* SensorSettings.swift in Sources */,
+				30575EF243E7429971C9B91F /* SetupView.swift in Sources */,
+				D23B2945C7A720210D63823D /* Uploader.swift in Sources */,
+				8E39B183DA7C42740284CBF2 /* VisionProcessor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73026A582298295C291DAA9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95889C9B4A124596BAC5EFAE /* SensorLogicTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C99970DC65F785CD4C0AEF9C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9ECB131542A353A88A7440D6 /* CrowdPulseSensor */;
+			targetProxy = B07661FF7D7EE7C6BE469EEC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0DBDF0FD1899BAFA0B5F3965 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.crowdpulse.sensor.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CrowdPulseSensor.app/CrowdPulseSensor";
+			};
+			name = Debug;
+		};
+		44522493BA5D8907E67E5F47 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		97635DBD753FCC2F555A9676 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.crowdpulse.sensor.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CrowdPulseSensor.app/CrowdPulseSensor";
+			};
+			name = Release;
+		};
+		A86A47A89D3181EB5F2ADFC0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Sources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.crowdpulse.sensor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		D37FE69F6AFB8A63C8BF7E5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		F235D8D6CCE70A07FC68AF02 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Sources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.crowdpulse.sensor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		21D06FCA571737269556174D /* Build configuration list for PBXNativeTarget "CrowdPulseSensor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F235D8D6CCE70A07FC68AF02 /* Debug */,
+				A86A47A89D3181EB5F2ADFC0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		97E66EADDB714FEF07352EBA /* Build configuration list for PBXNativeTarget "CrowdPulseSensorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DBDF0FD1899BAFA0B5F3965 /* Debug */,
+				97635DBD753FCC2F555A9676 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BA562EE6DCC12ABB9EAEFAE8 /* Build configuration list for PBXProject "CrowdPulseSensor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D37FE69F6AFB8A63C8BF7E5C /* Debug */,
+				44522493BA5D8907E67E5F47 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 694191534CD2769E8B639F36 /* Project object */;
+}
