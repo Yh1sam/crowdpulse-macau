@@ -47,12 +47,9 @@ class RateLimiter:
 async def _background_loop(app: FastAPI) -> None:
     settings = get_settings()
     engine = get_engine()
-    last = time.monotonic()
     while True:
         try:
-            now = time.monotonic()
-            dt, last = now - last, now
-            await asyncio.to_thread(engine.tick, dt)
+            await asyncio.to_thread(engine.tick)
         except Exception:  # pragma: no cover
             log.exception("tick failed")
         await asyncio.sleep(settings.tick_seconds)

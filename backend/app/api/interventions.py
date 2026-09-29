@@ -14,6 +14,8 @@ router = APIRouter(tags=["interventions"])
 def list_interventions(status: str | None = None, limit: int = Query(100, ge=1, le=1000), db: Session = DB, engine: Engine = ENGINE):
     engine.refresh_if_due()
     q = select(Intervention)
+    if engine.sim is not None:  # while a simulation runs, show only this run's recommendations
+        q = q.where(Intervention.id > engine.run_markers.get("intervention_id", 0))
     if status:
         q = q.where(Intervention.status == status)
     return db.execute(q.order_by(Intervention.created_at.desc()).limit(limit)).scalars().all()

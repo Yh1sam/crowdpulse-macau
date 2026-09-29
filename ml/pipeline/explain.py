@@ -44,7 +44,12 @@ def rule_reasons(feat: dict[str, Any], predicted: str, zone_names: dict[str, str
             reasons.append(f"density {'increased' if pct > 0 else 'decreased'} {abs(pct):.0f}% in the last 3 minutes (now {d:.2f})")
     inflow, outflow = feat.get("inflow_proxy"), feat.get("outflow_proxy")
     if _ok(inflow) and _ok(outflow):
-        if inflow > outflow * 1.15 + 0.01:
+        if max(inflow, outflow) < 0.02:
+            reasons.append("very little movement in or out of the zone")
+        elif min(inflow, outflow) < 0.02 and max(inflow, outflow) >= 0.05:
+            # a percentage against a near-zero denominator reads as nonsense ("exceeds by 3584%")
+            reasons.append("people are arriving but almost nobody is leaving" if inflow > outflow else "people are leaving and almost nobody is arriving (zone draining)")
+        elif inflow > outflow * 1.15 + 0.01:
             reasons.append(f"inflow exceeds outflow by {((inflow - outflow) / max(outflow, 0.01)) * 100:.0f}% (net inflow)")
         elif outflow > inflow * 1.15 + 0.01:
             reasons.append(f"outflow exceeds inflow by {((outflow - inflow) / max(inflow, 0.01)) * 100:.0f}% (zone draining)")

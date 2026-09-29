@@ -159,3 +159,14 @@ def test_demo_scenario_reaches_critical_at_senado():
 def test_training_days_have_mixed_day_types():
     days = training_days(14)
     assert {p.day_type for p in days} == {"weekday", "weekend", "golden_week"}
+
+
+def test_rule_reasons_avoid_percentages_against_near_zero_flow():
+    reasons = " ".join(rule_reasons({"density": 0.17, "inflow_proxy": 0.36, "outflow_proxy": 0.0}, "SAFE", {}))
+    assert "%" not in reasons.split("density")[0] and "almost nobody is leaving" in reasons
+    assert "draining" in " ".join(rule_reasons({"density": 0.5, "inflow_proxy": 0.0, "outflow_proxy": 0.3}, "SAFE", {}))
+
+
+def test_rule_reasons_small_nearly_equal_flows_are_balanced():
+    text = " ".join(rule_reasons({"density": 0.3, "inflow_proxy": 0.021, "outflow_proxy": 0.019}, "SAFE", {}))
+    assert "almost nobody" not in text

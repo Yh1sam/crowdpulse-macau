@@ -11,7 +11,8 @@ router = APIRouter(prefix="/sim", tags=["simulation"])
 
 @router.get("/status")
 def status(engine: Engine = ENGINE):
-    return {"available_scenarios": sorted(SCENARIOS), "sim": engine.sim.status() if engine.sim else None}
+    sim = engine.sim  # read once: /sim/stop may clear it concurrently
+    return {"available_scenarios": sorted(SCENARIOS), "sim": sim.status() if sim else None}
 
 
 @router.post("/start")
@@ -30,9 +31,10 @@ def stop(engine: Engine = ENGINE):
 @router.post("/inject")
 def inject(body: SimInjectIn, engine: Engine = ENGINE):
     """Demo helper: add a sudden surge of people to a zone in the live simulation."""
-    if engine.sim is None:
+    sim = engine.sim  # read once: /sim/stop may clear it concurrently
+    if sim is None:
         raise HTTPException(409, "live simulation not running")
     if body.zone_id not in engine.zones:
         raise HTTPException(404, "unknown zone")
-    engine.sim.inject(body.zone_id, body.people)
-    return engine.sim.status()
+    sim.inject(body.zone_id, body.people)
+    return sim.status()

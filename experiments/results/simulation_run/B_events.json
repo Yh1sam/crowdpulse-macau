@@ -1,0 +1,67 @@
+[
+  {
+    "real_time": "23:35:27",
+    "sim_time": "13:53",
+    "event": "start",
+    "health": "golden_week_demo"
+  },
+  {
+    "real_time": "23:36:59",
+    "sim_time": "14:08",
+    "event": "senado_critical_forecast",
+    "preds": [
+      [
+        5,
+        "WARNING",
+        0.41,
+        true
+      ],
+      [
+        10,
+        "CRITICAL",
+        0.33,
+        true
+      ],
+      [
+        15,
+        "WARNING",
+        0.35,
+        true
+      ]
+    ]
+  },
+  {
+    "real_time": "23:37:10",
+    "sim_time": "14:10",
+    "event": "screenshot",
+    "file": "B05_zone_senado_critical_forecast.png",
+    "page": "/zones/senado_square"
+  },
+  {
+    "real_time": "23:37:10",
+    "sim_time": "14:10",
+    "event": "senado_redirect_pending",
+    "intervention": 6,
+    "iv_kind": "redirect_flow",
+    "title": "Redirect part of north-eastbound flow around Senado Square",
+    "confidence": 0.6092313933007132
+  },
+  {
+    "real_time": "23:37:10",
+    "sim_time": "14:10",
+    "event": "operator_takes_no_action",
+    "intervention": 6
+  },
+  {
+    "real_time": "23:40:09",
+    "sim_time": "14:40",
+    "event": "end",
+    "stats": {
+      "observations_ingested": 6045,
+      "observations_rejected": 0,
+      "refreshes": 124,
+      "last_refresh_ms": 763.7,
+      "api_observations_retimed": 96
+    }
+  }
+]

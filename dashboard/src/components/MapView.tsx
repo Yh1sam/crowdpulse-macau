@@ -74,6 +74,7 @@ export default function MapView({ zones, sensors, config, onSelect, height = 420
   const mapRef = useRef<maplibregl.Map | null>(null);
   const ready = useRef(false);
   const pendingUpdate = useRef<(() => void) | null>(null);
+  const fitted = useRef(false);
   const markers = useRef<Map<string, maplibregl.Marker>>(new Map());
   const onSelectRef = useRef(onSelect);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
@@ -106,7 +107,7 @@ export default function MapView({ zones, sensors, config, onSelect, height = 420
     mapRef.current = map;
     const markerStore = markers.current;
     if (process.env.NODE_ENV !== "production") (window as unknown as { __cpMap?: maplibregl.Map }).__cpMap = map;
-    return () => { map.remove(); mapRef.current = null; ready.current = false; markerStore.clear(); };
+    return () => { map.remove(); mapRef.current = null; ready.current = false; fitted.current = false; markerStore.clear(); };
   }, []);
 
   useEffect(() => {
@@ -128,6 +129,12 @@ export default function MapView({ zones, sensors, config, onSelect, height = 420
         }
       }
       for (const [id, mk] of markers.current) if (!seen.has(id)) { mk.remove(); markers.current.delete(id); }
+      // Frame every zone once, on the first data: the fixed default view cut off the southern zones.
+      if (!fitted.current && zones.length) {
+        const lons = zones.map((z) => z.lon), lats = zones.map((z) => z.lat);
+        map.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: { top: 50, bottom: 70, left: 60, right: 60 }, duration: 0, maxZoom: 17 });
+        fitted.current = true;
+      }
     };
     if (ready.current) update(); else pendingUpdate.current = update;
   }, [zones, sensors, config]);

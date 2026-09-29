@@ -52,8 +52,9 @@
 3. **Observable proxies only.** Inflow/outflow are proxies computed from anonymous flow vectors projected onto edge bearings, weighted by density, speed and flow coherence — nothing needs per-person tracking.
 4. **Reliability is first-class.** Every observation gets a quality weight (stability, obstruction, GPS accuracy, vision confidence); zone reliability combines sensor availability, quality and inter-sensor disagreement; prediction confidence is scaled by it and low values trigger human review.
 5. **Simulated clock.** With the built-in live simulation the backend runs on the simulation's accelerated clock so that horizons, staleness and bins stay consistent; with real phones it uses wall-clock time.
-6. **Human in the loop.** Interventions are records with `pending/approved/rejected/expired` status; approval is an explicit API call recorded in `audit_log`. In simulation, approval feeds an assumed inflow reduction back into the crowd model.
+6. **Human in the loop.** Interventions are records with `pending/approved/rejected/expired/superseded` status; approval is an explicit API call recorded in `audit_log`. A stronger recommendation (monitoring → staff → redirect / inflow control) supersedes a weaker pending one; an approved one stays approved and the stronger one is added alongside. In simulation, approval feeds an assumed inflow reduction back into the crowd model.
 7. **Graceful degradation.** Missing models → persistence fallback flagged as such; missing sensors → stale zone + "insufficient data — human review"; backend down → phone buffers numbers and retries.
+8. **Hybrid mode.** While the live simulation runs, real sensors can join it: their wall-clock readings are re-timed onto the simulated clock (their real age is scaled by the simulation speed). Stopping or restarting the simulation closes that run's recommendations and hides its future-dated readings and alerts.
 
 ## Data model
 

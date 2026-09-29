@@ -31,7 +31,7 @@ def zone_history(zone_id: str, minutes: int = Query(60, ge=1, le=24 * 60), db: S
     if zone_id not in engine.zones:
         raise HTTPException(404, "unknown zone")
     since = engine.clock.now() - timedelta(minutes=minutes)
-    rows = db.execute(select(ZoneState).where(ZoneState.zone_id == zone_id, ZoneState.bin_start >= since).order_by(ZoneState.bin_start)).scalars().all()
+    rows = db.execute(select(ZoneState).where(ZoneState.zone_id == zone_id, ZoneState.bin_start >= since, ZoneState.bin_start <= engine.clock.now()).order_by(ZoneState.bin_start)).scalars().all()
     return [ZoneStateOut.model_validate(r, from_attributes=True) for r in rows]
 
 

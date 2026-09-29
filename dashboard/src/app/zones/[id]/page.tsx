@@ -13,11 +13,11 @@ export default function ZoneDetail({ params }: { params: Promise<{ id: string }>
   const { data: z, error } = useApi<Zone>(`/zones/${id}`, 2000);
   const { data: hist } = useApi<ZoneState[]>(`/zones/${id}/history?minutes=90`, 5000);
   const { data: config } = useApi<Config>("/config", 60000);
-  const { data: ivs } = useApi<Intervention[]>(`/interventions?limit=50`, 5000);
+  const { data: activeIv } = useApi<Intervention>(z?.active_intervention_id ? `/interventions/${z.active_intervention_id}` : null, 3000);
   if (error) return <p className="text-red-300">{String(error)}</p>;
   if (!z) return <p className="text-zinc-500">loading…</p>;
   const s = z.state;
-  const iv = (ivs ?? []).find((i) => i.id === z.active_intervention_id);
+  const iv = activeIv && activeIv.id === z.active_intervention_id ? activeIv : undefined;
   const p15 = z.predictions.find((p) => p.horizon_min === 15) ?? z.predictions[0];
   return (
     <div className="space-y-4">

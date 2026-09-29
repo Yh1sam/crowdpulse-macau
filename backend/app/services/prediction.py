@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import joblib
+from threadpoolctl import threadpool_limits
 import numpy as np
 import pandas as pd
 
@@ -47,6 +48,24 @@ class ModelBundle:
         }
 
 
+def _single_threaded(obj: Any, seen: set | None = None) -> None:
+    """Set n_jobs=1 on every nested estimator. Predictions here are 1-28 rows; with n_jobs=-1 each call paid
+    ~15 ms of thread-pool start-up (measured 28 ms -> 13 ms per call)."""
+    seen = seen if seen is not None else set()
+    if id(obj) in seen or not hasattr(obj, "__dict__"):
+        return
+    seen.add(id(obj))
+    if getattr(obj, "n_jobs", None) not in (None, 1):
+        obj.n_jobs = 1
+    for v in vars(obj).values():
+        for item in (v if isinstance(v, (list, tuple)) else [v]):
+            if isinstance(item, tuple):
+                for x in item:
+                    _single_threaded(x, seen)
+            else:
+                _single_threaded(item, seen)
+
+
 def load_models(models_dir: Path) -> ModelBundle:
     b = ModelBundle()
     if not models_dir.exists():
@@ -61,6 +80,10 @@ def load_models(models_dir: Path) -> ModelBundle:
         b.regressors[int(d["horizon"])] = d
     if (models_dir / "ood.joblib").exists():
         b.ood = OODDetector.load(str(models_dir / "ood.joblib"))
+    for d in (*b.classifiers.values(), *b.regressors.values()):
+        _single_threaded(d["model"])
+    if b.ood is not None:
+        _single_threaded(b.ood)
     if (models_dir / "feature_spec.json").exists():
         b.medians = {k: v for k, v in json.loads((models_dir / "feature_spec.json").read_text())["medians"].items() if v is not None}
     if (models_dir / "metrics.json").exists():
@@ -77,6 +100,13 @@ def _proba_in_class_order(model: Any, X: pd.DataFrame) -> np.ndarray:
 
 def predict_zone(bundle: ModelBundle, feat: dict[str, Any], zone_id: str, now, cfg: dict[str, Any], zone_names: dict[str, str]) -> list[dict[str, Any]]:
     """Return one prediction dict per horizon for a zone given its latest feature row."""
+    # One-row predictions: the gradient-boosting density models otherwise start an OpenMP thread team per tree
+    # (measured 171 ms -> 1.6 ms per call, identical output).
+    with threadpool_limits(limits=1, user_api="openmp"):
+        return _predict_zone(bundle, feat, zone_id, now, cfg, zone_names)
+
+
+def _predict_zone(bundle: ModelBundle, feat: dict[str, Any], zone_id: str, now, cfg: dict[str, Any], zone_names: dict[str, str]) -> list[dict[str, Any]]:
     conf_cfg = cfg["confidence"]
     density = feat.get("density")
     reliability = float(feat.get("reliability") or 0.0)
@@ -132,6 +162,11 @@ def predict_zone(bundle: ModelBundle, feat: dict[str, Any], zone_id: str, now, c
 
 
 def what_if_prediction(bundle: ModelBundle, feat: dict[str, Any], inflow_multiplier: float) -> dict[str, Any]:
+    with threadpool_limits(limits=1, user_api="openmp"):
+        return _what_if_prediction(bundle, feat, inflow_multiplier)
+
+
+def _what_if_prediction(bundle: ModelBundle, feat: dict[str, Any], inflow_multiplier: float) -> dict[str, Any]:
     """Re-run the classifiers with inflow proxies scaled (assumed effect of an intervention).
     Clearly a model what-if, not a validated causal estimate."""
     f = dict(feat)

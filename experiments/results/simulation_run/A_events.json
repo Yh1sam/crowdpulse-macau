@@ -1,0 +1,173 @@
+[
+  {
+    "real_time": "23:30:19",
+    "sim_time": "13:53",
+    "event": "start",
+    "health": "golden_week_demo"
+  },
+  {
+    "real_time": "23:30:30",
+    "sim_time": "13:54",
+    "event": "screenshot",
+    "file": "A01_overview_start.png",
+    "page": "/"
+  },
+  {
+    "real_time": "23:30:41",
+    "sim_time": "13:56",
+    "event": "screenshot",
+    "file": "A02_live_map.png",
+    "page": "/map"
+  },
+  {
+    "real_time": "23:30:51",
+    "sim_time": "13:58",
+    "event": "screenshot",
+    "file": "A03_reliability_phone_node.png",
+    "page": "/reliability"
+  },
+  {
+    "real_time": "23:31:02",
+    "sim_time": "14:00",
+    "event": "screenshot",
+    "file": "A04_zone_almeida_with_phone.png",
+    "page": "/zones/almeida_ribeiro"
+  },
+  {
+    "real_time": "23:31:53",
+    "sim_time": "14:08",
+    "event": "senado_critical_forecast",
+    "preds": [
+      [
+        5,
+        "WARNING",
+        0.55,
+        true
+      ],
+      [
+        10,
+        "CRITICAL",
+        0.49,
+        true
+      ],
+      [
+        15,
+        "WARNING",
+        0.52,
+        true
+      ]
+    ]
+  },
+  {
+    "real_time": "23:32:04",
+    "sim_time": "14:10",
+    "event": "screenshot",
+    "file": "A05_zone_senado_critical_forecast.png",
+    "page": "/zones/senado_square"
+  },
+  {
+    "real_time": "23:32:15",
+    "sim_time": "14:12",
+    "event": "screenshot",
+    "file": "A06_alerts.png",
+    "page": "/alerts"
+  },
+  {
+    "real_time": "23:32:16",
+    "sim_time": "14:12",
+    "event": "senado_redirect_pending",
+    "intervention": 5,
+    "iv_kind": "redirect_flow",
+    "title": "Redirect part of north-eastbound flow around Senado Square",
+    "confidence": 0.6384093407585655
+  },
+  {
+    "real_time": "23:32:24",
+    "sim_time": "14:13",
+    "event": "ui",
+    "action": "view_evidence",
+    "result": "evidence opened"
+  },
+  {
+    "real_time": "23:32:29",
+    "sim_time": "14:14",
+    "event": "screenshot",
+    "file": "A07_intervention_evidence.png",
+    "page": "/interventions"
+  },
+  {
+    "real_time": "23:32:29",
+    "sim_time": "14:14",
+    "event": "ui",
+    "action": "approve",
+    "result": "approve clicked",
+    "intervention": 5
+  },
+  {
+    "real_time": "23:32:35",
+    "sim_time": "14:15",
+    "event": "screenshot",
+    "file": "A08_after_approval_audit.png",
+    "page": "/interventions"
+  },
+  {
+    "real_time": "23:32:35",
+    "sim_time": "14:15",
+    "event": "intervention_state",
+    "status": "approved",
+    "decided_by": "operator",
+    "effect_applied": true,
+    "projected_after": {
+      "10": "CRITICAL",
+      "15": "CRITICAL",
+      "5": "CRITICAL"
+    }
+  },
+  {
+    "real_time": "23:34:00",
+    "sim_time": "14:29",
+    "event": "screenshot",
+    "file": "A09_zone_senado_after_approval.png",
+    "page": "/zones/senado_square"
+  },
+  {
+    "real_time": "23:34:11",
+    "sim_time": "14:31",
+    "event": "screenshot",
+    "file": "A10_ai_explanation.png",
+    "page": "/explain"
+  },
+  {
+    "real_time": "23:34:23",
+    "sim_time": "14:33",
+    "event": "screenshot",
+    "file": "A11_evaluation.png",
+    "page": "/evaluation"
+  },
+  {
+    "real_time": "23:34:34",
+    "sim_time": "14:35",
+    "event": "screenshot",
+    "file": "A12_privacy.png",
+    "page": "/privacy"
+  },
+  {
+    "real_time": "23:34:44",
+    "sim_time": "14:37",
+    "event": "screenshot",
+    "file": "A13_reliability_end.png",
+    "page": "/reliability"
+  },
+  {
+    "real_time": "23:35:02",
+    "sim_time": "14:40",
+    "event": "end",
+    "stats": {
+      "observations_ingested": 6066,
+      "observations_rejected": 0,
+      "refreshes": 126,
+      "last_refresh_ms": 765.9,
+      "api_observations_retimed": 99
+    }
+  }
+]

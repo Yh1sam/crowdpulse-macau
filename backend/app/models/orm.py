@@ -150,7 +150,7 @@ class Intervention(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     zone_id: Mapped[str] = mapped_column(String(64), index=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
-    status: Mapped[str] = mapped_column(String(16), default="pending")  # pending | approved | rejected | expired
+    status: Mapped[str] = mapped_column(String(16), default="pending")  # pending | approved | rejected | expired | superseded
     kind: Mapped[str] = mapped_column(String(32))
     title: Mapped[str] = mapped_column(String(200))
     recommendation: Mapped[str] = mapped_column(Text)

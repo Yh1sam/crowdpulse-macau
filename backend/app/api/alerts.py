@@ -13,7 +13,11 @@ router = APIRouter(tags=["alerts"])
 @router.get("/alerts", response_model=list[AlertOut])
 def list_alerts(limit: int = Query(100, ge=1, le=1000), level: str | None = None, db: Session = DB, engine: Engine = ENGINE):
     engine.refresh_if_due()
-    q = select(Alert)
+    # hide alerts dated after "now" (from a stopped or earlier simulation run); while a simulation runs, show
+    # only this run's alerts
+    q = select(Alert).where(Alert.created_at <= engine.clock.now())
+    if engine.sim is not None:
+        q = q.where(Alert.id > engine.run_markers.get("alert_id", 0))
     if level:
         q = q.where(Alert.level == level)
     return db.execute(q.order_by(Alert.created_at.desc()).limit(limit)).scalars().all()

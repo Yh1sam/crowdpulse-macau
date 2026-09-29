@@ -77,6 +77,9 @@ class ZoneStateOut(BaseModel):
     reliability: float
     disagreement: float
     obstructed_fraction: float
+    mean_stability: Optional[float] = None
+    mean_gps_accuracy_m: Optional[float] = None
+    mean_vision_confidence: Optional[float] = None
     congestion_state: str
     inflow_proxy: float
     outflow_proxy: float

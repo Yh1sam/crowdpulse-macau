@@ -12,8 +12,11 @@ router = APIRouter(tags=["system"])
 @router.get("/health")
 def health(engine: Engine = ENGINE):
     s = get_settings()
-    return {"status": "ok", "time": engine.clock.now(), "clock": "simulated" if engine.clock.simulated else "wall", "privacy_mode": s.privacy_mode,
-            "models_loaded": engine.models.loaded, "model_version": engine.models.version, "live_sim": engine.sim.status() if engine.sim else None,
+    sim = engine.sim  # read once: /sim/stop may clear it concurrently
+    return {"status": "ok", "time": engine.clock.now(), "clock": "simulated" if engine.clock.simulated else "wall",
+            "real_sensor_retiming": bool(sim is not None and sim.running),
+            "privacy_mode": s.privacy_mode,
+            "models_loaded": engine.models.loaded, "model_version": engine.models.version, "live_sim": sim.status() if sim else None,
             "last_refresh": engine.last_refresh, "stats": engine.stats}
 
 

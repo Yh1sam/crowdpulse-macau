@@ -77,6 +77,8 @@ Environment variables (all optional, prefix `CROWDPULSE_`): `DATABASE_URL` (defa
 6. **Reliability**: sensor health; predictions from unreliable zones show *LOW CONFIDENCE — HUMAN REVIEW REQUIRED*. **Evaluation**: real accuracy / F1 / confusion matrices from the last training run.
 7. Optional: the status bar has *inject surge (Senado)* to trigger a sudden surge; use the iOS app on a phone pointed at a group of people to see a real node appear on the map.
 
+A complete recorded run of this story, with the iOS app joining from the iPhone Simulator as a live sensor node and a no-action comparison run, is in [experiments/results/simulation_run](experiments/results/simulation_run/README.md). Approving the redirect lowered Senado's simulated density to 0.73–0.75 by 14:40 in two recorded pairs of runs, against 0.82–0.87 with no action; Senado stayed above CRITICAL in both. The crowd builds in about 3 minutes, so the first CRITICAL forecast arrived within about a minute of the true crossing rather than well ahead of it.
+
 ## Results (synthetic held-out test days, from `ml/models/metrics.json`)
 
 | horizon | model | accuracy | F1 (macro) | persistence-baseline F1 | accuracy vs simulation ground truth | density MAE |

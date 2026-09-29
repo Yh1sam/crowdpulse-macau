@@ -4,6 +4,7 @@ phones use. Interventions approved by the operator feed back into it."""
 from __future__ import annotations
 
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
@@ -27,27 +28,44 @@ class LiveSimulation:
         self.running = False
         self.lock = threading.Lock()
         self.started_at = datetime.now(timezone.utc)
+        self._last_real = time.monotonic()  # real time up to which simulated time has been advanced
 
     @property
     def now(self) -> datetime:
         return self.start_time + timedelta(seconds=self.elapsed_s)
 
+    def sync_real_time(self) -> None:
+        """Declare that simulated time is up to date with the real clock (after priming or a manual advance)."""
+        self._last_real = time.monotonic()
+
+    def advance_to_now(self, ingest: Callable[[list[dict[str, Any]]], Any]) -> int:
+        """Advance simulated time by the real time elapsed since the last advance. Both the background tick and
+        real-sensor ingestion call this, so a phone reading is always placed against an up-to-date simulated clock.
+        Callers must hold the engine lock (serialises the two call sites)."""
+        now = time.monotonic()
+        real_seconds, self._last_real = max(0.0, now - self._last_real), now
+        return self.advance(real_seconds, ingest)
+
     def advance(self, real_seconds: float, ingest: Callable[[list[dict[str, Any]]], Any]) -> int:
         """Advance simulated time and emit observations. Returns observations emitted."""
         emitted = 0
         with self.lock:
-            self.elapsed_s += real_seconds * self.acceleration
-            while self._next_dynamics_s <= self.elapsed_s:
+            target = self.elapsed_s + real_seconds * self.acceleration
+            while self._next_dynamics_s <= target:
                 self.sim.dynamics_step(record=False)
                 self._next_dynamics_s += 60.0
             batch: list[dict[str, Any]] = []
-            while self._next_obs_s <= self.elapsed_s:
+            while self._next_obs_s <= target:
                 ts = self.start_time + timedelta(seconds=self._next_obs_s)
                 batch.extend(self.sim.observe(ts=ts, dt_min=self.sensor_interval_s / 60.0))
                 self._next_obs_s += self.sensor_interval_s
         if batch:
             ingest(batch)
             emitted = len(batch)
+        # Publish the new simulated time only after the readings up to it are stored. Publishing first let a
+        # concurrent request see the new clock with the old readings and report every sensor as stale.
+        with self.lock:
+            self.elapsed_s = max(self.elapsed_s, target)
         return emitted
 
     def context(self) -> dict[str, dict[str, int]]:
