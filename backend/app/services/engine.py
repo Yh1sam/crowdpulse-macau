@@ -24,6 +24,7 @@ from backend.app.services.prediction import ModelBundle, load_models, predict_zo
 from ml.pipeline.aggregation import OBS_COLUMNS, aggregate_zone_bins, assign_zone, observation_quality_weight
 from ml.pipeline.features import FEATURE_COLUMNS, latest_features
 from shared.config import load_config, load_zone_graph
+from shared.geo import haversine_m
 from shared.schemas import SensorObservation
 
 log = logging.getLogger("crowdpulse.engine")
@@ -428,14 +429,20 @@ class Engine:
             issues.append("weak GPS")
         if s.last_vision_confidence < r["min_vision_confidence"]:
             issues.append("low vision confidence")
+        placement, distance = "none", None
         if s.zone_id is None:
-            issues.append("outside any zone")
+            issues.append("outside any zone: choose a zone in the app's Setup page")
+        elif s.zone_id in self.zones:
+            z = self.zones[s.zone_id]
+            distance = haversine_m(s.last_lat, s.last_lon, z["lat"], z["lon"])
+            placement = "gps" if distance <= self.cfg["sensor"]["zone_assignment_radius_m"] else "zone_hint"
         q = observation_quality_weight({"device_motion_stability": s.last_stability, "camera_obstructed": s.last_obstructed, "location_accuracy_m": s.last_accuracy_m, "vision_confidence": s.last_vision_confidence}, self.cfg)
         score = q * (1.0 if status == "online" else 0.5 if status == "stale" else 0.0)
         return {"sensor_id": s.sensor_id, "zone_id": s.zone_id, "status": status, "last_seen": s.last_seen, "seconds_since_seen": round(age, 1), "latitude": s.last_lat, "longitude": s.last_lon,
                 "location_accuracy_m": s.last_accuracy_m, "heading_deg": s.last_heading_deg, "device_motion_stability": s.last_stability, "camera_obstructed": s.last_obstructed,
                 "vision_confidence": s.last_vision_confidence, "person_count": s.last_person_count, "estimated_density": s.last_density, "model_version": s.model_version, "mode": s.mode,
-                "observation_count": s.observation_count, "reliability_score": round(score, 3), "issues": issues}
+                "observation_count": s.observation_count, "reliability_score": round(score, 3), "issues": issues,
+                "placement": placement, "distance_to_zone_m": None if distance is None else round(distance, 1)}
 
     def zone_view(self, db, zid: str) -> dict[str, Any]:
         z = self.zones[zid]

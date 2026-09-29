@@ -20,3 +20,13 @@ export function compass(deg: number | null | undefined): string {
   return `${dirs[Math.round((deg % 360) / 45) % 8]} (${Math.round(deg)}°)`;
 }
 export function riskOrder(c: CongestionClass | "UNKNOWN" | null): number { return c === "CRITICAL" ? 3 : c === "WARNING" ? 2 : c === "SAFE" ? 1 : 0; }
+
+/** How a sensor was placed in its zone, for tables and popups. */
+export function placementLabel(placement: string, distanceM: number | null | undefined): string {
+  if (placement === "gps") return "GPS";
+  if (placement === "zone_hint") {
+    const d = distanceM == null ? "" : distanceM >= 1000 ? ` · GPS ${(distanceM / 1000).toFixed(distanceM >= 100000 ? 0 : 1)} km away` : ` · GPS ${Math.round(distanceM)} m away`;
+    return `zone chosen in app${d}`;
+  }
+  return "–";
+}

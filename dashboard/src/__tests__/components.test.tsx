@@ -62,3 +62,13 @@ describe("zone card", () => {
     expect(screen.getByText(/1\/2 sensors/)).toBeInTheDocument();
   });
 });
+
+describe("placement label", () => {
+  it("explains how a sensor was placed", async () => {
+    const { placementLabel } = await import("@/lib/format");
+    expect(placementLabel("gps", 40)).toBe("GPS");
+    expect(placementLabel("zone_hint", 2140)).toBe("zone chosen in app · GPS 2.1 km away");
+    expect(placementLabel("zone_hint", 650)).toBe("zone chosen in app · GPS 650 m away");
+    expect(placementLabel("none", null)).toBe("–");
+  });
+});

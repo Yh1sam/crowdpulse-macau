@@ -55,7 +55,7 @@ def test_ingestion_assigns_zone_and_lists_sensor(client):
     r = client.post("/sensor/observation", json=obs(sensor_id="node-far1", lat=22.15, lon=113.55))
     assert r.json()["zone_assignments"]["node-far1"] is None
     s = client.get("/sensors/node-far1").json()
-    assert "outside any zone" in s["issues"]
+    assert any(i.startswith("outside any zone") for i in s["issues"]) and s["placement"] == "none"
 
 
 def test_batch_ingestion_and_zone_aggregation(client):
@@ -427,3 +427,21 @@ def test_stronger_recommendation_added_alongside_approved_weaker_one(client):
     assert ivs["deploy_staff"] == "approved" and ivs.get("redirect_flow", ivs.get("reduce_inflow")) == "pending", ivs
     z = client.get("/zones/senado_square").json()
     assert client.get(f"/interventions/{z['active_intervention_id']}").json()["kind"] in ("redirect_flow", "reduce_inflow")
+
+
+def test_phone_at_a_school_joins_the_zone_chosen_in_the_app(client):
+    school = dict(lat=22.2100, lon=113.5500)   # ~2 km from the historic district
+    r = client.post("/sensor/observation", json=obs(sensor_id="node-school1", zone_hint="Senado Square", **school))
+    assert r.status_code == 202 and r.json()["zone_assignments"]["node-school1"] == "senado_square"
+    s = client.get("/sensors/node-school1").json()
+    assert s["zone_id"] == "senado_square" and s["placement"] == "zone_hint" and 1500 < s["distance_to_zone_m"] < 3000
+    assert not any(i.startswith("outside any zone") for i in s["issues"])
+    z = client.get("/zones/senado_square").json()
+    assert "node-school1" in z["sensors"] and z["state"]["n_sensors"] == 1
+    # the same phone without a zone choice is not placed
+    client.post("/sensor/observation", json=obs(sensor_id="node-school2", **school))
+    assert client.get("/sensors/node-school2").json()["zone_id"] is None
+    # a phone in the district is placed by GPS even if another zone was chosen
+    client.post("/sensor/observation", json=obs(sensor_id="node-dist1", zone_hint="ruins_st_paul"))
+    s = client.get("/sensors/node-dist1").json()
+    assert s["zone_id"] == "senado_square" and s["placement"] == "gps"

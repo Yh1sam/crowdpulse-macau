@@ -57,7 +57,29 @@ def test_zone_assignment_uses_gps_not_hint():
     z = next(z for z in g["zones"] if z["id"] == "ruins_st_paul")
     assert assign_zone(z["lat"], z["lon"], g) == "ruins_st_paul"
     assert assign_zone(z["lat"], z["lon"], g, zone_hint="senado_square") == "ruins_st_paul"
-    assert assign_zone(22.10, 113.60, g, zone_hint="senado_square") is None
+    assert assign_zone(22.10, 113.60, g) is None, "far away and no zone chosen"
+    assert assign_zone(22.10, 113.60, g, zone_hint="nowhere") is None, "unknown zone names are rejected"
+
+
+def test_zone_choice_places_phones_outside_the_district():
+    """A phone at a school (or at home) is placed in the zone the operator chose; GPS still wins in the district."""
+    from ml.pipeline.aggregation import place_sensor, resolve_zone_hint
+    import copy
+    g, cfg = load_zone_graph(), load_config()
+    school = (22.2100, 113.5500)            # ~2 km from the district
+    far = (51.4988, -0.1749)                # Imperial College London
+    assert place_sensor(*school, g, cfg, zone_hint="senado_square")[:2] == ("senado_square", "zone_hint")
+    zone, placement, d = place_sensor(*far, g, cfg, zone_hint="Senado Square")
+    assert (zone, placement) == ("senado_square", "zone_hint") and d > 9_000_000
+    z = next(z for z in g["zones"] if z["id"] == "ruins_st_paul")
+    assert place_sensor(z["lat"], z["lon"], g, cfg, zone_hint="senado_square")[:2] == ("ruins_st_paul", "gps")
+    for spelling in ("senado_square", "Senado Square", "SENADO SQUARE", "  senado   square ", "senado square"):
+        assert resolve_zone_hint(spelling, g) == "senado_square", spelling
+    assert resolve_zone_hint("", g) is None and resolve_zone_hint("senado", g) is None
+    limited = copy.deepcopy(cfg); limited["sensor"]["zone_hint_max_distance_m"] = 360
+    assert place_sensor(*school, g, limited, zone_hint="senado_square") == (None, "none", None), "deployment limit"
+    near = (z["lat"] + 0.0015, z["lon"])    # ~170 m from the Ruins, outside every zone radius
+    assert place_sensor(*near, g, limited, zone_hint="ruins_st_paul")[:2] == ("ruins_st_paul", "zone_hint")
 
 
 def test_missing_sensor_data_produces_nan_features_and_staleness():

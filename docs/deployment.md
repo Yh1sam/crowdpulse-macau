@@ -10,6 +10,8 @@
 | iOS | Xcode local install / TestFlight | App Store submission is not on the critical path |
 | local demo | SQLite + built-in live simulation | zero infrastructure |
 
+Zone placement: inside the district a phone is placed by GPS; elsewhere the zone chosen in the app is used, at any distance. For a live deployment in Macau set `sensor.zone_hint_max_distance_m` in `shared/config.json` (for example 360), so a phone carried away from its post stops feeding its zone; the Reliability page shows each phone's placement and its distance from the zone.
+
 Security for the prototype: HTTPS at the platform edge, secrets only in environment variables, closed input schema with bounds, per-IP rate limiting on ingestion, no file uploads or code execution paths. Not in scope: authentication (add a simple bearer token per sensor kit before any real deployment).
 
 ## Operational model

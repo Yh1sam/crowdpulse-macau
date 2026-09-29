@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useApi } from "@/lib/api";
 import type { Health, Sensor, Zone } from "@/lib/types";
-import { localTime, num, pct } from "@/lib/format";
+import { localTime, num, pct, placementLabel } from "@/lib/format";
 
 interface Status { loaded: boolean; version: string; model_types: Record<string, string>; ood_detector: boolean; trained_at: string | null; calibration: Record<string, { calibrated: boolean }> }
 
@@ -37,9 +37,9 @@ export default function Reliability() {
       </section>
       <section>
         <h2 className="mb-2 text-sm font-semibold">Sensor health</h2>
-        <table className="w-full text-sm"><thead className="text-left text-xs uppercase text-zinc-500"><tr><th>node</th><th>zone</th><th>status</th><th>last seen</th><th>stability</th><th>GPS ±m</th><th>vision</th><th>obstructed</th><th>count</th><th>score</th><th>issues</th></tr></thead>
+        <table className="w-full text-sm"><thead className="text-left text-xs uppercase text-zinc-500"><tr><th>node</th><th>zone</th><th>placement</th><th>status</th><th>last seen</th><th>stability</th><th>GPS ±m</th><th>vision</th><th>obstructed</th><th>count</th><th>score</th><th>issues</th></tr></thead>
           <tbody className="divide-y divide-zinc-800">{(sensors ?? []).map((s) => (
-            <tr key={s.sensor_id} className={s.status !== "online" ? "opacity-60" : ""}><td className="font-mono text-xs">{s.sensor_id}</td><td>{s.zone_id ?? "–"}</td><td><span className={`rounded px-1.5 text-xs ${s.status === "online" ? "bg-emerald-900 text-emerald-200" : s.status === "stale" ? "bg-amber-900 text-amber-200" : "bg-red-900 text-red-200"}`}>{s.status}</span></td><td className="text-xs">{localTime(s.last_seen)} ({Math.round(s.seconds_since_seen)}s)</td><td>{num(s.device_motion_stability)}</td><td>{num(s.location_accuracy_m, 0)}</td><td>{num(s.vision_confidence)}</td><td>{s.camera_obstructed ? <span className="text-red-300">yes</span> : "no"}</td><td>{s.person_count}</td><td><Bar v={s.reliability_score} /></td><td className="text-xs text-amber-200">{s.issues.join(", ")}</td></tr>
+            <tr key={s.sensor_id} className={s.status !== "online" ? "opacity-60" : ""}><td className="font-mono text-xs">{s.sensor_id}</td><td>{s.zone_id ?? "–"}</td><td className="text-xs text-zinc-400">{placementLabel(s.placement, s.distance_to_zone_m)}</td><td><span className={`rounded px-1.5 text-xs ${s.status === "online" ? "bg-emerald-900 text-emerald-200" : s.status === "stale" ? "bg-amber-900 text-amber-200" : "bg-red-900 text-red-200"}`}>{s.status}</span></td><td className="text-xs">{localTime(s.last_seen)} ({Math.round(s.seconds_since_seen)}s)</td><td>{num(s.device_motion_stability)}</td><td>{num(s.location_accuracy_m, 0)}</td><td>{num(s.vision_confidence)}</td><td>{s.camera_obstructed ? <span className="text-red-300">yes</span> : "no"}</td><td>{s.person_count}</td><td><Bar v={s.reliability_score} /></td><td className="text-xs text-amber-200">{s.issues.join(", ")}</td></tr>
           ))}</tbody></table>
       </section>
     </div>

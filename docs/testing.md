@@ -161,7 +161,7 @@ Expected `422`.
 
 ## 6. iPhone on-device test
 
-What this can verify today: on-device detection, frame rate, upload, offline buffering, the motion and obstruction checks, and privacy. It cannot yet put the phone's data into a zone on the map unless the phone is physically in the Macau district (see "Known gaps").
+What this verifies: on-device detection, frame rate, upload, zone placement, offline buffering, the motion and obstruction checks, and privacy. Away from Macau the phone joins the zone you choose in the app's Setup page.
 
 ### 6.1 Install the app
 
@@ -187,7 +187,7 @@ ipconfig getifaddr en0
 
 ### 6.3 Run the checks
 
-In the app's Setup page: Backend URL `http://<Mac address>:8000`, Mode Live, Detector YOLO11n (CoreML). Set Visible capacity to roughly how many people would fill the view. Tap Start sensing and allow camera, location, motion and local-network access.
+In the app's Setup page: Backend URL `http://<Mac address>:8000` (then tap *Reload zones from backend*), Mode Live, Detector YOLO11n (CoreML), and under *Placement* choose a zone (for example St. Dominic's Square). Set Visible capacity to roughly how many people would fill the view. Tap Start sensing and allow camera, location, motion and local-network access.
 
 | check | how | pass if |
 |---|---|---|
@@ -201,14 +201,14 @@ In the app's Setup page: Backend URL `http://<Mac address>:8000`, Mode Live, Det
 | privacy | Debug page → "Last observation" | payload contains numbers only, no image data |
 | count accuracy | point at a group of known size (5, 10, 20 people) | write down app count vs actual; this is your first real phone measurement |
 
-Expected today: `/sensors` lists the phone with the issue "outside any zone" unless you are in the district.
+Expected: `/sensors` lists the phone with `"zone_id"` set to the zone you chose, `"placement":"zone_hint"` and its distance from the zone. The Reliability page shows "zone chosen in app · GPS … km away", and the map draws the phone next to that zone. With *By GPS only* chosen, it shows "outside any zone: choose a zone in the app's Setup page".
 
 ## Known gaps
 
 | gap | effect on testing | status |
 |---|---|---|
-| Zone assignment is GPS-only for the Macau zones (zone hint honoured only within ~360 m) | a phone elsewhere never appears in a zone, so no forecast and no controlled experiment | open |
 | In hybrid mode a phone reports every 1–5 real seconds, which is every 10–50 simulated seconds at 10× | the phone carries fewer readings per minute than a simulated node, so less weight in its zone | by design; document when presenting |
+| Zones planned with two sensors (Senado Square, Ruins of St. Paul's) show "1/2 sensors" with one phone | zone reliability ≈ 0.82, confidence ≈ 10% lower | open: in the school test use single-sensor zones (see `docs/experiment-protocol.md`) |
 | A phone with no compass (the iOS Simulator reports heading 0°) turns image directions into wrong compass directions | a wrong direction is averaged into its zone's flow | open: check the heading on placement |
 | README `uv pip install -e ".[dev]"` fails on a fresh clone | first setup step errors | open: use the command in section 0 |
 | `pnpm install` exits with code 1 | looks like a failure | open: install is complete; placeholder in `dashboard/pnpm-workspace.yaml` |
@@ -217,4 +217,5 @@ Expected today: `/sensors` lists the phone with the issue "outside any zone" unl
 | `GET /zones` took ≈ 3 s | — | fixed 2026-09-29 (single-threaded inference, reads never wait for a refresh): refresh ≈ 0.8 s, reads < 50 ms |
 | Stored zone history held partial minutes | history chart and experiment joins used incomplete data | fixed 2026-09-29 (window aligned to minute boundaries) |
 | Sensors showed "stale" while the simulation caught up | — | fixed 2026-09-29 (simulated time published after its readings are stored) |
+| Phones outside the Macau district were never placed in a zone | — | fixed 2026-09-30 (the zone chosen in the app's Setup page places them; GPS still wins inside the district) |
 | Restarting or stopping the sim on an old database showed the previous run's state and blocked recommendations | — | fixed 2026-09-29 (a run's recommendations are closed when it ends; future-dated readings and alerts are hidden) |

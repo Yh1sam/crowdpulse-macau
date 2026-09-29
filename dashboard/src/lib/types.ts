@@ -29,6 +29,8 @@ export interface Sensor {
   latitude: number; longitude: number; location_accuracy_m: number; heading_deg: number; device_motion_stability: number; camera_obstructed: boolean;
   vision_confidence: number; person_count: number; estimated_density: number; model_version: string; mode: string | null; observation_count: number;
   reliability_score: number; issues: string[];
+  /** gps: GPS within a zone · zone_hint: placed by the zone chosen in the app (GPS outside every zone) · none */
+  placement: "gps" | "zone_hint" | "none"; distance_to_zone_m: number | null;
 }
 
 export interface Alert { id: number; zone_id: string; created_at: string; level: string; title: string; message: string; horizon_min: number | null; prediction_id: number | null; confidence: number | null; acknowledged: boolean }

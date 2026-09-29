@@ -37,7 +37,9 @@
     "observation_interval_s": 5,
     "min_interval_s": 1,
     "max_interval_s": 5,
-    "zone_assignment_radius_m": 120.0
+    "zone_assignment_radius_m": 120.0,
+    "zone_hint_max_distance_m": null,
+    "zone_hint_note": "A phone is placed in a zone by GPS when it is within zone_assignment_radius_m of a zone centre. Otherwise the zone chosen in the app (zone_hint) is used. zone_hint_max_distance_m limits how far the phone's GPS may be from the chosen zone: null = no limit (off-site experiments, school tests, a phone at home joining the demo). For a live deployment in Macau set a limit (e.g. 360) so a phone carried away stops feeding its zone."
   },
   "aggregation": {
     "bin_seconds": 60,

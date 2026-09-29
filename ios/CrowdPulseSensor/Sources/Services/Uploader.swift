@@ -52,7 +52,9 @@ final class Uploader: ObservableObject {
                     self.sent += batch.count
                     self.lastStatus = "sent \(batch.count) (HTTP \(code))"
                     if let data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                        if let z = (json["zone_assignments"] as? [String: Any])?.values.first { self.lastZoneAssignment = "\(z)" }
+                        if let assignments = json["zone_assignments"] as? [String: Any], let z = assignments.values.first {
+                            self.lastZoneAssignment = Uploader.zoneLabel(z)
+                        }
                         self.lastServerTime = json["server_time"] as? String
                     }
                 } else if code == 422 || code == 403 {
@@ -79,4 +81,10 @@ final class Uploader: ObservableObject {
     }
 
     var pendingCount: Int { buffer.count }
+
+    /// The backend's zone assignment as shown on the Live page (JSON null means the phone is in no zone).
+    static func zoneLabel(_ value: Any) -> String {
+        if let zone = value as? String, !zone.isEmpty { return zone }
+        return "none: choose a zone in Setup"
+    }
 }

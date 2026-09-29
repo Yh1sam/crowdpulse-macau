@@ -115,6 +115,22 @@ final class SensorLogicTests: XCTestCase {
         XCTAssertLessThanOrEqual(r.visionConfidence, 0.05, "a failed inference must floor the confidence so the backend discounts it")
     }
 
+    @MainActor
+    func testZoneCatalogDecodesBackendConfig() throws {
+        // shape of GET /config (other keys ignored)
+        let json = #"{"privacy_mode": true, "zone_graph": {"zones": [{"id": "senado_square", "name": "Senado Square", "lat": 22.19, "lon": 113.54, "capacity": 1200}, {"id": "ruins_st_paul", "name": "Ruins of St. Paul's", "lat": 22.19, "lon": 113.54}], "edges": []}}"#
+        let zones = try ZoneCatalog.decode(Data(json.utf8))
+        XCTAssertEqual(zones.map(\.id), ["senado_square", "ruins_st_paul"])
+        XCTAssertEqual(zones.first?.name, "Senado Square")
+    }
+
+    func testZoneLabelForUnplacedPhone() throws {
+        let json = try XCTUnwrap(try JSONSerialization.jsonObject(with: Data(#"{"zone_assignments": {"node-abc123": null}}"#.utf8)) as? [String: Any])
+        let value = try XCTUnwrap((json["zone_assignments"] as? [String: Any])?.values.first)
+        XCTAssertEqual(Uploader.zoneLabel(value), "none: choose a zone in Setup")
+        XCTAssertEqual(Uploader.zoneLabel("senado_square"), "senado_square")
+    }
+
     func testUploaderBuffersWhenOffline() {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Config, Sensor, Zone } from "@/lib/types";
-import { RISK_COLORS } from "@/lib/format";
+import { RISK_COLORS, placementLabel } from "@/lib/format";
 
 // No symbol layers (they need a remote glyph server): labels and flow arrows are DOM markers,
 // so the map still works offline apart from the background tiles.
@@ -39,14 +39,32 @@ function edgeFeatures(cfg: Config | undefined, zones: Zone[]): GeoJSON.FeatureCo
   };
 }
 
-function sensorFeatures(sensors: Sensor[]): GeoJSON.FeatureCollection {
+/** A stable small offset (about 25 m) around a zone centre, so several placed phones do not overlap. */
+function offsetAround(zone: Zone, id: string): [number, number] {
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const a = ((h % 360) * Math.PI) / 180;
+  const dLat = (25 * Math.cos(a)) / 111_320;
+  const dLon = (25 * Math.sin(a)) / (111_320 * Math.cos((zone.lat * Math.PI) / 180));
+  return [zone.lon + dLon, zone.lat + dLat];
+}
+
+function sensorFeatures(sensors: Sensor[], zones: Zone[]): GeoJSON.FeatureCollection {
+  const byId = Object.fromEntries(zones.map((z) => [z.id, z]));
   return {
     type: "FeatureCollection",
-    features: sensors.map((s) => ({
-      type: "Feature",
-      properties: { id: s.sensor_id, status: s.status, heading: s.heading_deg, count: s.person_count, issues: s.issues.join(", "), color: s.status === "online" ? (s.issues.length ? "#fab219" : "#2a78d6") : "#9a9891" },
-      geometry: { type: "Point", coordinates: [s.longitude, s.latitude] },
-    })),
+    features: sensors.map((s) => {
+      // A phone placed by the zone chosen in the app (e.g. at a school) is drawn next to that zone, not at its real
+      // GPS position, which can be kilometres off the map.
+      const zone = s.placement === "zone_hint" && s.zone_id ? byId[s.zone_id] : undefined;
+      const coordinates = zone ? offsetAround(zone, s.sensor_id) : [s.longitude, s.latitude];
+      return {
+        type: "Feature",
+        properties: { id: s.sensor_id, status: s.status, heading: s.heading_deg, count: s.person_count, issues: s.issues.join(", "), placed: zone ? placementLabel(s.placement, s.distance_to_zone_m) : "",
+                      color: s.status === "online" ? (s.issues.length ? "#fab219" : "#2a78d6") : "#9a9891", ring: zone ? "#ffffff" : "#000000" },
+        geometry: { type: "Point", coordinates },
+      };
+    }),
   };
 }
 
@@ -90,15 +108,15 @@ export default function MapView({ zones, sensors, config, onSelect, height = 420
       map.addLayer({ id: "edges-stairs", type: "line", source: "edges", filter: ["==", ["get", "stairs"], true], paint: { "line-color": "#e87ba4", "line-width": 3, "line-dasharray": [1, 1.5] } });
       map.addSource("zones", { type: "geojson", data: zoneFeatures([]) });
       map.addLayer({ id: "zones-fill", type: "circle", source: "zones", paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 14, 10, 16, 22, 18, 60], "circle-color": ["get", "color"], "circle-opacity": ["case", ["get", "stale"], 0.25, 0.45], "circle-stroke-color": ["get", "color"], "circle-stroke-width": 2 } });
-      map.addSource("sensors", { type: "geojson", data: sensorFeatures([]) });
-      map.addLayer({ id: "sensors", type: "circle", source: "sensors", paint: { "circle-radius": 5, "circle-color": ["get", "color"], "circle-stroke-color": "#000", "circle-stroke-width": 1 } });
+      map.addSource("sensors", { type: "geojson", data: sensorFeatures([], []) });
+      map.addLayer({ id: "sensors", type: "circle", source: "sensors", paint: { "circle-radius": 5, "circle-color": ["get", "color"], "circle-stroke-color": ["get", "ring"], "circle-stroke-width": 1.5 } });
       map.on("click", "zones-fill", (e: maplibregl.MapLayerMouseEvent) => { const id = e.features?.[0]?.properties?.id; if (id) onSelectRef.current?.(String(id)); });
       map.on("mouseenter", "zones-fill", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "zones-fill", () => { map.getCanvas().style.cursor = ""; });
       const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
       map.on("mouseenter", "sensors", (e: maplibregl.MapLayerMouseEvent) => {
         const f = e.features?.[0]; const p = f?.properties; if (!f || !p) return;
-        popup.setLngLat((f.geometry as unknown as { coordinates: [number, number] }).coordinates).setHTML(`<b>${p.id}</b><br/>${p.status} · ${p.count} people in view<br/>${p.issues || "no issues"}`).addTo(map);
+        popup.setLngLat((f.geometry as unknown as { coordinates: [number, number] }).coordinates).setHTML(`<b>${p.id}</b><br/>${p.status} · ${p.count} people in view<br/>${p.issues || "no issues"}${p.placed ? `<br/><i>${p.placed}</i>` : ""}`).addTo(map);
       });
       map.on("mouseleave", "sensors", () => popup.remove());
       ready.current = true;
@@ -115,7 +133,7 @@ export default function MapView({ zones, sensors, config, onSelect, height = 420
     if (!map) return;
     const update = () => {
       (map.getSource("zones") as maplibregl.GeoJSONSource | undefined)?.setData(zoneFeatures(zones));
-      (map.getSource("sensors") as maplibregl.GeoJSONSource | undefined)?.setData(sensorFeatures(sensors));
+      (map.getSource("sensors") as maplibregl.GeoJSONSource | undefined)?.setData(sensorFeatures(sensors, zones));
       (map.getSource("edges") as maplibregl.GeoJSONSource | undefined)?.setData(edgeFeatures(config, zones));
       const seen = new Set<string>();
       for (const z of zones) {

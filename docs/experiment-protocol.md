@@ -4,7 +4,7 @@ Goal: measure how well phone sensors estimate crowd state against manually recor
 
 ## Setup
 
-- 3 iPhones (no LiDAR needed) with the CrowdPulseSensor app, each on a tripod/shelf 1.5–2.5 m high, tilted ~20° down, facing the test area. Assign each a zone via the app's *Sensor Setup* page (the backend also assigns by GPS; indoors, GPS may be poor — use the zone hint and expect the "weak GPS" reliability penalty, which is itself part of the evaluation).
+- 3 iPhones (no LiDAR needed) with the CrowdPulseSensor app, each on a tripod/shelf 1.5–2.5 m high, tilted ~20° down, facing the test area. Assign each phone a zone in the app's *Sensor Setup* page → *Placement* → *Zone*. Outside the Macau district the backend uses that choice; the dashboard's Reliability page shows it as "zone chosen in app" with the phone's real distance. Use three neighbouring zones that each plan one sensor, so the zone graph's neighbour features and flow directions make sense and no zone looks half-empty: **Company of Jesus Square → Rua de S. Paulo (corridor) → St. Dominic's Square** (for example: room entrance, corridor, doorway bottleneck). Senado Square and the Ruins of St. Paul's plan two sensors each; one phone there shows "1/2 sensors" and lowers confidence by about 10%. Indoors, GPS accuracy is often poor: expect the "weak GPS" reliability penalty, which is itself part of the evaluation.
 - Backend running on a laptop on the same Wi-Fi with `CROWDPULSE_LIVE_SIM=false`; phones point at `http://<laptop-ip>:8000`.
 - 20–30 volunteers, one "counter" per phone with a clicker, one timekeeper.
 - Calibrate each phone's *visible capacity* (the number of people that would fill its view) in the Setup page; this defines the relative density index for that node.

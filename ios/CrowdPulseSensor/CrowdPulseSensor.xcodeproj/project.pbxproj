@@ -26,6 +26,7 @@
 		D23B2945C7A720210D63823D /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC10582F73DC5C195444D3C /* Uploader.swift */; };
 		EC4364A86F631281183C3DD8 /* crossing_t32.png in Resources */ = {isa = PBXBuildFile; fileRef = 6CB1DE845B9F5FD1F8E2DE67 /* crossing_t32.png */; };
 		EDCA6779F80DF3997A991874 /* FlowEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593249D29571C9C154F26459 /* FlowEstimator.swift */; };
+		F582411E17B10484B9B29953 /* ZoneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF57052C089EAF5157F9EF8 /* ZoneCatalog.swift */; };
 		F824628E3A08EB62FEF96E6F /* SensorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA9F7FFF1B72FFD5BD00351F /* SensorNode.swift */; };
 /* End PBXBuildFile section */
 
@@ -48,6 +49,7 @@
 		4955C9FAC23C67805509C489 /* yolo11n.mlpackage */ = {isa = PBXFileReference; path = yolo11n.mlpackage; sourceTree = "<group>"; };
 		4C58CF6E1928916D37931E3F /* SensorObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorObservation.swift; sourceTree = "<group>"; };
 		593249D29571C9C154F26459 /* FlowEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowEstimator.swift; sourceTree = "<group>"; };
+		5FF57052C089EAF5157F9EF8 /* ZoneCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneCatalog.swift; sourceTree = "<group>"; };
 		649A21557D1813B13C5FA61F /* PersonDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonDetector.swift; sourceTree = "<group>"; };
 		6CB1DE845B9F5FD1F8E2DE67 /* crossing_t32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = crossing_t32.png; sourceTree = "<group>"; };
 		721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 				2EC10582F73DC5C195444D3C /* Uploader.swift */,
 				07BA7400DA276CE84C535D4A /* VideoFrameSource.swift */,
 				721C53374FDE3F5C20E337D9 /* VisionProcessor.swift */,
+				5FF57052C089EAF5157F9EF8 /* ZoneCatalog.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -279,6 +282,7 @@
 				D23B2945C7A720210D63823D /* Uploader.swift in Sources */,
 				1E5D4177E6ADBE655B6A0414 /* VideoFrameSource.swift in Sources */,
 				8E39B183DA7C42740284CBF2 /* VisionProcessor.swift in Sources */,
+				F582411E17B10484B9B29953 /* ZoneCatalog.swift in Sources */,
 				A93DF95D5D57312334990ECD /* yolo11n.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

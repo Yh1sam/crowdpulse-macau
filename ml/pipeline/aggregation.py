@@ -7,7 +7,7 @@ identically.
 Pipeline
 --------
 observations (one row per sensor message)
-  -> zone assignment (nearest zone centroid within a radius; zone_hint is only a hint)
+  -> zone assignment (nearest zone centre within a radius; otherwise the operator's zone choice, see place_sensor)
   -> per-observation quality weight (stability, obstruction, GPS, vision confidence)
   -> per (zone, time-bin) aggregate: density, visible count, flow vector, speed,
      reliability, sensor disagreement
@@ -40,8 +40,29 @@ ZONE_STATE_COLUMNS = [
 
 
 # --------------------------------------------------------------- assignment
-def assign_zone(lat: float, lon: float, graph: dict[str, Any] | None = None, cfg: dict[str, Any] | None = None, zone_hint: str | None = None) -> str | None:
-    """Nearest zone centroid within the configured radius, else None."""
+def resolve_zone_hint(zone_hint: str | None, graph: dict[str, Any] | None = None) -> str | None:
+    """Map an operator's zone choice to a zone id. Accepts the id or the display name, in any case and with
+    spaces or underscores ("senado_square", "Senado Square", "SENADO SQUARE"). Unknown names give None."""
+    if not zone_hint or not zone_hint.strip():
+        return None
+    graph = graph or load_zone_graph()
+    h = " ".join(zone_hint.strip().lower().replace("_", " ").split())
+    for z in graph["zones"]:
+        if h == z["id"].replace("_", " ") or h == " ".join(z["name"].lower().split()):
+            return z["id"]
+    return None
+
+
+def place_sensor(lat: float, lon: float, graph: dict[str, Any] | None = None, cfg: dict[str, Any] | None = None, zone_hint: str | None = None) -> tuple[str | None, str, float | None]:
+    """Decide which zone a reading belongs to. Returns (zone_id, placement, distance_m):
+
+    * placement "gps": the GPS position is within ``zone_assignment_radius_m`` of a zone centre. GPS wins
+      over the operator's choice here, because inside the district it is the better evidence.
+    * placement "zone_hint": GPS is outside every zone, and the operator chose a zone in the app. Used for
+      off-site experiments (a school corridor standing in for a Macau zone) and indoor tests with poor GPS.
+      ``zone_hint_max_distance_m`` (config) optionally limits how far away the phone may be.
+    * placement "none": no zone.
+    ``distance_m`` is the distance from the GPS position to the chosen zone's centre."""
     graph = graph or load_zone_graph()
     cfg = cfg or load_config()
     radius = cfg["sensor"]["zone_assignment_radius_m"]
@@ -51,11 +72,20 @@ def assign_zone(lat: float, lon: float, graph: dict[str, Any] | None = None, cfg
         if d < best_d:
             best, best_d = z["id"], d
     if best is not None and best_d <= radius:
-        return best
-    # fall back to the hint only if it is a known zone and the GPS is merely imprecise (< 3x radius)
-    if zone_hint and any(z["id"] == zone_hint for z in graph["zones"]) and best_d <= 3 * radius:
-        return zone_hint
-    return None
+        return best, "gps", best_d
+    hinted = resolve_zone_hint(zone_hint, graph)
+    if hinted is not None:
+        z = next(z for z in graph["zones"] if z["id"] == hinted)
+        d = haversine_m(lat, lon, z["lat"], z["lon"])
+        limit = cfg["sensor"].get("zone_hint_max_distance_m")
+        if limit is None or d <= limit:
+            return hinted, "zone_hint", d
+    return None, "none", None
+
+
+def assign_zone(lat: float, lon: float, graph: dict[str, Any] | None = None, cfg: dict[str, Any] | None = None, zone_hint: str | None = None) -> str | None:
+    """Zone id for a reading (see ``place_sensor``)."""
+    return place_sensor(lat, lon, graph, cfg, zone_hint)[0]
 
 
 def assign_zones_df(obs: pd.DataFrame, graph: dict[str, Any] | None = None, cfg: dict[str, Any] | None = None) -> pd.DataFrame:

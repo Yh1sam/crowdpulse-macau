@@ -26,7 +26,7 @@ class SensorObservation(BaseModel):
     camera_obstructed: bool
     model_version: str = Field(max_length=64)
     mode: Optional[Literal["live", "video", "simulated"]] = None
-    zone_hint: Optional[str] = Field(default=None, max_length=64)
+    zone_hint: Optional[str] = Field(default=None, max_length=64, description="Operator-chosen zone (id or name); used when GPS is not within a zone")
 
     @field_validator("timestamp")
     @classmethod

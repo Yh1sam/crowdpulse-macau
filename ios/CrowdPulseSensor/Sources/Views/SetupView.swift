@@ -3,6 +3,7 @@ import SwiftUI
 struct SetupView: View {
     @EnvironmentObject var settings: SensorSettings
     @EnvironmentObject var node: SensorNode
+    @StateObject private var catalog = ZoneCatalog()
 
     var body: some View {
         NavigationStack {
@@ -11,12 +12,31 @@ struct SetupView: View {
                     TextField("Sensor name (local only)", text: $settings.sensorName)
                     HStack { Text("Anonymous node id"); Spacer(); Text(settings.sensorId).font(.system(.body, design: .monospaced)) }
                     Button("Regenerate id") { settings.regenerateId() }
-                    TextField("Zone hint (optional, e.g. senado_square)", text: $settings.zoneHint).autocapitalization(.none)
                     Picker("Mode", selection: $settings.mode) { ForEach(SensorSettings.SensorMode.allCases) { Text($0.rawValue.capitalized).tag($0) } }
                     Picker("Detector", selection: $settings.detector) { ForEach(SensorSettings.DetectorChoice.allCases) { Text($0.label).tag($0) } }
                 }
+                Section {
+                    if catalog.zones.isEmpty {
+                        TextField("Zone id (e.g. senado_square)", text: $settings.zoneHint).autocapitalization(.none)
+                    } else {
+                        Picker("Zone", selection: $settings.zoneHint) {
+                            Text("By GPS only").tag("")
+                            ForEach(catalog.zones) { Text($0.name).tag($0.id) }
+                            if !settings.zoneHint.isEmpty && !catalog.zones.contains(where: { $0.id == settings.zoneHint }) {
+                                Text("\(settings.zoneHint) (unknown)").tag(settings.zoneHint)
+                            }
+                        }
+                    }
+                    Button("Reload zones from backend") { catalog.load(backendURL: settings.backendURL) }
+                    Text(catalog.status).font(.footnote).foregroundStyle(.secondary)
+                } header: {
+                    Text("Placement")
+                } footer: {
+                    Text("Inside the Macau district the phone is placed by GPS. Anywhere else (a school, at home) it joins the zone chosen here.")
+                }
                 Section("Backend") {
                     TextField("Backend URL", text: $settings.backendURL).keyboardType(.URL).autocapitalization(.none)
+                        .onSubmit { catalog.load(backendURL: settings.backendURL) }
                     Stepper("Send every \(Int(settings.intervalSeconds)) s", value: $settings.intervalSeconds, in: 1...5, step: 1).onChange(of: settings.intervalSeconds) { _, _ in node.restartTimer() }
                 }
                 Section("Calibration") {
@@ -38,6 +58,7 @@ struct SetupView: View {
                 }
             }
             .navigationTitle("Sensor setup")
+            .onAppear { if catalog.zones.isEmpty { catalog.load(backendURL: settings.backendURL) } }
         }
     }
 

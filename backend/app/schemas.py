@@ -35,6 +35,8 @@ class SensorOut(BaseModel):
     observation_count: int
     reliability_score: float
     issues: list[str]
+    placement: str = "none"  # gps | zone_hint (operator's zone choice; GPS not within a zone) | none
+    distance_to_zone_m: Optional[float] = None  # GPS position to the assigned zone's centre
 
 
 class PredictionOut(BaseModel):
