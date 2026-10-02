@@ -50,4 +50,6 @@ def reject(iv_id: int, body: DecisionIn = DecisionIn(), engine: Engine = ENGINE)
 
 @router.get("/audit", response_model=list[AuditOut])
 def audit(limit: int = Query(200, ge=1, le=5000), db: Session = DB):
-    return db.execute(select(AuditLog).order_by(AuditLog.timestamp.desc()).limit(limit)).scalars().all()
+    # newest-written first: timestamps are simulated time while a simulation runs, and a restarted run starts
+    # earlier than where the last one stopped, so ordering by timestamp put stale runs above current decisions
+    return db.execute(select(AuditLog).order_by(AuditLog.id.desc()).limit(limit)).scalars().all()

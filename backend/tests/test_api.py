@@ -409,6 +409,20 @@ def test_restart_shows_only_the_new_runs_alerts_and_recommendations(client):
     client.post("/sim/stop")
 
 
+def test_audit_lists_newest_written_first_across_simulation_runs(client):
+    """Regression: /audit sorted by (simulated) timestamp, so entries from an earlier run that had reached a later
+    simulated day stayed above the current run's approvals."""
+    from backend.app.db import session_scope
+    from backend.app.models import AuditLog
+    t0 = datetime(2026, 10, 3, 6, 0, tzinfo=timezone.utc)
+    with session_scope() as db:
+        db.add(AuditLog(timestamp=t0 + timedelta(days=3), actor="system", action="intervention_expired", target_type="intervention", target_id="1", details={}))
+    with session_scope() as db:
+        db.add(AuditLog(timestamp=t0, actor="operator", action="intervention_approved", target_type="intervention", target_id="2", details={}))
+    audit = client.get("/audit").json()
+    assert [(a["action"], a["target_id"]) for a in audit[:2]] == [("intervention_approved", "2"), ("intervention_expired", "1")]
+
+
 def test_stronger_recommendation_added_alongside_approved_weaker_one(client):
     from backend.app.db import session_scope
     from backend.app.models import Intervention
