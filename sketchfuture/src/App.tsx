@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import rawMap from "./data/macau.json";
 import type {
   Comparison,
@@ -21,31 +28,33 @@ import {
 } from "./core/storage";
 import MapCanvas, { type Tool } from "./components/MapCanvas";
 import Results, { Sensitivity } from "./components/Results";
+import FloatingPanel from "./components/FloatingPanel";
+import Icon, { type IconName } from "./components/Icon";
 
 const MAP = rawMap as MapData;
 const PRIMARY_STEPS = MAP.edges.find((e) => e.osmId === 670357826)!;
-const TOOLS: { id: Tool; symbol: string; label: string; hint: string }[] = [
+const TOOLS: { id: Tool; icon: IconName; label: string; hint: string }[] = [
   {
     id: "inspect",
-    symbol: "↖",
+    icon: "inspect",
     label: "查看",
     hint: "點選通道，查看距離及模擬條件。放大後可拖曳地圖。",
   },
   {
     id: "link",
-    symbol: "╱",
+    icon: "link",
     label: "畫連接",
     hint: "從一個圓點畫到另一個圓點，新增構想步行通道。",
   },
   {
     id: "ramp",
-    symbol: "↗",
+    icon: "ramp",
     label: "無階梯",
     hint: "點選棕色樓梯，提出無階梯改造。",
   },
   {
     id: "close",
-    symbol: "⊘",
+    icon: "close",
     label: "暫封路",
     hint: "點選通道暫時封閉，再點一次取消。",
   },
@@ -89,10 +98,25 @@ export default function App() {
   const [playSpeed, setPlaySpeed] = useState(10);
   const [linkWidth, setLinkWidth] = useState(2);
   const [linkSlope, setLinkSlope] = useState(4);
-  const [landmarkFrom, setLandmarkFrom] = useState(MAP.places.find(p => p.id === 'senado')!.node);
-  const [landmarkTo, setLandmarkTo] = useState(MAP.places.find(p => p.id === 'ruins')!.node);
+  const [landmarkFrom, setLandmarkFrom] = useState(
+    MAP.places.find((p) => p.id === "senado")!.node,
+  );
+  const [landmarkTo, setLandmarkTo] = useState(
+    MAP.places.find((p) => p.id === "ruins")!.node,
+  );
+  const [panelTab, setPanelTab] = useState<"plan" | "conditions" | "checks">(
+    "plan",
+  );
+  const [plannerOpen, setPlannerOpen] = useState(
+    () => window.matchMedia("(min-width: 901px)").matches,
+  );
+  const [resultsOpen, setResultsOpen] = useState(
+    () => window.matchMedia("(min-width: 1100px)").matches,
+  );
   const [dialog, setDialog] = useState<"assumptions" | "reset" | null>(null);
   const importInput = useRef<HTMLInputElement>(null);
+  const workspaceElement = useRef<HTMLElement>(null);
+  const focusResults = useRef(false);
   const modal = useRef<HTMLElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   const worker = useRef<Worker | null>(null);
@@ -101,7 +125,9 @@ export default function App() {
     () => applyEdits(MAP, workspace.edits),
     [workspace.edits],
   );
-  const selectedEdge = edges.find((e) => e.id === selected);
+  const selectedEdge =
+    edges.find((e) => e.id === selected) ??
+    edges.find((e) => e.id === PRIMARY_STEPS.id);
   const bottlenecks = comparison
     ? Object.entries(comparison.proposal.queues)
         .filter(([, queue]) => queue.max > 0)
@@ -113,59 +139,96 @@ export default function App() {
     : 1800;
   const dirty = !comparison;
 
-  const compute = useCallback((snapshot: Workspace, robustness = false) => {
-    worker.current?.terminate();
-    request.current++;
-    setError("");
-    setPlaying(false);
-    if (robustness) setChecking(true);
-    else {
-      setBusy(true);
-      setChecking(false);
-    }
-    try {
-      const current = new Worker(new URL("./core/worker.ts", import.meta.url), {
-        type: "module",
-      });
-      worker.current = current;
-      const id = request.current;
-      current.onmessage = (event) => {
-        if (event.data.id !== request.current) return;
-        if (event.data.error) setError(event.data.error);
-        else if (robustness) {
-          setChecks(event.data.result as SensitivityRow[]);
-          setNotice("9 種條件已完成，結果在下方。");
-        } else {
-          setComparison(event.data.result as Comparison);
-          setTime(80);
-          setNotice("比較完成。右側是完整時段結果，播放可查看旅程過程。");
-        }
+  const compute = useCallback(
+    (snapshot: Workspace, robustness = false, reveal = false) => {
+      worker.current?.terminate();
+      request.current++;
+      setError("");
+      setPlaying(false);
+      if (robustness) setChecking(true);
+      else {
+        setBusy(true);
+        setChecking(false);
+      }
+      try {
+        const current = new Worker(
+          new URL("./core/worker.ts", import.meta.url),
+          {
+            type: "module",
+          },
+        );
+        worker.current = current;
+        const id = request.current;
+        current.onmessage = (event) => {
+          if (event.data.id !== request.current) return;
+          if (event.data.error) setError(event.data.error);
+          else if (robustness) {
+            setChecks(event.data.result as SensitivityRow[]);
+            setNotice("9 種條件已完成，可在「檢查」查看。");
+          } else {
+            setComparison(event.data.result as Comparison);
+            setTime(80);
+            if (reveal) {
+              setNotice("比較完成，點選使用者查看路線。");
+              setResultsOpen(true);
+              if (window.matchMedia("(max-width: 900px)").matches) {
+              const focusWasInPlanner =
+                document.activeElement === document.body ||
+                document.activeElement?.closest(".planner-panel");
+                setPlannerOpen(false);
+                focusResults.current = !!focusWasInPlanner;
+              }
+            }
+          }
+          setBusy(false);
+          setChecking(false);
+          current.terminate();
+          worker.current = null;
+        };
+        current.onerror = () => {
+          if (id !== request.current) return;
+          setError("模擬未完成，請重新比較。原有方案仍保留。");
+          setBusy(false);
+          setChecking(false);
+          current.terminate();
+        };
+        current.postMessage({
+          id,
+          map: { ...MAP, buildings: [], context: [] },
+          edits: snapshot.edits,
+          settings: snapshot.settings,
+          sensitivity: robustness,
+        });
+      } catch {
+        setError("這個瀏覽器無法啟動模擬，請用較新的 Chrome、Safari 或 Edge。");
         setBusy(false);
         setChecking(false);
-        current.terminate();
-        worker.current = null;
-      };
-      current.onerror = () => {
-        if (id !== request.current) return;
-        setError("模擬未完成，請重新比較。原有方案仍保留。");
-        setBusy(false);
-        setChecking(false);
-        current.terminate();
-      };
-      current.postMessage({
-        id,
-        map: { ...MAP, buildings: [], context: [] },
-        edits: snapshot.edits,
-        settings: snapshot.settings,
-        sensitivity: robustness,
-      });
-    } catch {
-      setError("這個瀏覽器無法啟動模擬，請用較新的 Chrome、Safari 或 Edge。");
-      setBusy(false);
-      setChecking(false);
-    }
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 900px)");
+    const adapt = () => {
+      if (mobile.matches) setResultsOpen(false);
+    };
+    mobile.addEventListener("change", adapt);
+    return () => mobile.removeEventListener("change", adapt);
   }, []);
 
+  useLayoutEffect(() => {
+    if (!focusResults.current || !resultsOpen || plannerOpen) return;
+    focusResults.current = false;
+    // Move focus only when the initiating panel has become hidden.
+    if (!document.querySelector('[role="dialog"]')) {
+      workspaceElement.current
+        ?.querySelector<HTMLButtonElement>(
+          ".results-container .floating-panel-toggle",
+        )
+        ?.focus();
+    }
+  }, [resultsOpen, plannerOpen]);
   useEffect(() => {
     compute(currentWorkspace.current);
     return () => worker.current?.terminate();
@@ -269,6 +332,12 @@ export default function App() {
   }
   function chooseEdge(edge: Edge) {
     setSelected(edge.id);
+    if (tool === "inspect") {
+      setPanelTab("plan");
+      setPlannerOpen(true);
+      if (window.matchMedia("(max-width: 900px)").matches)
+        setResultsOpen(false);
+    }
     if (tool === "close")
       addEdit(
         { type: "close", edgeId: edge.id },
@@ -336,8 +405,12 @@ export default function App() {
     else if (kind === "close") {
       const street = MAP.edges
         .filter((e) => e.name === "大三巴街")
-        .sort((a, b) =>
-          (comparison?.baseline.queues[b.id]?.entries ?? 0) - (comparison?.baseline.queues[a.id]?.entries ?? 0) || b.length - a.length)[0];
+        .sort(
+          (a, b) =>
+            (comparison?.baseline.queues[b.id]?.entries ?? 0) -
+              (comparison?.baseline.queues[a.id]?.entries ?? 0) ||
+            b.length - a.length,
+        )[0];
       edit = { type: "close", edgeId: street.id };
     } else
       edit = {
@@ -355,7 +428,7 @@ export default function App() {
     if (next) {
       setSelected(edit.type === "link" ? edit.id : edit.edgeId);
       setProfile("wheelchair");
-      compute(next);
+      compute(next, false, true);
     }
   }
   async function importPlan(file: File | undefined) {
@@ -364,7 +437,8 @@ export default function App() {
       if (file.size > 250_000)
         throw new Error("檔案太大，請選擇匯出的方案 JSON。");
       const next = parseWorkspace(await file.text(), MAP);
-      if (change(next, "方案已匯入，正在重新比較。")) compute(next);
+      if (change(next, "方案已匯入，正在重新比較。"))
+        compute(next, false, true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "無法讀取方案檔案。");
     } finally {
@@ -388,519 +462,689 @@ export default function App() {
     setProfile("all");
   }
 
+  function chooseTool(next: Tool) {
+    setTool(next);
+    setError("");
+    if (next === "link" || next === "ramp") {
+      setPanelTab("plan");
+      setPlannerOpen(true);
+      if (window.matchMedia("(max-width: 900px)").matches)
+        setResultsOpen(false);
+    }
+    if (next === "ramp") {
+      setLinkWidth((w) => Math.max(1.5, w));
+      setLinkSlope((s) => Math.min(5, s));
+    }
+  }
+  function togglePanel(panel: "planner" | "results") {
+    const mobile = window.matchMedia("(max-width: 900px)").matches;
+    if (panel === "planner") {
+      setPlannerOpen((open) => !open);
+      if (mobile) setResultsOpen(false);
+    } else {
+      setResultsOpen((open) => !open);
+      if (mobile) setPlannerOpen(false);
+    }
+  }
+
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <a className="brand" href="#top">
-          <span className="brand-mark">╱</span>Sketch<span>Future</span>
+    <div
+      className="app-shell"
+      data-planner-open={plannerOpen}
+      data-results-open={resultsOpen}
+    >
+      <header className="app-header">
+        <a
+          className="brand"
+          href="#workspace"
+          aria-label="SketchFuture 街道實驗室"
+        >
+          <span className="brand-mark">
+            <Icon name="map" />
+          </span>
+          <span>
+            SketchFuture<small>澳門街道實驗室</small>
+          </span>
         </a>
-        <div className="district-pill">
-          <span className="live-dot" />
-          澳門・議事亭 — 大三巴
-        </div>
-        <div className="topbar-actions">
-          <button onClick={() => openDialog("assumptions")}>資料與假設</button>
+        <div className="header-actions glass">
           <button
-            className="icon-button"
-            aria-label="匯入方案"
-            onClick={() => importInput.current?.click()}
+            onClick={() => togglePanel("results")}
+            aria-pressed={resultsOpen}
           >
-            ↥
+            <Icon name="layers" />
+            <span>比較結果</span>
           </button>
           <button
-            className="save-button"
-            onClick={() =>
-              download(
-                "sketchfuture-plan.json",
-                JSON.stringify(workspace, null, 2),
-              )
-            }
+            onClick={() => openDialog("assumptions")}
+            aria-label="資料與假設"
+            title="資料與假設"
           >
-            匯出方案 ↗
+            <Icon name="info" />
           </button>
         </div>
-        <input
-          ref={importInput}
-          type="file"
-          accept=".json,application/json"
-          hidden
-          aria-label="方案 JSON 檔案"
-          onChange={(e) => void importPlan(e.target.files?.[0])}
-        />
       </header>
-      <main id="top">
-        <section className="intro">
-          <div>
-            <span className="eyebrow">THE CITY IS A WORK IN PROGRESS</span>
-            <h1>
-              畫一筆。<span>看看誰的路變了。</span>
-            </h1>
-            <p>在真實澳門街區提出改動，看看不同使用者的路程、等待與可達性。</p>
-          </div>
-          <div className="intro-note">
-            <span>
-              路網是真實的。
-              <br />
-              改動是你提出的。
-            </span>
-            <small>結果來自模型，通行條件待校準。</small>
-          </div>
-        </section>
-        <div className="workspace-heading">
-          <div className="plan-name">
-            <label htmlFor="plan-title">方案</label>
-            <input
-              id="plan-title"
-              value={workspace.title}
-              maxLength={80}
-              onChange={(e) =>
-                setHistory((h) => ({
-                  ...h,
-                  present: { ...h.present, title: e.target.value },
-                }))
-              }
+      <main
+        ref={workspaceElement}
+        id="workspace"
+        className="map-workspace"
+        aria-label="澳門街道方案工作區"
+      >
+        <div className={`map-grid ${view === "split" ? "split" : ""}`}>
+          {view === "split" ? (
+            <MapCanvas
+              map={MAP}
+              edges={MAP.edges}
+              run={comparison?.baseline}
+              time={time}
+              profile={profile}
+              tool="inspect"
+              editable={false}
+              onEdge={() => {}}
+              onLink={() => {}}
+              title="改動前"
             />
-            <span className="save-status">{saveMessage}</span>
+          ) : null}
+          <MapCanvas
+            map={MAP}
+            edges={edges}
+            run={comparison?.proposal}
+            time={time}
+            profile={profile}
+            tool={tool}
+            editable
+            selected={selectedEdge?.id}
+            onEdge={chooseEdge}
+            onLink={addLink}
+            title="你的方案"
+          />
+        </div>
+        <div className="map-top-controls">
+          <div
+            className="tool-strip glass"
+            role="toolbar"
+            aria-label="街道改動工具"
+          >
+            {TOOLS.map((t) => (
+              <button
+                key={t.id}
+                className={tool === t.id ? "active" : ""}
+                aria-pressed={tool === t.id}
+                onClick={() => chooseTool(t.id)}
+                title={t.hint}
+              >
+                <Icon name={t.icon} />
+                <span>{t.label}</span>
+              </button>
+            ))}
           </div>
-          <div className="history-actions">
+          <div className="view-toggle glass" aria-label="地圖呈現">
             <button
-              onClick={() => undo()}
-              disabled={!history.past.length}
-              aria-label="撤銷上一步"
+              aria-pressed={view === "proposal"}
+              className={view === "proposal" ? "active" : ""}
+              onClick={() => setView("proposal")}
             >
-              ↶ 撤銷
+              方案
             </button>
             <button
-              onClick={() => undo(true)}
-              disabled={!history.future.length}
-              aria-label="重做上一步"
+              aria-pressed={view === "split"}
+              className={view === "split" ? "active" : ""}
+              onClick={() => setView("split")}
             >
-              ↷ 重做
+              並排比較
             </button>
-            <button onClick={() => openDialog("reset")}>重設</button>
           </div>
         </div>
-        {error ? (
-          <div className="alert error" role="alert">
-            <span>{error}</span>
-            {saveBlocked ? (
-              <button onClick={() => openDialog("reset")}>
-                備份並重新開始
+        <p className="tool-hint glass">
+          {TOOLS.find((t) => t.id === tool)!.hint}
+        </p>
+        <FloatingPanel
+          id="planner"
+          className="planner-panel"
+          title="街區方案"
+          subtitle="議事亭 · 板樟堂 · 大三巴"
+          expanded={plannerOpen}
+          onToggle={() => togglePanel("planner")}
+        >
+          <nav className="panel-tabs" aria-label="方案面板">
+            {(
+              [
+                ["plan", "方案"],
+                ["conditions", "條件"],
+                ["checks", "檢查"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                aria-pressed={panelTab === id}
+                className={panelTab === id ? "active" : ""}
+                onClick={() => setPanelTab(id)}
+              >
+                {label}
               </button>
+            ))}
+          </nav>
+          <div className="panel-scroll">
+            {panelTab === "plan" ? (
+              <>
+                <div className="plan-name">
+                  <label htmlFor="plan-title">方案名稱</label>
+                  <input
+                    id="plan-title"
+                    value={workspace.title}
+                    maxLength={80}
+                    onChange={(e) =>
+                      setHistory((h) => ({
+                        ...h,
+                        present: { ...h.present, title: e.target.value },
+                      }))
+                    }
+                  />
+                  <span className="save-status">
+                    <Icon name={saveBlocked ? "info" : "check"} />
+                    {saveMessage}
+                  </span>
+                </div>
+                <div className="plan-actions">
+                  <button
+                    onClick={() => importInput.current?.click()}
+                    aria-label="匯入方案"
+                    title="匯入方案"
+                  >
+                    <Icon name="upload" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      download(
+                        "sketchfuture-plan.json",
+                        JSON.stringify(workspace, null, 2),
+                      )
+                    }
+                    aria-label="匯出方案"
+                    title="匯出方案"
+                  >
+                    <Icon name="download" />
+                  </button>
+                  <span className="action-divider" />
+                  <button
+                    onClick={() => undo()}
+                    disabled={!history.past.length}
+                    aria-label="撤銷上一步"
+                    title="撤銷上一步"
+                  >
+                    <Icon name="undo" />
+                  </button>
+                  <button
+                    onClick={() => undo(true)}
+                    disabled={!history.future.length}
+                    aria-label="重做上一步"
+                    title="重做上一步"
+                  >
+                    <Icon name="redo" />
+                  </button>
+                  <button
+                    className="text-button"
+                    onClick={() => openDialog("reset")}
+                  >
+                    重設
+                  </button>
+                </div>
+                <section className="examples-section" aria-label="範例方案">
+                  <h2>從一個改動開始</h2>
+                  <p>範例會取代目前改動，可撤銷。</p>
+                  <button onClick={() => preset("ramp")}>
+                    <span className="example-icon">
+                      <Icon name="ramp" />
+                    </span>
+                    <span>
+                      <strong>大三巴樓梯改造</strong>
+                      <small>加入無階梯通道</small>
+                    </span>
+                    <Icon name="chevron" />
+                  </button>
+                  <button onClick={() => preset("close")}>
+                    <span className="example-icon closure">
+                      <Icon name="close" />
+                    </span>
+                    <span>
+                      <strong>大三巴街暫封一段</strong>
+                      <small>看看人流怎樣繞行</small>
+                    </span>
+                    <Icon name="chevron" />
+                  </button>
+                  <button onClick={() => preset("link")}>
+                    <span className="example-icon">
+                      <Icon name="link" />
+                    </span>
+                    <span>
+                      <strong>加入構想捷徑</strong>
+                      <small>少繞路，會多排隊嗎？</small>
+                    </span>
+                    <Icon name="chevron" />
+                  </button>
+                </section>
+                <div className="selected-panel">
+                  <div>
+                    <span className="eyebrow">已選通道</span>
+                    <h3>{selectedEdge?.name ?? "選一段通道"}</h3>
+                    <select
+                      className="edge-picker"
+                      aria-label="選擇通道"
+                      value={selectedEdge?.id ?? ""}
+                      onChange={(e) => setSelected(e.target.value)}
+                    >
+                      {edges.map((edge) => (
+                        <option key={edge.id} value={edge.id}>
+                          {edge.name} · {Math.round(edge.length)} m
+                          {edge.kind === "steps" ? " · 樓梯" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedEdge && (tool === "ramp" || tool === "close") ? (
+                      <button
+                        className="apply-tool"
+                        onClick={() => chooseEdge(selectedEdge)}
+                      >
+                        套用目前工具
+                      </button>
+                    ) : null}
+                  </div>
+                  {selectedEdge ? (
+                    <div className="edge-facts">
+                      <span>
+                        <b>{Math.round(selectedEdge.length)}</b> m
+                      </span>
+                      <span>
+                        <b>{selectedEdge.width.toFixed(1)}</b> m 寬
+                      </span>
+                      <span>
+                        {selectedEdge.kind === "steps"
+                          ? "樓梯"
+                          : selectedEdge.slope === null
+                            ? "坡度未記錄，模型按 0%"
+                            : `坡度 ${selectedEdge.slope}%`}
+                      </span>
+                      <span>{selectedEdge.closed ? "已封閉" : "開放"}</span>
+                    </div>
+                  ) : null}
+                </div>
+                {comparison ? (
+                  <div className="bottleneck-list">
+                    <span>排隊最多的通道</span>
+                    {bottlenecks.length ? (
+                      bottlenecks.map(([id, queue]) => (
+                        <button key={id} onClick={() => setSelected(id)}>
+                          {edges.find((e) => e.id === id)?.name ?? "通道"}
+                          <b>最多 {queue.max} 人</b>
+                        </button>
+                      ))
+                    ) : (
+                      <span>這次模擬沒有入口排隊。</span>
+                    )}
+                  </div>
+                ) : null}
+                {tool === "link" || tool === "ramp" ? (
+                  <div className="connection-options">
+                    {tool === "link" ? (
+                      <details className="landmark-link">
+                        <summary>用地標選擇起終點</summary>
+                        <div>
+                          <label>
+                            起點
+                            <select
+                              aria-label="連接起點"
+                              value={landmarkFrom}
+                              onChange={(e) => setLandmarkFrom(e.target.value)}
+                            >
+                              {MAP.places.map((place) => (
+                                <option key={place.id} value={place.node}>
+                                  {place.name}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            終點
+                            <select
+                              aria-label="連接終點"
+                              value={landmarkTo}
+                              onChange={(e) => setLandmarkTo(e.target.value)}
+                            >
+                              {MAP.places.map((place) => (
+                                <option key={place.id} value={place.node}>
+                                  {place.name}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <button
+                            className="secondary-button"
+                            onClick={() => addLink(landmarkFrom, landmarkTo)}
+                          >
+                            新增此連接
+                          </button>
+                        </div>
+                      </details>
+                    ) : null}
+                    <label>
+                      構想寬度{" "}
+                      <select
+                        value={linkWidth}
+                        onChange={(e) => setLinkWidth(Number(e.target.value))}
+                      >
+                        <option value="1" disabled={tool === "ramp"}>
+                          1 m
+                        </option>
+                        <option value="1.5">1.5 m</option>
+                        <option value="2">2 m</option>
+                        <option value="3">3 m</option>
+                      </select>
+                    </label>
+                    <label>
+                      構想坡度{" "}
+                      <select
+                        value={linkSlope}
+                        onChange={(e) => setLinkSlope(Number(e.target.value))}
+                      >
+                        <option value="0">0%</option>
+                        <option value="4">4%</option>
+                        <option value="5">5%</option>
+                        <option value="8" disabled={tool === "ramp"}>
+                          8%
+                        </option>
+                      </select>
+                    </label>
+                    <span>
+                      未校驗建物、地形或施工可行性；坡道寬度至少 1.5 m。
+                    </span>
+                  </div>
+                ) : null}
+
+                <p className="model-caption">
+                  真實 OSM 路網 · 通行條件待校準
+                  <br />
+                  新通道是構想，尚未驗證建物與地形。
+                </p>
+              </>
+            ) : panelTab === "conditions" ? (
+              <section className="assumption-controls">
+                <div>
+                  <span className="eyebrow">相同出發者，相同條件</span>
+                  <h2>比較條件</h2>
+                  <p>改動前後使用完全相同的出發者。調整後請重新比較。</p>
+                </div>
+                <label>
+                  模擬人數 <b>{workspace.settings.people}</b>
+                  <input
+                    aria-label="模擬人數"
+                    type="range"
+                    min="30"
+                    max="300"
+                    step="15"
+                    value={workspace.settings.people}
+                    onChange={(e) => setting("people", Number(e.target.value))}
+                  />
+                </label>
+                <label>
+                  出發時段 <b>{workspace.settings.releaseSeconds} 秒</b>
+                  <input
+                    aria-label="出發時段"
+                    type="range"
+                    min="30"
+                    max="300"
+                    step="30"
+                    value={workspace.settings.releaseSeconds}
+                    onChange={(e) =>
+                      setting("releaseSeconds", Number(e.target.value))
+                    }
+                  />
+                </label>
+                <label>
+                  通道容量{" "}
+                  <b>{workspace.settings.capacityFactor.toFixed(1)}×</b>
+                  <input
+                    aria-label="通道容量"
+                    type="range"
+                    min="0.3"
+                    max="2"
+                    step="0.1"
+                    value={workspace.settings.capacityFactor}
+                    onChange={(e) =>
+                      setting("capacityFactor", Number(e.target.value))
+                    }
+                  />
+                </label>
+                <details>
+                  <summary>重複與重現設定</summary>
+                  <div className="advanced-settings">
+                    <label>
+                      起始種子{" "}
+                      <input
+                        type="number"
+                        min="0"
+                        max="2147483647"
+                        value={workspace.settings.seed}
+                        onChange={(e) =>
+                          setting("seed", Number(e.target.value))
+                        }
+                      />
+                    </label>
+                    <label>
+                      重複次數{" "}
+                      <select
+                        value={workspace.settings.repeats}
+                        onChange={(e) =>
+                          setting("repeats", Number(e.target.value))
+                        }
+                      >
+                        {[1, 3, 5, 10].map((n) => (
+                          <option key={n} value={n}>
+                            {n} 次
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      速度{" "}
+                      <select
+                        value={workspace.settings.speedFactor}
+                        onChange={(e) =>
+                          setting("speedFactor", Number(e.target.value))
+                        }
+                      >
+                        <option value="0.85">0.85×</option>
+                        <option value="1">1×</option>
+                        <option value="1.15">1.15×</option>
+                      </select>
+                    </label>
+                  </div>
+                </details>
+              </section>
             ) : (
-              <button aria-label="關閉錯誤提示" onClick={() => setError("")}>
-                ×
-              </button>
+              <div className="checks-content">
+                <Sensitivity
+                  rows={checks}
+                  busy={checking || busy}
+                  onRun={() => compute(workspace, true)}
+                />
+                <section className="export-section">
+                  <div>
+                    <h2>把你的方案和依據帶走。</h2>
+                    <p>方案 JSON 可重新匯入；報告保留資料來源、參數和結果。</p>
+                  </div>
+                  <div>
+                    <button
+                      className="secondary-button"
+                      disabled={!comparison}
+                      onClick={() =>
+                        comparison &&
+                        download(
+                          "sketchfuture-report.json",
+                          reportJSON(MAP, workspace, comparison, checks),
+                        )
+                      }
+                    >
+                      匯出完整報告
+                    </button>
+                    <button
+                      className="secondary-button"
+                      disabled={!comparison}
+                      onClick={() =>
+                        comparison &&
+                        download(
+                          "sketchfuture-metrics.csv",
+                          reportCSV(comparison),
+                          "text/csv",
+                        )
+                      }
+                    >
+                      匯出結果 CSV
+                    </button>
+                  </div>
+                </section>
+              </div>
             )}
           </div>
-        ) : null}
-        {notice ? (
-          <div className="alert notice" role="status">
-            <span>{notice}</span>
-            <button aria-label="關閉提示" onClick={() => setNotice("")}>
-              ×
+          <div className="panel-bottom">
+            <span className="comparison-status">
+              {workspace.edits.length} 項改動 ·{" "}
+              {dirty ? "等待比較" : "已完成比較"}
+            </span>
+            <button
+              className="primary-button compare-button"
+              onClick={() => compute(workspace, false, true)}
+              disabled={busy || checking}
+            >
+              <Icon name={busy ? "layers" : "play"} />
+              {busy ? "正在比較…" : dirty ? "比較方案" : "重新比較"}
             </button>
           </div>
-        ) : null}
-        <div className="workspace-grid">
-          <div className="drawing-desk">
-            <div className="tool-strip">
-              <div className="tools">
-                {TOOLS.map((t) => (
-                  <button
-                    key={t.id}
-                    className={tool === t.id ? "active" : ""}
-                    aria-pressed={tool === t.id}
-                    onClick={() => {
-                      setTool(t.id);
-                      if (t.id === "ramp") {
-                        setLinkWidth((w) => Math.max(1.5, w));
-                        setLinkSlope((s) => Math.min(5, s));
-                      }
-                      setError("");
-                    }}
-                    title={t.hint}
-                  >
-                    <span>{t.symbol}</span>
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-              <button
-                className="primary-button compare-button"
-                onClick={() => compute(workspace)}
-                disabled={busy || checking}
-              >
-                {busy ? "正在比較…" : dirty ? "比較方案 ↗" : "重新比較 ↗"}
-              </button>
-            </div>
-            <div className="desk-instructions">
-              <span>{TOOLS.find((t) => t.id === tool)!.hint}</span>
-              <div className="view-toggle" aria-label="地圖呈現">
-                <button
-                  aria-pressed={view === "proposal"}
-                  className={view === "proposal" ? "active" : ""}
-                  onClick={() => setView("proposal")}
-                >
-                  方案
-                </button>
-                <button
-                  aria-pressed={view === "split"}
-                  className={view === "split" ? "active" : ""}
-                  onClick={() => setView("split")}
-                >
-                  並排比較
-                </button>
-              </div>
-            </div>
-            <div className={`map-grid ${view === "split" ? "split" : ""}`}>
-              {view === "split" ? (
-                <MapCanvas
-                  map={MAP}
-                  edges={MAP.edges}
-                  run={comparison?.baseline}
-                  time={time}
-                  profile={profile}
-                  tool="inspect"
-                  editable={false}
-                  onEdge={() => {}}
-                  onLink={() => {}}
-                  title="改動前"
-                />
-              ) : null}
-              <MapCanvas
-                map={MAP}
-                edges={edges}
-                run={comparison?.proposal}
-                time={time}
-                profile={profile}
-                tool={tool}
-                editable
-                selected={selected}
-                onEdge={chooseEdge}
-                onLink={addLink}
-                title="你的方案"
-              />
-            </div>
-            <div className="playback-bar">
-              <button
-                className="play-button"
-                aria-label={playing ? "暫停模擬播放" : "播放模擬"}
-                disabled={!comparison || busy}
-                onClick={() => {
-                  if (time >= duration) setTime(0);
-                  setPlaying((p) => !p);
-                }}
-              >
-                {playing ? "Ⅱ" : "▶"}
-              </button>
-              <span className="timecode">{clock(time)}</span>
-              <input
-                aria-label="模擬時間"
-                type="range"
-                min="0"
-                max={duration}
-                step="1"
-                value={time}
-                disabled={!comparison}
-                onChange={(e) => {
-                  setTime(Number(e.target.value));
-                  setPlaying(false);
-                }}
-              />
-              <span className="timecode">{clock(duration)}</span>
-              <select
-                aria-label="播放速度"
-                value={playSpeed}
-                onChange={(e) => setPlaySpeed(Number(e.target.value))}
-              >
-                <option value="1">1×</option>
-                <option value="10">10×</option>
-                <option value="30">30×</option>
-              </select>
-            </div>
-            <div className="map-legend">
-              <div>
-                {PROFILES.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setProfile(profile === p.id ? "all" : p.id)}
-                    aria-pressed={profile === p.id}
-                  >
-                    <span
-                      className={`profile-symbol ${p.id}`}
-                      style={{ background: p.color }}
-                    />
-                    {p.short}
-                  </button>
-                ))}
-              </div>
-              <span>
-                <i className="proposal-line" />
-                構想通道
-              </span>
-              <span>
-                <i className="closed-line" />
-                暫封路
-              </span>
-            </div>
-            <div className="selected-panel">
-              <div>
-                <span className="eyebrow">SELECTED CONNECTION</span>
-                <h3>{selectedEdge?.name ?? "選一段通道"}</h3>
-                <select
-                  className="edge-picker"
-                  aria-label="選擇通道"
-                  value={selectedEdge?.id ?? ""}
-                  onChange={(e) => setSelected(e.target.value)}
-                >
-                  {edges.map((edge) => (
-                    <option key={edge.id} value={edge.id}>
-                      {edge.name} · {Math.round(edge.length)} m
-                      {edge.kind === "steps" ? " · 樓梯" : ""}
-                    </option>
-                  ))}
-                </select>
-                {selectedEdge && (tool === "ramp" || tool === "close") ? (
-                  <button
-                    className="apply-tool"
-                    onClick={() => chooseEdge(selectedEdge)}
-                  >
-                    套用目前工具
-                  </button>
-                ) : null}
-              </div>
-              {selectedEdge ? (
-                <div className="edge-facts">
-                  <span>
-                    <b>{Math.round(selectedEdge.length)}</b> m
-                  </span>
-                  <span>
-                    <b>{selectedEdge.width.toFixed(1)}</b> m 寬
-                  </span>
-                  <span>
-                    {selectedEdge.kind === "steps"
-                      ? "樓梯"
-                      : selectedEdge.slope === null
-                        ? "坡度未記錄，模型按 0%"
-                        : `坡度 ${selectedEdge.slope}%`}
-                  </span>
-                  <span>{selectedEdge.closed ? "已封閉" : "開放"}</span>
-                </div>
-              ) : null}
-            </div>
-            {comparison ? (
-              <div className="bottleneck-list">
-                <span>排隊最多的通道</span>
-                {bottlenecks.length ? (
-                  bottlenecks.map(([id, queue]) => (
-                    <button key={id} onClick={() => setSelected(id)}>
-                      {edges.find((e) => e.id === id)?.name ?? "通道"}
-                      <b>最多 {queue.max} 人</b>
-                    </button>
-                  ))
-                ) : (
-                  <span>這次模擬沒有入口排隊。</span>
-                )}
-              </div>
-            ) : null}
-            {tool === "link" || tool === "ramp" ? (
-              <div className="connection-options">
-                {tool === 'link' ? <details className="landmark-link"><summary>用地標選擇起終點</summary><div><label>起點<select aria-label="連接起點" value={landmarkFrom} onChange={e => setLandmarkFrom(e.target.value)}>{MAP.places.map(place => <option key={place.id} value={place.node}>{place.name}</option>)}</select></label><label>終點<select aria-label="連接終點" value={landmarkTo} onChange={e => setLandmarkTo(e.target.value)}>{MAP.places.map(place => <option key={place.id} value={place.node}>{place.name}</option>)}</select></label><button className="secondary-button" onClick={() => addLink(landmarkFrom, landmarkTo)}>新增此連接</button></div></details> : null}
-                <label>
-                  構想寬度{" "}
-                  <select
-                    value={linkWidth}
-                    onChange={(e) => setLinkWidth(Number(e.target.value))}
-                  >
-                    <option value="1" disabled={tool === "ramp"}>
-                      1 m
-                    </option>
-                    <option value="1.5">1.5 m</option>
-                    <option value="2">2 m</option>
-                    <option value="3">3 m</option>
-                  </select>
-                </label>
-                <label>
-                  構想坡度{" "}
-                  <select
-                    value={linkSlope}
-                    onChange={(e) => setLinkSlope(Number(e.target.value))}
-                  >
-                    <option value="0">0%</option>
-                    <option value="4">4%</option>
-                    <option value="5">5%</option>
-                    <option value="8" disabled={tool === "ramp"}>
-                      8%
-                    </option>
-                  </select>
-                </label>
-                <span>未校驗建物、地形或施工可行性；坡道寬度至少 1.5 m。</span>
-              </div>
-            ) : null}
-          </div>
+        </FloatingPanel>
+        <FloatingPanel
+          id="results"
+          className="results-container"
+          title="旅程比較"
+          subtitle="同一批人，改動前與改動後"
+          expanded={resultsOpen}
+          onToggle={() => togglePanel("results")}
+        >
           <Results
             comparison={comparison}
             selected={profile}
             onSelect={setProfile}
             busy={busy}
           />
-        </div>
-        <section className="examples-section">
-          <div>
-            <span className="eyebrow">START WITH A QUESTION</span>
-            <h2>先試一個取捨。</h2>
-            <p>範例會取代目前改動，可撤銷。</p>
-          </div>
-          <button onClick={() => preset("ramp")}>
-            <span>↗</span>
-            <strong>大三巴樓梯改造</strong>
-            <small>無階梯通道會幫助誰？</small>
-          </button>
-          <button onClick={() => preset("close")}>
-            <span>⊘</span>
-            <strong>大三巴街暫封一段</strong>
-            <small>人流會改走哪條路？</small>
-          </button>
-          <button onClick={() => preset("link")}>
-            <span>╱</span>
-            <strong>加入構想捷徑</strong>
-            <small>少繞路，會多排隊嗎？</small>
-          </button>
-        </section>
-        <section className="assumption-controls">
-          <div>
-            <span className="eyebrow">SAME PEOPLE, SAME CONDITIONS</span>
-            <h2>比較條件</h2>
-            <p>改動前後使用完全相同的出發者。調整後請重新比較。</p>
-          </div>
-          <label>
-            模擬人數 <b>{workspace.settings.people}</b>
-            <input
-              type="range"
-              min="30"
-              max="300"
-              step="15"
-              value={workspace.settings.people}
-              onChange={(e) => setting("people", Number(e.target.value))}
-            />
-          </label>
-          <label>
-            出發時段 <b>{workspace.settings.releaseSeconds} 秒</b>
-            <input
-              type="range"
-              min="30"
-              max="300"
-              step="30"
-              value={workspace.settings.releaseSeconds}
-              onChange={(e) =>
-                setting("releaseSeconds", Number(e.target.value))
-              }
-            />
-          </label>
-          <label>
-            通道容量 <b>{workspace.settings.capacityFactor.toFixed(1)}×</b>
-            <input
-              type="range"
-              min="0.3"
-              max="2"
-              step="0.1"
-              value={workspace.settings.capacityFactor}
-              onChange={(e) =>
-                setting("capacityFactor", Number(e.target.value))
-              }
-            />
-          </label>
-          <details>
-            <summary>重複與重現設定</summary>
-            <div className="advanced-settings">
-              <label>
-                起始種子{" "}
-                <input
-                  type="number"
-                  min="0"
-                  max="2147483647"
-                  value={workspace.settings.seed}
-                  onChange={(e) => setting("seed", Number(e.target.value))}
+        </FloatingPanel>
+        <div className="map-bottom-controls">
+          <div className="profile-filter glass" aria-label="顯示使用者">
+            <button
+              className={profile === "all" ? "active" : ""}
+              aria-pressed={profile === "all"}
+              onClick={() => setProfile("all")}
+            >
+              全部
+            </button>
+            {PROFILES.map((p) => (
+              <button
+                key={p.id}
+                className={profile === p.id ? "active" : ""}
+                onClick={() => setProfile(profile === p.id ? "all" : p.id)}
+                aria-pressed={profile === p.id}
+              >
+                <span
+                  className={`profile-symbol ${p.id}`}
+                  style={{ background: p.color }}
                 />
-              </label>
-              <label>
-                重複次數{" "}
-                <select
-                  value={workspace.settings.repeats}
-                  onChange={(e) => setting("repeats", Number(e.target.value))}
-                >
-                  {[1, 3, 5, 10].map((n) => (
-                    <option key={n} value={n}>
-                      {n} 次
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                速度{" "}
-                <select
-                  value={workspace.settings.speedFactor}
-                  onChange={(e) =>
-                    setting("speedFactor", Number(e.target.value))
-                  }
-                >
-                  <option value="0.85">0.85×</option>
-                  <option value="1">1×</option>
-                  <option value="1.15">1.15×</option>
-                </select>
-              </label>
+                {p.short}
+              </button>
+            ))}
+          </div>
+          <div className="playback-bar glass">
+            <button
+              className="play-button"
+              aria-label={playing ? "暫停模擬播放" : "播放模擬"}
+              disabled={!comparison || busy}
+              onClick={() => {
+                if (time >= duration) setTime(0);
+                setPlaying((p) => !p);
+              }}
+            >
+              <Icon name={playing ? "pause" : "play"} />
+            </button>
+            <span className="timecode">{clock(time)}</span>
+            <input
+              aria-label="模擬時間"
+              type="range"
+              min="0"
+              max={duration}
+              step="1"
+              value={time}
+              disabled={!comparison}
+              onChange={(e) => {
+                setTime(Number(e.target.value));
+                setPlaying(false);
+              }}
+            />
+            <span className="timecode">{clock(duration)}</span>
+            <select
+              aria-label="播放速度"
+              value={playSpeed}
+              onChange={(e) => setPlaySpeed(Number(e.target.value))}
+            >
+              <option value="1">1×</option>
+              <option value="10">10×</option>
+              <option value="30">30×</option>
+            </select>
+          </div>
+          <div className="map-legend">
+            <span>
+              <i className="proposal-line" />
+              構想通道
+            </span>
+            <span>
+              <i className="closed-line" />
+              暫封路
+            </span>
+            <span>
+              <i className="steps-line" />
+              樓梯
+            </span>
+          </div>
+        </div>
+        <div className="notification-stack">
+          {error ? (
+            <div className="alert error" role="alert">
+              <Icon name="info" />
+              <span>{error}</span>
+              {saveBlocked ? (
+                <button onClick={() => openDialog("reset")}>
+                  備份並重新開始
+                </button>
+              ) : (
+                <button aria-label="關閉錯誤提示" onClick={() => setError("")}>
+                  <Icon name="x" />
+                </button>
+              )}
             </div>
-          </details>
-        </section>
-        <Sensitivity
-          rows={checks}
-          busy={checking || busy}
-          onRun={() => compute(workspace, true)}
-        />
-        <section className="export-section">
-          <div>
-            <h2>把你的方案和依據帶走。</h2>
-            <p>方案 JSON 可重新匯入；報告保留資料來源、參數和結果。</p>
-          </div>
-          <div>
-            <button
-              className="secondary-button"
-              disabled={!comparison}
-              onClick={() =>
-                comparison &&
-                download(
-                  "sketchfuture-report.json",
-                  reportJSON(MAP, workspace, comparison, checks),
-                )
-              }
-            >
-              匯出完整報告
-            </button>
-            <button
-              className="secondary-button"
-              disabled={!comparison}
-              onClick={() =>
-                comparison &&
-                download(
-                  "sketchfuture-metrics.csv",
-                  reportCSV(comparison),
-                  "text/csv",
-                )
-              }
-            >
-              匯出結果 CSV
-            </button>
-          </div>
-        </section>
-        <footer className="app-footer">
-          <span>SketchFuture · 澳門街道實驗室</span>
-          <span>OSM 資料快照：{MAP.timestamp} · 模型結果待現場校準</span>
-          <button onClick={() => openDialog("assumptions")}>
-            查看資料與模型範圍 ↗
-          </button>
-        </footer>
+          ) : null}
+          {notice ? (
+            <div className="alert notice" role="status">
+              <Icon name="check" />
+              <span>{notice}</span>
+              <button aria-label="關閉提示" onClick={() => setNotice("")}>
+                <Icon name="x" />
+              </button>
+            </div>
+          ) : null}
+        </div>
       </main>
+      <input
+        ref={importInput}
+        type="file"
+        accept=".json,application/json"
+        hidden
+        aria-label="方案 JSON 檔案"
+        onChange={(e) => void importPlan(e.target.files?.[0])}
+      />
       {dialog ? (
         <div
           className="modal-backdrop"

@@ -26,15 +26,11 @@ export default function Results({
   return (
     <aside className="results-panel">
       <div className="panel-heading">
-        <span className="eyebrow">WHO DOES IT HELP?</span>
-        <h2>
-          同一個改動，
-          <br />
-          不同的旅程。
-        </h2>
+        <span className="eyebrow">改動前 → 你的方案</span>
+        <h2 className="sr-only">比較結果</h2>
       </div>
       <p className="panel-description">
-        點選一類使用者，在地圖看路線。下方是整段模擬結果，改動前後使用相同出發者。
+        點選使用者，查看地圖路線。兩邊使用同一批出發者。
       </p>
       {PROFILES.map((profile) => {
         const b = comparison?.baseline.profiles[profile.id],
@@ -44,20 +40,26 @@ export default function Results({
         const band = comparison?.ranges[profile.id].delta;
         const changedReach = !!a && !!b && a.arrived !== b.arrived;
         return (
-          <button
+          <article
             key={profile.id}
             className={`profile-result ${selected === profile.id ? "selected" : ""}`}
             style={{ "--profile-color": profile.color } as React.CSSProperties}
-            onClick={() =>
-              onSelect(selected === profile.id ? "all" : profile.id)
-            }
-            aria-pressed={selected === profile.id}
           >
-            <div className="profile-heading">
-              <span className={`profile-symbol ${profile.id}`} />
-              <strong>{profile.name}</strong>
-              <span>↗</span>
-            </div>
+            <button
+              className="profile-select"
+              onClick={() =>
+                onSelect(selected === profile.id ? "all" : profile.id)
+              }
+              aria-pressed={selected === profile.id}
+            >
+              <span className="profile-heading">
+                <span className={`profile-symbol ${profile.id}`} />
+                <strong>{profile.name}</strong>
+                <span className="profile-selection" aria-hidden="true">
+                  {selected === profile.id ? "✓" : "›"}
+                </span>
+              </span>
+            </button>
             {busy ? (
               <div className="result-loading">正在比較相同出發條件…</div>
             ) : a && b ? (
@@ -88,18 +90,6 @@ export default function Results({
                     {a.arrived}/{a.people}
                   </b>
                 </div>
-                <div className="small-metrics">
-                  <span>
-                    平均等待 {minutes(b.meanWait)} → {minutes(a.meanWait)}
-                  </span>
-                  <span>
-                    路程{" "}
-                    {b.meanDistance === null ? "—" : Math.round(b.meanDistance)}{" "}
-                    →{" "}
-                    {a.meanDistance === null ? "—" : Math.round(a.meanDistance)}{" "}
-                    m
-                  </span>
-                </div>
                 {a.unreachable || a.unfinished ? (
                   <p className="result-note">
                     模型中：{a.unreachable} 人無可用路線，{a.unfinished}{" "}
@@ -113,22 +103,46 @@ export default function Results({
                 ) : null}
                 {paired ? (
                   <div className="paired-note">
-                    兩邊都到達的同一批 {paired.count} 人：{changeText(delta)}
+                    同一批到達者 {paired.count} 人 · {changeText(delta)}
                   </div>
                 ) : null}
                 {band ? (
                   <div className="range-note">
-                    {comparison!.repeats} 次配對差值：{signedMinutes(band[0])}{" "}
-                    至 {signedMinutes(band[1])} 分
+                    {comparison!.repeats} 次配對差值 {signedMinutes(band[0])} 至{" "}
+                    {signedMinutes(band[1])} 分
                   </div>
                 ) : null}
+                <details className="profile-details">
+                  <summary>等待與路程</summary>
+                  <div className="small-metrics">
+                    <span>
+                      平均等待{" "}
+                      <b>
+                        {minutes(b.meanWait)} → {minutes(a.meanWait)}
+                      </b>
+                    </span>
+                    <span>
+                      平均路程{" "}
+                      <b>
+                        {b.meanDistance === null
+                          ? "—"
+                          : Math.round(b.meanDistance)}{" "}
+                        →{" "}
+                        {a.meanDistance === null
+                          ? "—"
+                          : Math.round(a.meanDistance)}{" "}
+                        m
+                      </b>
+                    </span>
+                  </div>
+                </details>
               </>
             ) : (
               <div className="result-empty">
                 執行比較後，查看路程、等待與可達率。
               </div>
             )}
-          </button>
+          </article>
         );
       })}
       <div className="results-footnote">
@@ -151,8 +165,8 @@ export function Sensitivity({
     <section className="sensitivity-section">
       <div className="section-title">
         <div>
-          <span className="eyebrow">CHANGE THE ASSUMPTIONS</span>
-          <h2>人更多、走得更慢，結論還成立嗎？</h2>
+          <span className="eyebrow">人流與步行速度</span>
+          <h2>檢查不同條件</h2>
         </div>
         <button className="secondary-button" onClick={onRun} disabled={busy}>
           {busy ? "正在檢查…" : "檢查 9 種條件 ↗"}
@@ -205,7 +219,7 @@ export function Sensitivity({
         </div>
       ) : (
         <div className="sensitivity-empty">
-          <span>↔</span>不要只看一個漂亮的結果。改變條件，看看取捨。
+          改變人流與速度，檢查方案的取捨是否仍然成立。
         </div>
       )}
     </section>

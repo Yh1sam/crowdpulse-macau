@@ -8,6 +8,7 @@ import {
   type PointerEvent,
 } from "react";
 import type { Edge, MapData, Point, ProfileId, Run } from "../core/types";
+import Icon from "./Icon";
 import { PROFILES } from "../core/model";
 import { personPosition } from "../core/playback";
 
@@ -22,7 +23,7 @@ const BaseMap = memo(function BaseMap({ map }: { map: MapData }) {
         y={-100}
         width={map.width + 200}
         height={map.height + 200}
-        fill="#edf0f7"
+        fill="#eef0e9"
       />
       {map.context
         .filter((c) => c.kind === "square" || c.kind === "park")
@@ -30,8 +31,8 @@ const BaseMap = memo(function BaseMap({ map }: { map: MapData }) {
           <path
             key={`area-${i}`}
             d={`${path(c.points)}Z`}
-            fill={c.kind === "park" ? "#d3e1d4" : "#e5dccc"}
-            stroke="#d8d0c6"
+            fill={c.kind === "park" ? "#d5e6bd" : "#e7e5d5"}
+            stroke="#d6d9c7"
             strokeWidth="0.6"
           />
         ))}
@@ -39,8 +40,8 @@ const BaseMap = memo(function BaseMap({ map }: { map: MapData }) {
         <path
           key={i}
           d={`${path(building.points)}Z`}
-          fill="#dbe1ed"
-          stroke="#c4cedf"
+          fill="#e0e2d9"
+          stroke="#ced2c8"
           strokeWidth="0.45"
         />
       ))}
@@ -51,7 +52,7 @@ const BaseMap = memo(function BaseMap({ map }: { map: MapData }) {
             key={`road-${i}`}
             d={path(c.points)}
             fill="none"
-            stroke="#f9fbff"
+            stroke="#ffffff"
             strokeWidth={["secondary", "primary"].includes(c.kind) ? 8 : 4}
             strokeLinecap="round"
           />
@@ -92,7 +93,12 @@ export default function MapCanvas({
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [from, setFrom] = useState<string | null>(null);
   const [ghost, setGhost] = useState<Point | null>(null);
-  const gesture = useRef<{ x: number; y: number; offset: Point } | null>(null);
+  const gesture = useRef<{
+    x: number;
+    y: number;
+    offset: Point;
+    scale: number;
+  } | null>(null);
   const linkDrag = useRef<string | null>(null);
   const skipClick = useRef(false);
   useEffect(() => {
@@ -164,11 +170,15 @@ export default function MapCanvas({
             : best,
         anchors[0],
       );
-      const start = nearest?.id === linkDrag.current && from && from !== linkDrag.current ? from : linkDrag.current;
+      const start =
+        nearest?.id === linkDrag.current && from && from !== linkDrag.current
+          ? from
+          : linkDrag.current;
       const matrix = svg.current?.getScreenCTM();
       const scale = matrix ? Math.hypot(matrix.a, matrix.b) : 1;
       if (
-        nearest && nearest.id !== start &&
+        nearest &&
+        nearest.id !== start &&
         Math.hypot(nearest.x - point.x, nearest.y - point.y) < 28 / scale
       ) {
         onLink(start, nearest.id);
@@ -201,13 +211,13 @@ export default function MapCanvas({
           aria-label={`${title}放大地圖`}
           onClick={() => setZoom((z) => Math.min(3, z + 0.35))}
         >
-          ＋
+          <Icon name="plus" />
         </button>
         <button
           aria-label={`${title}縮小地圖`}
           onClick={() => setZoom((z) => Math.max(1, z - 0.35))}
         >
-          −
+          <Icon name="minus" />
         </button>
         <button
           aria-label={`${title}重設視野`}
@@ -216,7 +226,7 @@ export default function MapCanvas({
             setOffset({ x: 0, y: 0 });
           }}
         >
-          ⌖
+          <Icon name="locate" />
         </button>
       </div>
       <svg
@@ -228,29 +238,33 @@ export default function MapCanvas({
         onPointerDown={(event) => {
           if (tool === "inspect" && zoom > 1) {
             if ((event.target as Element).closest('g[role="button"]')) return;
-            gesture.current = { x: event.clientX, y: event.clientY, offset };
+            const matrix = svg.current?.getScreenCTM();
+            gesture.current = {
+              x: event.clientX,
+              y: event.clientY,
+              offset,
+              scale: matrix ? Math.hypot(matrix.a, matrix.b) : 1,
+            };
             event.currentTarget.setPointerCapture(event.pointerId);
           }
         }}
         onPointerMove={(event) => {
           if (from) setGhost(local(event));
           if (gesture.current) {
-            const rect = event.currentTarget.getBoundingClientRect(),
-              g = gesture.current;
+            const g = gesture.current;
             setOffset({
               x: Math.max(
                 -30,
                 Math.min(
                   map.width - viewWidth + 30,
-                  g.offset.x - ((event.clientX - g.x) * viewWidth) / rect.width,
+                  g.offset.x - (event.clientX - g.x) / g.scale,
                 ),
               ),
               y: Math.max(
                 -30,
                 Math.min(
                   map.height - viewHeight + 30,
-                  g.offset.y -
-                    ((event.clientY - g.y) * viewHeight) / rect.height,
+                  g.offset.y - (event.clientY - g.y) / g.scale,
                 ),
               ),
             });
@@ -268,12 +282,12 @@ export default function MapCanvas({
         <g>
           {edges.map((edge) => {
             const color = edge.closed
-              ? "#bf4650"
+              ? "#e45a51"
               : edge.proposed
-                ? "#2458d3"
+                ? "#007aff"
                 : edge.kind === "steps"
-                  ? "#bd8d5b"
-                  : "#b7c2d3";
+                  ? "#b68d5b"
+                  : "#a9b6b0";
             const active = selected === edge.id || highlighted.has(edge.id);
             return (
               <g
@@ -301,7 +315,7 @@ export default function MapCanvas({
                 <path
                   d={path(edge.points)}
                   fill="none"
-                  stroke={edge.closed ? "#bf4650" : active ? "#2458d3" : color}
+                  stroke={edge.closed ? "#e45a51" : active ? "#007aff" : color}
                   strokeWidth={active ? 3.6 : edge.proposed ? 3 : 1.5}
                   strokeDasharray={
                     edge.closed ? "4 3" : edge.proposed ? "6 3" : undefined
@@ -381,10 +395,11 @@ export default function MapCanvas({
         {map.places.map((place) => (
           <g
             key={place.id}
+            data-place={place.id}
             transform={`translate(${place.x},${place.y})`}
             pointerEvents="none"
           >
-            <circle r="5.5" fill="white" stroke="#26385c" strokeWidth="1.2" />
+            <circle r="5.5" fill="white" stroke="#526556" strokeWidth="1.2" />
             <text
               x={place.id === "museum" ? -9 : 9}
               y="-9"
@@ -426,8 +441,8 @@ export default function MapCanvas({
                   cx={node.x}
                   cy={node.y}
                   r={from === node.id ? 5 : 3.2}
-                  fill={from === node.id ? "#2458d3" : "white"}
-                  stroke="#2458d3"
+                  fill={from === node.id ? "#007aff" : "white"}
+                  stroke="#007aff"
                   strokeWidth="1.1"
                 />
               </g>
@@ -440,18 +455,18 @@ export default function MapCanvas({
         >
           <path
             d={`M0,-4V0H${zoom >= 2 ? 50 : 100}V-4`}
-            stroke="#50607e"
+            stroke="#5c685b"
             strokeWidth="1.2"
             fill="none"
           />
-          <text x="0" y="13" fontSize="10" fill="#50607e">
+          <text x="0" y="13" fontSize="10" fill="#5c685b">
             {zoom >= 2 ? 50 : 100} m
           </text>
         </g>
         {from && ghost ? (
           <path
             d={`M${nodeIndex.get(from)!.x},${nodeIndex.get(from)!.y}L${ghost.x},${ghost.y}`}
-            stroke="#2458d3"
+            stroke="#007aff"
             strokeWidth="2.5"
             strokeDasharray="5 3"
             pointerEvents="none"
