@@ -1,0 +1,31 @@
+{
+  "checkedOn": "2026-10-08",
+  "unitTestsPassed": 19,
+  "benchmarkCases": 12,
+  "mapRebuild": "JSON equivalent",
+  "browserMethod": "actual UI via cua_repl; final pass on production preview",
+  "responsive": {
+    "iframeCssWidth": 390,
+    "documentScrollWidth": 390,
+    "physicalPhoneTest": false
+  },
+  "checks": [
+    "drag link",
+    "keyboard link",
+    "two-click link",
+    "configured ramp width",
+    "closure",
+    "undo and redo",
+    "reload persistence",
+    "plan export/reset/import",
+    "reject wrong-map import",
+    "playback start/pause",
+    "nine sensitivity rows",
+    "JSON and CSV export"
+  ],
+  "limits": [
+    "not a measured pedestrian model",
+    "no street accessibility audit",
+    "no construction validation"
+  ]
+}

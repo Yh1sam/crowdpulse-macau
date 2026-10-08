@@ -1,0 +1,1699 @@
+{
+  "generatedAt": "2026-10-08T08:08:58.129Z",
+  "mapVersion": "macau-osm-2026-10-08-v1",
+  "assumptions": "Model verification only; no measured Macau pedestrian demand or accessibility survey.",
+  "measurements": [
+    {
+      "people": 30,
+      "name": "unchanged",
+      "milliseconds": 89,
+      "profiles": {
+        "walk": {
+          "people": 10,
+          "arrived": 10,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 434.9339755041459,
+          "medianTime": 428.6037179227718,
+          "meanWait": 0.14530214273645042,
+          "meanDistance": 549.6821
+        },
+        "wheelchair": {
+          "people": 10,
+          "arrived": 3,
+          "unreachable": 7,
+          "unfinished": 0,
+          "meanTime": 386.3036940304549,
+          "medianTime": 388.7123810587671,
+          "meanWait": 0,
+          "meanDistance": 341.724
+        },
+        "stroller": {
+          "people": 10,
+          "arrived": 7,
+          "unreachable": 3,
+          "unfinished": 0,
+          "meanTime": 410.52118361339643,
+          "medianTime": 409.91755006854004,
+          "meanWait": 0.049712601547854875,
+          "meanDistance": 421.524
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 10,
+          "before": 434.9339755041459,
+          "after": 434.9339755041459,
+          "delta": 0
+        },
+        "wheelchair": {
+          "count": 3,
+          "before": 386.3036940304549,
+          "after": 386.3036940304549,
+          "delta": 0
+        },
+        "stroller": {
+          "count": 7,
+          "before": 410.52118361339643,
+          "after": 410.52118361339643,
+          "delta": 0
+        }
+      }
+    },
+    {
+      "people": 30,
+      "name": "ramp",
+      "milliseconds": 100,
+      "profiles": {
+        "walk": {
+          "people": 10,
+          "arrived": 10,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 436.67632996218344,
+          "medianTime": 431.4352565360664,
+          "meanWait": 0.19467439616306165,
+          "meanDistance": 565.8089000000001
+        },
+        "wheelchair": {
+          "people": 10,
+          "arrived": 3,
+          "unreachable": 7,
+          "unfinished": 0,
+          "meanTime": 386.3036940304549,
+          "medianTime": 388.7123810587671,
+          "meanWait": 0,
+          "meanDistance": 341.724
+        },
+        "stroller": {
+          "people": 10,
+          "arrived": 7,
+          "unreachable": 3,
+          "unfinished": 0,
+          "meanTime": 410.52118361339643,
+          "medianTime": 409.91755006854004,
+          "meanWait": 0.049712601547854875,
+          "meanDistance": 421.524
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 10,
+          "before": 434.9339755041459,
+          "after": 436.67632996218344,
+          "delta": 1.742354458037579
+        },
+        "wheelchair": {
+          "count": 3,
+          "before": 386.3036940304549,
+          "after": 386.3036940304549,
+          "delta": 0
+        },
+        "stroller": {
+          "count": 7,
+          "before": 410.52118361339643,
+          "after": 410.52118361339643,
+          "delta": 0
+        }
+      }
+    },
+    {
+      "people": 30,
+      "name": "shortcut",
+      "milliseconds": 96,
+      "profiles": {
+        "walk": {
+          "people": 10,
+          "arrived": 10,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 428.87244030752146,
+          "medianTime": 418.48437614310103,
+          "meanWait": 0.13414022194221076,
+          "meanDistance": 549.6820163117055
+        },
+        "wheelchair": {
+          "people": 10,
+          "arrived": 3,
+          "unreachable": 7,
+          "unfinished": 0,
+          "meanTime": 379.8707364614814,
+          "medianTime": 388.7123810587671,
+          "meanWait": 0,
+          "meanDistance": 332.76462017316976
+        },
+        "stroller": {
+          "people": 10,
+          "arrived": 7,
+          "unreachable": 3,
+          "unfinished": 0,
+          "meanTime": 401.11887507127346,
+          "medianTime": 394.1937744462038,
+          "meanWait": 0.049712601547854875,
+          "meanDistance": 406.1650631540053
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 10,
+          "before": 434.9339755041459,
+          "after": 428.87244030752146,
+          "delta": -6.061535196624431
+        },
+        "wheelchair": {
+          "count": 3,
+          "before": 386.3036940304549,
+          "after": 379.8707364614814,
+          "delta": -6.432957568973507
+        },
+        "stroller": {
+          "count": 7,
+          "before": 410.52118361339643,
+          "after": 401.11887507127346,
+          "delta": -9.402308542123007
+        }
+      }
+    },
+    {
+      "people": 30,
+      "name": "closure",
+      "milliseconds": 91,
+      "profiles": {
+        "walk": {
+          "people": 10,
+          "arrived": 10,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 486.3461106109394,
+          "medianTime": 492.7562022678662,
+          "meanWait": 0.2534740495704071,
+          "meanDistance": 601.9317
+        },
+        "wheelchair": {
+          "people": 10,
+          "arrived": 2,
+          "unreachable": 8,
+          "unfinished": 0,
+          "meanTime": 259.37287889685865,
+          "medianTime": 259.37287889685865,
+          "meanWait": 0,
+          "meanDistance": 226.195
+        },
+        "stroller": {
+          "people": 10,
+          "arrived": 3,
+          "unreachable": 7,
+          "unfinished": 0,
+          "meanTime": 266.45231884815684,
+          "medianTime": 333.09461818511755,
+          "meanWait": 0,
+          "meanDistance": 259.9096666666667
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 10,
+          "before": 434.9339755041459,
+          "after": 486.3461106109394,
+          "delta": 51.41213510679356
+        },
+        "wheelchair": {
+          "count": 2,
+          "before": 259.37287889685865,
+          "after": 259.37287889685865,
+          "delta": 0
+        },
+        "stroller": {
+          "count": 3,
+          "before": 266.45231884815684,
+          "after": 266.45231884815684,
+          "delta": 0
+        }
+      }
+    },
+    {
+      "people": 120,
+      "name": "unchanged",
+      "milliseconds": 211,
+      "profiles": {
+        "walk": {
+          "people": 40,
+          "arrived": 40,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 413.6259625179947,
+          "medianTime": 441.01889887422465,
+          "meanWait": 4.280562951239777,
+          "meanDistance": 508.405625
+        },
+        "wheelchair": {
+          "people": 40,
+          "arrived": 16,
+          "unreachable": 24,
+          "unfinished": 0,
+          "meanTime": 399.7108985398725,
+          "medianTime": 429.8250676994576,
+          "meanWait": 1.065186366246814,
+          "meanDistance": 361.1697500000001
+        },
+        "stroller": {
+          "people": 40,
+          "arrived": 28,
+          "unreachable": 12,
+          "unfinished": 0,
+          "meanTime": 442.08607461901676,
+          "medianTime": 511.88944119423763,
+          "meanWait": 1.6313256294060152,
+          "meanDistance": 454.183357142857
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 40,
+          "before": 413.6259625179947,
+          "after": 413.6259625179947,
+          "delta": 0
+        },
+        "wheelchair": {
+          "count": 16,
+          "before": 399.7108985398725,
+          "after": 399.7108985398725,
+          "delta": 0
+        },
+        "stroller": {
+          "count": 28,
+          "before": 442.08607461901676,
+          "after": 442.08607461901676,
+          "delta": 0
+        }
+      }
+    },
+    {
+      "people": 120,
+      "name": "ramp",
+      "milliseconds": 249,
+      "profiles": {
+        "walk": {
+          "people": 40,
+          "arrived": 40,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 415.15839289634425,
+          "medianTime": 444.0262415945076,
+          "meanWait": 4.303101644950658,
+          "meanDistance": 522.516575
+        },
+        "wheelchair": {
+          "people": 40,
+          "arrived": 16,
+          "unreachable": 24,
+          "unfinished": 0,
+          "meanTime": 399.74445791588374,
+          "medianTime": 429.6389972530021,
+          "meanWait": 1.0987457422580578,
+          "meanDistance": 361.1697500000001
+        },
+        "stroller": {
+          "people": 40,
+          "arrived": 28,
+          "unreachable": 12,
+          "unfinished": 0,
+          "meanTime": 442.1218288836536,
+          "medianTime": 512.5921422910228,
+          "meanWait": 1.6670798940430256,
+          "meanDistance": 454.183357142857
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 40,
+          "before": 413.6259625179947,
+          "after": 415.15839289634425,
+          "delta": 1.5324303783495181
+        },
+        "wheelchair": {
+          "count": 16,
+          "before": 399.7108985398725,
+          "after": 399.74445791588374,
+          "delta": 0.03355937601124026
+        },
+        "stroller": {
+          "count": 28,
+          "before": 442.08607461901676,
+          "after": 442.1218288836536,
+          "delta": 0.035754264637012464
+        }
+      }
+    },
+    {
+      "people": 120,
+      "name": "shortcut",
+      "milliseconds": 222,
+      "profiles": {
+        "walk": {
+          "people": 40,
+          "arrived": 40,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 408.0897694159936,
+          "medianTime": 430.8715983062035,
+          "meanWait": 4.140414930666539,
+          "meanDistance": 508.40555177274257
+        },
+        "wheelchair": {
+          "people": 40,
+          "arrived": 16,
+          "unreachable": 24,
+          "unfinished": 0,
+          "meanTime": 390.1591815169755,
+          "medianTime": 420.6467555254558,
+          "meanWait": 1.0085581801782633,
+          "meanDistance": 347.73068025975465
+        },
+        "stroller": {
+          "people": 40,
+          "arrived": 28,
+          "unreachable": 12,
+          "unfinished": 0,
+          "meanTime": 429.30921972213093,
+          "medianTime": 496.55605514449906,
+          "meanWait": 1.3444293694169474,
+          "meanDistance": 434.02475253248906
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 40,
+          "before": 413.6259625179947,
+          "after": 408.0897694159936,
+          "delta": -5.536193102001124
+        },
+        "wheelchair": {
+          "count": 16,
+          "before": 399.7108985398725,
+          "after": 390.1591815169755,
+          "delta": -9.551717022896995
+        },
+        "stroller": {
+          "count": 28,
+          "before": 442.08607461901676,
+          "after": 429.30921972213093,
+          "delta": -12.77685489688572
+        }
+      }
+    },
+    {
+      "people": 120,
+      "name": "closure",
+      "milliseconds": 198,
+      "profiles": {
+        "walk": {
+          "people": 40,
+          "arrived": 40,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 455.72548142474227,
+          "medianTime": 492.6885797145874,
+          "meanWait": 2.5660698035610645,
+          "meanDistance": 552.491225
+        },
+        "wheelchair": {
+          "people": 40,
+          "arrived": 8,
+          "unreachable": 32,
+          "unfinished": 0,
+          "meanTime": 251.8754847224062,
+          "medianTime": 251.1261293372273,
+          "meanWait": 0.044084512120338815,
+          "meanDistance": 226.195
+        },
+        "stroller": {
+          "people": 40,
+          "arrived": 7,
+          "unreachable": 33,
+          "unfinished": 0,
+          "meanTime": 185.44720712276947,
+          "medianTime": 129.56853938382253,
+          "meanWait": 0.09820105049847021,
+          "meanDistance": 182.8475714285714
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 40,
+          "before": 413.6259625179947,
+          "after": 455.72548142474227,
+          "delta": 42.09951890674769
+        },
+        "wheelchair": {
+          "count": 8,
+          "before": 251.96683725765487,
+          "after": 251.8754847224062,
+          "delta": -0.0913525352486424
+        },
+        "stroller": {
+          "count": 7,
+          "before": 185.57179453186524,
+          "after": 185.44720712276947,
+          "delta": -0.12458740909577923
+        }
+      }
+    },
+    {
+      "people": 300,
+      "name": "unchanged",
+      "milliseconds": 499,
+      "profiles": {
+        "walk": {
+          "people": 100,
+          "arrived": 100,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 414.5837588858233,
+          "medianTime": 440.1954882629926,
+          "meanWait": 7.002140512272276,
+          "meanDistance": 507.3049099999998
+        },
+        "wheelchair": {
+          "people": 100,
+          "arrived": 49,
+          "unreachable": 51,
+          "unfinished": 0,
+          "meanTime": 446.7922937169916,
+          "medianTime": 473.0284798827154,
+          "meanWait": 4.044524218377457,
+          "meanDistance": 404.0845102040815
+        },
+        "stroller": {
+          "people": 100,
+          "arrived": 65,
+          "unreachable": 35,
+          "unfinished": 0,
+          "meanTime": 424.165168051538,
+          "medianTime": 451.6882002788405,
+          "meanWait": 5.395171894630556,
+          "meanDistance": 435.3665999999998
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 100,
+          "before": 414.5837588858233,
+          "after": 414.5837588858233,
+          "delta": 0
+        },
+        "wheelchair": {
+          "count": 49,
+          "before": 446.7922937169916,
+          "after": 446.7922937169916,
+          "delta": 0
+        },
+        "stroller": {
+          "count": 65,
+          "before": 424.165168051538,
+          "after": 424.165168051538,
+          "delta": 0
+        }
+      }
+    },
+    {
+      "people": 300,
+      "name": "ramp",
+      "milliseconds": 504,
+      "profiles": {
+        "walk": {
+          "people": 100,
+          "arrived": 100,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 416.6350376736133,
+          "medianTime": 444.5552714052066,
+          "meanWait": 7.639831258665996,
+          "meanDistance": 520.4751300000004
+        },
+        "wheelchair": {
+          "people": 100,
+          "arrived": 49,
+          "unreachable": 51,
+          "unfinished": 0,
+          "meanTime": 446.88214773875677,
+          "medianTime": 475.506919349977,
+          "meanWait": 4.134378240142703,
+          "meanDistance": 404.0845102040815
+        },
+        "stroller": {
+          "people": 100,
+          "arrived": 65,
+          "unreachable": 35,
+          "unfinished": 0,
+          "meanTime": 424.2698400780855,
+          "medianTime": 450.3802657902818,
+          "meanWait": 5.499843921178078,
+          "meanDistance": 435.3665999999998
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 100,
+          "before": 414.5837588858233,
+          "after": 416.6350376736133,
+          "delta": 2.0512787877898204
+        },
+        "wheelchair": {
+          "count": 49,
+          "before": 446.7922937169916,
+          "after": 446.88214773875677,
+          "delta": 0.08985402176524786
+        },
+        "stroller": {
+          "count": 65,
+          "before": 424.165168051538,
+          "after": 424.2698400780855,
+          "delta": 0.10467202654751698
+        }
+      }
+    },
+    {
+      "people": 300,
+      "name": "shortcut",
+      "milliseconds": 513,
+      "profiles": {
+        "walk": {
+          "people": 100,
+          "arrived": 100,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 409.34357218670687,
+          "medianTime": 430.0931356801017,
+          "meanWait": 6.81382930564621,
+          "meanDistance": 507.30484165455914
+        },
+        "wheelchair": {
+          "people": 100,
+          "arrived": 49,
+          "unreachable": 51,
+          "unfinished": 0,
+          "meanTime": 435.460235270105,
+          "medianTime": 455.6526863338544,
+          "meanWait": 3.4674851250515055,
+          "meanDistance": 388.725573358087
+        },
+        "stroller": {
+          "people": 100,
+          "arrived": 65,
+          "unreachable": 35,
+          "unfinished": 0,
+          "meanTime": 412.1912656497688,
+          "medianTime": 432.16781888834737,
+          "meanWait": 4.838020114156175,
+          "meanDistance": 416.7586572827373
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 100,
+          "before": 414.5837588858233,
+          "after": 409.34357218670687,
+          "delta": -5.240186699116268
+        },
+        "wheelchair": {
+          "count": 49,
+          "before": 446.7922937169916,
+          "after": 435.460235270105,
+          "delta": -11.332058446886592
+        },
+        "stroller": {
+          "count": 65,
+          "before": 424.165168051538,
+          "after": 412.1912656497688,
+          "delta": -11.973902401769214
+        }
+      }
+    },
+    {
+      "people": 300,
+      "name": "closure",
+      "milliseconds": 415,
+      "profiles": {
+        "walk": {
+          "people": 100,
+          "arrived": 100,
+          "unreachable": 0,
+          "unfinished": 0,
+          "meanTime": 458.35042991275657,
+          "medianTime": 497.6912303590468,
+          "meanWait": 5.2998164828670715,
+          "meanDistance": 553.0233099999991
+        },
+        "wheelchair": {
+          "people": 100,
+          "arrived": 21,
+          "unreachable": 79,
+          "unfinished": 0,
+          "meanTime": 257.70934260920484,
+          "medianTime": 332.3853159265262,
+          "meanWait": 0.7692677719907766,
+          "meanDistance": 231.011380952381
+        },
+        "stroller": {
+          "people": 100,
+          "arrived": 20,
+          "unreachable": 80,
+          "unfinished": 0,
+          "meanTime": 215.54981410738532,
+          "medianTime": 131.45368021703126,
+          "meanWait": 0.7773256575059738,
+          "meanDistance": 216.0806
+        }
+      },
+      "paired": {
+        "walk": {
+          "count": 100,
+          "before": 414.5837588858233,
+          "after": 458.35042991275657,
+          "delta": 43.766671026933274
+        },
+        "wheelchair": {
+          "count": 21,
+          "before": 258.0451169558734,
+          "after": 257.70934260920484,
+          "delta": -0.3357743466685604
+        },
+        "stroller": {
+          "count": 20,
+          "before": 215.97604506139024,
+          "after": 215.54981410738532,
+          "delta": -0.42623095400493866
+        }
+      }
+    }
+  ],
+  "sensitivityMilliseconds": 370,
+  "sensitivityResults": [
+    {
+      "label": "人流 70% · 速度 85%",
+      "people": 84,
+      "speedFactor": 0.85,
+      "profiles": {
+        "walk": {
+          "delta": 1.886269434379772,
+          "beforeArrived": 28,
+          "afterArrived": 28
+        },
+        "wheelchair": {
+          "delta": 0,
+          "beforeArrived": 11,
+          "afterArrived": 11
+        },
+        "stroller": {
+          "delta": 0.011471421885283618,
+          "beforeArrived": 19,
+          "afterArrived": 19
+        }
+      }
+    },
+    {
+      "label": "人流 70% · 速度 100%",
+      "people": 84,
+      "speedFactor": 1,
+      "profiles": {
+        "walk": {
+          "delta": 1.5986235023507638,
+          "beforeArrived": 28,
+          "afterArrived": 28
+        },
+        "wheelchair": {
+          "delta": 0,
+          "beforeArrived": 11,
+          "afterArrived": 11
+        },
+        "stroller": {
+          "delta": 0.03347963288232031,
+          "beforeArrived": 19,
+          "afterArrived": 19
+        }
+      }
+    },
+    {
+      "label": "人流 70% · 速度 115%",
+      "people": 84,
+      "speedFactor": 1.15,
+      "profiles": {
+        "walk": {
+          "delta": 1.592045816616379,
+          "beforeArrived": 28,
+          "afterArrived": 28
+        },
+        "wheelchair": {
+          "delta": 0,
+          "beforeArrived": 11,
+          "afterArrived": 11
+        },
+        "stroller": {
+          "delta": 0.04740936341390747,
+          "beforeArrived": 19,
+          "afterArrived": 19
+        }
+      }
+    },
+    {
+      "label": "人流 100% · 速度 85%",
+      "people": 120,
+      "speedFactor": 0.85,
+      "profiles": {
+        "walk": {
+          "delta": 1.8571886775037996,
+          "beforeArrived": 40,
+          "afterArrived": 40
+        },
+        "wheelchair": {
+          "delta": 0.13402053481271992,
+          "beforeArrived": 16,
+          "afterArrived": 16
+        },
+        "stroller": {
+          "delta": 0.01921708766415772,
+          "beforeArrived": 28,
+          "afterArrived": 28
+        }
+      }
+    },
+    {
+      "label": "人流 100% · 速度 100%",
+      "people": 120,
+      "speedFactor": 1,
+      "profiles": {
+        "walk": {
+          "delta": 1.5324303783495181,
+          "beforeArrived": 40,
+          "afterArrived": 40
+        },
+        "wheelchair": {
+          "delta": 0.03355937601124026,
+          "beforeArrived": 16,
+          "afterArrived": 16
+        },
+        "stroller": {
+          "delta": 0.035754264637012464,
+          "beforeArrived": 28,
+          "afterArrived": 28
+        }
+      }
+    },
+    {
+      "label": "人流 100% · 速度 115%",
+      "people": 120,
+      "speedFactor": 1.15,
+      "profiles": {
+        "walk": {
+          "delta": 1.831436517165305,
+          "beforeArrived": 40,
+          "afterArrived": 40
+        },
+        "wheelchair": {
+          "delta": 0.052190888988690176,
+          "beforeArrived": 16,
+          "afterArrived": 16
+        },
+        "stroller": {
+          "delta": -0.0018261215526718746,
+          "beforeArrived": 28,
+          "afterArrived": 28
+        }
+      }
+    },
+    {
+      "label": "人流 140% · 速度 85%",
+      "people": 168,
+      "speedFactor": 0.85,
+      "profiles": {
+        "walk": {
+          "delta": 1.9949614969025882,
+          "beforeArrived": 56,
+          "afterArrived": 56
+        },
+        "wheelchair": {
+          "delta": -0.004797434264949411,
+          "beforeArrived": 26,
+          "afterArrived": 26
+        },
+        "stroller": {
+          "delta": 0.13225510474828817,
+          "beforeArrived": 36,
+          "afterArrived": 36
+        }
+      }
+    },
+    {
+      "label": "人流 140% · 速度 100%",
+      "people": 168,
+      "speedFactor": 1,
+      "profiles": {
+        "walk": {
+          "delta": 1.7385713158410943,
+          "beforeArrived": 56,
+          "afterArrived": 56
+        },
+        "wheelchair": {
+          "delta": 0.05351469297787704,
+          "beforeArrived": 26,
+          "afterArrived": 26
+        },
+        "stroller": {
+          "delta": 0.09035620496108739,
+          "beforeArrived": 36,
+          "afterArrived": 36
+        }
+      }
+    },
+    {
+      "label": "人流 140% · 速度 115%",
+      "people": 168,
+      "speedFactor": 1.15,
+      "profiles": {
+        "walk": {
+          "delta": 1.8150849086658607,
+          "beforeArrived": 56,
+          "afterArrived": 56
+        },
+        "wheelchair": {
+          "delta": 0.1499836212380807,
+          "beforeArrived": 26,
+          "afterArrived": 26
+        },
+        "stroller": {
+          "delta": 0.13459657228653377,
+          "beforeArrived": 36,
+          "afterArrived": 36
+        }
+      }
+    }
+  ],
+  "exampleRouteRestrictions": [
+    {
+      "id": "osm-670357826-0",
+      "name": "耶穌會紀念廣場",
+      "kind": "steps",
+      "width": 2
+    }
+  ],
+  "proposalEdgeCount": 692,
+  "debugRoutes": [
+    {
+      "profile": "walk",
+      "before": [
+        {
+          "id": "osm-192573684-5",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-4",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-717912859-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-776547208-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880717-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880718-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880716-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-969265608-1",
+          "kind": "street",
+          "width": 2
+        },
+        {
+          "id": "osm-710516681-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-670357826-0",
+          "kind": "steps",
+          "width": 2
+        },
+        {
+          "id": "osm-670357825-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-248826426-0",
+          "kind": "path",
+          "width": 2
+        }
+      ],
+      "after": [
+        {
+          "id": "osm-192573684-5",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-4",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-717912859-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-776547208-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880717-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880718-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880716-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-969265608-1",
+          "kind": "street",
+          "width": 2
+        },
+        {
+          "id": "osm-710516681-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516680-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516683-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-711005732-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-248826426-0",
+          "kind": "path",
+          "width": 2
+        }
+      ]
+    },
+    {
+      "profile": "wheelchair",
+      "before": [
+        {
+          "id": "osm-192573684-5",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-4",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-717912859-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-776547208-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880717-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880718-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880716-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-969265608-1",
+          "kind": "street",
+          "width": 2
+        },
+        {
+          "id": "osm-710516681-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516680-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516683-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-711005732-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-248826426-0",
+          "kind": "path",
+          "width": 2
+        }
+      ],
+      "after": [
+        {
+          "id": "osm-192573684-5",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-4",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-717912859-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-776547208-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880717-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880718-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880716-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-969265608-1",
+          "kind": "street",
+          "width": 2
+        },
+        {
+          "id": "osm-710516681-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516680-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516683-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-711005732-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-248826426-0",
+          "kind": "path",
+          "width": 2
+        }
+      ]
+    },
+    {
+      "profile": "stroller",
+      "before": [
+        {
+          "id": "osm-192573684-5",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-4",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-717912859-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-776547208-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880717-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880718-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880716-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-969265608-1",
+          "kind": "street",
+          "width": 2
+        },
+        {
+          "id": "osm-710516681-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516680-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516683-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-711005732-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-248826426-0",
+          "kind": "path",
+          "width": 2
+        }
+      ],
+      "after": [
+        {
+          "id": "osm-192573684-5",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-4",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-192573684-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-717912859-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-776547208-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271470-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-3",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-2",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-307334799-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-46510079-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-770271483-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880717-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880718-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-971880716-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-969265608-1",
+          "kind": "street",
+          "width": 2
+        },
+        {
+          "id": "osm-710516681-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516680-1",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-710516683-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-711005732-0",
+          "kind": "path",
+          "width": 2
+        },
+        {
+          "id": "osm-248826426-0",
+          "kind": "path",
+          "width": 2
+        }
+      ]
+    }
+  ]
+}
