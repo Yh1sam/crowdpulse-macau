@@ -29,3 +29,21 @@ Local browser evidence is saved under ignored `artifacts/browser/desktop.jpg` an
 ## Interpretation limits
 
 No actual street/accessibility survey, measured pedestrian demand, city deployment, user study or causal intervention evaluation has been performed. The tests establish software behaviour and model consistency. They do not establish real-world navigation, accessibility or construction validity; see `MODEL.md`.
+
+## Apple-style interface refactor — 2026-10-09
+
+Replaced the long document-style page with a full-height map workspace, floating toolbars, collapsible planning/results panels, and a mobile sheet layout. The planning panel groups existing controls under Plan, Conditions, and Checks. Results retain reached-count changes, paired cohorts, repeat ranges and model boundaries; wait/distance details use native disclosures. The panel spring preserves its current height and velocity when interrupted. Reduced motion, reduced transparency and increased contrast preferences have dedicated handling.
+
+Verified the final production build in the in-app browser, using same-origin iframes with actual 1440 × 900 and 390 × 844 CSS-pixel viewports:
+
+- Both viewport sizes have no horizontal document overflow. On mobile, the map opens first with collapsed panel headers; only one sheet expands at a time.
+- Adjusted population via the keyboard, recomputed results, and undid the parameter change to restore the original 180-person plan.
+- Created a link through two keyboard endpoint activations; edit count changed from 3 to 4 and returned to 3 on undo. Selection now falls back to the main stairs after a selected proposed link is undone.
+- Selected a traveller profile and verified its selected state. Computed and inspected all nine sensitivity rows and four table columns.
+- Opened the assumptions dialog and used Escape to close it; focus returned to its trigger.
+- Triggered comparison from the mobile planning sheet; after results appeared, focus was on the visible results-panel toggle instead of the hidden planning panel.
+- Enlarged the map, dragged it with native pointer input and observed the SVG viewBox change. Reset the view, displayed both comparison maps, and returned to proposal view.
+- Reopened the saved plan after reload: its title and three existing edits remained. Browser warnings/errors were empty in the inspected log.
+- `npm test`: all 19 existing model/storage tests passed. TypeScript/production build passed; the existing offline-map chunk-size advisory remains.
+
+Final UI screenshots are ignored local artifacts: `artifacts/browser/apple-desktop.png` and `artifacts/browser/apple-mobile.png`. These are browser viewport checks, not physical-device or user-study validation. A download-event capture in the iframe harness was unavailable; export/import semantics remain covered by the existing storage tests and the earlier browser pass above, rather than claimed as newly verified file delivery.
