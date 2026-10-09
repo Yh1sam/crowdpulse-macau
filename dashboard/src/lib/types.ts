@@ -49,7 +49,8 @@ export interface AuditEntry { id: number; timestamp: string; actor: string; acti
 
 export interface Health {
   status: string; time: string; clock: "simulated" | "wall"; privacy_mode: boolean; models_loaded: boolean; model_version: string;
-  live_sim: { running: boolean; scenario: string; acceleration: number; sim_time: string; elapsed_sim_min: number; ground_truth: Record<string, { occupancy: number; density: number }> } | null;
+  live_sim: { running: boolean; scenario: string; acceleration: number; sim_time: string; elapsed_sim_min: number; duration_min: number; end_time: string; ground_truth: Record<string, { occupancy: number; density: number }> } | null;
+  sim_ended: { scenario: string; ended_at: string; reason: string } | null;
   last_refresh: string | null; stats: Record<string, number>;
 }
 

@@ -12,7 +12,7 @@ router = APIRouter(prefix="/sim", tags=["simulation"])
 @router.get("/status")
 def status(engine: Engine = ENGINE):
     sim = engine.sim  # read once: /sim/stop may clear it concurrently
-    return {"available_scenarios": sorted(SCENARIOS), "sim": sim.status() if sim else None}
+    return {"available_scenarios": sorted(SCENARIOS), "sim": sim.status() if sim else None, "sim_ended": engine.sim_ended if sim is None else None}
 
 
 @router.post("/start")

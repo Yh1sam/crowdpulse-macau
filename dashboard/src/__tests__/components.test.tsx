@@ -72,3 +72,12 @@ describe("placement label", () => {
     expect(placementLabel("none", null)).toBe("–");
   });
 });
+
+describe("audit details", () => {
+  it("formats details as readable key: value text", async () => {
+    const { auditDetails } = await import("@/lib/format");
+    expect(auditDetails({ zone_id: "senado_square", confidence: 0.6241392870818554, horizon_min: 15, effect_applied_to_simulation: true }))
+      .toBe("zone_id: senado_square · confidence: 0.62 · horizon_min: 15 · effect_applied_to_simulation: true");
+    expect(auditDetails({})).toBe("");
+  });
+});

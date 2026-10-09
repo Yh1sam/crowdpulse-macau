@@ -69,7 +69,7 @@ Environment variables (all optional, prefix `CROWDPULSE_`): `DATABASE_URL` (defa
 
 ## Demo (under 3 minutes)
 
-1. Start backend + dashboard. The simulated clock starts at 13:45 on a Golden-Week afternoon; sensors report every 5 s at 6× speed.
+1. Start backend + dashboard. The simulated clock starts at 13:45 on a Golden-Week afternoon; sensors report every 5 s at 6× speed. The run stops by itself at 15:45, the end of the scenario (about 19 minutes of real time); press *start demo sim* to run it again.
 2. **Overview / Live map**: Senado Square is WARNING; flows are southbound from the Ruins.
 3. ~14:04 a performance at St. Dominic's Square ends and tour groups surge in from Almeida Ribeiro. Density and inflow rise; walking speed falls.
 4. **Zone detail → Senado Square**: the +10/+15 min forecast turns CRITICAL with its confidence, and "why" reasons (density change, inflow > outflow, adjacent zone filling, speed falling).

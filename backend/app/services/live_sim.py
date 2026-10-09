@@ -22,6 +22,7 @@ class LiveSimulation:
         self.params = SCENARIOS[scenario](sensor_interval_s=sensor_interval_s) if start_utc is None else SCENARIOS[scenario](start_utc=start_utc, sensor_interval_s=sensor_interval_s)
         self.sim = CrowdSimulator(self.params)
         self.start_time = self.params.start_time
+        self.end_s = self.params.duration_min * 60.0  # the scenario's script ends here; the engine then stops the run
         self.elapsed_s = 0.0
         self._next_dynamics_s = 60.0
         self._next_obs_s = 0.0
@@ -33,6 +34,10 @@ class LiveSimulation:
     @property
     def now(self) -> datetime:
         return self.start_time + timedelta(seconds=self.elapsed_s)
+
+    @property
+    def finished(self) -> bool:
+        return self.elapsed_s >= self.end_s
 
     def sync_real_time(self) -> None:
         """Declare that simulated time is up to date with the real clock (after priming or a manual advance)."""
@@ -50,7 +55,7 @@ class LiveSimulation:
         """Advance simulated time and emit observations. Returns observations emitted."""
         emitted = 0
         with self.lock:
-            target = self.elapsed_s + real_seconds * self.acceleration
+            target = min(self.end_s, self.elapsed_s + real_seconds * self.acceleration)
             while self._next_dynamics_s <= target:
                 self.sim.dynamics_step(record=False)
                 self._next_dynamics_s += 60.0
@@ -84,4 +89,5 @@ class LiveSimulation:
 
     def status(self) -> dict[str, Any]:
         return {"running": self.running, "scenario": self.scenario, "acceleration": self.acceleration, "sim_time": self.now.isoformat(), "elapsed_sim_min": round(self.elapsed_s / 60.0, 2),
+                "duration_min": self.params.duration_min, "end_time": (self.start_time + timedelta(seconds=self.end_s)).isoformat(),
                 "sensor_interval_s": self.sensor_interval_s, "started_at": self.started_at.isoformat(), "redirects": self.sim.redirects, "ground_truth": self.truth()}

@@ -30,3 +30,10 @@ export function placementLabel(placement: string, distanceM: number | null | und
   }
   return "–";
 }
+
+/** Audit-entry details as readable, wrappable text: "zone_id: senado_square · confidence: 0.62". */
+export function auditDetails(details: Record<string, unknown> | null | undefined): string {
+  return Object.entries(details ?? {})
+    .map(([k, v]) => `${k}: ${typeof v === "number" && !Number.isInteger(v) ? v.toFixed(2) : v !== null && typeof v === "object" ? JSON.stringify(v) : String(v)}`)
+    .join(" · ");
+}

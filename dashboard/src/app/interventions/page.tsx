@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useApi, post } from "@/lib/api";
 import type { AuditEntry, Intervention, Prediction } from "@/lib/types";
 import { RiskBadge } from "@/components/Badges";
-import { localDateTime, localTime, pct } from "@/lib/format";
+import { auditDetails, localDateTime, localTime, pct } from "@/lib/format";
 
 export default function Interventions() {
   const { data: ivs, mutate } = useApi<Intervention[]>("/interventions?limit=100", 3000);
@@ -69,7 +69,7 @@ export default function Interventions() {
       <section>
         <h2 className="mb-2 text-sm font-semibold text-zinc-300">Audit log</h2>
         <ul className="divide-y divide-zinc-800 rounded-lg border border-zinc-800 bg-zinc-900/60 text-xs">
-          {(audit ?? []).map((a) => <li key={a.id} className="flex gap-3 px-3 py-1.5"><span className="w-36 shrink-0 text-zinc-500">{localDateTime(a.timestamp)}</span><span className="w-24 shrink-0 font-semibold">{a.actor}</span><span className="w-44 shrink-0">{a.action}</span><span className="text-zinc-400">{a.target_type} #{a.target_id} {JSON.stringify(a.details)}</span></li>)}
+          {(audit ?? []).map((a) => <li key={a.id} className="flex flex-wrap gap-x-3 gap-y-0.5 px-3 py-1.5"><span className="w-36 shrink-0 text-zinc-500">{localDateTime(a.timestamp)}</span><span className="w-16 shrink-0 font-semibold">{a.actor}</span><span className="w-60 min-w-0 shrink break-words">{a.action}</span><span className="min-w-0 flex-1 basis-64 break-words text-zinc-400">{a.target_type} #{a.target_id} · {auditDetails(a.details)}</span></li>)}
         </ul>
       </section>
     </div>

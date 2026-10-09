@@ -423,6 +423,26 @@ def test_audit_lists_newest_written_first_across_simulation_runs(client):
     assert [(a["action"], a["target_id"]) for a in audit[:2]] == [("intervention_approved", "2"), ("intervention_expired", "1")]
 
 
+def test_simulation_stops_at_the_end_of_its_scenario(client):
+    """Regression: the live simulation ignored the scenario's length, so a demo left running overnight at 6x ended
+    days ahead in simulated time and every timestamp it wrote followed it."""
+    client.post("/sim/start", json={"scenario": "golden_week_demo", "acceleration": 60})
+    from backend.app.services.engine import get_engine
+    eng = get_engine()
+    sim = eng.sim
+    assert client.get("/health").json()["live_sim"]["duration_min"] == 120
+    sim.end_s = sim.elapsed_s + 60  # end the script one simulated minute from now
+    end_time = sim.start_time + timedelta(seconds=sim.end_s)
+    eng.tick(real_seconds=5)  # 5 s at 60x = 5 simulated minutes, past the end
+    assert sim.now == end_time, "simulated time ran past the end of the scenario"
+    h = client.get("/health").json()
+    assert eng.sim is None and h["live_sim"] is None and h["clock"] == "wall"
+    assert h["sim_ended"]["scenario"] == "golden_week_demo" and datetime.fromisoformat(h["sim_ended"]["ended_at"]) == end_time
+    client.post("/sim/start", json={"scenario": "golden_week_demo", "acceleration": 60})
+    assert client.get("/health").json()["sim_ended"] is None
+    client.post("/sim/stop")
+
+
 def test_stronger_recommendation_added_alongside_approved_weaker_one(client):
     from backend.app.db import session_scope
     from backend.app.models import Intervention

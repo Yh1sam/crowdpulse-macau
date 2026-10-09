@@ -17,6 +17,7 @@ def health(engine: Engine = ENGINE):
             "real_sensor_retiming": bool(sim is not None and sim.running),
             "privacy_mode": s.privacy_mode,
             "models_loaded": engine.models.loaded, "model_version": engine.models.version, "live_sim": sim.status() if sim else None,
+            "sim_ended": engine.sim_ended if sim is None else None,
             "last_refresh": engine.last_refresh, "stats": engine.stats}
 
 

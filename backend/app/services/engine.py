@@ -50,6 +50,7 @@ class Engine:
         self.clock = Clock()
         self.models: ModelBundle = load_models(settings.models_dir)
         self.sim: LiveSimulation | None = None
+        self.sim_ended: dict[str, Any] | None = None  # the last run that stopped on its own at the end of its scenario
         self.context: dict[str, dict[str, int]] = {}
         self.lock = threading.RLock()
         self.last_refresh: datetime | None = None
@@ -66,6 +67,7 @@ class Engine:
     def start_sim(self, scenario: str | None = None, acceleration: float | None = None) -> dict[str, Any]:
         with self.lock:
             self.stop_sim()
+            self.sim_ended = None
             self.sim = LiveSimulation(scenario or self.settings.sim_scenario, acceleration or self.settings.sim_acceleration, self.cfg["sensor"]["observation_interval_s"])
             self.sim.running = True
             with session_scope() as db:
@@ -120,6 +122,11 @@ class Engine:
                     self.sim.advance(real_seconds, self._ingest_from_sim)
                     self.sim.sync_real_time()
                 self.context = self.sim.context()
+                if self.sim.finished:
+                    # Stop at the end of the scenario's script. Left running, a demo kept going overnight and its
+                    # simulated clock ended days ahead, with every stored timestamp following it.
+                    self.sim_ended = {"scenario": self.sim.scenario, "ended_at": self.sim.now.isoformat(), "reason": "scenario_complete"}
+                    self.stop_sim()
         if time.monotonic() - self._last_refresh_real >= self.settings.refresh_seconds:
             self.refresh()
 
