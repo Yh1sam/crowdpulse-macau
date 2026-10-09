@@ -2,13 +2,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useApi, post } from "@/lib/api";
-import type { AuditEntry, Intervention, Prediction } from "@/lib/types";
+import type { AuditEntry, Config, Intervention, Prediction } from "@/lib/types";
 import { RiskBadge } from "@/components/Badges";
+import { SketchFutureCheck } from "@/components/SketchFutureCheck";
 import { auditDetails, localDateTime, localTime, pct } from "@/lib/format";
 
 export default function Interventions() {
   const { data: ivs, mutate } = useApi<Intervention[]>("/interventions?limit=100", 3000);
   const { data: audit } = useApi<AuditEntry[]>("/audit?limit=50", 5000);
+  const { data: config } = useApi<Config>("/config", 60000);
   const [evidence, setEvidence] = useState<Intervention | null>(null);
   const [busy, setBusy] = useState<number | null>(null);
   const pending = (ivs ?? []).filter((i) => i.status === "pending");
@@ -48,6 +50,7 @@ export default function Interventions() {
               <button disabled={busy === iv.id} className="rounded bg-red-800 px-3 py-1 text-sm font-semibold hover:bg-red-700 disabled:opacity-50" onClick={() => decide(iv, false)}>REJECT</button>
               <button className="rounded border border-zinc-600 px-3 py-1 text-sm hover:bg-zinc-800" onClick={() => setEvidence(evidence?.id === iv.id ? null : iv)}>VIEW EVIDENCE</button>
             </div>
+            <SketchFutureCheck iv={iv} crosswalk={config?.sketchfuture} />
             {evidence?.id === iv.id && <Evidence iv={iv} />}
           </div>
         ))}
@@ -57,7 +60,7 @@ export default function Interventions() {
         <ul className="divide-y divide-zinc-800 rounded-lg border border-zinc-800 bg-zinc-900/60 text-sm">
           {others.map((iv) => (
             <li key={iv.id} className="px-3 py-2">
-              <div className="flex flex-wrap items-center gap-2"><span className="text-xs text-zinc-500">#{iv.id} {localTime(iv.created_at)}</span><span className={`rounded px-1.5 text-xs ${iv.status === "approved" ? "bg-emerald-900 text-emerald-200" : iv.status === "rejected" ? "bg-red-900 text-red-200" : "bg-zinc-800 text-zinc-300"}`}>{iv.status}</span><span>{iv.title}</span><span className="text-xs text-zinc-500">{iv.decided_by ? `by ${iv.decided_by}` : ""} {iv.effect_applied ? "· effect applied to simulation" : ""}</span></div>
+              <div className="flex flex-wrap items-center gap-2"><span className="text-xs text-zinc-500">#{iv.id} {localTime(iv.created_at)}</span><span className={`rounded px-1.5 text-xs ${iv.status === "approved" ? "bg-emerald-900 text-emerald-200" : iv.status === "rejected" ? "bg-red-900 text-red-200" : "bg-zinc-800 text-zinc-300"}`}>{iv.status}</span><span>{iv.title}</span><span className="text-xs text-zinc-500">{iv.decided_by ? `by ${iv.decided_by}` : ""} {iv.effect_applied ? "· effect applied to simulation" : ""}</span><SketchFutureCheck iv={iv} crosswalk={config?.sketchfuture} compact /></div>
               {iv.projected_after && (
                 <p className="mt-1 text-xs text-zinc-400">Recalculated forecast (what-if, inflow ×{iv.projected_after.inflow_multiplier}): {Object.entries(iv.projected_after.horizons).map(([h, v]) => <span key={h} className="mr-2">+{h} min <RiskBadge level={v.predicted_class} size="sm" /> {pct(v.confidence)}</span>)} <i>{iv.projected_after.note}</i></p>
               )}

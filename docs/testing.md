@@ -139,6 +139,12 @@ Note: this scenario gives no early warning. The crowd builds in about 3 minutes,
 
 The iOS app can join the running simulation from the iPhone Simulator in video mode, as an extra sensor node. Its wall-clock readings are re-timed onto the simulated clock. The full procedure, a recorded run with and without operator approval, and all screenshots are in `experiments/results/simulation_run/README.md`.
 
+## 4c. SketchFuture route check (no phone)
+
+Start SketchFuture next to the backend and dashboard (`cd sketchfuture && npm install && npm run dev`, http://localhost:4173; set `NEXT_PUBLIC_SKETCHFUTURE_URL` for the dashboard if it runs elsewhere). When the "Redirect part of … flow around Senado Square" card appears (table above), its **Route check in SketchFuture** section names the corridor that will be closed (Largo de S. Domingos link: three 議事亭前地 footway segments) and the model's direct/detour walking distances (125 m → 216 m). Click **TEST IN SKETCHFUTURE**: a new tab opens SketchFuture with the plan "CrowdPulse #N：封閉板樟堂前地↔議事亭前地通道", a notice naming the recommendation it came from, and the comparison of the same 120 people with and without the closure (per-profile travel time, distance, queues, reachability). 撤銷 (undo) restores the plan that was saved in that browser before. After APPROVE the card moves to "Decided / expired" with a smaller *test in SketchFuture* link.
+
+Automated checks: `cd sketchfuture && npm test` (URL plan round-trip and validation; crosswalk consistent with the map: valid closures, recorded distances reproduced by the model's router, at least one cohort route changes, no walker stranded), `cd dashboard && pnpm test` (plan built from a recommendation, card rendering, unsupported corridors), and `backend` tests (`/config` serves the crosswalk for every zone-graph corridor). `cd sketchfuture && npm run crosswalk` regenerates `shared/sketchfuture_crosswalk.json`; commit it together with any map change.
+
 ## 5. Privacy checks (backend running)
 
 ```bash

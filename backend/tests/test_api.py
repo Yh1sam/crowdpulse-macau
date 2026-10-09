@@ -24,6 +24,11 @@ def test_health_and_config(client):
     c = client.get("/config").json()
     assert c["congestion_thresholds"]["critical"] > c["congestion_thresholds"]["warning"]
     assert len(c["zone_graph"]["zones"]) == 7
+    # the dashboard's intervention cards open SketchFuture with the corridor closures from this crosswalk
+    sf = c["sketchfuture"]
+    assert sf["map_version"] and sf["edges"]["e_dominic_senado"]["close"] and sf["edges"]["e_dominic_senado"]["detour_m"] > sf["edges"]["e_dominic_senado"]["direct_m"]
+    assert sf["edges"]["e_senado_almeida"]["unsupported"] and not sf["edges"]["e_senado_almeida"]["close"]
+    assert {e["id"] for e in c["zone_graph"]["edges"]} == set(sf["edges"]), "every zone-graph corridor has a crosswalk entry"
 
 
 def test_schema_rejects_identifying_and_invalid_fields(client):
@@ -418,20 +423,6 @@ def test_restart_shows_only_the_new_runs_alerts_and_recommendations(client):
     client.post("/sim/stop")
 
 
-def test_audit_lists_newest_written_first_across_simulation_runs(client):
-    """Regression: /audit sorted by (simulated) timestamp, so entries from an earlier run that had reached a later
-    simulated day stayed above the current run's approvals."""
-    from backend.app.db import session_scope
-    from backend.app.models import AuditLog
-    t0 = datetime(2026, 10, 3, 6, 0, tzinfo=timezone.utc)
-    with session_scope() as db:
-        db.add(AuditLog(timestamp=t0 + timedelta(days=3), actor="system", action="intervention_expired", target_type="intervention", target_id="1", details={}))
-    with session_scope() as db:
-        db.add(AuditLog(timestamp=t0, actor="operator", action="intervention_approved", target_type="intervention", target_id="2", details={}))
-    audit = client.get("/audit").json()
-    assert [(a["action"], a["target_id"]) for a in audit[:2]] == [("intervention_approved", "2"), ("intervention_expired", "1")]
-
-
 def test_simulation_stops_at_the_end_of_its_scenario(client):
     """Regression: the live simulation ignored the scenario's length, so a demo left running overnight at 6x ended
     days ahead in simulated time and every timestamp it wrote followed it."""
@@ -450,6 +441,20 @@ def test_simulation_stops_at_the_end_of_its_scenario(client):
     client.post("/sim/start", json={"scenario": "golden_week_demo", "acceleration": 60})
     assert client.get("/health").json()["sim_ended"] is None
     client.post("/sim/stop")
+
+
+def test_audit_lists_newest_written_first_across_simulation_runs(client):
+    """Regression: /audit sorted by (simulated) timestamp, so entries from an earlier run that had reached a later
+    simulated day stayed above the current run's approvals."""
+    from backend.app.db import session_scope
+    from backend.app.models import AuditLog
+    t0 = datetime(2026, 10, 3, 6, 0, tzinfo=timezone.utc)
+    with session_scope() as db:
+        db.add(AuditLog(timestamp=t0 + timedelta(days=3), actor="system", action="intervention_expired", target_type="intervention", target_id="1", details={}))
+    with session_scope() as db:
+        db.add(AuditLog(timestamp=t0, actor="operator", action="intervention_approved", target_type="intervention", target_id="2", details={}))
+    audit = client.get("/audit").json()
+    assert [(a["action"], a["target_id"]) for a in audit[:2]] == [("intervention_approved", "2"), ("intervention_expired", "1")]
 
 
 def test_stronger_recommendation_added_alongside_approved_weaker_one(client):

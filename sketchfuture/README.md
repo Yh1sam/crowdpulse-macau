@@ -29,6 +29,7 @@ Stop the dev server before starting preview because both use port 4173. The gene
 4. Click a profile to highlight its sample Senado-to-Ruins route. Switch to side-by-side maps, play the computed journeys or scrub the timeline. The result cards show the **whole simulation**, not playback progress.
 5. Check nine demand/speed conditions. A negative paired time difference means faster for people who arrive in both plans. Reachability changes are reported separately.
 6. Export the plan, full JSON report, or CSV metrics. Importing a plan revalidates it and recomputes results. Invalid files do not replace the current plan. Reset is confirmed and undoable within the current session.
+7. A plan can also arrive in the URL fragment, `#plan=<base64url JSON>` of `{ "workspace": …, "source": "…" }` — this is how CrowdPulse's intervention cards open the corridor closure a recommendation implies. It is validated exactly like an imported file, replaces the current plan (undo restores it), shows its source in a notice, and is removed from the address bar.
 
 Changes and parameters are automatically saved. Undo/redo history and simulation outputs are session-local; reopening reloads the plan and recomputes outputs. Corrupt saved data is preserved and blocks automatic overwriting until the user explicitly backs it up and starts again. Storage failures are shown with an export instruction.
 
@@ -38,10 +39,11 @@ Changes and parameters are automatically saved. Undo/redo history and simulation
 npm test
 npm run build
 npm run benchmark
+npm run crosswalk
 python3 scripts/rebuild_map.py
 ```
 
-Tests check hand-calculated routing/queues, access restrictions, conservation, identical unmodified scenarios, paired statistics, sensitivity, import validation and storage recovery. The benchmark writes `artifacts/benchmark.json`; map rebuilding uses the included compressed source extract without network access.
+Tests check hand-calculated routing/queues, access restrictions, conservation, identical unmodified scenarios, paired statistics, sensitivity, import validation, storage recovery, URL plans and the CrowdPulse crosswalk. The benchmark writes `artifacts/benchmark.json`; map rebuilding uses the included compressed source extract without network access. `npm run crosswalk` regenerates `../shared/sketchfuture_crosswalk.json` — for each corridor of CrowdPulse's zone graph, the street segments whose closure forces a detour, derived with this model's router from a hand-picked boundary junction; rerun it after a map change.
 
 See [MODEL.md](MODEL.md) for equations, interpretation and limits, [DATA_NOTICE.md](DATA_NOTICE.md) for map provenance/licensing, and [VERIFICATION.md](VERIFICATION.md) for the validation record.
 

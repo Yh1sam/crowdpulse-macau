@@ -43,7 +43,8 @@
 | ML | pandas, numpy, scikit-learn | `ml/pipeline/{aggregation,features,ood,explain}.py`, `ml/training/train.py`, `ml/evaluation/evaluate.py` |
 | synthetic data | pure Python | `ml/synthetic/{simulator,scenarios,generate}.py` |
 | dashboard | Next.js 16, React 19, TypeScript, Tailwind 4, MapLibre GL, Recharts, SWR | `dashboard/src/app/*`, `dashboard/src/components/*` |
-| shared | JSON | `shared/config.json` (one central config), `shared/zones.json` (graph), `shared/schemas/` |
+| shared | JSON | `shared/config.json` (one central config), `shared/zones.json` (graph), `shared/schemas/`, `shared/sketchfuture_crosswalk.json` (zone-graph corridors → SketchFuture street closures) |
+| SketchFuture (separate app) | Vite, React 19, TypeScript, Web Worker | `sketchfuture/` — OSM street graph of the district, shortest-time routing + FIFO service queues, walker / wheelchair / stroller profiles; accepts a plan in its URL fragment (`#plan=`) |
 
 ## Key design decisions
 
@@ -55,6 +56,7 @@
 6. **Human in the loop.** Interventions are records with `pending/approved/rejected/expired/superseded` status; approval is an explicit API call recorded in `audit_log`. A stronger recommendation (monitoring → staff → redirect / inflow control) supersedes a weaker pending one; an approved one stays approved and the stronger one is added alongside. In simulation, approval feeds an assumed inflow reduction back into the crowd model.
 7. **Graceful degradation.** Missing models → persistence fallback flagged as such; missing sensors → stale zone + "insufficient data — human review"; backend down → phone buffers numbers and retries.
 8. **Hybrid mode.** While the live simulation runs, real sensors can join it: their wall-clock readings are re-timed onto the simulated clock (their real age is scaled by the simulation speed). Stopping or restarting the simulation closes that run's recommendations and hides its future-dated readings and alerts.
+9. **Route check on real streets.** The zone graph is seven nodes; a redirect recommendation says *which* corridor to divert from but not what the detour looks like. The intervention card therefore opens SketchFuture with a plan that closes that corridor's street segments (from the generated crosswalk) and lets its route + queue model show the detour, queues and reachability per mobility profile. The dashboard only builds the plan and the URL; SketchFuture validates it like a file import, and the card labels the result as a model check under SketchFuture's assumptions (a full closure is the extreme case of the assumed partial diversion).
 
 ## Data model
 
@@ -62,7 +64,7 @@
 
 ## API (minimum set + extras)
 
-`POST /sensor/observation` (single or batch) · `GET /sensors` · `GET /zones` · `GET /zones/{id}` · `GET /zones/{id}/history` · `GET /zones/{id}/prediction` · `GET /zones/{id}/prediction/history` · `POST /zones/{id}/context` · `GET /alerts` · `POST /alerts/{id}/ack` · `GET /interventions` · `POST /interventions/{id}/approve|reject` · `GET /audit` · `GET /model/metrics` · `GET /model/status` · `GET /health` · `GET /config` · `GET|POST /sim/*` · `GET /export/{table}.csv` · `POST /experiments/ground-truth` · `GET /experiments/results[.csv]` · static `/evidence/*.png`.
+`POST /sensor/observation` (single or batch) · `GET /sensors` · `GET /zones` · `GET /zones/{id}` · `GET /zones/{id}/history` · `GET /zones/{id}/prediction` · `GET /zones/{id}/prediction/history` · `POST /zones/{id}/context` · `GET /alerts` · `POST /alerts/{id}/ack` · `GET /interventions` · `POST /interventions/{id}/approve|reject` · `GET /audit` · `GET /model/metrics` · `GET /model/status` · `GET /health` · `GET /config` (thresholds, zone graph, SketchFuture crosswalk) · `GET|POST /sim/*` · `GET /export/{table}.csv` · `POST /experiments/ground-truth` · `GET /experiments/results[.csv]` · static `/evidence/*.png`.
 
 ## Performance (measured locally, Apple Silicon)
 

@@ -26,6 +26,7 @@ import {
   reportJSON,
   STORAGE_KEY,
 } from "./core/storage";
+import { decodePlan, type SharedPlan } from "./core/plan";
 import MapCanvas, { type Tool } from "./components/MapCanvas";
 import Results, { Sensitivity } from "./components/Results";
 import FloatingPanel from "./components/FloatingPanel";
@@ -69,11 +70,23 @@ const clock = (s: number) =>
 
 export default function App() {
   const [loaded] = useState(() => loadWorkspace(MAP));
-  const [history, setHistory] = useState<History>({
-    past: [],
-    present: loaded.workspace,
-    future: [],
+  // A plan in the URL fragment (`#plan=…`, e.g. from a CrowdPulse intervention card) replaces
+  // the saved plan like a file import: validated first, undoable, and never kept in the URL.
+  const [shared] = useState<{ plan: SharedPlan | null; error?: string }>(() => {
+    try {
+      return { plan: decodePlan(window.location.hash, MAP) };
+    } catch (e) {
+      return {
+        plan: null,
+        error: e instanceof Error ? e.message : "連結中的方案無法讀取。",
+      };
+    }
   });
+  const [history, setHistory] = useState<History>(() =>
+    shared.plan
+      ? { past: [loaded.workspace], present: shared.plan.workspace, future: [] }
+      : { past: [], present: loaded.workspace, future: [] },
+  );
   const workspace = history.present;
   const currentWorkspace = useRef(workspace);
   useEffect(() => {
@@ -83,10 +96,17 @@ export default function App() {
   const [saveMessage, setSaveMessage] = useState(
     loaded.error ? "本機保存暫停；原始資料已保留。" : "已在這個瀏覽器保存",
   );
-  const [error, setError] = useState(loaded.error ?? "");
-  const [notice, setNotice] = useState("");
+  const [error, setError] = useState(loaded.error ?? shared.error ?? "");
+  const [notice, setNotice] = useState(
+    shared.plan
+      ? `已載入${shared.plan.source ? `來自 ${shared.plan.source} 的` : "連結中的"}方案，正在比較；按「撤銷」可回到原有方案。`
+      : "",
+  );
   const [tool, setTool] = useState<Tool>("inspect");
-  const [selected, setSelected] = useState<string>(PRIMARY_STEPS.id);
+  const [selected, setSelected] = useState<string>(() => {
+    const first = shared.plan?.workspace.edits[0];
+    return first ? (first.type === "link" ? first.id : first.edgeId) : PRIMARY_STEPS.id;
+  });
   const [profile, setProfile] = useState<ProfileId | "all">("all");
   const [view, setView] = useState<"proposal" | "split">("proposal");
   const [comparison, setComparison] = useState<Comparison | null>(null);
@@ -233,6 +253,14 @@ export default function App() {
     compute(currentWorkspace.current);
     return () => worker.current?.terminate();
   }, [compute]);
+  useEffect(() => {
+    if (/(^|[#&])plan=/.test(window.location.hash))
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+  }, []);
   useEffect(() => {
     if (saveBlocked) return;
     const save = () => {

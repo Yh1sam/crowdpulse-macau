@@ -1,0 +1,140 @@
+{
+  "map_version": "macau-osm-2026-10-08-v1",
+  "model_version": "sf-route-queue-1.0",
+  "generated_by": "sketchfuture/scripts/crosswalk.mjs",
+  "method": "Each CrowdPulse corridor is cut by closing the SketchFuture street segments nearest to a hand-picked boundary junction, one at a time along the current shortest walking route, until that route is at least 30% longer than the direct one. direct_m and detour_m are the model's shortest walking routes between the two zones' representative nodes before and after the closure. Closing a corridor is the extreme case (100% diversion) of CrowdPulse's assumed partial redirect.",
+  "zones": {
+    "ruins_st_paul": {
+      "node": "7621468858",
+      "place": "ruins",
+      "name_zh": "大三巴牌坊"
+    },
+    "jesus_square": {
+      "node": "4533665334",
+      "place": null,
+      "name_zh": "耶穌會紀念廣場"
+    },
+    "rua_sao_paulo": {
+      "node": "8995121711",
+      "place": null,
+      "name_zh": "大三巴街"
+    },
+    "st_dominic": {
+      "node": "2031208643",
+      "place": "dominic",
+      "name_zh": "板樟堂前地"
+    },
+    "senado_square": {
+      "node": "6046966528",
+      "place": "senado",
+      "name_zh": "議事亭前地"
+    },
+    "almeida_ribeiro": {
+      "node": null,
+      "place": null,
+      "name_zh": "新馬路（亞美打利庇盧大馬路）"
+    },
+    "tercena_corridor": {
+      "node": "5685822408",
+      "place": "tercena",
+      "name_zh": "果欄街一帶"
+    }
+  },
+  "edges": {
+    "e_ruins_jesus": {
+      "name": "St. Paul's steps",
+      "from": "ruins_st_paul",
+      "to": "jesus_square",
+      "close": [
+        "osm-670357826-0"
+      ],
+      "streets": [
+        "耶穌會紀念廣場"
+      ],
+      "direct_m": 59,
+      "detour_m": 86,
+      "unsupported": null
+    },
+    "e_jesus_ruasp": {
+      "name": "Rua de S. Paulo (upper)",
+      "from": "jesus_square",
+      "to": "rua_sao_paulo",
+      "close": [
+        "osm-971880716-0"
+      ],
+      "streets": [
+        "大三巴街"
+      ],
+      "direct_m": 117,
+      "detour_m": 347,
+      "unsupported": null
+    },
+    "e_ruasp_dominic": {
+      "name": "Rua de S. Paulo (lower)",
+      "from": "rua_sao_paulo",
+      "to": "st_dominic",
+      "close": [
+        "osm-776547208-0",
+        "osm-717912859-2",
+        "osm-717912859-0"
+      ],
+      "streets": [
+        "板樟堂街",
+        "板樟堂前地"
+      ],
+      "direct_m": 247,
+      "detour_m": 335,
+      "unsupported": null
+    },
+    "e_dominic_senado": {
+      "name": "Largo de S. Domingos link",
+      "from": "st_dominic",
+      "to": "senado_square",
+      "close": [
+        "osm-192573684-4",
+        "osm-713100572-1",
+        "osm-192573684-1"
+      ],
+      "streets": [
+        "議事亭前地"
+      ],
+      "direct_m": 125,
+      "detour_m": 216,
+      "unsupported": null
+    },
+    "e_senado_almeida": {
+      "name": "Senado Square south exit",
+      "from": "senado_square",
+      "to": "almeida_ribeiro",
+      "close": [],
+      "streets": [],
+      "direct_m": null,
+      "detour_m": null,
+      "unsupported": "Avenida de Almeida Ribeiro is outside SketchFuture's pedestrian map (no crossing of the avenue is mapped)."
+    },
+    "e_ruasp_tercena": {
+      "name": "Rua da Tercena west link",
+      "from": "rua_sao_paulo",
+      "to": "tercena_corridor",
+      "close": [
+        "osm-713098464-1"
+      ],
+      "streets": [
+        "庇山耶街(爐石塘)"
+      ],
+      "direct_m": 370,
+      "detour_m": 570,
+      "unsupported": null
+    },
+    "e_tercena_almeida": {
+      "name": "Rua dos Ervanarios descent",
+      "from": "tercena_corridor",
+      "to": "almeida_ribeiro",
+      "close": [],
+      "streets": [],
+      "direct_m": null,
+      "detour_m": null,
+      "unsupported": "Avenida de Almeida Ribeiro is outside SketchFuture's pedestrian map (no crossing of the avenue is mapped)."
+    }
+  }
+}

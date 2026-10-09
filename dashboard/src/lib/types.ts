@@ -54,11 +54,19 @@ export interface Health {
   last_refresh: string | null; stats: Record<string, number>;
 }
 
+/** One CrowdPulse zone-graph corridor → the SketchFuture street segments whose closure forces a detour (shared/sketchfuture_crosswalk.json). */
+export interface SketchFutureCorridor { name: string; from: string; to: string; close: string[]; streets: string[]; direct_m: number | null; detour_m: number | null; unsupported: string | null }
+export interface SketchFutureCrosswalk {
+  map_version: string; model_version: string; generated_by: string; method: string;
+  zones: Record<string, { node: string | null; place: string | null; name_zh: string }>; edges: Record<string, SketchFutureCorridor>;
+}
+
 export interface Config {
   congestion_thresholds: { label: string; warning: number; critical: number; note: string };
   confidence: { low_confidence_threshold: number; ood_confidence_multiplier: number };
   density_index: { note: string };
   forecast_horizons_min: number[];
   zone_graph: { zones: { id: string; name: string; lat: number; lon: number; capacity: number; kind: string }[]; edges: { id: string; from: string; to: string; name: string; has_stairs: boolean; length_m: number }[]; sensors: { sensor_id: string; zone_id: string; lat: number; lon: number; heading_deg: number }[] };
+  sketchfuture: SketchFutureCrosswalk;
   privacy_mode_effective: boolean;
 }

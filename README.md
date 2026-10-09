@@ -30,7 +30,8 @@ ml/synthetic             mesoscopic crowd-flow simulator with sensor failure mod
 ml/pipeline              observation → zone-state aggregation, lag features, OOD detector, explanations
 ml/training, ml/evaluation   model comparison, metrics, presentation figures (all from real runs)
 dashboard/               Next.js + MapLibre operator console (8 pages)
-shared/                  ONE config file (thresholds, confidence, reliability), zone graph, observation schema
+sketchfuture/            SketchFuture: offline route + queue model on Macau's OSM streets, opened from intervention cards
+shared/                  ONE config file (thresholds, confidence, reliability), zone graph, observation schema, SketchFuture crosswalk
 docs/                    architecture, privacy, model card, experiment protocol, deployment, notes
 experiments/results/latest   evaluation figures + metrics table produced by the last evaluation run
 ```
@@ -60,12 +61,15 @@ uv venv --python 3.12 && uv pip install --python .venv/bin/python -e ".[dev]"
 # 4. dashboard
 cd dashboard && pnpm install && pnpm dev                 # http://localhost:3000
 
+# 5. optional: SketchFuture, the route check opened from intervention cards
+cd sketchfuture && npm install && npm run dev            # http://localhost:4173
+
 # tests
 .venv/bin/python -m pytest -q          # backend API + ML pipeline
 cd dashboard && pnpm test              # component tests
 ```
 
-Environment variables (all optional, prefix `CROWDPULSE_`): `DATABASE_URL` (default SQLite; use a Postgres/Supabase URL for deployment), `LIVE_SIM` (default true), `SIM_ACCELERATION`, `CORS_ORIGINS`, `PRIVACY_MODE` (default true; the only supported setting). Domain thresholds live in `shared/config.json`.
+Environment variables (all optional, prefix `CROWDPULSE_`): `DATABASE_URL` (default SQLite; use a Postgres/Supabase URL for deployment), `LIVE_SIM` (default true), `SIM_ACCELERATION`, `CORS_ORIGINS`, `PRIVACY_MODE` (default true; the only supported setting). Domain thresholds live in `shared/config.json`. The dashboard reads `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SKETCHFUTURE_URL` (default `http://localhost:4173`).
 
 ## Demo (under 3 minutes)
 
@@ -73,11 +77,19 @@ Environment variables (all optional, prefix `CROWDPULSE_`): `DATABASE_URL` (defa
 2. **Overview / Live map**: Senado Square is WARNING; flows are southbound from the Ruins.
 3. ~14:04 a performance at St. Dominic's Square ends and tour groups surge in from Almeida Ribeiro. Density and inflow rise; walking speed falls.
 4. **Zone detail → Senado Square**: the +10/+15 min forecast turns CRITICAL with its confidence, and "why" reasons (density change, inflow > outflow, adjacent zone filling, speed falling).
-5. **Interventions**: the recommendation ("redirect part of the southbound flow via the Rua da Tercena corridor", accessibility check, zh/en/pt notices). Click **VIEW EVIDENCE**, then **APPROVE**. The decision is written to the audit log, the assumed inflow reduction is applied to the simulation and the forecast is recalculated.
+5. **Interventions**: the recommendation ("redirect part of the southbound flow via the Rua da Tercena corridor", accessibility check, zh/en/pt notices). Click **VIEW EVIDENCE**, then **APPROVE**. The decision is written to the audit log, the assumed inflow reduction is applied to the simulation and the forecast is recalculated. **TEST IN SKETCHFUTURE** opens the same recommendation as a street-level plan (next section).
 6. **Reliability**: sensor health; predictions from unreliable zones show *LOW CONFIDENCE — HUMAN REVIEW REQUIRED*. **Evaluation**: real accuracy / F1 / confusion matrices from the last training run.
 7. Optional: the status bar has *inject surge (Senado)* to trigger a sudden surge; use the iOS app on a phone pointed at a group of people to see a real node appear on the map.
 
 A complete recorded run of this story, with the iOS app joining from the iPhone Simulator as a live sensor node and a no-action comparison run, is in [experiments/results/simulation_run](experiments/results/simulation_run/README.md). Approving the redirect lowered Senado's simulated density to 0.73–0.75 by 14:40 in two recorded pairs of runs, against 0.82–0.87 with no action; Senado stayed above CRITICAL in both. The crowd builds in about 3 minutes, so the first CRITICAL forecast arrived within about a minute of the true crossing rather than well ahead of it.
+
+## SketchFuture route check (integration)
+
+[sketchfuture/](sketchfuture/README.md) is a separate, offline route + queue model on Macau's OSM pedestrian streets (575 nodes, 692 segments) with walker, wheelchair-user and stroller profiles. Every redirect recommendation carries a **TEST IN SKETCHFUTURE** button that opens SketchFuture with a plan closing the zone-graph corridor the recommendation diverts people away from (for the demo: the Largo de S. Domingos → Senado Square entrance, three footway segments). SketchFuture then compares the same cohort with and without the closure: per-profile travel time, distance, queues and reachability.
+
+The two graphs are linked by `shared/sketchfuture_crosswalk.json`: for each of the seven zone-graph corridors, the SketchFuture street segments whose closure forces a detour. `sketchfuture/scripts/crosswalk.mjs` generates it with SketchFuture's own router (a hand-picked boundary junction per corridor; segments closed one at a time until the walking route is at least 30% longer), `GET /config` serves it, and SketchFuture's tests check it against the map (closures are valid plans, the recorded direct/detour distances are the model's, at least one cohort route changes, no walker is stranded). The two corridors to Avenida de Almeida Ribeiro are outside SketchFuture's map; their cards say so instead of offering a test.
+
+What it shows and what it does not: a full closure is the extreme case of CrowdPulse's assumed 30% diversion, and SketchFuture's cohort is its own (Senado / St. Dominic's / Rua da Tercena ↔ Ruins / Museum) under its own assumptions (`sketchfuture/MODEL.md`). It is a consistency check on real street geometry — e.g. the detour around Senado's north entrance is 216 m instead of 125 m in that map — not evidence of real pedestrian behaviour. Reduced-mobility visitors keep the main route with staff assistance, as the recommendation states.
 
 ## Results (synthetic held-out test days, from `ml/models/metrics.json`)
 

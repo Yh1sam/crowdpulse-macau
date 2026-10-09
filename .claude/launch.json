@@ -16,6 +16,13 @@
       "runtimeArgs": ["node_modules/next/dist/bin/next", "dev", "--port", "3100"],
       "cwd": "dashboard",
       "port": 3100
+    },
+    {
+      "name": "sketchfuture",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "4173"],
+      "cwd": "sketchfuture",
+      "port": 4173
     }
   ]
 }

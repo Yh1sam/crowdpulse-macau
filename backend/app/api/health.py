@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from backend.app.api.deps import ENGINE, Engine
 from backend.app.config import get_settings
-from shared.config import load_config, load_zone_graph
+from shared.config import load_config, load_sketchfuture_crosswalk, load_zone_graph
 
 router = APIRouter(tags=["system"])
 
@@ -24,4 +24,4 @@ def health(engine: Engine = ENGINE):
 @router.get("/config")
 def config():
     cfg = load_config()
-    return {**cfg, "zone_graph": load_zone_graph(), "privacy_mode_effective": get_settings().privacy_mode}
+    return {**cfg, "zone_graph": load_zone_graph(), "sketchfuture": load_sketchfuture_crosswalk(), "privacy_mode_effective": get_settings().privacy_mode}
