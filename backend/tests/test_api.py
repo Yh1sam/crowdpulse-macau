@@ -386,7 +386,16 @@ def test_stopping_the_simulation_closes_its_state(client):
     assert sim_nodes and sim_nodes[0]["status"] == "offline", sim_nodes
     z = client.get("/zones/senado_square").json()
     assert z["state"] is None and z["active_intervention_id"] is None and z["risk"] == "UNKNOWN"
-    assert client.get("/alerts").json() == [], "alerts dated in the stopped simulation's future are hidden"
+    # alerts dated after the wall clock (a stopped simulation's future) are hidden. The scenario day is fixed
+    # (2026-10-03), so the run's earlier alerts are history once that day has passed; check the mechanism with
+    # an alert that is always in the future.
+    from datetime import datetime, timedelta, timezone
+    from backend.app.models import Alert
+    with session_scope() as db:
+        db.add(Alert(zone_id="senado_square", created_at=datetime.now(timezone.utc) + timedelta(days=1), level="warning", title="future-dated", message="belongs to a simulation's future"))
+    listed = client.get("/alerts").json()
+    assert all(a["title"] != "future-dated" for a in listed), "alerts dated in the stopped simulation's future are hidden"
+    assert all(datetime.fromisoformat(a["created_at"].replace("Z", "+00:00")) <= datetime.now(timezone.utc) for a in listed)
     with session_scope() as db:
         assert all(i.expires_at.year == 2000 for i in db.execute(select(Intervention)).scalars())
     # a real phone now works normally on the wall clock
