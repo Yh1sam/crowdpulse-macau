@@ -29,7 +29,7 @@ backend/app              FastAPI: ingestion, zone aggregation, prediction, alert
 ml/synthetic             mesoscopic crowd-flow simulator with sensor failure modes (same schema as real phones)
 ml/pipeline              observation → zone-state aggregation, lag features, OOD detector, explanations
 ml/training, ml/evaluation   model comparison, metrics, presentation figures (all from real runs)
-dashboard/               Next.js + MapLibre operator console (8 pages)
+dashboard/               Next.js + MapLibre operator console (9 pages)
 sketchfuture/            SketchFuture: offline route + queue model on Macau's OSM streets, opened from intervention cards
 shared/                  ONE config file (thresholds, confidence, reliability), zone graph, observation schema, SketchFuture crosswalk
 docs/                    architecture, privacy, model card, experiment protocol, deployment, notes
@@ -40,12 +40,14 @@ See [docs/architecture.md](docs/architecture.md) for the system diagram and data
 
 ## Setup
 
-Requirements: Python 3.12, Node 20+, pnpm (or npm), Xcode 16+ for the iOS app.
+Requirements: Python 3.12, [uv](https://docs.astral.sh/uv/) (or pip), Node 20+, pnpm 10+ (tested with 11.21) and npm, Xcode 16+ for the iOS app.
+
+The trained models (`ml/models/`) and evaluation figures (`experiments/results/latest/`) are committed, so the backend and dashboard run straight after installing; steps 1–2 are only needed to regenerate them, and they overwrite the committed files.
 
 ```bash
-# Python (backend + ML)
-uv venv --python 3.12 && uv pip install --python .venv/bin/python -e ".[dev]"
-# or: python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+# Python (backend + ML): creates .venv with the versions pinned in uv.lock
+uv sync --python 3.12 --extra dev
+# or, without uv: python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 
 # 1. synthetic data (14 simulated days + a rain/closure stress day)
 .venv/bin/python -m ml.synthetic.generate --days 14 --interval 20 --out ml/data
@@ -71,13 +73,25 @@ cd dashboard && pnpm test              # component tests
 
 Environment variables (all optional, prefix `CROWDPULSE_`): `DATABASE_URL` (default SQLite; use a Postgres/Supabase URL for deployment), `LIVE_SIM` (default true), `SIM_ACCELERATION`, `CORS_ORIGINS`, `PRIVACY_MODE` (default true; the only supported setting). Domain thresholds live in `shared/config.json`. The dashboard reads `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SKETCHFUTURE_URL` (default `http://localhost:4173`).
 
-## Demo (under 3 minutes)
+## Demo (about 3 minutes on stage)
 
-1. Start backend + dashboard. The simulated clock starts at 13:45 on a Golden-Week afternoon; sensors report every 5 s at 6× speed. The run stops by itself at 15:45, the end of the scenario (about 19 minutes of real time); press *start demo sim* to run it again.
+**Timing.** The scenario is a Golden-Week afternoon from 13:45 to 15:45. The backend fast-forwards its first 8 simulated minutes so the forecasts have history, so the SIM CLOCK shows about 13:53 when the dashboard opens. At the default 6× speed one real minute is six simulated minutes:
+
+| real time after (re)start | SIM CLOCK | what happens |
+|---|---|---|
+| 0 min | ≈13:53 | Senado Square WARNING; *Deploy staff* cards pending |
+| ≈2 min | ≈14:04 | a performance at St. Dominic's ends; tour groups surge in |
+| ≈3 min | ≈14:09–14:11 | Senado forecasts turn CRITICAL; the Senado redirect card appears |
+| ≈7 min | ≈14:35–14:40 | after an approval, Senado's density eases |
+| ≈19 min | 15:45 | the run ends by itself; every zone shows UNKNOWN until the next start |
+
+So start or restart the run (*start demo sim* in the status bar) about 3 minutes before you open Interventions. For rehearsals, `CROWDPULSE_SIM_ACCELERATION=10` shortens every step ([docs/testing.md §4](docs/testing.md)). The Live map loads OpenStreetMap tiles over the internet; open it once before the pitch.
+
+1. Start the backend, the dashboard and, for step 5, SketchFuture (commands in [Setup](#setup)).
 2. **Overview / Live map**: Senado Square is WARNING; flows are southbound from the Ruins.
 3. ~14:04 a performance at St. Dominic's Square ends and tour groups surge in from Almeida Ribeiro. Density and inflow rise; walking speed falls.
-4. **Zone detail → Senado Square**: the +10/+15 min forecast turns CRITICAL with its confidence, and "why" reasons (density change, inflow > outflow, adjacent zone filling, speed falling).
-5. **Interventions**: the recommendation ("redirect part of the southbound flow via the Rua da Tercena corridor", accessibility check, zh/en/pt notices). Click **VIEW EVIDENCE**, then **APPROVE**. The decision is written to the audit log, the assumed inflow reduction is applied to the simulation and the forecast is recalculated. **TEST IN SKETCHFUTURE** opens the same recommendation as a street-level plan (next section).
+4. **Zone detail → Senado Square**: the +5/+10/+15 min forecasts turn CRITICAL, the first ones flagged *LOW CONFIDENCE — HUMAN REVIEW REQUIRED*, then confident ones, each with "why" reasons (density change, inflow > outflow, adjacent zone filling, speed falling). **Say it plainly:** this scripted crowd builds in about 3 minutes, so the confident CRITICAL forecast arrives *with* the crowd, not before it. The 5–15 minute forecasting skill is shown offline on held-out days: on the **Evaluation** page, +15 min CRITICAL recall is 0.908 against 0.792 for persistence.
+5. **Interventions**: two or three cards are pending, because neighbouring zones raise their own (St. Dominic's, Rua de S. Paulo). Open the *Redirect part of … flow around Senado Square* card; the Overview's "Highest risk" line names its number. It shows the route, the accessibility check and the zh/en/pt public notice. Click **VIEW EVIDENCE**, then **APPROVE**. The decision is written to the audit log, the assumed inflow reduction is applied to the simulation and the forecast is recalculated. **TEST IN SKETCHFUTURE** opens the same recommendation as a street-level plan (next section). Two things to expect: a card that has just been superseded by a stronger one, or has expired, answers APPROVE with "409: intervention N already superseded" (or "expired"), so act on the newest card; and a neighbouring zone's card may route people towards a zone that is itself busy, because routes are scored by length, stairs and capacity, not by the destination's state. The operator, not the system, makes that call.
 6. **Reliability**: sensor health; predictions from unreliable zones show *LOW CONFIDENCE — HUMAN REVIEW REQUIRED*. **Evaluation**: real accuracy / F1 / confusion matrices from the last training run.
 7. Optional: the status bar has *inject surge (Senado)* to trigger a sudden surge; use the iOS app on a phone pointed at a group of people to see a real node appear on the map.
 
@@ -99,7 +113,7 @@ What it shows and what it does not: a full closure is the extreme case of CrowdP
 | +10 min | random forest | 0.966 | 0.876 | 0.827 | 0.972 | 0.019 |
 | +15 min | random forest | 0.964 | 0.865 | 0.795 | 0.972 | 0.020 |
 
-Low-confidence gating: predictions flagged for human review (≈2% of all) are right only ~55% of the time versus ~97% for the rest. On the rain + closure + surge stress day, macro-F1 drops to ≈0.61–0.64 and the OOD detector flags ≈14% of inputs (vs ≈1–2% on normal days). Full tables and figures: `experiments/results/latest/`, and the dashboard's Evaluation page. These are **synthetic** results; see the model card for what they do and do not show.
+The forecast beats the persistence baseline ("the class stays as it is now") by 3.7 / 4.9 / 7.0 macro-F1 points at +5 / +10 / +15 min; the gain grows with the horizon. At +15 min the model recognises 91% of CRITICAL bins (recall 0.908) against 79% for persistence (0.792). Low-confidence gating: the predictions flagged for human review (1.4–1.7% of all) are right only 56–57% of the time, versus 97–98% for the rest. On the rain + closure + surge stress day, macro-F1 falls to 0.86 / 0.83 / 0.81 (WARNING F1 to 0.61–0.70) and the OOD detector flags 11–12% of inputs, against 0.6–0.7% on the normal test days. Full tables and figures: `experiments/results/latest/metrics_table.md` (generated from `ml/models/metrics.json`, the single source for every number here), and the dashboard's Evaluation page. These are **synthetic** results; see the model card for what they do and do not show.
 
 ## Real-video result (not synthetic)
 
@@ -114,15 +128,23 @@ YOLO11s (18 MB) was no better than YOLO11n, so the smaller model ships. Inferenc
 
 **Correction:** the first version of this evaluation reported 34% / 8% for Apple's detector. Those hand counts were attached to the wrong video times (ffmpeg's sampler takes the last frame of each 5 s interval, 2.4 s after the label), and the near-field definition was not one the detectors could be scored against. The script now verifies frame alignment pixel-for-pixel and uses a stated geometric near-field rule; the table above is the corrected result.
 
-**Licence:** YOLO11 weights are AGPL-3.0 (Ultralytics). That is fine for this open-source prototype; a closed-source or App Store deployment needs an Ultralytics licence or a permissively licensed detector. Apple's built-in detector remains selectable in the app's Setup page and is the automatic fallback.
+**Licence:** YOLO11 weights are AGPL-3.0 (Ultralytics), so this repository is released under AGPL-3.0 as a whole (see [Licence](#licence)); a closed-source or App Store deployment needs an Ultralytics licence or a permissively licensed detector. Apple's built-in detector remains selectable in the app's Setup page and is the automatic fallback.
 
 ## Limitations (honest summary)
 
 - All accuracy numbers come from a simulator that we wrote; real-world accuracy is unknown until the controlled experiments in `docs/experiment-protocol.md` are run.
 - The density index is relative (0–1), not persons per m². Thresholds are experimental.
 - Camera person detection undercounts in dense crowds (occlusion). This is measured on real video (YOLO11n finds about 82% of people in the densest frames) and modelled in the simulator (observed density saturates near 0.8 while simulated truth reaches 1.0).
-- The WARNING class (transitional) is the hardest: F1 ≈ 0.73–0.77 vs ≈0.90 for CRITICAL.
+- The WARNING class (transitional) is the hardest: F1 0.74–0.79 vs 0.86–0.88 for CRITICAL (test days, observed labels).
 - Intervention effects are assumptions (30% inflow diversion), not validated causal estimates.
 - One phone sees one part of a zone; the zone estimate depends on calibration of each phone's visible capacity.
 
 Documented failure cases: `docs/model-card.md` (occlusion, rain/umbrellas, obstruction not flagged, device movement, unusual days, single-sensor dropout).
+
+## Licence
+
+Copyright (C) 2026 the CrowdPulse Macau team.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation ([LICENSE](LICENSE)). It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. Under AGPL-3.0, anyone who runs a modified version as a network service (the backend or dashboard) must offer its users the corresponding source.
+
+Third-party material keeps its own licence: the YOLO11n weights (AGPL-3.0, Ultralytics), the CC0 Yonge & Dundas video and the OpenStreetMap data used by SketchFuture (ODbL 1.0). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

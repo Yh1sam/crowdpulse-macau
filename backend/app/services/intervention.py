@@ -13,20 +13,33 @@ PUBLIC_MESSAGES = {
     "redirect_flow": {
         "en": "{zone} is very crowded. Please use the alternative route via {route} to continue. Staff are available to assist visitors with reduced mobility.",
         "zh": "{zone}目前非常擁擠。請改經{route}前往。工作人員可協助行動不便的遊客。",
-        "pt": "{zone} está muito cheio. Por favor utilize o percurso alternativo por {route}. Há pessoal disponível para apoiar visitantes com mobilidade reduzida.",
+        "pt": "{zone}: grande afluência de visitantes. Por favor utilize o percurso alternativo: {route}. Há pessoal disponível para apoiar visitantes com mobilidade reduzida.",
     },
     "reduce_inflow": {
         "en": "{zone} is reaching capacity. Entry is temporarily slowed for safety. Thank you for your patience.",
         "zh": "{zone}人流即將飽和。為安全起見，入口暫時放慢放行。感謝您的耐心。",
-        "pt": "{zone} está a atingir a capacidade. A entrada está temporariamente condicionada por segurança. Obrigado pela sua paciência.",
+        "pt": "{zone}: lotação quase esgotada. A entrada está temporariamente condicionada por segurança. Obrigado pela sua paciência.",
     },
     "deploy_staff": {
         "en": "{zone} is busy. Please follow staff guidance and keep moving.",
         "zh": "{zone}人流較多。請聽從工作人員指示並保持前行。",
-        "pt": "{zone} está movimentado. Siga as indicações do pessoal e mantenha-se em movimento.",
+        "pt": "{zone}: grande afluência de visitantes. Siga as indicações do pessoal e continue a circular.",
     },
     "increase_monitoring": {"en": "", "zh": "", "pt": ""},
 }
+# Portuguese notices put the place name before a colon, so the sentence never depends on its gender or article.
+ROUTE_SEPARATOR = {"en": " / ", "zh": "、", "pt": " / "}
+
+
+def place_name(item: dict[str, Any], lang: str) -> str:
+    """A zone's or corridor's name in a notice language (name_zh / name_pt in shared/zones.json; English otherwise)."""
+    return item.get(f"name_{lang}") or item["name"]
+
+
+def public_messages(kind: str, zone: dict[str, Any], route_edges: list[dict[str, Any]] = ()) -> dict[str, str]:
+    """Public notices in every language, with place names in that language."""
+    return {lang: text.format(zone=place_name(zone, lang), route=ROUTE_SEPARATOR[lang].join(place_name(e, lang) for e in route_edges))
+            for lang, text in PUBLIC_MESSAGES[kind].items()}
 
 
 def _paths(graph_nbrs: dict[str, list[tuple[str, dict]]], src: str, dst: str, avoid: str, max_len: int = 4) -> list[list[tuple[str, dict]]]:
@@ -95,7 +108,7 @@ def build_recommendation(zone: dict[str, Any], graph: dict[str, Any], states: di
                 "recommendation": f"Prediction confidence is low ({conf:.0%}). Send a staff member to verify conditions at {zone['name']} before any crowd-control action. No automatic action.",
                 "rationale": rationale + ["AI confidence below the operator threshold: human verification required"], "messages": {}}
     if pred_class == "WARNING":
-        msgs = {k: v.format(zone=zone["name"], route="") for k, v in PUBLIC_MESSAGES["deploy_staff"].items()}
+        msgs = public_messages("deploy_staff", zone)
         return {**base, "kind": "deploy_staff", "title": f"Deploy staff to {zone['name']}",
                 "recommendation": f"{zone['name']} is predicted WARNING in {horizon} min ({conf:.0%} confidence). Deploy 2 staff to keep pedestrians moving and prepare the alternate route. Display the multilingual notice.",
                 "rationale": rationale, "messages": msgs, "assumed_effect": {"note": "Staff presence assumed to keep flow moving; no inflow change modelled."}}
@@ -123,12 +136,13 @@ def build_recommendation(zone: dict[str, Any], graph: dict[str, Any], states: di
             "note": ("Chosen route avoids stairs and steep sections." if not (route["has_stairs"] or route["steep"]) else "Chosen route includes stairs/steep sections: keep the main route open with staff assistance for reduced-mobility visitors.")
             + " Elderly and reduced-mobility visitors should never be forced onto a long detour; staff escort on the main route is part of this recommendation.",
         }
-        msgs = {k: v.format(zone=zone["name"], route=route_name) for k, v in PUBLIC_MESSAGES["redirect_flow"].items()}
+        edges_by_name = {e["name"]: e for e in graph["edges"]}
+        msgs = public_messages("redirect_flow", zone, [edges_by_name[name] for name in route["edges"]])
         return {**base, "kind": "redirect_flow", "title": f"Redirect part of {direction or 'inbound'} flow around {zone['name']}",
                 "recommendation": f"{zone['name']} is predicted CRITICAL in {horizon} min ({conf:.0%} confidence). Redirect part of the {direction or 'inbound'} flow from {src_name} via {route_name} (to {zones[route['to']]['name']}). Keep the main route open with staff for reduced-mobility visitors. Display multilingual notices at {src_name}.",
                 "rationale": rationale, "route": route, "route_alternatives": alternatives[:4], "accessibility": access, "messages": msgs,
                 "assumed_effect": {"inflow_reduction": reduction, "duration_min": 20, "note": f"Assumes {reduction:.0%} of inbound flow diverts (configurable prototype assumption, not validated)."}}
-    msgs = {k: v.format(zone=zone["name"], route="") for k, v in PUBLIC_MESSAGES["reduce_inflow"].items()}
+    msgs = public_messages("reduce_inflow", zone)
     return {**base, "kind": "reduce_inflow", "title": f"Temporarily reduce inflow into {zone['name']}",
             "recommendation": f"{zone['name']} is predicted CRITICAL in {horizon} min ({conf:.0%} confidence) and no alternate route is available. Ask staff at {src_name} to hold groups briefly (metered entry) and display multilingual notices. Do not block reduced-mobility visitors.",
             "rationale": rationale, "messages": msgs, "accessibility": {"note": "Metered entry must keep a priority lane for reduced-mobility visitors."},

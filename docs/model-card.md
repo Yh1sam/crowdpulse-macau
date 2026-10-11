@@ -2,7 +2,7 @@
 
 ## Model type
 
-Per forecast horizon (+5, +10, +15 min) one classifier chosen among logistic regression, random forest and histogram gradient boosting by validation macro-F1 (random forest won all three in the last run), plus a gradient-boosting regressor for the future density index. Isotonic calibration is applied only if it lowers ECE on a held-out half of the validation set (it did not in the last run; raw ECE was already ≤ 0.01). An isolation forest + feature-range checks detect out-of-distribution inputs.
+Per forecast horizon (+5, +10, +15 min) one classifier chosen among logistic regression, random forest and histogram gradient boosting by validation macro-F1 (random forest won all three in the last run), plus a gradient-boosting regressor for the future density index. Isotonic calibration is applied only if it lowers ECE by more than 0.005 on a held-out half of the validation set: in the last run it was applied at +10 min (held-out ECE 0.012 → 0.007) and +15 min (0.017 → 0.009), and not at +5 min (0.009 → 0.005, below the required improvement). An isolation forest + feature-range checks detect out-of-distribution inputs.
 
 ## Intended use
 
@@ -26,20 +26,22 @@ density and 3 lags, 1- and 3-min density change; inflow/outflow/net-flow proxies
 
 | horizon | accuracy | precision (macro) | recall (macro) | F1 (macro) | ROC-AUC (ovr) | ECE | persistence F1 | acc. vs ground truth | density MAE | stress-day F1 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| +5 | 0.969 | 0.88 | 0.90 | 0.887 | 0.99 | 0.004 | 0.849 | 0.974 | 0.017 | ≈0.62 |
-| +10 | 0.966 | 0.87 | 0.89 | 0.876 | 0.99 | 0.007 | 0.827 | 0.972 | 0.019 | ≈0.64 |
-| +15 | 0.964 | 0.86 | 0.88 | 0.865 | 0.99 | 0.009 | 0.795 | 0.972 | 0.020 | ≈0.61 |
+| +5 | 0.969 | 0.877 | 0.897 | 0.887 | 0.993 | 0.001 | 0.849 | 0.974 | 0.017 | 0.857 |
+| +10 | 0.966 | 0.871 | 0.882 | 0.876 | 0.991 | 0.007 | 0.827 | 0.972 | 0.019 | 0.832 |
+| +15 | 0.964 | 0.863 | 0.869 | 0.865 | 0.991 | 0.007 | 0.795 | 0.972 | 0.020 | 0.814 |
 
-Per class (+15 min): SAFE F1 0.99, WARNING F1 ≈0.73, CRITICAL F1 ≈0.90. Confusion matrices and figures: `experiments/results/latest/`. Exact values for the current artefacts are always in `metrics.json`; the table above is copied from it.
+The table is the one `ml/evaluation/evaluate.py` writes to `experiments/results/latest/metrics_table.md` from `ml/models/metrics.json` (training run 2026-09-28T11:12Z); an earlier run that day is kept in `experiments/results/20260928T105934Z/` and is superseded.
 
-Confidence gating (threshold 0.60 on effective confidence = model probability × reliability factor × OOD factor): ≈2% of predictions are flagged for human review; their accuracy is ≈0.55 versus ≈0.97 for the rest.
+Per class (+15 min, test days): against the *observed* labels the model is trained on, SAFE F1 0.99, WARNING F1 0.74, CRITICAL F1 0.86 (recall 0.91; persistence baseline 0.79). Against the simulator's *ground truth*, CRITICAL F1 is 0.91 (precision 0.99, recall 0.84) and WARNING F1 0.77. Confusion matrices and figures: `experiments/results/latest/`.
+
+Confidence gating (threshold 0.60 on effective confidence = model probability × reliability factor × OOD factor): 1.4–1.7% of predictions are flagged for human review; their accuracy is 0.56–0.57 versus 0.97–0.98 for the rest.
 
 ## Known limitations and failure cases
 
 | case | cause | impact | detection | mitigation |
 |---|---|---|---|---|
 | Dense-crowd under-count | occlusion: detector misses people behind others | observed density saturates ≈0.8 when truth is 1.0; CRITICAL recognised late | ground-truth counts in controlled experiments; timeline figure | per-sensor calibration of visible capacity; thresholds defined on the observed index; multiple viewpoints per zone |
-| Rain / umbrellas | umbrellas hide bodies; lens droplets | counts noisier, vision confidence drops; stress-day F1 ≈0.6 | rain indicator, vision confidence, OOD detector (flag rate 14% vs 1.6%) | confidence reduced; operator warning "conditions differ from training data" |
+| Rain / umbrellas | umbrellas hide bodies; lens droplets | counts noisier, vision confidence drops; stress-day macro-F1 0.814–0.857 vs 0.865–0.887 on normal test days, WARNING F1 down to 0.61–0.70 | rain indicator, vision confidence, OOD detector (flags 11–12% of stress-day inputs vs 0.6–0.7% on normal days) | confidence reduced; operator warning "conditions differ from training data" |
 | Camera obstruction not flagged | someone stands in front of the phone; the app fails to notice | near-zero counts look like an empty zone | disagreement between sensors in the same zone; sudden drop vs neighbours | reliability weight from vision confidence; alerts for low reliability; human review |
 | Device moved / knocked | motion stability < 0.75 | garbage counts and flow | accelerometer/gyro stability score | observation weight → 0; sensor issue alert |
 | Single-sensor dropout | phone battery / network | zone becomes stale; no prediction | staleness, "INSUFFICIENT DATA — HUMAN REVIEW" | buffer + retry on phone; ≥2 phones per critical zone |
@@ -51,7 +53,7 @@ Confidence gating (threshold 0.60 on effective confidence = model probability ×
 ## Fairness considerations
 
 - *Elderly / reduced-mobility pedestrians*: interventions are scored with an accessibility penalty (stairs, steep sections, detour length); the chosen route in the demo avoids the St. Paul's steps, and every recommendation keeps the main route open with staff assistance.
-- *Non-Chinese-speaking visitors*: public notices are generated in Chinese, English and Portuguese.
+- *Non-Chinese-speaking visitors*: public notices are generated in Chinese, English and Portuguese, with zone and street names in each language (`name_zh` / `name_pt` in `shared/zones.json`).
 - The model itself does not use any attribute of individuals (it cannot: it never sees them).
 
 ## Ethical considerations

@@ -131,7 +131,10 @@ def test_critical_forecast_creates_alert_and_intervention_with_audit(client):
     assert ivs, "expected a pending intervention"
     iv = ivs[0]
     assert iv["kind"] in ("redirect_flow", "reduce_inflow", "deploy_staff", "increase_monitoring")
-    assert set(iv["messages"]) <= {"zh", "en", "pt"}
+    if iv["kind"] == "increase_monitoring":
+        assert not any(iv["messages"].values()), "monitoring is internal: no public notice"
+    else:
+        assert set(iv["messages"]) == {"zh", "en", "pt"} and all(iv["messages"].values())
     r = client.post(f"/interventions/{iv['id']}/approve", json={"operator": "tester", "note": "ok"})
     assert r.status_code == 200 and r.json()["status"] == "approved" and r.json()["decided_by"] == "tester"
     assert client.post(f"/interventions/{iv['id']}/reject", json={}).status_code == 409
@@ -284,6 +287,36 @@ def test_future_dated_reading_does_not_lock_sensor(client):
     client.post("/sensor/observation", json=obs(sensor_id="node-skew1", ts=wall + timedelta(hours=2), count=10))
     client.post("/sensor/observation", json=obs(sensor_id="node-skew1", ts=wall, count=77))
     assert client.get("/sensors/node-skew1").json()["person_count"] == 77
+
+
+def test_public_notices_use_place_names_in_each_language():
+    """Review finding: the zh and pt notices inserted the English zone and street names
+    ("Senado Square目前非常擁擠。請改經Rua de S. Paulo (lower) / …")."""
+    import re
+    from backend.app.services.intervention import build_recommendation
+    from shared.config import load_config
+    from shared.geo import bearing_deg
+    latin = re.compile(r"[A-Za-z]")
+    for item in GRAPH["zones"] + GRAPH["edges"]:
+        assert item["name_zh"] and not latin.search(item["name_zh"]), item["id"]
+        assert item["name_pt"], item["id"]
+    zones = {z["id"]: z for z in GRAPH["zones"]}
+    senado, dominic = zones["senado_square"], zones["st_dominic"]
+    toward_senado = bearing_deg(dominic["lat"], dominic["lon"], senado["lat"], senado["lon"])
+    flowing = {"st_dominic": {"density": 0.8, "flow_speed_mps": 0.8, "flow_coherence": 0.9, "flow_direction_deg": toward_senado}}
+    cases = [("redirect_flow", flowing, _pred("CRITICAL", 0.9, False)), ("reduce_inflow", {}, _pred("CRITICAL", 0.9, False)), ("deploy_staff", flowing, _pred("WARNING", 0.9, False))]
+    for kind, states, pred in cases:
+        rec = build_recommendation(senado, GRAPH, states, pred, load_config())
+        assert rec["kind"] == kind
+        msgs = rec["messages"]
+        assert set(msgs) == {"zh", "en", "pt"} and all(msgs.values()), kind
+        assert not latin.search(msgs["zh"]), msgs["zh"]
+        assert "議事亭前地" in msgs["zh"] and "Largo do Senado" in msgs["pt"] and "Senado Square" in msgs["en"]
+        assert "Senado Square" not in msgs["pt"]
+        if kind == "redirect_flow":
+            edges = {e["name"]: e for e in GRAPH["edges"]}
+            for name in rec["route"]["edges"]:
+                assert edges[name]["name_zh"] in msgs["zh"] and edges[name]["name_pt"] in msgs["pt"] and name in msgs["en"]
 
 
 def _pred(cls, conf, low, h=5):

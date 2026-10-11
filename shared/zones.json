@@ -1,9 +1,11 @@
 {
-  "note": "Conceptual zone graph for the Macau historic tourist district. Coordinates are approximate centroids for a prototype; capacities are relative simulation parameters (not surveyed values).",
+  "note": "Conceptual zone graph for the Macau historic tourist district. Coordinates are approximate centroids for a prototype; capacities are relative simulation parameters (not surveyed values). name_zh / name_pt are the Chinese and Portuguese place names used in public notices.",
   "zones": [
     {
       "id": "ruins_st_paul",
       "name": "Ruins of St. Paul's",
+      "name_zh": "大三巴牌坊",
+      "name_pt": "Ruínas de São Paulo",
       "lat": 22.1975,
       "lon": 113.5409,
       "capacity": 900,
@@ -14,6 +16,8 @@
     {
       "id": "jesus_square",
       "name": "Company of Jesus Square",
+      "name_zh": "耶穌會紀念廣場",
+      "name_pt": "Largo da Companhia de Jesus",
       "lat": 22.1969,
       "lon": 113.54075,
       "capacity": 1000,
@@ -24,6 +28,8 @@
     {
       "id": "rua_sao_paulo",
       "name": "Rua de S. Paulo (corridor)",
+      "name_zh": "大三巴街",
+      "name_pt": "Rua de São Paulo",
       "lat": 22.1959,
       "lon": 113.5404,
       "capacity": 450,
@@ -34,6 +40,8 @@
     {
       "id": "st_dominic",
       "name": "St. Dominic's Square",
+      "name_zh": "板樟堂前地",
+      "name_pt": "Largo de São Domingos",
       "lat": 22.1943,
       "lon": 113.5399,
       "capacity": 1100,
@@ -44,6 +52,8 @@
     {
       "id": "senado_square",
       "name": "Senado Square",
+      "name_zh": "議事亭前地",
+      "name_pt": "Largo do Senado",
       "lat": 22.1934,
       "lon": 113.5397,
       "capacity": 1200,
@@ -54,6 +64,8 @@
     {
       "id": "almeida_ribeiro",
       "name": "Avenida de Almeida Ribeiro",
+      "name_zh": "新馬路",
+      "name_pt": "Avenida de Almeida Ribeiro",
       "lat": 22.1928,
       "lon": 113.5392,
       "capacity": 1500,
@@ -64,6 +76,8 @@
     {
       "id": "tercena_corridor",
       "name": "Rua da Tercena corridor (alternate route)",
+      "name_zh": "果欄街一帶",
+      "name_pt": "Rua da Tercena",
       "lat": 22.1947,
       "lon": 113.5386,
       "capacity": 450,
@@ -81,7 +95,9 @@
       "capacity_per_min": 220,
       "has_stairs": true,
       "steep": true,
-      "name": "St. Paul's steps"
+      "name": "St. Paul's steps",
+      "name_zh": "大三巴牌坊石階",
+      "name_pt": "escadaria das Ruínas de São Paulo"
     },
     {
       "id": "e_jesus_ruasp",
@@ -91,7 +107,9 @@
       "capacity_per_min": 180,
       "has_stairs": false,
       "steep": false,
-      "name": "Rua de S. Paulo (upper)"
+      "name": "Rua de S. Paulo (upper)",
+      "name_zh": "大三巴街（上段）",
+      "name_pt": "Rua de São Paulo (troço superior)"
     },
     {
       "id": "e_ruasp_dominic",
@@ -101,7 +119,9 @@
       "capacity_per_min": 170,
       "has_stairs": false,
       "steep": false,
-      "name": "Rua de S. Paulo (lower)"
+      "name": "Rua de S. Paulo (lower)",
+      "name_zh": "大三巴街（下段）",
+      "name_pt": "Rua de São Paulo (troço inferior)"
     },
     {
       "id": "e_dominic_senado",
@@ -111,7 +131,9 @@
       "capacity_per_min": 260,
       "has_stairs": false,
       "steep": false,
-      "name": "Largo de S. Domingos link"
+      "name": "Largo de S. Domingos link",
+      "name_zh": "板樟堂前地通道",
+      "name_pt": "passagem do Largo de São Domingos"
     },
     {
       "id": "e_senado_almeida",
@@ -121,7 +143,9 @@
       "capacity_per_min": 320,
       "has_stairs": false,
       "steep": false,
-      "name": "Senado Square south exit"
+      "name": "Senado Square south exit",
+      "name_zh": "議事亭前地南出口",
+      "name_pt": "saída sul do Largo do Senado"
     },
     {
       "id": "e_ruasp_tercena",
@@ -131,7 +155,9 @@
       "capacity_per_min": 120,
       "has_stairs": false,
       "steep": false,
-      "name": "Rua da Tercena west link"
+      "name": "Rua da Tercena west link",
+      "name_zh": "果欄街西面連接路段",
+      "name_pt": "ligação oeste pela Rua da Tercena"
     },
     {
       "id": "e_tercena_almeida",
@@ -141,7 +167,9 @@
       "capacity_per_min": 140,
       "has_stairs": false,
       "steep": false,
-      "name": "Rua dos Ervanarios descent"
+      "name": "Rua dos Ervanarios descent",
+      "name_zh": "草堆街下坡路段",
+      "name_pt": "descida pela Rua dos Ervanários"
     }
   ],
   "sensors": [

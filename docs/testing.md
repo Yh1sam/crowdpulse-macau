@@ -1,6 +1,6 @@
 # Testing CrowdPulse
 
-Every command below was run on 2026-09-29, either on a fresh clone or on the working copy. Expected results are what those runs produced.
+The automated suites and builds in section 1 were last re-run on 2026-10-11, and the Python install in section 0 on a fresh `git archive` export the same day. The other sections were run when they were written, between 2026-09-29 and 2026-10-09. Expected results are what those runs produced.
 Run commands from the repository root unless a step says otherwise.
 
 ## 0. Prerequisites
@@ -8,32 +8,38 @@ Run commands from the repository root unless a step says otherwise.
 - macOS with Xcode 16+ (iOS tests and the phone app), Python 3.12, `uv`, Node 20+, `pnpm`, `ffmpeg`.
 - Optional: `xcodegen` (`brew install xcodegen`) if you change `ios/CrowdPulseSensor/project.yml`.
 
-Python environment (the `-e ".[dev]"` command in the README currently fails, see "Known gaps"; use this instead):
+Python environment (versions pinned in `uv.lock`; scikit-learn is pinned to 1.9.1 because the committed models were pickled with it):
 
 ```bash
-uv venv --python 3.12
+uv sync --python 3.12 --extra dev
 ```
+
+Without uv, or if PyPI returns HTTP 503 (then add `--index-url https://mirrors.aliyun.com/pypi/simple`):
 
 ```bash
-uv pip install --python .venv/bin/python fastapi "uvicorn[standard]" sqlalchemy pydantic pydantic-settings pandas numpy scikit-learn joblib matplotlib httpx pytest pytest-asyncio
+python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 ```
 
-If PyPI returns HTTP 503, add `--index-url https://mirrors.aliyun.com/pypi/simple` to the install command.
-
-Dashboard dependencies (`pnpm install` prints `ERR_PNPM_IGNORED_BUILDS` and exits with code 1, but the install is complete):
+Dashboard and SketchFuture dependencies:
 
 ```bash
 cd dashboard && pnpm install
+```
+
+```bash
+cd sketchfuture && npm install
 ```
 
 ## 1. Automated tests
 
 | suite | command | expected |
 |---|---|---|
-| backend API + ML pipeline | `.venv/bin/python -m pytest -q` | 40 passed |
-| dashboard components | `cd dashboard && pnpm test` | 7 passed |
+| backend API + ML pipeline | `.venv/bin/python -m pytest -q` | 49 passed |
+| dashboard components | `cd dashboard && pnpm test` | 15 passed |
 | dashboard production build | `cd dashboard && node node_modules/next/dist/bin/next build` | "Compiled successfully", 10 routes |
-| iOS logic + detector | see below | 11 tests, 0 failures |
+| SketchFuture model + CrowdPulse hand-over | `cd sketchfuture && npm test` | 27 passed |
+| SketchFuture production build | `cd sketchfuture && npm run build` | succeeds; Vite prints a chunk-size advisory for the bundled offline map |
+| iOS logic + detector | see below | 13 tests, 0 failures |
 
 ```bash
 cd ios/CrowdPulseSensor && xcodebuild test -project CrowdPulseSensor.xcodeproj -scheme CrowdPulseSensor -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
@@ -216,8 +222,8 @@ Expected: `/sensors` lists the phone with `"zone_id"` set to the zone you chose,
 | In hybrid mode a phone reports every 1–5 real seconds, which is every 10–50 simulated seconds at 10× | the phone carries fewer readings per minute than a simulated node, so less weight in its zone | by design; document when presenting |
 | Zones planned with two sensors (Senado Square, Ruins of St. Paul's) show "1/2 sensors" with one phone | zone reliability ≈ 0.82, confidence ≈ 10% lower | open: in the school test use single-sensor zones (see `docs/experiment-protocol.md`) |
 | A phone with no compass (the iOS Simulator reports heading 0°) turns image directions into wrong compass directions | a wrong direction is averaged into its zone's flow | open: check the heading on placement |
-| README `uv pip install -e ".[dev]"` fails on a fresh clone | first setup step errors | open: use the command in section 0 |
-| `pnpm install` exits with code 1 | looks like a failure | open: install is complete; placeholder in `dashboard/pnpm-workspace.yaml` |
+| README `uv pip install -e ".[dev]"` failed on a fresh clone | first setup step errored | fixed 2026-10-11 (`uv sync` with a committed `uv.lock`; `pip install -e ".[dev]"` also works now) |
+| `pnpm install` exited with code 1 | looked like a failure | fixed 2026-10-11 (placeholder removed from `dashboard/pnpm-workspace.yaml`) |
 | Live simulation ignored real-phone data (different clocks) | — | fixed 2026-09-29 (re-timing onto the simulated clock) |
 | A pending "deploy staff" blocked the CRITICAL redirect for up to 20 min | — | fixed 2026-09-29 (stronger recommendations supersede weaker pending ones) |
 | `GET /zones` took ≈ 3 s | — | fixed 2026-09-29 (single-threaded inference, reads never wait for a refresh): refresh ≈ 0.8 s, reads < 50 ms |
