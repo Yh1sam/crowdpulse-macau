@@ -101,7 +101,7 @@ Then, from the repository root, run each detector over the clip:
 .venv/bin/python experiments/video_eval.py
 ```
 
-Expected: YOLO11n near-field MAE 1.5, found 97%; Apple built-in MAE 3.0, found 55%. Note: when `frames/` is absent the script prints "alignment ok" without checking anything; the pixel check only runs if the frame images exist.
+Expected: YOLO11n near-field MAE 1.5, found 97%; Apple built-in MAE 3.0, found 55% ("found" = detector count ÷ hand count, not per-person recall). Note: when `frames/` is absent the script prints "alignment ok" without checking anything; the pixel check only runs if the frame images exist.
 
 ### 3b. The 2,000-frame Mall benchmark
 

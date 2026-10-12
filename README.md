@@ -95,7 +95,7 @@ So start or restart the run (*start demo sim* in the status bar) about 3 minutes
 6. **Reliability**: sensor health; predictions from unreliable zones show *LOW CONFIDENCE — HUMAN REVIEW REQUIRED*. **Evaluation**: real accuracy / F1 / confusion matrices from the last training run.
 7. Optional: the status bar has *inject surge (Senado)* to trigger a sudden surge; use the iOS app on a phone pointed at a group of people to see a real node appear on the map.
 
-A complete recorded run of this story, with the iOS app joining from the iPhone Simulator as a live sensor node and a no-action comparison run, is in [experiments/results/simulation_run](experiments/results/simulation_run/README.md). Approving the redirect lowered Senado's simulated density to 0.73–0.75 by 14:40 in two recorded pairs of runs, against 0.82–0.87 with no action; Senado stayed above CRITICAL in both. The crowd builds in about 3 minutes, so the first CRITICAL forecast arrived within about a minute of the true crossing rather than well ahead of it.
+A complete recorded run of this story, with the iOS app joining from the iPhone Simulator as a live sensor node and a no-action comparison run, is in [experiments/results/simulation_run](experiments/results/simulation_run/README.md). Approving the redirect lowered Senado's simulated density to 0.73–0.75 by 14:40 in two recorded pairs of runs, against 0.82–0.87 with no action; Senado stayed above CRITICAL in both, and its time above CRITICAL was not shortened (32 vs 31 minutes). The simulated effect is an assumption (see Limitations). The crowd builds in about 3 minutes, so the first CRITICAL forecast arrived within about a minute of the true crossing rather than well ahead of it.
 
 ## SketchFuture route check (integration)
 
@@ -119,12 +119,12 @@ The forecast beats the persistence baseline ("the class stays as it is now") by 
 
 `experiments/video_eval.py` runs the app's own detection code (`PersonDetector` + `VisionProcessor`, compiled into a Mac harness) over a CC0 street-crossing clip (Yonge & Dundas, Toronto; 640×360, 10 fps) and compares it with 11 hand-counted frames. The app now uses a **YOLO11n CoreML person detector** (5 MB, on-device) instead of Apple's built-in human detector:
 
-| detector | near field (within ~20 m): error per frame | near field: share of people found | dense frames: share found | whole street scene: share found |
+| detector | near field (within ~20 m): error per frame | near field: count as a share of the hand count | dense frames: count ÷ hand count | whole street scene: count ÷ hand count |
 |---|---|---|---|---|
 | Apple built-in (previous) | 3.0 people | 55% | 61% | 9% |
 | YOLO11n CoreML (new default) | 1.5 people | 97% | 82% | 27% |
 
-YOLO11s (18 MB) was no better than YOLO11n, so the smaller model ships. Inference is about 6 ms per frame on a Mac; phone speed is not yet measured. Remaining limits: dense crowds still hide people from a single low camera (82% found at the scramble peak), and people ~50 m away are mostly missed (27%), so phones must be placed close to and above the crowd they measure. With one clip and 11 labelled frames these numbers are indicative, not a benchmark. Figures: `experiments/results/video/`, table: `experiments/results/video/summary.md`.
+YOLO11s (18 MB) was no better than YOLO11n, so the smaller model ships. Inference is about 6 ms per frame on a Mac; phone speed is not yet measured. Remaining limits: dense crowds still hide people from a single low camera (the count is 82% of the hand count at the scramble peak), and people ~50 m away are mostly missed (27%). These are count ratios (detector total ÷ hand total), not the share of individual people detected; the Mall benchmark below measures that directly, so phones must be placed close to and above the crowd they measure. With one clip and 11 labelled frames these numbers are indicative, not a benchmark. Figures: `experiments/results/video/`, table: `experiments/results/video/summary.md`.
 
 **A larger, harder test (Mall dataset).** Eleven frames of one street clip is a small sample, so the same detector code was also run on all 2,000 frames of the Mall dataset (a public research benchmark: a shopping-mall webcam looking down a busy walkway, 13–53 annotated people per frame, 62,315 in total; research use only, so the data is not redistributed here). Results from `experiments/results/mall/summary.md`:
 
@@ -143,9 +143,9 @@ From a high indoor camera, with people seated, behind a kiosk or far down the wa
 
 - All accuracy numbers come from a simulator that we wrote; real-world accuracy is unknown until the controlled experiments in `docs/experiment-protocol.md` are run.
 - The density index is relative (0–1), not persons per m². Thresholds are experimental.
-- Camera person detection undercounts. Measured on real footage: YOLO11n finds about 82% of people in the densest frames of a street clip and 59% of the people in 2,000 frames of a crowded shopping-mall walkway (42% in the far third of the image). The simulator models a milder under-count (observed density saturates near 0.8 while simulated truth reaches 1.0). Each phone needs a per-camera calibration; with 20 labelled frames this reduced the mall error from 13.4 to 3.3 people per frame on held-out frames (one camera).
+- Camera person detection undercounts. Measured on real footage: YOLO11n's count is about 82% of the hand count in the densest frames of a street clip and 59% of the annotated count in 2,000 frames of a crowded shopping-mall walkway, where it put a box on 55% of the people (42% in the far third of the image). The simulator models a milder under-count (observed density saturates near 0.8 while simulated truth reaches 1.0). Each phone needs a per-camera calibration; with 20 labelled frames this reduced the mall error from 13.4 to 3.3 people per frame on held-out frames (one camera).
 - The WARNING class (transitional) is the hardest: F1 0.74–0.79 vs 0.86–0.88 for CRITICAL (test days, observed labels).
-- Intervention effects are assumptions (30% inflow diversion), not validated causal estimates.
+- Intervention effects are assumptions, not validated causal estimates: in the live simulation, routes into the zone are made 30% less attractive for 20 minutes (people re-choose among the other routes, so inflow falls by less than 30%), and the forecast what-if scales the zone's inflow by 0.7.
 - One phone sees one part of a zone; the zone estimate depends on calibration of each phone's visible capacity.
 
 Documented failure cases: `docs/model-card.md` (occlusion, rain/umbrellas, obstruction not flagged, device movement, unusual days, single-sensor dropout).
