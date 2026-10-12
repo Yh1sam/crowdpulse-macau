@@ -1,0 +1,7 @@
+{"cwd": "/Users/yhsam/Documents/Imperial_hackathon/video/build/terminal", "title": "privacy checks · backend on localhost:8001 (fresh database, PRIVACY_MODE on)",
+ "cols": 100, "rows": 14, "font_size": 26, "duration": 9.0,
+ "steps": [
+  {"at": 1.6, "type": "curl -s -o /dev/null -w '%{http_code}\\n' -H 'content-type: application/json' -d @obs.json localhost:8001/sensor/observation"},
+  {"at": 3.9, "type": "curl -s -o /dev/null -w '%{http_code}\\n' -H 'content-type: application/json' -d @obs_face.json localhost:8001/sensor/observation"},
+  {"at": 5.8, "type": "curl -s -w '\\n%{http_code}\\n' -F 'file=@frame.jpg;type=image/jpeg' localhost:8001/sensor/observation"}
+ ]}
