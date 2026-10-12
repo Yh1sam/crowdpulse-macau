@@ -1,0 +1,315 @@
+[
+  {
+    "id": "S01",
+    "start_s": 0.0,
+    "end_s": 11.5,
+    "speaker": "[MEMBER 4] (VO)",
+    "narration": "This is Ah Po, going to see the Ruins of St. Paul's. From her wheelchair, she sees only backs, not the crowd building ahead.",
+    "visual_type": "motion_graphic",
+    "visual": "Beats follow the words (140 wpm, voice from 1.0 s; re-key each move to the word timestamps of the real take). 0-1.0 s: kinetic title on navy. 1.0-6.0 s ('This is Ah Po, going to see the Ruins of St. Paul's'): top-down schematic of the 7 zones and 7 street links from shared/zones.json (St. Paul's steps hatched with a stair icon). Ah Po's wheelchair icon (amber outline) with a small 'Ah Po' tag moves north from Avenida de Almeida Ribeiro towards her destination pin at Company of Jesus Square, the square below the Ruins; the labels appear; Senado's disc is amber. 6.0-9.0 s ('From her wheelchair, she sees only backs'): the camera drops to her seated eye height: her wheelchair's armrest in the foreground, a wall of grey silhouettes (rounded rectangles + circles) swaying gently ahead. 9.0-11.5 s ('not the crowd building ahead'): crane back up to the top-down map; Senado's disc goes amber to red. Senado's colour is driven by true_density of senado_square in A_timeline.csv (sim 13:53 to 14:09) across the two map beats. Grey dots drifting along the streets are illustrative. If cut 2 is applied, the crane-up runs silent in the shot's last 0.5 s or so.",
+    "on_screen_text": "Macau · Golden Week | Small grey: Illustrative story. The people are fictional; the map is a schematic of our zone model; Senado's colour follows our recorded simulation. | Labels: 大三巴牌坊 Ruins of St. Paul's · 議事亭前地 Senado Square · 新馬路 Av. de Almeida Ribeiro · pin: view of the Ruins from the square below | Tag on her icon: Ah Po | Badge (top-right): ILLUSTRATION",
+    "assets": [
+      "shared/zones.json",
+      "experiments/results/simulation_run/A_timeline.csv",
+      "fonts: video/build/fonts/Geist[wght].ttf (Latin) + NotoSansTC[wght].ttf (Chinese), both SIL OFL"
+    ],
+    "notes": "Chapter: hook. Never show Ah Po on the St. Paul's steps (in zones.json the Ruins' only link is the steps, has_stairs true). Only Senado's colour is data; dots and icons are choreography. Same map and icons are reused in S18."
+  },
+  {
+    "id": "S02",
+    "start_s": 11.5,
+    "end_s": 18.5,
+    "speaker": "[MEMBER 1] (VO)",
+    "narration": "Our phone app counts people on the device. It never sends a picture, only numbers.",
+    "visual_type": "ios_capture",
+    "visual": "iPhone Simulator recording of the CrowdPulse Sensor app (Mode Video and Detector YOLO11n set on the Setup tab, then Start pressed on the Live tab) playing the CC0 Yonge & Dundas clip: green boxes on pedestrians, counters ticking, gentle push-in. Recognisable near-field faces are pixelated in post (head band only, boxes left visible). Motion-graphic overlay: on 'It never sends a picture' (about 14.9-17.0 s at 140 wpm from 11.5 s) the numbers peel off the panel into a payload card that slides to a server icon; on 'only numbers' (about 17.0-17.9 s) a photo icon tries to follow and bounces off a shield and 'HTTP 403' lands; hold to the cut at 18.5 s. Key all three animations to the word timestamps of the real take. If the 403 cannot hold for at least 1 s, move 0.5 s from S04 to S02 (S02 11.5-19.0, S03 19.0-29.0, S04 29.0-37.5) and update this file, the storyboard and the structure table in script.md together.",
+    "on_screen_text": "Badge (top-right): LIVE SOFTWARE · TEST CLIP | Caption: iOS app running in the iPhone Simulator on a Mac · YOLO11n on the device · public-domain (CC0) street clip, Toronto, not Macau | Payload card (real key names; values from your own Debug-tab capture, e.g.): person_count 11 · estimated_density 0.27 · flow_direction_deg 116 · vision_confidence 0.91 · latitude / longitude · heading_deg | Small: sensor_id = a random node label for a temporary sensing position, not a person or a device serial | Shield: image upload → HTTP 403",
+    "assets": [
+      "xcrun simctl io booted recordVideo --codec=h264 S02_sim.mp4 (recorded during the C2 run, in C2a's map wait)",
+      "fallback: experiments/results/simulation_run/ios_app_video_mode_30s.mp4",
+      "reference: experiments/results/simulation_run/ios_app_debug_payload.png",
+      "ios/CrowdPulseSensor/Sources/Models/SensorObservation.swift (payload key names)"
+    ],
+    "notes": "Never say or caption 'this phone' without the Simulator caption: no physical-phone run is documented. Near-field faces can be identifiable; pixelate them (ffmpeg crop of the head band → scale down 12x → scale up with flags=neighbor → overlay back, only for the seconds a face is recognisable). Keep the push-in modest. Set location first: xcrun simctl location booted set 22.19282,113.53925. Which backend (decision, script.md section 6, ios_capture): reproduce runs A and B. The app posts to the C2 backend on http://localhost:8000 (its default Backend URL) and joins at Almeida Ribeiro during every C2 run, and S02 is recorded in that same run, for about 30 s during C2a's map wait (stop recordVideo well before C2a's click); its readings are re-timed onto the simulated clock (docs/testing.md 6.2), as in runs A and B, so the README timing table stays the reference. Never point the app at the S08 privacy backend (:8001) or at a second backend while C2 runs. If S02 must be re-shot outside C2: a separate backend with CROWDPULSE_LIVE_SIM=false and its own database (e.g. phone_demo.db) on :8000, started only when no C2 backend is running. Take the Debug-tab payload screenshot after C2b, while the app is still running. sensor_id wording follows docs/privacy.md ('a temporary sensing position, not a person or a device serial'); the iOS app generates it once per install, so never say 'not a device'. If the reference PNG values are used instead of a fresh capture, label them 'example payload · test run, 29 Sep 2026'."
+  },
+  {
+    "id": "S03",
+    "start_s": 18.5,
+    "end_s": 28.5,
+    "speaker": "[MEMBER 5] (VO)",
+    "narration": "On our dashboard, with a simulated Golden Week crowd, Senado Square's forecast turns critical, with a confidence score and the reasons why.",
+    "visual_type": "ui_capture",
+    "visual": "Dashboard capture: 1 s on the Live map (OSM tiles, Senado amber: WARNING at about 14:08, as in run A); the pointer clicks the Senado marker, the sidebar fills, then it clicks 'open zone detail →': Zone detail at SIM CLOCK about 14:08-14:10. Density line climbs past the dashed CRITICAL line; the +5 / +10 / +15 min rows turn CRITICAL, first flagged LOW CONFIDENCE, then a confident row only if the capture shows one (in run A at 14:09:08: +5 still low-confidence at 0.516, +10 and +15 confident; a jump cut inside Zone detail is allowed); Senado turns red here, not on the map. Cut on whatever the capture actually shows (rows and colours). A highlight box traces the WHY (+15 MIN → CRITICAL) bullets. Status bar with SIM CLOCK stays visible.",
+    "on_screen_text": "Badge (top-right): LIVE SOFTWARE · SIMULATED CROWD | Badge sub-line (small, under the pill): Simulated Golden Week afternoon · SIM CLOCK, 10× speed | Lower-third: [MEMBER 5] · B · Business, B lit (four-member team: [MEMBER 2], S lit) | Callouts: +5 / +10 / +15 min · confidence · why | Footer: Map © OpenStreetMap contributors",
+    "assets": [
+      "dashboard :3100 /map and /zones/senado_square (capture C2a)",
+      "fallback: experiments/results/simulation_run/A05_zone_senado_critical_forecast.png"
+    ],
+    "notes": "Chapter: cold open. Capture C2 = one backend run on a fresh database at CROWDPULSE_SIM_ACCELERATION=10, recorded as two capture.py runs against it: C2a (S03 and the S09 zone-detail crop) and C2b (S04, the S09 lists, S15). Start order matters: the backend primes the live simulation to 13:53 the moment it starts and runs at 10x (one real minute is about 10 simulated minutes), so the dashboard production build and start on :3100, SketchFuture on :4173, caffeinate and the iOS app in the Simulator (Video mode, location Almeida Ribeiro, posting to :8000, as in runs A and B, which were recorded with this phone joined) come first and the backend last. C2a is launched within a few seconds of the backend and opens on /map, so its tiles load in that Chrome profile (each capture.py run uses a fresh temporary profile), and stays there until about 14:08 sim (about 90 real seconds after the backend starts). Times come from the simulated times in experiments/results/simulation_run/README.md's timing table (columns run A and run B). C2a runs on capture.py --port 9333 and its recording ends at about 14:11-14:12 sim. capture.py encodes (libx264, CRF 18, about 110 s of footage) before it shuts Chrome down, and both runs would otherwise share DevTools port 9333, so C2b can start right away only with the planned capture.py change (--port flag, Chrome closed before the encode): C2b on --port 9334 then starts at about 14:12, APPROVE lands at about 14:14 and the St. Dominic's click at about 14:16-14:17. Without the change C2b waits for the encode (roughly 20-60 real s, 3-10 sim min; measure it in the rehearsal) and the St. Dominic's step lands at about 14:19-14:26, at the card's expiry, so S15 becomes its own C2c (script.md section 6, 'Timing', decision rule). C2a's final wait stays at about 20 s: the moment a row turns confident varies by run (run B: 14:13:14). Map steps: {eval: start a setInterval tagger that gives the .cp-zone-marker whose text includes 'Senado Square' the id 'senado-marker'} → {wait_for: '#senado-marker'} → {wait: until about 14:08 sim} → {click: '#senado-marker'} → {click_text: 'open zone detail'} (or {navigate: '/zones/senado_square'}). Clicking a marker only fills the sidebar. The map colours a zone by its current state or a confident forecast, whichever is worse (backend/app/services/engine.py); in run A Senado was WARNING with only low-confidence forecasts until 14:09:08, so expect amber on the map and the turn to CRITICAL on Zone detail. Do not wait on the map for red: the 'turns critical' moment would be lost. Never stage or composite forecast rows: rows can flip back (run A: +5 back to WARNING at 14:09:46, all three WARNING at 14:11:02). The badge sub-line carries the context line; the lower-third is reserved for the speaker's name and STEMB strip."
+  },
+  {
+    "id": "S04",
+    "start_s": 28.5,
+    "end_s": 37.5,
+    "speaker": "[MEMBER 3] (VO)",
+    "narration": "It recommends a stair-free detour, with notices in Chinese, English and Portuguese. A person decides: approved, and logged.",
+    "visual_type": "ui_capture",
+    "visual": "Interventions page, the newest 'Redirect part of … flow around Senado Square' card. Zoom 1 on route line (… no stairs · accessibility penalty …) and the green wheelchair line ('Chosen route avoids stairs and steep sections … staff escort on the main route …'). Zoom 2: expand Public notice (中文 / English / Português). Click VIEW EVIDENCE (the zoom stays above the evidence panel's 'Assumed effect:' line unless that note is corrected first, script.md 5A item 7), then APPROVE at about 35 s; the capture's visible pointer stands for the click (no hand insert), and a small footer says the click is scripted. Cut to the audit log: the approval row appears at the top at about 36.5 s.",
+    "on_screen_text": "Badge (top-right): LIVE SOFTWARE · SIMULATED CROWD | Callouts: accessibility check: this route avoids stairs · 中文 · English · Português · needs a person's approval · audit log | Notice excerpts with English gloss: zh 議事亭前地目前非常擁擠… (Senado Square is very crowded…) · pt Largo do Senado: grande afluência de visitantes… (Senado Square: many visitors…) | Footer (small, from the APPROVE click to the end of the shot): click scripted for this recording · the approval runs the real code path",
+    "assets": [
+      "dashboard :3100 /interventions (capture C2b)",
+      "fallback (prefer the live capture): experiments/results/simulation_run/A07_intervention_evidence.png cropped above its old 'Assumed effect:' line (bottom edge just under the 'Current forecast' row, about y 805 of 1440x1789), A08_after_approval_audit.png"
+    ],
+    "notes": "In C2b the APPROVE click comes from capture.py's scripted pointer, so the footer 'click scripted for this recording · the approval runs the real code path' is shown and no hand on a mouse is cut in. Only if a team member clicks APPROVE themselves in a macOS screen recording (the fallback route) may that take be used, with an optional 1 s hand insert filmed during that same real click. Say 'stair-free' only if the captured card reads 'Chosen route avoids stairs and steep sections' (it did in run A); if it reads 'includes stairs/steep sections', say 'a detour scored to avoid stairs' instead. Act on the newest Senado card: a superseded or expired card answers APPROVE with 409. click_text 'APPROVE' or 'Public notice' would hit the first card on the page, which may belong to another zone. C2b therefore first installs a non-blocking eval that starts a setInterval tagger: it finds the pending card whose h3 includes 'around Senado Square' and gives the card, its notice summary, VIEW EVIDENCE and APPROVE the ids senado-card / senado-notice / senado-evidence / senado-approve (plus ids on the 'Decided / expired' and 'Audit log' headings); then {wait_for: '#senado-approve'} before any click. Steps and the full tagger are in script.md section 6. The evidence panel prints the raw assumed effect; its note (backend/app/services/intervention.py line 144) opens 'Assumed effect (configurable prototype assumption, not validated): 30% less inbound flow.', which reads like the never-say wording; the sentence after that clause is correct. Correct it before recording by deleting only that clause, so the note is one sentence (script.md 5A item 7; do not add a new opening, which would repeat the next sentence), or keep that line out of the zoom. A07 was taken before commit be83d39, and its 'Assumed effect:' line says 'Assumes 30% of inbound flow diverts'. If A07 is used, crop that line out (or mask it with a plain box)."
+  },
+  {
+    "id": "S05",
+    "start_s": 37.5,
+    "end_s": 46.0,
+    "speaker": "ALL (on camera: one word each, then together)",
+    "narration": "[M1] Technology. [M2] Science. [M3] Engineering. [M4] Medicine. [M5] Business. [ALL] We are CrowdPulse Macau.",
+    "visual_type": "team_footage",
+    "visual": "Five head-and-shoulders cuts of about 0.8 s, identical framing and background, hard cuts on the beat. Each member holds an object from their own work: M1 a phone on a clamp, showing the app (Setup tab, no street clip) only if the app was really installed on that phone (docs/testing.md 6.1, Xcode signing with an Apple ID), otherwise with its screen off, and nothing implying a field run; M2 a printed F1 bar chart; M3 a laptop with the server log; M4 a printed step-free route map; M5 the blank cost panel or the AGPL / deployment diagram (no numbers). Then a group shot (about 2.5 s, 'We are CrowdPulse Macau') as the zone graph collapses into the CrowdPulse wordmark, then a 2 s silent hold on the title card so the research question can be read (it appears with the wordmark and stays about 4 s in all).",
+    "on_screen_text": "Lower-thirds: [MEMBER n] · S/T/E/M/B · role, with the S T E M B strip lighting the speaker's letter | Title: CrowdPulse Macau | Sub: Our question: can ordinary phones, sending only numbers, help forecast crowds without identifying anyone? | Responsible AI · Challenge 2(c)",
+    "assets": [
+      "team camera: phone on tripod, landscape 1080p30, window light"
+    ],
+    "notes": "Chapter: team + title. Deliberate visual beat: 9 words in 8.5 s, including the 2 s silent title hold, is intentional (roll call and research question). Never cut the title hold. Four-member team: four cuts, M3 says 'Engineering and business.' Never show a cost sheet with figures. Never show the app on a phone it was not installed on: every documented run is the iPhone Simulator."
+  },
+  {
+    "id": "S06",
+    "start_s": 46.0,
+    "end_s": 58.0,
+    "speaker": "[MEMBER 4] (on camera 0-4 s, then VO)",
+    "narration": "Every Golden Week, the Ruins of St. Paul's and Senado Square become dangerously crowded. [TEAM TO RESEARCH - MEDICINE: one sentence, at most 12 words, from a cited peer-reviewed source, on how a crowd crush injures the body]",
+    "visual_type": "motion_graphic",
+    "visual": "0-4 s: M4 medium shot, eye level. Then the S01 zone schematic, dots piling up at Senado (illustration). During the medical sentence: a simple body-outline diagram drawn from shapes, annotated only with the sourced mechanism; abstract, nothing graphic.",
+    "on_screen_text": "Chapter card (top-left, 2 s): Why does it matter? | Footer: [TEAM TO RESEARCH: cited source for Golden Week crowding at the Ruins / Senado Square] | Citation: [TEAM TO RESEARCH: medical source, year] | Badge (top-right, from 4 s, over the schematic and the body diagram): ILLUSTRATION",
+    "assets": [
+      "team camera",
+      "shared/zones.json"
+    ],
+    "notes": "First sentence is the proposal's exact wording. The medical sentence stays silent until it is sourced; if no source is found by 21 Oct, drop the slot and close the gap (about -5 s)."
+  },
+  {
+    "id": "S07",
+    "start_s": 58.0,
+    "end_s": 71.0,
+    "speaker": "[MEMBER 5] (VO)",
+    "narration": "In 2019, Macau's tourism office announced attraction forecasts, hours to days ahead. We forecast the next five to fifteen minutes, street by street, from phones staff place temporarily.",
+    "visual_type": "motion_graphic",
+    "visual": "0-6 s: a long log-scale time axis; grey ticks 4 h · 24 h · 7 days light up above a row of 20 attraction pins. 6-13 s: the camera dives into the first sliver of the axis, which expands into +5 · +10 · +15 min over the 7-zone graph; phone icons drop onto street corners, number packets flow to a server icon, and each zone gets three small forecast chips.",
+    "on_screen_text": "Chapter card (top-left): What is new? | Announced 2019: 20 attractions, 4 h / 24 h / 7 days ahead · still running today? Not confirmed. | Footer: Macao SAR Government news, 30 Apr 2019, gov.mo/en/?p=111714 | CrowdPulse: next 5-15 min · street by street · temporary phones · privacy by design",
+    "assets": [
+      "docs/proposal.md (source table)",
+      "shared/zones.json",
+      "shared/config.json (forecast_horizons_min)"
+    ],
+    "notes": "Credit the existing system fairly; claim only the gap. Spoken '2019' = 'twenty nineteen'. Tight shot: the guide voice fills 13.0 of 13.0 s. If the real take overruns, apply cut 4 (drop ', from phones staff place temporarily', about -2.5 s; S17 still says it)."
+  },
+  {
+    "id": "S08",
+    "start_s": 71.0,
+    "end_s": 80.0,
+    "speaker": "[MEMBER 3] (VO)",
+    "narration": "Privacy is enforced in code. A numbers-only reading: accepted. Add a face-ID field: rejected. Upload an image: refused.",
+    "visual_type": "terminal",
+    "visual": "Real terminal recording (dark theme, 28 pt or larger) against a separate backend on a fresh database. Three commands typed in turn: (1) valid numbers-only observation → 202; (2) the same JSON plus 'face_id':'abc' → 422; (3) multipart JPEG upload → 403 with the server message 'PRIVACY_MODE: media uploads are not accepted. Send numerical metadata only.' Each code stamps on as it is spoken (green 202, red 422 and 403).",
+    "on_screen_text": "Chapter card (top-left): Can it be trusted? | Badge (top-right): LIVE SOFTWARE · recorded live (cyan) | 202 accepted · numbers only | 422 rejected · extra field face_id (closed schema) | 403 refused · image upload (PRIVACY_MODE on by default) | Footer: same checks in backend/tests/test_api.py",
+    "assets": [
+      "backend on port 8001 with CROWDPULSE_DATABASE_URL=sqlite:///privacy_demo.db",
+      "obs.json / obs_face.json built from docs/testing.md section 5 with a fresh UTC timestamp",
+      "frame.jpg: blank generated image with no people"
+    ],
+    "notes": "Record live, never typeset. Use a separate backend so the test reading never joins the C2 dashboard run. Dry-run all three codes before recording. Deliberate visual beat: 18 words in 9.0 s (guide 8.75 s) leaves room for the three code stamps; 0.5 s of stamp hold is already given back, and cut 1 can take up to 0.5 s more if the real take allows. The badge is LIVE SOFTWARE (cyan), one of the defined badges. Recorded live with video/record_terminal.py: the three commands run in a real shell inside a pseudo-terminal, every output byte is saved with its time, and the renderer draws that stream frame by frame (dark monospace, 28 pt or larger, 1920x1080, 30 fps). Nothing is retyped; never typeset this shot by hand."
+  },
+  {
+    "id": "S09",
+    "start_s": 80.0,
+    "end_s": 88.0,
+    "speaker": "[MEMBER 3] (VO)",
+    "narration": "Confidence is discounted for unreliable sensors and unusual conditions. Below sixty percent, a person must review it.",
+    "visual_type": "motion_graphic",
+    "visual": "The equation builds term by term; a gauge needle drops below a line at 0.60 and the badge LOW CONFIDENCE — HUMAN REVIEW REQUIRED stamps on. Cut to the same badge on real dashboard rows with the footer 'model confidence …% × reliability factor → effective …%', then the Interventions 'Decided / expired' list with 'Increase monitoring …' and 'superseded' tags.",
+    "on_screen_text": "effective confidence = model probability × sensor-reliability factor × unusual-data (OOD) factor | Below 0.60 → LOW CONFIDENCE — HUMAN REVIEW REQUIRED · only 'increase monitoring' is recommended | Stronger recommendations replace weaker pending ones | Footer: sensor-reliability factor = 0.4 + 0.6 × reliability (backend/app/services/prediction.py) · threshold in shared/config.json",
+    "assets": [
+      "shared/config.json",
+      "backend/app/services/prediction.py",
+      "dashboard captures: zone detail footer from C2a, Decided / expired list from C2b",
+      "fallback: A05_zone_senado_critical_forecast.png; A07_intervention_evidence.png cropped to its Decided / expired list (about y 1170-1320 of 1440x1789), never showing its old 'Assumed effect:' line"
+    ],
+    "notes": "Use the confidence values the capture actually shows. The equation wording matches the dashboard footer ('reliability factor')."
+  },
+  {
+    "id": "S10",
+    "start_s": 88.0,
+    "end_s": 110.0,
+    "speaker": "[MEMBER 2] (VO)",
+    "narration": "On held-out simulated days, fifteen-minute forecasts score an F1 of 0.865, against 0.795 for assuming nothing changes, and catch 91 percent of critical minutes, against 79. Forecasts flagged as uncertain are right only about 56 percent of the time; the rest, 97.",
+    "visual_type": "motion_graphic",
+    "visual": "0-1.5 s: evidence legend; five badges (SIMULATED, REAL DATA, MODEL CHECK, PENDING, CORRECTED) appear centre-screen, then shrink into a thin strip at bottom-right, above the footer row, where they stay through S16; the narration starts at about 1.0 s over the docking legend. Then grouped bars of macro-F1 from metrics.json, model vs 'no change': +5 min 0.887 vs 0.849, +10 min 0.876 vs 0.827, +15 min 0.865 vs 0.795, +15 pair highlighted. No gap labels: the bars and their 3-decimal values carry the point. Then two big numbers 91% vs 79%. Then two bars: flagged for review vs the rest.",
+    "on_screen_text": "Chapter card (top-left): Does it work? Every result is labelled. | Badge (top-right): SIMULATED (pinned) | Legend strip (bottom-right): SIMULATED · REAL DATA · MODEL CHECK · PENDING · CORRECTED | Axis: macro-F1 (0-1): how well SAFE, WARNING and CRITICAL are all predicted | Bar legend: model / no change: the level stays as it is now | Big numbers: 91% vs 79% of critical minutes caught (+15 min) | Bars: flagged as uncertain: right 56% · the rest: 97% (+15 min) | Footer: ml/models/metrics.json · 14 simulated days, split by day: 9 train / 2 validate / 3 test",
+    "assets": [
+      "ml/models/metrics.json"
+    ],
+    "notes": "Build the chart from metrics.json at 3 decimals; do not use model_comparison.png (2 decimals, four models). No gap labels; if they are ever restored, use +3.7 / +4.9 / +7.0 (from the unrounded values: 0.8867 - 0.8495 = 3.72) with the footnote 'gaps from unrounded values, ml/models/metrics.json', never gaps worked out from the rounded bars. Required on screen: the badge, the bars with their axis definition and legend, the two spoken comparisons, the footer. Kept off screen (Q&A answers in script.md 5F): CRITICAL recall 0.908 vs 0.792; flagged 1.4-1.7% of forecasts, right 56-57% vs 97-98% across horizons; the stress-day results (F1 0.857 / 0.832 / 0.814; unusual-data flags 11-12% vs 0.6-0.7%). Read aloud: 'an F one of point eight six five, against point seven nine five'. Shot is 22.0 s for 49 spoken words (0.95 at 140 wpm; guide 20.9 s)."
+  },
+  {
+    "id": "S11",
+    "start_s": 110.0,
+    "end_s": 128.0,
+    "speaker": "[MEMBER 1] (VO)",
+    "narration": "On eleven frames of a public-domain street clip, the open YOLO model in our app counted 97 percent as many nearby people as a careful hand count; Apple's detector, 55. In the densest frames, 82; across the whole scene, only 27.",
+    "visual_type": "figure",
+    "visual": "0-8 s: detector_overlay.png split into its two panels (the same CC0 frame with Apple's boxes, then YOLO11n's boxes). Recognisable faces are mosaicked in Pillow before any scaling, with the green boxes left visible. Each panel is fitted to 16:9 on navy (no stretching) with a slow push-in, and a wipe goes from the Apple panel to the YOLO11n panel at about 3.5 s. 8-18 s: three animated bar pairs titled 'count vs hand count', Apple → YOLO11n: within about 20 m 55% → 97%; densest frames 61% → 82% (the 2 frames with 10 or more nearby people); whole wide scene 9% → 27%.",
+    "on_screen_text": "Badge (top-right): REAL DATA · 11 hand-counted frames · indicative, not a benchmark | Panel labels: Apple's built-in detector / YOLO11n (Ultralytics), open model on the device | Bar title: count vs hand count = detector count ÷ hand count, summed over the frames in each group (not the share of individuals detected) | Small, under the densest pair: 2 frames with ≥10 nearby people | nearby = within ~20 m · YOLO11n error 1.5 people per frame | Credit: 'Diagonal crosswalk at Yonge & Dundas in Toronto', Raysonho, Wikimedia Commons, CC0 · faces pixelated by us | Footer: experiments/results/video/summary.md",
+    "assets": [
+      "experiments/results/video/detector_overlay.png (1950x615, two panels side by side)",
+      "experiments/results/video/summary.md",
+      "video/build/S11_apple.png, video/build/S11_yolo.png (mosaicked, cropped panels made by the team)"
+    ],
+    "notes": "Never say 'our model' or 'benchmark' for the 11 frames, and never 'found 97 percent of people': summary.md defines 'found' as the sum of detector counts divided by the sum of hand counts, a count ratio that can exceed 100%, not per-person recall (per-person recall exists only for the Mall benchmark, S13). CC0 covers copyright, not the people's likeness: mosaic every recognisable face (e.g. the man at the centre of both panels) before the push-in. Crop each panel's picture area (about x 28-958 and x 992-1922, y 68-592; measure once), then per panel: scale=3840:2160:force_original_aspect_ratio=decrease, pad=3840:2160 on 0x0B1220, zoompan to 1920x1080 (zoom at most 1.06), then xfade=wipeleft between the two clips. Never run zoompan on the full 1950x615 image (it would squeeze people). The densest pair sums only the 2 frames with 10 or more nearby people (experiments/video_eval.py: dense = near_count >= 10); the other two pairs sum all 11 frames. Say 'as a careful hand count', not 'as we did by hand': the hand counts (experiments/datasets/video/ground_truth.csv) were committed only in 391da20 and 3abcd7a, both with an AI co-author line, and the repo does not record who made them; 'as we did by hand' (same 5 words) only if a team member really made the 11 counts (script.md 5E, 5F). Tight shot: 41 words in 18.0 s (0.98 at 140 wpm; guide 17.0 s); if the real take overruns, apply cut 3 (drop 'Apple's detector, 55', about -2 s; it stays on screen)."
+  },
+  {
+    "id": "S12",
+    "start_s": 128.0,
+    "end_s": 138.0,
+    "speaker": "[MEMBER 1] then [MEMBER 2] (on camera together)",
+    "narration": "[M1] Our first version of this test had a frame-timing bug. [M2] It was caught, fixed, and we published the correction.",
+    "visual_type": "team_footage",
+    "visual": "0-8 s: M1 and M2 side by side at a laptop that shows the mosaicked S11 panel stills, framed in the left half of the picture. Both stay on camera for both lines (at 140 wpm M1 speaks about 0-4.3 s, M2 about 4.6-8.5 s), so each is seen saying their line. About 1.5-8 s, split screen: the timing motion graphic as a Pillow inset in the right half, in three quick beats: a hand-count label at time t; the frame that was actually compared (sampled 2.4 s after the label) is shown in red, then the correct frame aligned in green; then the dashed far-kerb line drops in (no extra tag). 8-10 s: the README.md Correction paragraph, rendered with pandoc and recorded with video/capture.py, with a highlight box drawn in post; it carries the full wording. Cut to it on M2's word 'correction' (re-key the cut to the real take). Fallback: a Pillow-typeset verbatim excerpt with the footer 'README.md · Correction (excerpt)'.",
+    "on_screen_text": "Badge (top-right): CORRECTED | Overlay (about 12 words, under the inset): v1 compared hand counts with frames 2.4 s off → fixed; near field redefined, recounted | Footer: README.md · Correction",
+    "assets": [
+      "team camera",
+      "README.md (Correction paragraph): pandoc README.md -s --metadata pagetitle=README.md -o video/build/README.html, then capture.py on file://<repo>/video/build/README.html with an eval tagging the paragraph that starts 'Correction:' as #correction and scroll_to '#correction' (script.md section 6, S12 README insert)",
+      "laptop screen: video/build/S11_apple.png and S11_yolo.png (mosaicked stills); source clip if needed: ios/CrowdPulseSensor/Resources/sample_crowd.mp4 (tracked 640x360 CC0 transcode); the local experiments/datasets/video/yonge_dundas_*_10fps.mp4 files are git-ignored and not in a fresh clone"
+    ],
+    "notes": "Keep this shot even if the cut runs long: it carries rigour and teamwork together. Both members stay on camera through both lines (film them in the left half of the frame, script.md 5D); the timing graphic is an inset beside them, never a cut-away while either speaks. The overlay is kept to about 12 words so it can be read in the 10 s shot; the full account (wrong video moment, near-field rule the detectors could not be scored against, pixel-exact alignment, only corrected numbers shown) is the highlighted README paragraph. Never show the raw clip with recognisable faces on the laptop: use the mosaicked stills, or mosaic in post. M2's line as written ('It was caught, fixed, and we published the correction.') is true whoever spotted the bug. Only if a team member really spotted it may M2 say instead 'We found it, fixed it, and published the correction.' (same 9 words); never 'we found it' or 'ourselves' otherwise. The repo does not record who spotted it, and the fix commit 3abcd7a carries an AI co-author line, so the AI-assistance line (script.md 5E) must cover it and the Q&A answer (5F) must be true. Label any hand-counting shown as 're-enacted' if filmed now."
+  },
+  {
+    "id": "S13",
+    "start_s": 138.0,
+    "end_s": 160.0,
+    "speaker": "[MEMBER 1] (VO)",
+    "narration": "Eleven frames is small, so we tested two thousand annotated mall frames. The detector counted only 59 percent, but 93 percent of its boxes were people: a steady under-count. Twenty labelled frames calibrated that one camera, cutting error from thirteen to about three people per frame. A lead, not proof.",
+    "visual_type": "figure",
+    "visual": "mall_count_scatter.png (chart only, up to 1.5× on a light card; the orange Apple cloud dimmed with a Pillow mask, the blue cloud labelled 'YOLO11n, the app default') draws in: the YOLO11n point cloud sits below the dashed 'perfect count' line. Then bars for the near / middle / far third of the image (78 / 64 / 42%), titled 'recall: share of people detected'. Then a schematic line 'true ≈ a × detected + b' and a big counter 13.4 → 3.3 people per frame with a '20 labelled frames' tag between the bars.",
+    "on_screen_text": "Badge (top-right): REAL DATA · Mall research benchmark · charts only | count vs annotated count: 59% · 93% of boxes are people | Bar title: recall: share of people detected · near / middle / far | Calibration: post-hoc · one camera · held-out frames 801-2000 · not yet in the app | Footer: experiments/results/mall/summary.md · Mall dataset: Chen, Loy, Gong & Xiang, BMVC 2012",
+    "assets": [
+      "experiments/results/mall/mall_count_scatter.png",
+      "experiments/results/mall/summary.md"
+    ],
+    "notes": "Never show Mall dataset imagery (research use only); the charts contain none. 'Counted 59 percent' is a count ratio, like S11's figures; the true recall is 55% overall (78% near / 64% middle / 42% far), precision 93%. Required on screen: the badge, the spoken count ratio and precision, the recall bars, the calibration counter with its limits, the citation footer. Kept off screen (Q&A answers in script.md 5F): 13-53 people per frame, count correlation 0.80, overall recall 55%, YOLO11n about 6-8 ms per frame on a Mac (phone speed not measured). Tight shot: 50 words in 22.0 s (0.97 at 140 wpm); if the real take overruns, apply cut 5 ('Eleven frames is small, so we tested' → 'We also tested', about -1 s)."
+  },
+  {
+    "id": "S14",
+    "start_s": 160.0,
+    "end_s": 180.5,
+    "speaker": "[MEMBER 3] (VO)",
+    "narration": "In a recorded simulation, approving the redirect left Senado less crowded by the end than doing nothing, but only modestly: it stayed critical. The effect rests on a diversion we assumed, not measured, and the crowd built so fast the alert came with it, not before.",
+    "visual_type": "motion_graphic",
+    "visual": "Line chart redrawn from A_timeline.csv and B_timeline.csv (senado_square, true_density, 13:53-14:40): blue = approved, orange = no action, dotted CRITICAL line at 0.70. Both lines cross it at about 14:08-14:09 and never drop back below. Markers, all from run A and labelled 'run A': first CRITICAL forecast (14:08:30, 21 s after the true crossing at 14:08:09), redirect recommended (14:09:08), 'approval (scripted operator), 14:14'. A light band marks the assumed effect window, 14:14-14:34; the 14:40 end values come after it. End labels: this pair 0.75 vs 0.82; faint: earlier pair 0.73 vs 0.87. One chip slides in as the assumed effect is spoken; 'it stayed critical' has no chip (the narration, the end labels and the CRITICAL line carry it). From the third spoken limit ('and the crowd built so fast...', about 14 s at 140 wpm; key to the real take) to the end: a clock panel slides in beside the chart (the chart stays visible), crowd build-up about 3 min against the 5-15 min forecast horizon, with its label. Senado never turns green.",
+    "on_screen_text": "Chapter card (top-left): Does acting help? | Badge (top-right): SIMULATED · recorded end-to-end run, 29 Sep 2026 (amber) | Under the chart: At 14:40 · approved 0.75 vs no action 0.82 (earlier pair 0.73 vs 0.87) · this pair: 32 vs 31 min above CRITICAL | Axis: relative density index, not people per m² | Chip: Assumed: routes into Senado made 30% less attractive for 20 min (prototype setting, not measured) | Clock panel: crowd build-up ≈3 min / forecast horizon 5-15 min; label: First CRITICAL forecast within ~1 min of the crossing: no early warning · 5-15 min skill shown offline, on simulated days only | Footer: experiments/results/simulation_run/README.md",
+    "assets": [
+      "experiments/results/simulation_run/A_timeline.csv",
+      "experiments/results/simulation_run/B_timeline.csv",
+      "experiments/results/simulation_run/A_events.json",
+      "fallback: experiments/results/simulation_run/simulation_run_timeline.png (top panel)"
+    ],
+    "notes": "The operator in the recorded runs was a script driving the real dashboard (simulation_run/README.md, operator row); do not imply a human operator study, so the run A marker reads 'approval (scripted operator), 14:14', never 'operator approves'. Keep the chart clear of the bottom-right legend strip and the top-left chapter card. The effect is a prototype setting, not measured: on approval the simulator makes routes into Senado 30% less attractive for 20 minutes (14:14-14:34 in run A), so its inflow falls by less than 30%; the forecast what-if scales the zone's inflow by 0.7 (engine.py, simulator.py, intervention.py; simulation_run/README.md). Never say '30 percent of the flow diverts'. Approval lowered only the end density (0.75 vs 0.82; earlier pair 0.73 vs 0.87); time above CRITICAL was not shortened (32 vs 31 minutes, final pair only: the README gives no minutes figure for the earlier pair, so the on-screen line says 'this pair'), so never say 'beat doing nothing' or 'shortened the critical time'. 'The alert came with it, not before' holds for run A's forecast marker and for confident forecasts in both runs (first confident CRITICAL forecast 14:09:08 in run A and 14:13:14 in run B, both after the crossing). In run B the first CRITICAL forecast, at 48% confidence and flagged for review, came 74 s before its crossing (14:08:06 vs 14:09:20). So the clock label uses the README's wording ('within ~1 min of the crossing: no early warning'), and the forecast marker must be run A's. On-screen text load: the 'Senado stayed above CRITICAL' chip is dropped and the 'no early warning' chip is merged into the clock label (script.md section 6, 'On-screen text load'). Badge is SIMULATED (amber), one of the five legend badges. Tight shot: 46 words in 20.5 s (0.96 at 140 wpm; guide 16.4 s); if the real take overruns, apply cut 6 (end the shot sooner after the last word, trimming the clock panel's tail hold); never cut the limits."
+  },
+  {
+    "id": "S15",
+    "start_s": 180.5,
+    "end_s": 201.5,
+    "speaker": "[MEMBER 4] (VO)",
+    "narration": "One click tests another recommendation, at St. Dominic's, on our model of Macau's streets: walkers lose seventeen seconds, wheelchair users thirty. And 24 of our 40 simulated wheelchair users had no step-free route either way. Real barrier, or missing map data? Only a street survey can tell.",
+    "visual_type": "ui_capture",
+    "visual": "Interventions page, the card titled 'Redirect part of southbound flow around St. Dominic's Square' (title visible; do not zoom on its route text). Click TEST IN SKETCHFUTURE. Unless the box's caveat is corrected first (script.md 5A item 7), frame the card title, then pan to the button, with the crop's bottom edge just under the button row: the grey line below it ('Model check, not evidence: a full closure is the extreme case of the assumed 30% diversion', dashboard/src/components/SketchFutureCheck.tsx lines 22 and 34) must not be readable. SketchFuture opens (Traditional Chinese UI) with the plan 'CrowdPulse #…：封閉大三巴街↔板樟堂前地通道' and the closed segments drawn red on the OpenStreetMap street network. Comparison cards for 一般行人 (walkers), 輪椅使用者 (wheelchair users), 推嬰兒車者 (stroller users) animate in. Motion-graphic overlays: counters tick to +17 s, +30 s, +21 s; a 40-dot grid in which 24 dots turn grey.",
+    "on_screen_text": "Badge (top-right): MODEL CHECK · synthetic cohort | Counter header: same 120 simulated people, with vs without the closure | walkers +17 s · wheelchair users +30 s · stroller users +21 s | Small, under the counters: averages over those who arrive in both plans: walkers 40/40 · wheelchair users 16/40 · stroller users 28/40 | Dot grid: 24 of 40 wheelchair users: no step-free route in EITHER plan · missing map detail or real barriers? Needs a site survey. | Footer: Map © OpenStreetMap contributors, ODbL · example run #721, sketchfuture/VERIFICATION.md",
+    "assets": [
+      "dashboard :3100 /interventions (capture C2b; C2c under the decision rule in script.md section 6, 'Timing')",
+      "SketchFuture dev server :4173 (cd sketchfuture && npm run dev)",
+      "sketchfuture/VERIFICATION.md (run #721)"
+    ],
+    "notes": "The Senado card from S04 cannot be tested: corridors to Avenida de Almeida Ribeiro are outside SketchFuture's map (its card says 'SketchFuture route check unavailable'). The model is seeded, so #721's numbers should reproduce; if the capture shows other numbers (including the arrive-in-both counts), narrate and caption the captured ones. VERIFICATION.md does not say why the other 12 stroller users miss a plan, so do not claim they have no route in either. The stroller count 28/40 appears once (the arrive-in-both line); the duplicate in the dot-grid line is removed. Kept off screen (Q&A answers in script.md 5F): 575 nodes / 692 segments; 'full closure = worst case of a partial redirect'. In C2b the tagger gives the TEST IN SKETCHFUTURE link of the pending card whose h3 includes 'around St. Dominic' the id 'stdom-sf' and removes its target=_blank; then {wait_for: '#stdom-sf'} → {eval: centre '#stdom-sf' in the viewport with scrollIntoView block 'center', so the card title stays in frame (scroll_to aligns to the top edge and would push the title out)} → {click}. The SketchFuture box under the button still carries the old 'assumed 30% diversion' caveat; correct the string in the code before the rehearsal (script.md 5A item 7, with the test at dashboard/src/__tests__/sketchfuture.test.tsx line 67) or keep it out of frame. Never show it readable. In run A that card was pending from about 14:06 to 14:26 sim (created 14:06:29; recommendations expire after INTERVENTION_TTL_MIN = 20 minutes, backend/app/services/engine.py). C2b reaches it at about 14:16-14:17 only if it starts when C2a's recording stops (planned capture.py --port change); if C2b has to wait for C2a's encode, the step lands at about 14:19-14:26. If the rehearsal puts the click after about 14:20, the capture.py change is not made, or the card has gone, record S15 alone as C2c: a fresh backend run with the Simulator app joined, a shot file on /interventions holding the same tagger and only the last five C2b steps, launched within a few seconds of its backend, so the click lands at about 14:07-14:15 sim. If asked why the St. Dominic's route ends at Senado: routes are scored by length, stairs and capacity, not by the destination's state, and the operator decides."
+  },
+  {
+    "id": "S16",
+    "start_s": 201.5,
+    "end_s": 218.5,
+    "speaker": "[MEMBER 2] (VO)",
+    "narration": "Because our forecasting results are simulated, we're testing them on real counts from 99 Melbourne street sensors: a test announced before its result. [RESULT PENDING - fill after analysis, report honestly whatever it shows]",
+    "visual_type": "motion_graphic",
+    "visual": "Dots at the lat/lon of only the location_ids present in experiments/datasets/melbourne/minute/*.csv.gz (99 on 12 Oct; not all 134 rows of sensors.csv), no basemap, each pulsing with its archived per-minute counts; a calendar strip fills hour by hour from 12 Oct. Second half: result panel. Until the analysis exists it shows a grey dashed PENDING stamp; afterwards a two-bar chart (model vs 'no change', +15 min, Melbourne held-out days) showing whatever was found.",
+    "on_screen_text": "Chapter card (top-left): What's next? | Badge (top-right): PENDING (switch to REAL DATA only after the analysis) | City of Melbourne pedestrian counts · per minute · 99 sensors · CC BY · archived hourly since 12 Oct 2026 | Not Macau: counts people crossing a line, not camera density. Tests the method, not accuracy in Macau. | ONLY IF COMMITTED BEFORE THE ANALYSIS: Count → SAFE / WARNING / CRITICAL mapping fixed on [DATE], before any result: experiments/datasets/melbourne/README.md (commit [HASH]); otherwise delete this line | [RESULT PENDING - fill after analysis, report honestly whatever it shows]",
+    "assets": [
+      "experiments/datasets/melbourne/minute/*.csv.gz",
+      "experiments/datasets/melbourne/sensors.csv",
+      "experiments/datasets/melbourne/README.md"
+    ],
+    "notes": "The mapping is not yet defined in the repo (README.md says it must be stated before looking at results). The team commits it, with its date, before running the analysis, and the footer cites that file and date; if that does not happen, the mapping line is deleted. Recount distinct location_ids in the analysed window before recording and use that number in voice, caption and map. Finished-case wording: 'Because our forecasting results are simulated, we tested them on real counts from [N] Melbourne street sensors, with the method fixed before we looked.' + result (use 'with the method fixed before we looked' only if the dated commit exists). Not-finished wording for the slot: 'The analysis is still running; we will publish the result, whatever it shows.' Never show a predicted or hoped-for number."
+  },
+  {
+    "id": "S17",
+    "start_s": 218.5,
+    "end_s": 236.5,
+    "speaker": "[MEMBER 5] (VO over B-roll)",
+    "narration": "Phones on temporary mounts can serve one festival, then move to the next. [TEAM TO RESEARCH - BUSINESS: at most 10 words, sources on screen: cost of a phone kit vs a fixed counting camera] The whole chain runs end to end in simulation, with 104 automated tests passing.",
+    "visual_type": "motion_graphic",
+    "visual": "0-5 s: a phone-on-clamp icon hops between festival dates on a calendar while a pole-mounted camera stays bolted in place. 5-10 s: cost panel, empty until sourced. 10-13 s: B-roll filmed by the team (3 s), a member runs .venv/bin/python -m pytest -q and the screen shows '49 passed'. 13-18 s: counters 49 · 15 · 27 · 13 tick up to 104; a roadmap arrow with four stations slides in.",
+    "on_screen_text": "Chapter card (top-left): Can it happen? | Cost panel: [TEAM TO RESEARCH: phone kit vs fixed counting camera, with sources] | Intended operators: event staff, tourism or police operations rooms (no partner yet) | Python 49 · dashboard 15 · SketchFuture 27 · iOS 13 = 104 automated tests · a fresh clone runs from the README | Open source, AGPL-3.0; a closed-source or App Store build needs an Ultralytics licence or another detector | Roadmap: Prototype (end to end in simulation) → Melbourne real-data check → school counting experiment (protocol written) → supervised street pilot",
+    "assets": [
+      "docs/testing.md",
+      "docs/deployment.md (operational model only; NOT its illustrative cost table)",
+      "docs/experiment-protocol.md",
+      "THIRD_PARTY_NOTICES.md",
+      "team camera B-roll of a real test run"
+    ],
+    "notes": "Do not use docs/deployment.md's cost figures: they are stated assumptions, not sources. If the cost slot cannot be sourced, drop it (about -4 s)."
+  },
+  {
+    "id": "S18",
+    "start_s": 236.5,
+    "end_s": 242.5,
+    "speaker": "[MEMBER 4] (VO)",
+    "narration": "Back to Ah Po: her main route stays open, with staff beside her.",
+    "visual_type": "motion_graphic",
+    "visual": "Same map and framing as S01. An APPROVED stamp lands; a staff icon (hi-vis vest) appears beside Ah Po on the main route north towards Company of Jesus Square; grey walkers take the dashed step-free detour of the approved card (in run A: Rua dos Ervanários → Rua da Tercena → Rua de S. Paulo lower). A small trilingual notice board flashes zh / en / pt. Senado stays red (CRITICAL; run A ended at 0.75), its colour driven from A_timeline.csv as in S01.",
+    "on_screen_text": "Illustrative story | Every redirect recommendation includes keeping the main route open, with staff, for reduced-mobility visitors",
+    "assets": [
+      "shared/zones.json",
+      "S01 assets",
+      "backend/app/services/intervention.py (recommendation wording)"
+    ],
+    "notes": "Senado never turns green: it stayed above CRITICAL. Draw the detour from the route on the captured S04 card. The software writes the keep-the-main-route-open step into the recommendation; staff carry it out if the operator approves."
+  },
+  {
+    "id": "S19",
+    "start_s": 242.5,
+    "end_s": 253.5,
+    "speaker": "[MEMBER 5], [MEMBER 3], [MEMBER 2], [MEMBER 1] (on camera, relay)",
+    "narration": "[M5] Next: a supervised street pilot in Macau, with permission. [M3] The AI recommends. [M2] A person decides. [M1] Nothing identifying leaves the phone.",
+    "visual_type": "team_footage",
+    "visual": "Wide shot of the whole team in the S05 set; each speaker leans in or is lit in turn; M4 is in frame. Allow about 0.3-0.5 s for each of the three hand-offs. Last 1 s: everyone together.",
+    "on_screen_text": "Next: supervised street pilot, only with permission from [TEAM TO RESEARCH: the responsible Macau authority] | The AI recommends. A person decides.",
+    "assets": [
+      "team camera"
+    ],
+    "notes": "Four-member team: M3 says the 'Next' line. Timing: 20 words + 3 hand-offs + 1 s together in 11.0 s (guide 9.4 s without hand-offs). If the real take overruns, drop the separate all-together second (the wide shot already holds everyone); never cut a line. The adult supervisor may appear in the wide shot but does not speak."
+  },
+  {
+    "id": "S20",
+    "start_s": 253.5,
+    "end_s": 259.5,
+    "speaker": "none",
+    "narration": "",
+    "visual_type": "motion_graphic",
+    "visual": "End card on navy: wordmark, full S T E M B strip, who-built-what grid, evidence legend, credits. Held 6 s, no voice, so the who-built-what grid and credits can be read.",
+    "on_screen_text": "CrowdPulse Macau · [SCHOOL] · Supervisor: [NAME] · Imperial College London Hackathon Hong Kong & Macau 2026 · Challenge 2(c) Responsible AI | Who built what: [TEAM TO FILL] | Simulated = our simulator · Real = CC0 video, Mall benchmark · Model check = SketchFuture · Pending = Melbourne | Credits: street clip 'Diagonal crosswalk at Yonge & Dundas in Toronto', Raysonho @ Open Grid Scheduler / Grid Engine, Wikimedia Commons, CC0 · faces pixelated by us · Map data © OpenStreetMap contributors, ODbL · Pedestrian counts © City of Melbourne, CC BY · Mall dataset: Chen, Loy, Gong & Xiang, BMVC 2012 (charts only) · YOLO11 © Ultralytics, AGPL-3.0 · CrowdPulse code AGPL-3.0 · fonts: Geist, Noto Sans TC (SIL OFL) | [optional, per organisers' reply: AI-assistance line]",
+    "assets": [
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "notes": "Chapter: end card. Never shorten below 6 s (it is on the never-cut list; the overrun plan trims elsewhere)."
+  }
+]
