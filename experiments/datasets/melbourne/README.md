@@ -6,7 +6,19 @@ Why: CrowdPulse's forecasting accuracy so far comes only from our own simulator.
 
 ## How it is collected
 
-The API keeps only a short window of minute counts. On 2026-10-12 at 10:26 and 10:48 UTC the window ran from 2026-10-11 13:55 UTC (00:55 in Melbourne) to about 20 minutes before the request: it held the current Melbourne day so far, not a rolling window. If it empties at Melbourne midnight (13:00 UTC, 21:00 in Macau, during daylight-saving time), a day's last minutes are kept only by a run shortly before then. `experiments/melbourne_archive.py` downloads the whole window and merges it into one gzipped CSV per UTC day, de-duplicated on `(location_id, sensing_datetime)`. Run it every hour at minute 50 (Macau time), which includes 20:50; each day's final ~30 minutes in Melbourne (late night, low counts) may still be missed, which `archive_log.jsonl` shows. Collection started on 2026-10-12.
+The API keeps only a short window of minute counts, refreshed about every 15 minutes. On 2026-10-12 the window started at 2026-10-11 13:55 UTC in every check from 10:26 to 14:18 UTC; at 14:18 it held 24 hours, and it did not empty at Melbourne midnight. `experiments/melbourne_archive.py` downloads the whole window and merges it into one gzipped CSV per UTC day, de-duplicated on `(location_id, sensing_datetime)`. Collection started on 2026-10-12; the first run was on a team Mac (`archive_log.mac.jsonl`), and since 2026-10-12 14:18 UTC it runs on the team's Linux server, which is the source of truth (`archive_log.jsonl`).
+
+On the server (Ubuntu 24.04, Python 3.12): the script is at `/opt/crowdpulse-melbourne/melbourne_archive.py`, run by `crowdpulse-melbourne-archive.service` (a systemd one-shot service with a throw-away sandboxed user, `DynamicUser=yes`, writing only to `/var/lib/crowdpulse-melbourne`) from `crowdpulse-melbourne-archive.timer` (every hour at minute 50 UTC; missed runs are caught up after downtime). Replace `<server>` with the team's SSH login:
+
+```bash
+rsync -a --exclude .archive.lock <server>:/var/lib/crowdpulse-melbourne/ experiments/datasets/melbourne/
+```
+
+```bash
+ssh <server> 'systemctl list-timers crowdpulse-melbourne-archive.timer; tail -3 /var/lib/crowdpulse-melbourne/archive_log.jsonl'
+```
+
+To stop collecting: `ssh <server> 'systemctl disable --now crowdpulse-melbourne-archive.timer'`. To run it by hand anywhere instead:
 
 ```bash
 python3 experiments/melbourne_archive.py --out experiments/datasets/melbourne
@@ -18,7 +30,7 @@ python3 experiments/melbourne_archive.py --out experiments/datasets/melbourne
 |---|---|
 | `minute/YYYY-MM-DD.csv.gz` | one row per sensor and minute with at least one pedestrian (UTC day of `sensing_datetime`): `location_id`, `sensing_datetime` (UTC), `sensing_date` / `sensing_time` (Melbourne local), `direction_1`, `direction_2`, `total_of_directions` |
 | `sensors.csv` | sensor id, description, coordinates, direction names, status; refreshed daily |
-| `archive_log.jsonl` | one line per run: rows downloaded, new rows, the window's first and last minute, or the error. Gaps between one run's `last` and the next run's `first` are gaps in the archive. |
+| `archive_log.jsonl` | one line per server run: rows downloaded, new rows, the window's first and last minute, or the error. Gaps between one run's `last` and the next run's `first` are gaps in the archive. `archive_log.mac.jsonl` holds the first runs on a team Mac. |
 
 ## Things to know before analysing
 
