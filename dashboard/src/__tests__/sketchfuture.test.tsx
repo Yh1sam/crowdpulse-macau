@@ -64,7 +64,7 @@ describe("SketchFuture card section", () => {
     expect(link.getAttribute("href")).toContain("/#plan=");
     expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("Largo de S. Domingos link corridor closed (議事亭前地, 3 segments)");
     expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("grows from 125 m to 216 m");
-    expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("extreme case of the assumed 30% diversion");
+    expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("extreme case of the assumed partial redirect");
   });
   it("says why a check is unavailable, and renders nothing for non-redirects", () => {
     const { rerender } = render(<SketchFutureCheck iv={{ ...redirect, route: { ...redirect.route!, from: "almeida_ribeiro" } }} crosswalk={crosswalk} />);
