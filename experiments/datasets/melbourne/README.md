@@ -6,7 +6,7 @@ Why: CrowdPulse's forecasting accuracy so far comes only from our own simulator.
 
 ## How it is collected
 
-The API keeps only the most recent ~20 hours of minute counts. `experiments/melbourne_archive.py` downloads the whole window and merges it into one gzipped CSV per UTC day, de-duplicated on `(location_id, sensing_datetime)`. It must run at least every ~12 hours to avoid gaps; the team runs it hourly with a scheduler on one Mac. Collection started on 2026-10-12 (first window: 2026-10-11 13:55 UTC).
+The API keeps only a short window of minute counts. On 2026-10-12 at 10:26 and 10:48 UTC the window ran from 2026-10-11 13:55 UTC (00:55 in Melbourne) to about 20 minutes before the request: it held the current Melbourne day so far, not a rolling window. If it empties at Melbourne midnight (13:00 UTC, 21:00 in Macau, during daylight-saving time), a day's last minutes are kept only by a run shortly before then. `experiments/melbourne_archive.py` downloads the whole window and merges it into one gzipped CSV per UTC day, de-duplicated on `(location_id, sensing_datetime)`. Run it every hour at minute 50 (Macau time), which includes 20:50; each day's final ~30 minutes in Melbourne (late night, low counts) may still be missed, which `archive_log.jsonl` shows. Collection started on 2026-10-12.
 
 ```bash
 python3 experiments/melbourne_archive.py --out experiments/datasets/melbourne

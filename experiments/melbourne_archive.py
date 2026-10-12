@@ -1,7 +1,8 @@
 """Archive the City of Melbourne's per-minute pedestrian counts for the real-data forecasting check.
 
-The open-data API keeps only the most recent ~20 hours of minute counts, so this script is run every
-hour (a launchd agent; see experiments/datasets/melbourne/README.md) and merges each download into one
+The open-data API keeps only a short window of minute counts (observed on 2026-10-12: the current
+Melbourne day so far, starting at about local midnight), so this script is run every hour, including
+shortly before Melbourne midnight (21:00 in Macau), and merges each download into one
 gzipped CSV per UTC day, de-duplicated on (location_id, sensing_datetime). Every run appends a line to
 archive_log.jsonl with the window it saw, so gaps in the archive can be found and reported later.
 
