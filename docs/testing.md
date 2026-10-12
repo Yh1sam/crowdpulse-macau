@@ -103,6 +103,34 @@ Then, from the repository root, run each detector over the clip:
 
 Expected: YOLO11n near-field MAE 1.5, found 97%; Apple built-in MAE 3.0, found 55%. Note: when `frames/` is absent the script prints "alignment ok" without checking anything; the pixel check only runs if the frame images exist.
 
+### 3b. The 2,000-frame Mall benchmark
+
+Download and unpack the dataset as described in `experiments/datasets/mall/README.md` (research use only; 92 MB). Wrap the frames into a video without re-encoding (every frame stays byte-identical to the dataset JPEG):
+
+```bash
+ffmpeg -framerate 10 -i experiments/datasets/mall/mall_dataset/frames/seq_%06d.jpg -c:v copy -f mov experiments/datasets/mall/mall_frames_mjpeg.mov
+```
+
+Run both detectors with the `videoeval` tool built above:
+
+```bash
+mkdir -p experiments/datasets/mall/runs
+```
+
+```bash
+/tmp/videoeval experiments/datasets/mall/mall_frames_mjpeg.mov --fps 10 --detector coreml --model /tmp/cp_models/yolo11n.mlmodelc --out experiments/datasets/mall/runs/counts_yolo11n.csv --boxes-out experiments/datasets/mall/runs/boxes_yolo11n.json
+```
+
+```bash
+/tmp/videoeval experiments/datasets/mall/mall_frames_mjpeg.mov --fps 10 --out experiments/datasets/mall/runs/counts_apple_upper.csv --boxes-out experiments/datasets/mall/runs/boxes_apple_upper.json
+```
+
+```bash
+.venv/bin/python -I experiments/mall_eval.py --mall experiments/datasets/mall --out experiments/results/mall
+```
+
+Expected (run on 2026-10-12): YOLO11n counts 59% of annotated people, MAE 12.9, precision 93%, recall 55%; Apple upper-body 29%, MAE 22.0; per-camera calibration on 20 frames gives held-out MAE 3.33 (YOLO11n).
+
 ## 4. Rehearse the demo (simulated Golden Week, no phone)
 
 Restarting the simulation on the same database is supported (the top bar's "start demo sim" or `POST /sim/start`): the previous run's recommendations are closed and its alerts hidden. For a clean recording, start from an empty database anyway, since the database grows with every run.

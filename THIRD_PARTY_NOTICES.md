@@ -14,6 +14,7 @@ CrowdPulse Macau's own code, documentation, synthetic data, trained models and f
 ## Used at run time, not bundled
 
 - **Map tiles** on the dashboard's Live map are loaded from `tile.openstreetmap.org`: map data © OpenStreetMap contributors (ODbL), shown in the map's attribution control. The OpenStreetMap Foundation tile usage policy applies; it does not allow heavy or production traffic, so a deployment needs its own tile source.
+- **Mall dataset** (K. Chen, C. C. Loy, S. Gong, T. Xiang, BMVC 2012; CUHK), used to benchmark person counting. Research use only, no commercial use; it is downloaded locally and **not** redistributed in this repository. Only aggregate metrics and charts without dataset imagery are committed (`experiments/results/mall/`). See `experiments/datasets/mall/README.md`.
 - **Melbourne pedestrian counts** (City of Melbourne open data, CC BY; attribution: City of Melbourne) are archived by `experiments/melbourne_archive.py` into `experiments/datasets/melbourne/` for the real-data forecasting check; see that folder's README.
 - **Package dependencies** are installed by uv/pip, pnpm and npm and are not part of this repository. Main direct dependencies and their declared licences, read from the installed package metadata on 2026-10-11:
   - Python: FastAPI (MIT), Uvicorn (BSD-3-Clause), SQLAlchemy (MIT), Pydantic and pydantic-settings (MIT), pandas (BSD-3-Clause), NumPy (BSD-3-Clause and others), scikit-learn (BSD-3-Clause), joblib (BSD-3-Clause), Matplotlib (Matplotlib licence, PSF-based), HTTPX (BSD-3-Clause).

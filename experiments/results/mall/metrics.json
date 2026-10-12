@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "dataset": "Mall dataset (Chen, Loy, Gong & Xiang, BMVC 2012), CUHK, research use only",
+    "frames": 2000,
+    "annotated_people_per_frame": {
+      "min": 13,
+      "mean": 31.2,
+      "max": 53
+    },
+    "settings": {
+      "yolo11n": "confidence 0.25, IoU 0.7 (app default)",
+      "apple_upper": "VNDetectHumanRectanglesRequest upperBodyOnly (app fallback)"
+    },
+    "matching_rule": "head inside box widened by 5% of width per side, from 5% of height above the top to HEAD_FRACTION of height below it; one-to-one assignment by distance to the expected head point",
+    "head_fraction": {
+      "yolo11n": 0.35,
+      "apple_upper": 0.6
+    }
+  },
+  "results": {
+    "yolo11n": {
+      "frames": 2000,
+      "annotated_people": 62315,
+      "detected_boxes": 36509,
+      "count_mae": 12.9,
+      "count_bias": -12.9,
+      "share_found": 0.586,
+      "pearson_r": 0.796,
+      "mae_by_crowd_size": {
+        "smallest third": {
+          "frames": 716,
+          "annotated_range": [
+            13,
+            28
+          ],
+          "mae": 9.32,
+          "share_found": 0.612
+        },
+        "middle third": {
+          "frames": 688,
+          "annotated_range": [
+            29,
+            34
+          ],
+          "mae": 12.59,
+          "share_found": 0.598
+        },
+        "largest third": {
+          "frames": 596,
+          "annotated_range": [
+            35,
+            53
+          ],
+          "mae": 17.57,
+          "share_found": 0.555
+        }
+      },
+      "matched": 34015,
+      "precision": 0.932,
+      "recall": 0.546,
+      "recall_range_head_fraction_pm_0.1": [
+        0.534,
+        0.549
+      ],
+      "precision_range_head_fraction_pm_0.1": [
+        0.912,
+        0.937
+      ],
+      "recall_by_image_region": {
+        "far (top third of image)": {
+          "heads": 32957,
+          "recall": 0.424
+        },
+        "middle": {
+          "heads": 20718,
+          "recall": 0.644
+        },
+        "near (bottom third)": {
+          "heads": 8640,
+          "recall": 0.777
+        }
+      },
+      "median_latency_ms_on_mac": 7.7,
+      "post_hoc_linear_calibration": {
+        "held_out_frames": "801-2000",
+        "raw_mae_held_out": 13.42,
+        "20 frames spread over 1-800": {
+          "a": 1.6,
+          "b": 1.65,
+          "mae_held_out": 3.33,
+          "bias_held_out": -0.49
+        },
+        "all frames 1-800": {
+          "a": 1.423,
+          "b": 4.75,
+          "mae_held_out": 3.22,
+          "bias_held_out": -0.72
+        }
+      }
+    },
+    "apple_upper": {
+      "frames": 2000,
+      "annotated_people": 62315,
+      "detected_boxes": 18323,
+      "count_mae": 22.0,
+      "count_bias": -22.0,
+      "share_found": 0.294,
+      "pearson_r": 0.56,
+      "mae_by_crowd_size": {
+        "smallest third": {
+          "frames": 716,
+          "annotated_range": [
+            13,
+            28
+          ],
+          "mae": 16.85,
+          "share_found": 0.299
+        },
+        "middle third": {
+          "frames": 688,
+          "annotated_range": [
+            29,
+            34
+          ],
+          "mae": 21.99,
+          "share_found": 0.298
+        },
+        "largest third": {
+          "frames": 596,
+          "annotated_range": [
+            35,
+            53
+          ],
+          "mae": 28.18,
+          "share_found": 0.286
+        }
+      },
+      "matched": 18157,
+      "precision": 0.991,
+      "recall": 0.291,
+      "recall_range_head_fraction_pm_0.1": [
+        0.291,
+        0.291
+      ],
+      "precision_range_head_fraction_pm_0.1": [
+        0.991,
+        0.991
+      ],
+      "recall_by_image_region": {
+        "far (top third of image)": {
+          "heads": 32957,
+          "recall": 0.175
+        },
+        "middle": {
+          "heads": 20718,
+          "recall": 0.38
+        },
+        "near (bottom third)": {
+          "heads": 8640,
+          "recall": 0.525
+        }
+      },
+      "median_latency_ms_on_mac": 5.8,
+      "post_hoc_linear_calibration": {
+        "held_out_frames": "801-2000",
+        "raw_mae_held_out": 23.04,
+        "20 frames spread over 1-800": {
+          "a": 1.753,
+          "b": 14.8,
+          "mae_held_out": 4.45,
+          "bias_held_out": -1.32
+        },
+        "all frames 1-800": {
+          "a": 1.372,
+          "b": 17.04,
+          "mae_held_out": 4.47,
+          "bias_held_out": -2.59
+        }
+      }
+    }
+  }
+}

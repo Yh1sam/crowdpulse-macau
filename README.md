@@ -126,6 +126,15 @@ The forecast beats the persistence baseline ("the class stays as it is now") by 
 
 YOLO11s (18 MB) was no better than YOLO11n, so the smaller model ships. Inference is about 6 ms per frame on a Mac; phone speed is not yet measured. Remaining limits: dense crowds still hide people from a single low camera (82% found at the scramble peak), and people ~50 m away are mostly missed (27%), so phones must be placed close to and above the crowd they measure. With one clip and 11 labelled frames these numbers are indicative, not a benchmark. Figures: `experiments/results/video/`, table: `experiments/results/video/summary.md`.
 
+**A larger, harder test (Mall dataset).** Eleven frames of one street clip is a small sample, so the same detector code was also run on all 2,000 frames of the Mall dataset (a public research benchmark: a shopping-mall webcam looking down a busy walkway, 13–53 annotated people per frame, 62,315 in total; research use only, so the data is not redistributed here). Results from `experiments/results/mall/summary.md`:
+
+| detector | share of people counted | count error per frame | people with a box (recall): near / middle / far third of image | boxes that are a person (precision) |
+|---|---|---|---|---|
+| YOLO11n CoreML (app default) | 59% | 12.9 people (mean crowd 31) | 78% / 64% / 42% | 93% |
+| Apple built-in (fallback) | 29% | 22.0 people | 52% / 38% / 18% | 99% |
+
+From a high indoor camera, with people seated, behind a kiosk or far down the walkway, YOLO11n misses about 4 in 10 people, so the 97% near-field figure above is optimistic for crowded scenes. Its boxes are almost always real people, and its count tracks the true count (correlation 0.80), so the under-count is systematic. In a follow-up added after seeing this, a per-camera linear calibration fitted on 20 labelled frames (from the first 800) brought the error on the held-out frames 801–2000 down from 13.4 to 3.3 people per frame. That makes "label about 20 snapshots when installing a phone" a concrete deployment step; it is tested on one camera only.
+
 **Correction:** the first version of this evaluation reported 34% / 8% for Apple's detector. Those hand counts were attached to the wrong video times (ffmpeg's sampler takes the last frame of each 5 s interval, 2.4 s after the label), and the near-field definition was not one the detectors could be scored against. The script now verifies frame alignment pixel-for-pixel and uses a stated geometric near-field rule; the table above is the corrected result.
 
 **Licence:** YOLO11 weights are AGPL-3.0 (Ultralytics), so this repository is released under AGPL-3.0 as a whole (see [Licence](#licence)); a closed-source or App Store deployment needs an Ultralytics licence or a permissively licensed detector. Apple's built-in detector remains selectable in the app's Setup page and is the automatic fallback.
@@ -134,7 +143,7 @@ YOLO11s (18 MB) was no better than YOLO11n, so the smaller model ships. Inferenc
 
 - All accuracy numbers come from a simulator that we wrote; real-world accuracy is unknown until the controlled experiments in `docs/experiment-protocol.md` are run.
 - The density index is relative (0–1), not persons per m². Thresholds are experimental.
-- Camera person detection undercounts in dense crowds (occlusion). This is measured on real video (YOLO11n finds about 82% of people in the densest frames) and modelled in the simulator (observed density saturates near 0.8 while simulated truth reaches 1.0).
+- Camera person detection undercounts. Measured on real footage: YOLO11n finds about 82% of people in the densest frames of a street clip and 59% of the people in 2,000 frames of a crowded shopping-mall walkway (42% in the far third of the image). The simulator models a milder under-count (observed density saturates near 0.8 while simulated truth reaches 1.0). Each phone needs a per-camera calibration; with 20 labelled frames this reduced the mall error from 13.4 to 3.3 people per frame on held-out frames (one camera).
 - The WARNING class (transitional) is the hardest: F1 0.74–0.79 vs 0.86–0.88 for CRITICAL (test days, observed labels).
 - Intervention effects are assumptions (30% inflow diversion), not validated causal estimates.
 - One phone sees one part of a zone; the zone estimate depends on calibration of each phone's visible capacity.
