@@ -74,7 +74,14 @@ export default function App() {
   // the saved plan like a file import: validated first, undoable, and never kept in the URL.
   const [shared] = useState<{ plan: SharedPlan | null; error?: string }>(() => {
     try {
-      return { plan: decodePlan(window.location.hash, MAP) };
+      const plan = decodePlan(window.location.hash, MAP);
+      if (
+        !plan &&
+        new URLSearchParams(window.location.hash.replace(/^#/, "")).has("plan")
+      ) {
+        throw new Error("連結中的方案是空的，原有方案未被替換。");
+      }
+      return { plan };
     } catch (e) {
       return {
         plan: null,
@@ -96,7 +103,12 @@ export default function App() {
   const [saveMessage, setSaveMessage] = useState(
     loaded.error ? "本機保存暫停；原始資料已保留。" : "已在這個瀏覽器保存",
   );
-  const [error, setError] = useState(loaded.error ?? shared.error ?? "");
+  // Loading/import failures describe rejected input, not the current computation.
+  // Keep them visible when the preserved workspace is recomputed or edited.
+  const [inputError, setInputError] = useState(
+    loaded.error ?? shared.error ?? "",
+  );
+  const [error, setError] = useState("");
   const [notice, setNotice] = useState(
     shared.plan
       ? `已載入${shared.plan.source ? `來自 ${shared.plan.source} 的` : "連結中的"}方案，正在比較；按「撤銷」可回到原有方案。`
@@ -465,10 +477,14 @@ export default function App() {
       if (file.size > 250_000)
         throw new Error("檔案太大，請選擇匯出的方案 JSON。");
       const next = parseWorkspace(await file.text(), MAP);
-      if (change(next, "方案已匯入，正在重新比較。"))
+      if (change(next, "方案已匯入，正在重新比較。")) {
+        // A valid import resolves a rejected link/file, but cannot discard a
+        // corrupt saved copy that still needs the existing backup/reset flow.
+        setInputError(saveBlocked ? loaded.error ?? "" : "");
         compute(next, false, true);
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "無法讀取方案檔案。");
+      setInputError(e instanceof Error ? e.message : "無法讀取方案檔案。");
     } finally {
       if (importInput.current) importInput.current.value = "";
     }
@@ -484,7 +500,10 @@ export default function App() {
       setSaveBlocked(false);
     }
     const next = change(freshWorkspace(MAP), "已重設街區。");
-    if (next) compute(next);
+    if (next) {
+      setInputError("");
+      compute(next);
+    }
     setDialog(null);
     setSelected(PRIMARY_STEPS.id);
     setProfile("all");
@@ -1139,19 +1158,31 @@ export default function App() {
           </div>
         </div>
         <div className="notification-stack">
-          {error ? (
+          {inputError ? (
             <div className="alert error" role="alert">
               <Icon name="info" />
-              <span>{error}</span>
+              <span>{inputError}</span>
               {saveBlocked ? (
                 <button onClick={() => openDialog("reset")}>
                   備份並重新開始
                 </button>
               ) : (
-                <button aria-label="關閉錯誤提示" onClick={() => setError("")}>
+                <button
+                  aria-label="關閉載入錯誤提示"
+                  onClick={() => setInputError("")}
+                >
                   <Icon name="x" />
                 </button>
               )}
+            </div>
+          ) : null}
+          {error ? (
+            <div className="alert error" role="alert">
+              <Icon name="info" />
+              <span>{error}</span>
+              <button aria-label="關閉錯誤提示" onClick={() => setError("")}>
+                <Icon name="x" />
+              </button>
             </div>
           ) : null}
           {notice ? (

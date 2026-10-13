@@ -57,3 +57,13 @@ Added `src/core/plan.ts`: a plan can arrive in the URL fragment as `#plan=<base6
 - 撤銷 restored the plan saved earlier in that browser (我的街區方案, 0 edits) and 重做 brought the CrowdPulse plan back; after the redo the browser's saved copy held the CrowdPulse title and its three closures. Note for operators: a second SketchFuture tab that is navigated away saves *its* plan on `pagehide`, so with two tabs open the last one to leave wins — unchanged behaviour.
 
 These are software and model-consistency checks under the model's assumptions (`MODEL.md`), not evidence about real pedestrian behaviour; a full closure is the extreme case of CrowdPulse's assumed partial diversion.
+
+## Rejected-input recovery — 2026-10-13
+
+Loading/import errors now have independent state from editing and worker errors. Initial comparison and later retries keep a rejected URL/file warning visible; a valid import or explicit dismissal/reset resolves it. Empty `#plan=` is rejected explicitly. A corrupt saved copy remains untouched until the backup/reset flow completes.
+
+- `npm test`: 33 tests passed, including six mounted-App regression cases covering malformed/empty/foreign-map URL plans, retry, dismissal, file replacement, corrupt-storage backup/reset and independent worker failures.
+- `npm run build`: TypeScript and production build passed; the existing offline-map bundle advisory remains.
+- Fresh browser check on isolated `127.0.0.1:4175/#plan=not-json`: the URL fragment was removed, the original workspace completed comparison, and the rejection alert remained visible after both initial computation and a manual recompute. Screenshot: ignored local `artifacts/browser/invalid-plan-warning.png`.
+
+The broader closure-versus-partial-diversion model and result-return changes are not included in this fix; their scope affects the existing S15 video scenario.
