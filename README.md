@@ -7,7 +7,7 @@ Hackathon prototype for the Imperial College London Global Hackathon 2026 — Hi
 
 ## Problem
 
-During Golden Week, hotspots such as the Ruins of St. Paul's and Senado Square become dangerously crowded, and operators struggle to see where crowds will move *next*. Permanent CCTV/LiDAR networks are expensive and raise surveillance concerns.
+In Golden Week 2026, police briefly imposed crowd control at the Ruins of St. Paul's on three afternoons ([Public Security Police Force, 8 Oct 2026](https://www.gcs.gov.mo/news/detail/zh-hant/N26JHjeU3y)), and 4 October set a National Day holiday record of 210,000 visitor arrivals to Macau, a preliminary figure ([MGTO, 8 Oct 2026](https://www.gov.mo/en/news/410737/)). The police already run a "crowd forecast and early-warning system" from the Ruins to Senado Square, officially described as real-time monitoring with alerts, and plan to expand it. CrowdPulse explores what movable phones that send only numbers could add, with 5-15 minute forecasts that carry a confidence score and need a person's approval. Every figure here is sourced in [docs/research/brief-evidence.md](docs/research/brief-evidence.md).
 
 ## Solution
 
