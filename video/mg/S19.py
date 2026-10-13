@@ -1,34 +1,36 @@
 """S19 · Relay close (4:02.5-4:13.5, 11.0 s): the team on camera, one line each, then all together.
 
 Storyboard: docs/video/script.md section 3, row S19 (narration, visual, on-screen text); section 4, the three S19
-claims rows (the "Next" line is a plan; "The AI recommends. A person decides." and "Nothing identifying leaves the
-phone" are real code); section 1 "Team roles" (who carries which STEMB letter); section 5A item 5 (the pilot authority
-is still [TEAM TO RESEARCH]); section 5D and section 6 "team_footage" (wide shot, same set as S05); the S19 row of the
-overrun plan (drop the separate all-together second first, never cut a line). docs/video/shotlist.json, entry S19.
+claims rows (the "Next" line is a plan, with "which approvals apply: to be confirmed"; "The AI recommends. A person
+decides." and "Nothing identifying leaves the phone" are real code); section 1 "Team roles" (who carries which STEMB
+letter); section 5D and section 6 "team_footage" (wide shot, same set as S05); the S19 row of the overrun plan (drop
+the separate all-together second first, never cut a line). docs/video/shotlist.json, entry S19.
 
 Data sources (nothing is retyped):
-  - docs/video/shotlist.json: the shot duration (end_s - start_s).
+  - docs/video/shotlist.json: the shot duration (end_s - start_s); its narration and on_screen_text are cross-checked
+    against the storyboard row.
   - docs/video/script.md, section 3, S19 row:
       narration cell  -> the four relay lines and who says them ([M5], [M3], [M2], [M1]), in order;
       visual cell     -> the slate's direction line (its first sentence);
-      on-screen cell  -> the two text lines, verbatim: the "Next" line (with its [TEAM TO RESEARCH: ...] placeholder,
-                         drawn in an amber dashed box) and "The AI recommends. A person decides." (split at its
-                         sentence break so each half lands with its speaker).
-    When the team fills the placeholder in the storyboard, re-running this script picks it up.
+      on-screen cell  -> the two text lines, verbatim: the "Next" line (its "(...)" aside in a quieter colour; any
+                         [bracketed placeholder] would be drawn in an amber dashed box) and, after the label
+                         "Final all-together second only:", the tagline "The AI recommends. A person decides.", shown
+                         only in the shot's final all-together second.
   - docs/video/script.md, section 1, "Team roles" table: [MEMBER n] -> STEMB letter.
 
 The team has not filmed yet, so the picture is an amber "[TEAM FOOTAGE]" slate: five silhouettes in a wide shot,
-the speaker lit in turn (M5, M3, M2, M1; M4 in frame), then everyone together. The two on-screen lines sit in the top
-band (y 44-124) so they stay above the faces in the real wide shot; the slate keeps the lower-third slot
-(x 60-780, y 795-895) and the caption band (y 900-995) clear for the whole shot, because a new speaker starts four times.
+the speaker lit in turn (M5, M3, M2, M1; M4 in frame), then everyone together. The two on-screen lines take turns in
+the top band (y 44-about 175: the "Next" card from M5's first word to the hand-off to M1, the tagline in the last
+second), so they stay above the faces in the real wide shot; the slate keeps the lower-third slot (x 60-780,
+y 795-895) and the caption band (y 900-995) clear for the whole shot, because a new speaker starts four times.
 No chapter card, badge or footer: the storyboard gives S19 none. Captions and lower-thirds are added at assembly.
 
 Outputs:
   - video/build/mg/S19.mp4: slate + text (stand-in for the whole shot).
   - video/build/overlays/S19_text.mov: the two text lines and their top scrim only, with alpha, full shot length,
     to lay over the real relay footage at assembly.
-  - video/build/mg/stills/S19_*.png: layout checks at the key beats (S19_overlay_check shows the overlay on a bright
-    stand-in background, the worst case for legibility).
+  - video/build/mg/stills/S19_*.png: layout checks at the key beats (S19_overlay_check and S19_overlay_check_tag show
+    the overlay on a bright stand-in background, the worst case for legibility).
 
 Run: .venv/bin/python video/mg/S19.py [--stills-only]
 """
@@ -49,25 +51,28 @@ SHOT = "S19"
 _entry = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
 DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 11.0 s
 
-# Times in seconds from the shot start, keyed to the narration at about 140 words per minute
-# (9 + 3 + 3 + 5 words, a 0.4 s hand-off between speakers, then about 1 s all together).
+# Times in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S19.wav, say -v Daniel at
+# about 147 wpm; assemble.py lays it 0.2 s into the shot). Sentence boundaries from
+#   ffmpeg -i video/build/guide/S19.wav -af silencedetect=noise=-35dB:d=0.12 -f null -
+# (speech 0.00-4.03 | 4.27-5.51 | 5.75-7.02 | 7.27-about 9.30, the tail of "phone" fading out), each + 0.2 s.
+# The guide has 0.25 s gaps, not the 0.3-0.5 s hand-offs of the real relay; the final second stays at the shot end.
 # re-key to the real voice take
 BEATS = {
-    "m5": 0.25,         # [M5] "Next: a supervised street pilot in Macau, with permission."  -> the "Next" line
-    "m5_end": 4.10,
-    "m3": 4.50,         # [M3] "The AI recommends."                                          -> first half of the tagline
-    "m3_end": 5.80,
-    "m2": 6.20,         # [M2] "A person decides."                                           -> second half lands
-    "m2_end": 7.50,
-    "m1": 7.90,         # [M1] "Nothing identifying leaves the phone."                       (tagline holds)
-    "m1_end": 10.00,
-    "together": 10.05,  # everyone together, last ~1 s (overrun plan: drop this second first, never a line)
-}
+    "m5": 0.20,         # [M5] "Next: a supervised street pilot in Macau, with permission."  -> the "Next" card
+    "m5_end": 4.23,
+    "m3": 4.47,         # [M3] "The AI recommends."
+    "m3_end": 5.71,
+    "m2": 5.95,         # [M2] "A person decides."
+    "m2_end": 7.22,
+    "m1": 7.47,         # [M1] "Nothing identifying leaves the phone."  (the "Next" card has left in the hand-off)
+    "m1_end": 9.50,
+    "together": round(DURATION - 1.0, 3),  # 10.0: everyone together, the final second -> the tagline, only here
+}                                          # (overrun plan: drop this second first, never a line)
 HANDOFF = 0.40          # spotlight move from one speaker to the next (s), ends on the next speaker's first word
-TEXT_IN = 0.40          # fade-and-rise of each text block (s)
-NEXT_OUT = 0.35         # the "Next" line leaves this long before M3 starts
-SLIDE = 0.50            # first tagline half slides left to make room for the second (s), in the M2 hand-off
-SLIDE_LEAD = 0.40       # ... starting this long before M2's first word, so the halves never overlap
+TEXT_IN = 0.40          # fade-and-rise of the "Next" card (s)
+NEXT_OUT = 0.35         # the "Next" card leaves during the M2 -> M1 hand-off (on screen ≈6.6 s for its 19 words)
+TAG_IN = 0.20           # fade-and-rise of the tagline at the start of the final second (s), both halves at once
+RULE_IN = 0.30          # the cyan rule under "A person decides." draws in just after (s)
 
 SS = 2                  # supersampling for shapes
 PH = re.compile(r"(\[[^\]]+\])")  # a bracketed placeholder
@@ -86,6 +91,7 @@ def storyboard_cell(shot: str, col: int) -> str:
 
 
 NARRATION = storyboard_cell(SHOT, 3)
+assert NARRATION == _entry["narration"], (NARRATION, _entry["narration"])
 RELAY = [(f"[MEMBER {n}]", line.strip()) for n, line in re.findall(r"\[M(\d)\]\s*([^\[]+)", NARRATION)]
 assert [m for m, _ in RELAY] == ["[MEMBER 5]", "[MEMBER 3]", "[MEMBER 2]", "[MEMBER 1]"], RELAY
 SPEAKER_BEATS = ["m5", "m3", "m2", "m1"]
@@ -93,12 +99,17 @@ SPEAKER_BEATS = ["m5", "m3", "m2", "m1"]
 DIRECTION = storyboard_cell(SHOT, 4).split("<br>")[0].split(". ")[0].strip().rstrip(".") + "."
 assert DIRECTION.startswith("Wide shot of the whole team"), DIRECTION
 
-ON_SCREEN = [p.strip().strip('"') for p in storyboard_cell(SHOT, 5).split("<br>")]
+ON_SCREEN = [p.strip() for p in storyboard_cell(SHOT, 5).split("<br>")]
 assert len(ON_SCREEN) == 2, ON_SCREEN
-NEXT_LINE, TAGLINE = ON_SCREEN
-assert NEXT_LINE.startswith("Next:"), NEXT_LINE
+FINAL_LABEL = "Final all-together second only:"   # a direction to the editor, not on-screen text
+assert ON_SCREEN[1].startswith(FINAL_LABEL), ON_SCREEN[1]
+NEXT_LINE = ON_SCREEN[0].strip('"')
+TAGLINE = ON_SCREEN[1][len(FINAL_LABEL):].strip().strip('"')
+assert NEXT_LINE.startswith("Next:") and '"' not in NEXT_LINE, NEXT_LINE
 TAG_A, TAG_B = (s if s.endswith(".") else s + "." for s in TAGLINE.split(". ", 1))
 assert (TAG_A, TAG_B) == ("The AI recommends.", "A person decides."), (TAG_A, TAG_B)
+# the shot list says the same (its two lines joined by " | ", without the quotes)
+assert _entry["on_screen_text"] == f"{NEXT_LINE} | {FINAL_LABEL} {TAGLINE}", _entry["on_screen_text"]
 
 # [MEMBER n] -> STEMB letter (section 1, Team roles)
 ROLE = {m.group(1): m.group(2) for m in re.finditer(r"^\| (\[MEMBER \d\])(?: \(optional\))? \| \*\*([STEMB])\*\* ", SCRIPT, re.M)}
@@ -213,38 +224,34 @@ def camera_glyph(d, x: float, y: float, colour=WARNING) -> None:
 # ---------- rich text: words and [placeholders] laid out and wrapped together ----------
 
 PH_PAD = 12
+LEAD_W = 700            # weight of a leading "Word:" (the cyan "Next:")
+
+# token kinds: "word", "lead" (a leading "Word:"), "aside" (a word inside "(...)"), "ph" ([placeholder] chip)
 
 
-def tokens(text: str) -> list[tuple[str, bool]]:
-    out = []
+def tokens(text: str) -> list[tuple[str, str]]:
+    out, aside = [], False
     for part in PH.split(text):
         if not part:
             continue
         if PH.fullmatch(part):
-            out.append((part, True))
-        else:
-            out += [(w_, False) for w_ in part.split()]
+            out.append((part, "ph"))
+            continue
+        for w_ in part.split():
+            aside = aside or w_.startswith("(")
+            kind = "aside" if aside else ("lead" if not out and w_.endswith(":") else "word")
+            out.append((w_, kind))
+            aside = aside and not w_.endswith(")")
     return out
 
 
-def tok_w(tok: tuple[str, bool], size: int, weight: int) -> float:
-    s, ph = tok
-    return text_font(s, size, max(weight, 600) if ph else weight).getlength(s) + (2 * PH_PAD if ph else 0)
+def tok_weight(kind: str, weight: int) -> int:
+    return {"ph": max(weight, 600), "lead": LEAD_W}.get(kind, weight)
 
 
-def rich_lines(text: str, size: int, weight: int, max_w: float) -> list[list[tuple[str, bool]]]:
-    space = text_font(" ", size, weight).getlength(" ")
-    lines, cur, cw = [], [], 0.0
-    for tk in tokens(text):
-        w_ = tok_w(tk, size, weight)
-        if cur and cw + space + w_ > max_w:
-            lines.append(cur)
-            cur, cw = [], 0.0
-        cw += (space if cur else 0) + w_
-        cur.append(tk)
-    if cur:
-        lines.append(cur)
-    return lines
+def tok_w(tok: tuple[str, str], size: int, weight: int) -> float:
+    s, kind = tok
+    return text_font(s, size, tok_weight(kind, weight)).getlength(s) + (2 * PH_PAD if kind == "ph" else 0)
 
 
 def line_w(line, size: int, weight: int) -> float:
@@ -252,44 +259,80 @@ def line_w(line, size: int, weight: int) -> float:
     return sum(tok_w(t, size, weight) for t in line) + space * (len(line) - 1)
 
 
+def rich_lines(text: str, size: int, weight: int, max_w: float) -> list[list[tuple[str, str]]]:
+    """Greedy wrap at max_w."""
+    lines, cur = [], []
+    for tk in tokens(text):
+        if cur and line_w(cur + [tk], size, weight) > max_w:
+            lines.append(cur)
+            cur = []
+        cur.append(tk)
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+PHRASE_BREAK_BEFORE = {"and", "or", "but", "with", "only"}
+
+
+def two_lines(text: str, size: int, weight: int, max_w: float) -> list[list[tuple[str, str]]] | None:
+    """The best break into two lines no wider than max_w: as balanced as possible, preferring a phrase boundary
+    (after a comma, before "(" or a joining word) unless that costs more than 15% of line width. None if none fits."""
+    tks = tokens(text)
+    best, best_score = None, math.inf
+    for i in range(1, len(tks)):
+        a, b = tks[:i], tks[i:]
+        wmax = max(line_w(a, size, weight), line_w(b, size, weight))
+        if wmax > max_w:
+            continue
+        boundary = a[-1][0].endswith((",", ";")) or b[0][0].startswith("(") or b[0][0].lower() in PHRASE_BREAK_BEFORE
+        score = wmax * (1.0 if boundary else 1.15)
+        if score < best_score:
+            best, best_score = [a, b], score
+    return best
+
+
 def draw_rich_line(img, d2, x: float, cy: float, line, size: int, weight: int, fill=INK, chip_h: float = 44,
-                   lead_fill=None) -> None:
-    """Draws one laid-out line; placeholders sit in amber dashed boxes; lead_fill colours a leading 'Word:'."""
+                   lead_fill=CYAN, aside_fill=INK_2) -> None:
+    """Draws one laid-out line: placeholders in amber dashed boxes, a leading 'Word:' in lead_fill, the words of a
+    '(...)' aside in aside_fill."""
     space = text_font(" ", size, weight).getlength(" ")
-    for i, (s, ph) in enumerate(line):
-        w_ = tok_w((s, ph), size, weight)
-        if ph:
+    for s, kind in line:
+        w_ = tok_w((s, kind), size, weight)
+        if kind == "ph":
             box = (x, cy - chip_h / 2, x + w_, cy + chip_h / 2)
             d2.rounded_rectangle(SB(box), S(9), fill=(*NAVY, 240))
             dashed_rrect(d2, SB(box), S(9), (*WARNING, 255), S(2.2))
-            draw_text(img, (x + PH_PAD, cy), s, size, max(weight, 600), WARNING, anchor="lm")
+            draw_text(img, (x + PH_PAD, cy), s, size, tok_weight(kind, weight), WARNING, anchor="lm")
         else:
-            lead = i == 0 and lead_fill is not None and s.endswith(":")
-            draw_text(img, (x, cy), s, size, 700 if lead else weight, lead_fill if lead else fill, anchor="lm")
+            colour = {"lead": lead_fill, "aside": aside_fill}.get(kind, fill)
+            draw_text(img, (x, cy), s, size, tok_weight(kind, weight), colour, anchor="lm")
         x += w_ + space
 
 
 # ---------- top band: the two on-screen lines (also the overlay for the real footage) ----------
 
 TOP_Y = 44                       # top of the text band (chapter-card height; S19 has no card or badge)
-NEXT_SIZE, NEXT_W = 30, 1300     # "Next" line: size, preferred maximum line width (wraps beyond it)
-NEXT_PITCH, NEXT_PAD_X, NEXT_PAD_Y = 54, 30, 18
+NEXT_SIZE, NEXT_W = 34, 1300     # "Next" line: size (= the caption size), wrap width if it needs three lines or more
+NEXT_PITCH, NEXT_PAD_X, NEXT_PAD_Y, NEXT_ROW = 50, 32, 18, 44
+NEXT_MAX_1 = 1740                # widest single line, and the widest line of a two-line card
 TAG_SIZE = 62
 
-NEXT_LINES = rich_lines(NEXT_LINE, NEXT_SIZE, 600, 1740)        # one line if it fits the frame, else wrapped
-if len(NEXT_LINES) > 1:
-    NEXT_LINES = rich_lines(NEXT_LINE, NEXT_SIZE, 600, NEXT_W)
+NEXT_LINES = rich_lines(NEXT_LINE, NEXT_SIZE, 600, NEXT_MAX_1)
+if len(NEXT_LINES) > 1:          # two balanced lines if they fit, else wrapped at NEXT_W
+    NEXT_LINES = two_lines(NEXT_LINE, NEXT_SIZE, 600, NEXT_MAX_1) or rich_lines(NEXT_LINE, NEXT_SIZE, 600, NEXT_W)
 _next_w = max(line_w(l, NEXT_SIZE, 600) for l in NEXT_LINES)
 NEXT_BOX = ((W - _next_w) / 2 - NEXT_PAD_X, TOP_Y,
-            (W + _next_w) / 2 + NEXT_PAD_X, TOP_Y + 2 * NEXT_PAD_Y + NEXT_PITCH * (len(NEXT_LINES) - 1) + 44)
-TEXT_CY = (NEXT_BOX[1] + NEXT_BOX[3]) / 2 if len(NEXT_LINES) == 1 else TOP_Y + 40   # tagline centre line
+            (W + _next_w) / 2 + NEXT_PAD_X, TOP_Y + 2 * NEXT_PAD_Y + NEXT_PITCH * (len(NEXT_LINES) - 1) + NEXT_ROW)
+TEXT_CY = (NEXT_BOX[1] + NEXT_BOX[3]) / 2   # tagline centre line: it takes the "Next" card's place in the band
+assert " ".join(s for ln in NEXT_LINES for s, _ in ln) == " ".join(NEXT_LINE.split()), NEXT_LINES   # verbatim
 
 
 def _next_card(img, d2):
     d2.rounded_rectangle(SB(NEXT_BOX), S(18), fill=(*NAVY_2, 236))
     for i, ln in enumerate(NEXT_LINES):
-        cy = NEXT_BOX[1] + NEXT_PAD_Y + 22 + i * NEXT_PITCH
-        draw_rich_line(img, d2, (W - line_w(ln, NEXT_SIZE, 600)) / 2, cy, ln, NEXT_SIZE, 600, INK, lead_fill=CYAN)
+        cy = NEXT_BOX[1] + NEXT_PAD_Y + NEXT_ROW / 2 + i * NEXT_PITCH
+        draw_rich_line(img, d2, (W - line_w(ln, NEXT_SIZE, 600)) / 2, cy, ln, NEXT_SIZE, 600, INK)
 
 
 NEXT_CARD = sprite_from(_next_card, shadow=0.55)
@@ -297,24 +340,23 @@ NEXT_CARD = sprite_from(_next_card, shadow=0.55)
 _fa, _fb = text_font(TAG_A, TAG_SIZE, 600), text_font(TAG_B, TAG_SIZE, 800)
 TAG_GAP = 0.55 * TAG_SIZE
 WA, WB = _fa.getlength(TAG_A), _fb.getlength(TAG_B)
-TAG_X0 = (W - (WA + TAG_GAP + WB)) / 2        # final left edge of the whole tagline
-TAG_A_ALONE_DX = (W - WA) / 2 - TAG_X0         # while alone, the first half sits centred
+TAG_X0 = (W - (WA + TAG_GAP + WB)) / 2        # left edge of the whole tagline (centred)
+RULE_Y = TEXT_CY + TAG_SIZE * 0.62             # a short cyan rule under "A person decides." (the human in the loop)
 
 
-def _tag_a(img, d2):
+def _tag(img, d2):
     draw_text(img, (TAG_X0, TEXT_CY), TAG_A, TAG_SIZE, 600, INK, anchor="lm")
-
-
-def _tag_b(img, d2):
     draw_text(img, (TAG_X0 + WA + TAG_GAP, TEXT_CY), TAG_B, TAG_SIZE, 800, INK, anchor="lm")
-    # a short cyan rule under "A person decides." (the human in the loop), drawn once it has landed
-    y = TEXT_CY + TAG_SIZE * 0.62
-    d2.rounded_rectangle(SB((TAG_X0 + WA + TAG_GAP, y, TAG_X0 + WA + TAG_GAP + WB, y + 5)), S(2.5), fill=(*CYAN, 255))
 
 
-TAG_A_S = sprite_from(_tag_a, shadow=0.7)
-TAG_B_S = sprite_from(_tag_b, shadow=0.7)
-TEXT_BOTTOM = max(NEXT_CARD.y + NEXT_CARD.img.height, TAG_B_S.y + TAG_B_S.img.height)
+def _rule(img, d2):
+    x0 = TAG_X0 + WA + TAG_GAP
+    d2.rounded_rectangle(SB((x0, RULE_Y, x0 + WB, RULE_Y + 5)), S(2.5), fill=(*CYAN, 255))
+
+
+TAG_S = sprite_from(_tag, shadow=0.7)
+RULE_S = sprite_from(_rule, shadow=0.7)
+TEXT_BOTTOM = max(NEXT_CARD.y + NEXT_CARD.img.height, TAG_S.y + TAG_S.img.height, RULE_S.y + RULE_S.img.height)
 
 
 def _scrim() -> Sprite:
@@ -330,22 +372,28 @@ def _scrim() -> Sprite:
 
 
 SCRIM = _scrim()
+NEXT_OUT_T = BEATS["m2_end"]     # the "Next" card starts to leave as M2 finishes (the hand-off to M1)
+TAG_T = BEATS["together"]        # the tagline starts with the final all-together second, not earlier
+assert TAG_T >= DURATION - 1.0 - 1e-6 and TAG_T > BEATS["m1_end"], (TAG_T, BEATS)
+assert NEXT_OUT_T + NEXT_OUT <= TAG_T and NEXT_OUT_T - (BEATS["m5"] + 0.05 + TEXT_IN) >= 6.0  # ≥6 s fully readable
 
 
 def overlay_at(t: float, img: Image.Image | None = None) -> Image.Image:
     """The top band at time t, drawn onto img (a transparent frame by default)."""
     img = img if img is not None else transparent()
     put(img, SCRIM, progress(t, 0.0, 0.3))
-    # the "Next" line: in on M5's first word, out just before M3 starts
+    # the "Next" card: in on M5's first word, holds through M3 and M2 so its 19 words can be read, out in the
+    # hand-off to M1
     k_in = progress(t, BEATS["m5"] + 0.05, TEXT_IN)
-    k_out = progress(t, BEATS["m3"] - NEXT_OUT - 0.05, NEXT_OUT)
+    k_out = progress(t, NEXT_OUT_T, NEXT_OUT)
     put(img, NEXT_CARD, k_in * (1 - k_out), dy=(1 - k_in) * 12 - k_out * 10)
-    # "The AI recommends." on M3; slides left as "A person decides." lands on M2; both hold to the end
-    ka = progress(t, BEATS["m3"], TEXT_IN)
-    ks = progress(t, BEATS["m2"] - SLIDE_LEAD, SLIDE)
-    put(img, TAG_A_S, ka, dx=TAG_A_ALONE_DX * (1 - ks), dy=(1 - ka) * 12)
-    kb = progress(t, BEATS["m2"], TEXT_IN)
-    put(img, TAG_B_S, kb, dx=(1 - kb) * 18)
+    # the tagline: only in the final all-together second, both halves at once, then the rule draws in
+    kt = progress(t, TAG_T, TAG_IN)
+    put(img, TAG_S, kt, dy=(1 - kt) * 12)
+    kr = progress(t, TAG_T + 0.10, RULE_IN)
+    if kr > 0.002:
+        put(img, Sprite(RULE_S.img.crop((0, 0, max(1, int(RULE_S.img.width * kr)), RULE_S.img.height)),
+                        RULE_S.x, RULE_S.y), kt)
     return img
 
 
@@ -498,13 +546,10 @@ TOG_LIT = sprite_from(_together(INK, CYAN))
 
 # layout checks: slate clear of the lower-third slot and the caption band, nothing off-frame
 assert PANEL[3] < 795 and TOG_Y + 20 < PANEL[3], PANEL
-for _sp in [NEXT_CARD, TAG_A_S, TAG_B_S, *Q_ACTIVE, TOG_LIT]:
+for _sp in [NEXT_CARD, TAG_S, RULE_S, *Q_ACTIVE, TOG_LIT]:
     assert _sp.x >= 56 and _sp.x + _sp.img.width <= W - 56 and _sp.y >= 20, (_sp.x, _sp.y)  # (incl. soft shadows)
     assert _sp.y + _sp.img.height <= 790, (_sp.y, _sp.img.height)
 assert PANEL[1] > TEXT_BOTTOM, (PANEL, TEXT_BOTTOM)
-assert TAG_A_S.x + TAG_A_ALONE_DX >= 56
-# when "A person decides." starts to fade in, the sliding first half has already cleared its place
-assert TAG_A_ALONE_DX * (1 - progress(BEATS["m2"], BEATS["m2"] - SLIDE_LEAD, SLIDE)) < TAG_GAP - 4
 
 # ---------- timing of the spotlight ----------
 
@@ -599,11 +644,11 @@ def overlay_check(t: float) -> Image.Image:
 
 
 STILLS = {  # name: time (s)
-    "next": 2.2,                 # M5 speaking, the "Next" line up
-    "ai_recommends": 5.2,        # M3, first tagline half centred
-    "person_decides": 7.0,       # M2, full tagline
-    "m1_phone": 9.0,             # M1, tagline holds
-    "together": DURATION - 1 / FPS,
+    "next": 2.2,                 # M5 speaking, the "Next" card up
+    "ai_recommends": 5.1,        # M3 speaking, the "Next" card holds (no tagline yet)
+    "person_decides": 6.6,       # M2 speaking, the "Next" card holds (no tagline yet)
+    "m1_phone": 8.5,             # M1 speaking, top band clear
+    "together": DURATION - 1 / FPS,   # the final all-together second, tagline up
 }
 
 if __name__ == "__main__":
@@ -614,7 +659,8 @@ if __name__ == "__main__":
     args = ap.parse_args()
     for name, tt in STILLS.items():
         print("still", still(f"{SHOT}_{name}", frame(tt)))
-    print("still", still(f"{SHOT}_overlay_check", overlay_check(7.0)))
+    print("still", still(f"{SHOT}_overlay_check", overlay_check(3.0)))
+    print("still", still(f"{SHOT}_overlay_check_tag", overlay_check(DURATION - 1 / FPS)))
     if not args.stills_only:
         print("video", render(SHOT, DURATION, frame))
         print("overlay", render_overlay(f"{SHOT}_text", DURATION, overlay_frame))

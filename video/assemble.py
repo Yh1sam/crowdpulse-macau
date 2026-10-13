@@ -59,24 +59,46 @@ def voice_file(shot: str) -> Path | None:
     return None
 
 
+WEAK = {"a", "an", "the", "of", "to", "at", "in", "on", "as", "and", "or", "with", "for", "by", "from", "our", "its", "that"}
+
+
 def caption_chunks(narration: str) -> list[str]:
+    """Splits a shot's narration into one-line caption chunks (style.caption: 34 px, 1360 px wide).
+
+    Sentences are kept apart ("St." is not a sentence end). A sentence too wide for one line is
+    broken after a comma, semicolon or colon if one sits between 15% and 85% of the way through,
+    otherwise between words near the middle, never right after a small word such as "the" or "of"."""
     text = re.sub(r"\[(?:M\d|ALL)\]\s*", "", narration or "")
     text = re.sub(r"\[[^\]]*\]", "", text)
     text = re.sub(r"\s+", " ", text).strip()
     if not text:
         return []
-    chunks, cur = [], []
-    for word in text.split():
-        cur.append(word)
-        if len(" ".join(cur)) > 58 or (word.endswith((".", "?", "!", ":", ";")) and len(cur) >= 4):
-            chunks.append(" ".join(cur))
-            cur = []
-    if cur:
-        if chunks and len(cur) <= 2:
-            chunks[-1] += " " + " ".join(cur)
+
+    def fits(chunk: str) -> bool:
+        return text_size(chunk, 34, 500)[0] <= 1360
+
+    def split(sentence: str) -> list[str]:
+        words = sentence.split()
+        if fits(sentence) or len(words) < 4:
+            return [sentence]
+        pos = lambda i: len(" ".join(words[:i]))  # noqa: E731
+        n, mid = len(sentence), len(sentence) / 2
+        cuts = [i for i in range(1, len(words)) if words[i - 1].endswith((",", ";", ":")) and 0.15 * n <= pos(i) <= 0.85 * n]
+        if cuts:
+            i = min(cuts, key=lambda k: abs(pos(k) - mid))
         else:
-            chunks.append(" ".join(cur))
-    return chunks
+            i = min(range(2, len(words) - 1), key=lambda k: abs(pos(k) - mid) + (1000 if words[k - 1].lower() in WEAK else 0))
+        return split(" ".join(words[:i])) + split(" ".join(words[i:]))
+
+    chunks = [c for sent in re.split(r"(?<=[.?!])(?<!St\.)\s+", text) for c in split(sent)]
+    merged: list[str] = []
+    for c in chunks:  # a run of one-word sentences (the S05 roll call) shares one caption
+        if merged and len(c.split()) == 1 and all(len(x.split()) == 1 for x in re.split(r"(?<=\.)\s+", merged[-1])) \
+                and fits(f"{merged[-1]} {c}"):
+            merged[-1] += " " + c
+        else:
+            merged.append(c)
+    return merged
 
 
 def png(name: str, draw) -> Path:
@@ -88,8 +110,21 @@ def png(name: str, draw) -> Path:
     return path
 
 
+def pauses(path: Path) -> list[tuple[float, float]]:
+    """(start, end) of the pauses in a voice file, from ffmpeg silencedetect."""
+    err = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(path), "-af", "silencedetect=noise=-35dB:d=0.12", "-f", "null", "-"],
+                         capture_output=True, text=True).stderr
+    starts = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", err)]
+    ends = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", err)]
+    return list(zip(starts, ends))
+
+
 def caption_overlays(shot: dict) -> list[tuple[Path, float, float]]:
-    """[(png, start, end)] for the shot's burned-in captions, timed over its speech."""
+    """[(png, start, end)] for the shot's burned-in captions, timed over its speech.
+
+    Chunks share the speech in proportion to their length; a chunk that ends a sentence (or a
+    clause ending in ; or :) is then snapped to the nearest pause in the voice file, within 1 s,
+    so a sentence's caption appears when it is spoken, not a few tenths of a second early."""
     chunks = caption_chunks(shot.get("narration", ""))
     v = voice_file(shot["id"])
     if not chunks or not v:
@@ -98,12 +133,21 @@ def caption_overlays(shot: dict) -> list[tuple[Path, float, float]]:
     speech = probe_duration(v)
     slot = shot["end_s"] - shot["start_s"]
     total = sum(len(c) for c in chunks)
-    out, t = [], start
+    bounds, acc = [0.0], 0.0
+    for c in chunks:
+        acc += speech * len(c) / total
+        bounds.append(acc)
+    gaps = pauses(v)
+    for i in range(1, len(chunks)):
+        if not chunks[i - 1].endswith((".", "?", "!", ";", ":")) or not gaps:
+            continue
+        near = min(gaps, key=lambda g: abs((g[0] + g[1]) / 2 - bounds[i]))
+        if abs((near[0] + near[1]) / 2 - bounds[i]) <= 1.0 and bounds[i - 1] < near[1] < bounds[i + 1]:
+            bounds[i] = near[1]
+    out = []
     for i, c in enumerate(chunks):
-        dur = speech * len(c) / total
-        end = min(slot, t + dur + (0.25 if i == len(chunks) - 1 else 0.0))
-        out.append((png(f"{shot['id']}_cap{i:02d}", lambda img, c=c: caption(img, c)), t, end))
-        t += dur
+        t, end = start + bounds[i], start + bounds[i + 1] + (0.25 if i == len(chunks) - 1 else 0.0)
+        out.append((png(f"{shot['id']}_cap{i:02d}", lambda img, c=c: caption(img, c)), t, min(slot, end)))
     return out
 
 

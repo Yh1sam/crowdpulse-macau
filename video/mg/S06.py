@@ -1,22 +1,26 @@
 """Shot S06 (0:46.0-0:58.0, 12.0 s): "Why does it matter?"
 
-[MEMBER 4] on camera for 4 s (a placeholder slate until the take is filmed), then voice-over over
-the zone schematic with illustrative dots piling up at Senado Square, then, during the medical
-sentence, a plain body-outline diagram whose only annotation is the research placeholder.
+[MEMBER 4] on camera for 4 s (a placeholder slate until the take is filmed) with the arrivals tag,
+then voice-over over the zone schematic: illustrative dots pile up on Rua de S. Paulo below the
+Ruins while three date chips (the police crowd-control afternoons) stack beside the Ruins. On the
+medical sentence the map fades out completely; on a plain navy background a side-view body outline
+drawn from shapes appears, two arrows press on the chest from front and back, and the only
+annotation is the sourced mechanism, with its citation in the footer slot.
 
 Data sources:
-  - docs/video/shotlist.json, shot S06: duration (end_s - start_s) and the camera timecode.
-  - shared/zones.json (through style.zone_graph / draw_zone_graph): zone positions, names, street
-    links and which zones are entry points (where the illustrative dots come in).
-  - docs/video/script.md, section 3, row S06: card, badge, footer and citation text (verbatim,
-    checked against shotlist.json); the medical placeholder is read from the shotlist narration.
-The dots are an illustration (badge ILLUSTRATION), not data. No medical mechanism is drawn or
-written: the body diagram carries only the [TEAM TO RESEARCH - MEDICINE ...] placeholder.
+  - docs/video/shotlist.json, shot S06: duration (end_s - start_s), the camera timecode, the
+    narration and every on-screen line (card, tag, footers, date chips, body label, citation, badge).
+  - docs/video/script.md, section 3, row S06: the same narration and lines (checked verbatim).
+  - shared/zones.json (through style.zone_graph / draw_zone_graph): zone positions, names and the
+    street links the illustrative dots walk along (uphill to Rua de S. Paulo, below the Ruins).
+The dots and the pile are an illustration (badge ILLUSTRATION), not data; the date chips are the
+real dates from the police release and Macao Daily News (footer). The body diagram is shapes only,
+off the Macau map, and carries no text but the sourced mechanism (Gill & Landi 2004).
 
 Outputs:
-  video/build/mg/S06.mp4                  the full shot (camera slate 0-4 s)
-  video/build/overlays/S06_cam_overlay.mov  0-4 s card + footer with alpha, for the real camera take
-  video/build/mg/stills/S06_*.png          layout checks
+  video/build/mg/S06.mp4                    the full shot (camera slate 0-4 s)
+  video/build/overlays/S06_cam_overlay.mov  0-4 s card + tag + footer with alpha, for the real camera take
+  video/build/mg/stills/S06_*.png           layout checks
 
 Run:  .venv/bin/python video/mg/S06.py            (stills, overlay and render)
       .venv/bin/python video/mg/S06.py --stills   (stills only)
@@ -27,7 +31,6 @@ import bisect
 import json
 import math
 import random
-import re
 import sys
 from collections import deque
 
@@ -39,39 +42,69 @@ SHOT = "S06"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
 DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 12.0 s
 START_S = _shot["start_s"]
+_row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} | 0:"))
 
-# Beats in seconds from the shot start, keyed to the narration at about 140 wpm (0.43 s a word),
-# voice from 0.3 s: "Every Golden Week, the Ruins of St. Paul's and Senado | Square become
-# dangerously crowded." then the medical sentence (placeholder, at most 12 words) from about 7 s.
-# re-key to the real voice take
+# Beats in seconds from the shot start. The narration starts 0.2 s into the shot (assemble.py,
+# VOICE_START). Keyed to the guide voice (video/build/guide/S06.wav, say -v Daniel, ~147 wpm):
+# silencedetect pauses at 1.04-1.35, 5.60-5.84, 6.58-6.81 and 9.08-9.38 s of the wav, word starts
+# from synthesising prefixes of the line; + 0.2 s gives the shot times below:
+#   "This Golden Week," 0.2-1.25 | "police briefly imposed crowd control" 1.56-3.75 |
+#   "at the Ruins" 3.75-4.55 | "on three afternoons." 4.55-5.80 | pause | "In a crush," 6.04-6.78 |
+#   "victims" 7.01 | "typically suffocate" 7.65-8.74 | "standing up," 8.74-9.28 |
+#   "from chest compression." 9.58-10.84 ("chest" ~10.0) | silence to 12.0.
+# The date chips come in fast (0.25 s fades, all three up by "three", ~4.9 s) so the full stack reads
+# for over a second before the map leaves on "In a crush" (6.05 s); the map cannot stay longer, since
+# assemble.py's medical-sentence caption arrives at about 5.9-6.0 s.
+# re-key to the real voice take (the team reads at about 140 wpm, so everything moves ~5% later)
 BEATS = {
-    "card_in": 0.0,       # chapter card over the camera take (shown about 2 s)
-    "voice_in": 0.3,      # "Every Golden Week" (source footer appears)
-    "card_out": 2.3,      # card gone
-    "schematic": 4.0,     # "...Senado Square": cut from camera to the zone schematic, badge on
-    "pile_start": 4.2,    # "Square become": dots start to pile up at Senado
-    "pile_full": 6.6,     # end of "dangerously crowded": the pile is complete
-    "map_left": 6.55,     # pause after "crowded": the map slides left (done just after "medical")
-    "medical": 7.0,       # medical sentence starts: body diagram comes in
-    "annotation": 7.9,    # placeholder annotation lands (early in the medical sentence)
-    "citation": 8.3,      # citation placeholder lands
+    "card_in": 0.0,       # chapter card over the camera take (2 s)
+    "card_out": 2.0,
+    "tag_in": 0.5,        # arrivals tag over the camera (spec: 0.5-4 s)
+    "schematic": 4.0,     # cut from camera to the zone schematic, on "...the Ruins"; badge on
+    "chip_0": 4.0,        # "Crowd control:" and the first chip, with the cut, as "Ruins" lands
+    "chip_1": 4.35,       # end of "Ruins" / "on": second chip
+    "chip_2": 4.65,       # "three": third chip (all three fully up by ~4.9 s)
+    "pile_full": 5.65,    # end of "afternoons": the pile on Rua de S. Paulo is complete
+    "map_out": 6.05,      # "In a crush," starts: map, chips and footer fade out (gone by 6.35)
+    "body_in": 6.35,      # map gone; the body outline appears on plain navy ("crush")
+    "arrows": 6.95,       # "victims": the two arrows press in, "front-to-back pressure"
+    "label_2": 7.6,       # "typically": "→ chest can't fully expand"
+    "label_3": 8.15,      # "suffocate": "→ asphyxia"
+    "press": 9.95,        # "chest compression": the arrows press once more
 }
+CHIP_FADE = 0.25          # date-chip fade-in (s): quick, so the stack is readable before map_out
 
-# Text, verbatim from the storyboard (script.md section 3, S06; the same text is in shotlist.json).
+# Text, verbatim from the shot list (on_screen_text, narration), checked against the storyboard row.
+NARRATION = ("This Golden Week, police briefly imposed crowd control at the Ruins on three afternoons. "
+             "In a crush, victims typically suffocate standing up, from chest compression.")
 CARD = "Why does it matter?"
-FOOTER = "[TEAM TO RESEARCH: cited source for Golden Week crowding at the Ruins / Senado Square]"
-CITATION = "[TEAM TO RESEARCH: medical source, year]"
-for _txt in (CARD, FOOTER, CITATION):
-    assert _txt in _shot["on_screen_text"], _txt
-# The medical slot is the storyboard narration's own placeholder, read from the shot list so it
-# stays word for word what the storyboard says.
-MECHANISM = re.search(r"\[TEAM TO RESEARCH - MEDICINE:[^\]]*\]", _shot["narration"]).group(0)
+TAG = "Macau, 4 Oct: 210,000 visitor arrivals, a National Day holiday record (preliminary)"
+FOOTER_CAM = "Macao Government Tourism Office via gov.mo, 8 Oct 2026"
+CHIPS_TEXT = "Crowd control: 2 Oct pm · 3 Oct pm · 4 Oct 13:50-15:10"
+FOOTER_MAP = "Public Security Police Force via gcs.gov.mo, 8 Oct 2026 · Macao Daily News, 5 Oct 2026"
+BODY_LABEL = "front-to-back pressure → chest can't fully expand → asphyxia"
+CITATION = "Gill & Landi, Am J Forensic Med Pathol, 2004 · case report, New York, 1991"
+BADGE = "ILLUSTRATION"
+_ost = dict(item.split(": ", 1) for item in _shot["on_screen_text"].split(" | "))
+assert _shot["narration"] == NARRATION, _shot["narration"]
+assert NARRATION in _row
+for _key, _txt in (("Chapter card (top-left, 2 s)", CARD), ("Tag (0.5-4 s, over the camera)", TAG),
+                   ("Footer (0-4 s)", FOOTER_CAM), ("Date chips (4-6.5 s, beside the Ruins)", CHIPS_TEXT),
+                   ("Footer (4-6.5 s)", FOOTER_MAP), ("Body label (6.5-12 s)", BODY_LABEL),
+                   ("Citation (6.5-12 s, footer slot)", CITATION),
+                   ("Badge (top-right, from 4 s, over the schematic and the body diagram)", BADGE)):
+    assert _ost.get(_key) == _txt, (_key, _ost.get(_key))
+    assert _txt in _row, _txt
+assert BADGE in BADGES
+# Layout splits (the same words, broken into lines / chips; checked to rejoin exactly).
+TAG_LINES = ["Macau, 4 Oct: 210,000 visitor arrivals,", "a National Day holiday record (preliminary)"]
+CHIP_HEAD, CHIPS = "Crowd control:", ["2 Oct pm", "3 Oct pm", "4 Oct 13:50-15:10"]
+LABEL_LINES = ["front-to-back pressure", "→ chest can't fully expand", "→ asphyxia"]
+assert " ".join(TAG_LINES) == TAG
+assert f"{CHIP_HEAD} {' · '.join(CHIPS)}" == CHIPS_TEXT
+assert " ".join(LABEL_LINES) == BODY_LABEL
 SLATE_TAG = "[TEAM FOOTAGE]"
 SLATE_WHAT = "[MEMBER 4], medium shot, eye level"
-# Once the sourced sentence names a body region, set this to a point on the body (canvas pixels)
-# and the annotation's leader line will point there; while it is None the bracket spans the whole
-# body, so the diagram implies no mechanism.
-MECH_TARGET: tuple[int, int] | None = None
 
 SS = 3  # supersampling factor for shapes drawn smooth
 
@@ -141,26 +174,33 @@ def dashed_box(d: ImageDraw.ImageDraw, box, colour, width=3, dash=14, gap=9, rad
                cy + radius - hw + width / 2), a0, a0 + 90, fill=colour, width=width)
 
 
-def placeholder_box(text: str, size: int, max_w: int, pad_x: int = 22, pad_y: int = 16, weight: int = 600,
-                    border: int = 3, radius: int = 14, full_width: bool = False) -> Image.Image:
-    """A bracketed research placeholder, verbatim, in amber text inside an amber dashed box."""
-    lines = wrap(text, size, weight, max_w - 2 * pad_x)
-    lh = int(size * 1.32)
-    tw = max(text_size(l, size, weight)[0] for l in lines)
-    w_, h_ = (max_w if full_width else tw + 2 * pad_x), lh * len(lines) + 2 * pad_y
-    im = Image.new("RGBA", (w_ + 2, h_ + 2), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    dashed_box(d, (1, 1, w_, h_), (*WARNING, 255), width=border, radius=radius, fill=(*NAVY_2, 240))
-    for i, l in enumerate(lines):
-        draw_text(im, (1 + pad_x, 1 + pad_y + i * lh + lh / 2), l, size, weight, WARNING, anchor="lm")
-    return im
-
-
 def smooth_shapes(size, draw_fn) -> Image.Image:
     """Draws with draw_fn(d, s) on an SS-times larger RGBA canvas and downsamples (anti-aliased shapes)."""
     big = Image.new("RGBA", (size[0] * SS, size[1] * SS), (0, 0, 0, 0))
     draw_fn(ImageDraw.Draw(big), SS)
     return big.resize(size, Image.LANCZOS)
+
+
+def outlined(mask_big: Image.Image, fill=NAVY_3, line=INK_2, fill_alpha=0.85, round_px=5, band_px=2.2):
+    """Outline drawing from an SS-scale silhouette mask: rounded joints, a soft line band around the
+    edge (no inner seams) and a translucent fill. Returns (rgba sprite, fill mask, crop box / SS)."""
+    bb = mask_big.getbbox()
+    pad = 12 * SS
+    crop = (bb[0] - pad, bb[1] - pad, bb[2] + pad, bb[3] + pad)
+    m = mask_big.crop(crop).filter(ImageFilter.GaussianBlur(round_px * SS)).point(lambda v: 255 if v > 110 else 0)
+    blur = m.filter(ImageFilter.GaussianBlur(band_px * SS))
+    outer = blur.point(lambda v: 255 if v > 18 else 0)
+    inner = blur.point(lambda v: 255 if v > 237 else 0)
+    band = ImageChops.subtract(outer, inner)
+    size = ((crop[2] - crop[0]) // SS, (crop[3] - crop[1]) // SS)
+    band_s = band.resize(size, Image.LANCZOS)
+    fill_s = inner.resize(size, Image.LANCZOS)
+    im = Image.new("RGBA", size, (*fill, 0))
+    im.putalpha(fill_s.point(lambda v: int(v * fill_alpha)))
+    ln = Image.new("RGBA", size, (*line, 0))
+    ln.putalpha(band_s)
+    im.alpha_composite(ln)
+    return im, fill_s, (crop[0] // SS, crop[1] // SS)
 
 
 # ---------- the zone schematic and the illustrative dots ----------
@@ -170,25 +210,26 @@ ZONES = {z["id"]: z for z in G["zones"]}
 PROJ = project()                                  # the S01 schematic projection (style default box)
 POS = {zid: PROJ(z["lat"], z["lon"]) for zid, z in ZONES.items()}
 NODE_R = 26
-SEN = "senado_square"
+RUINS, JESUS, RSP, DOM = "ruins_st_paul", "jesus_square", "rua_sao_paulo", "st_dominic"
 ADJ: dict[str, list[str]] = {zid: [] for zid in ZONES}
 for e in G["edges"]:
     ADJ[e["from"]].append(e["to"])
     ADJ[e["to"]].append(e["from"])
+STAIRS = [(POS[e["from"]], POS[e["to"]]) for e in G["edges"] if e.get("has_stairs")]
 
 
-def path_to_senado(src: str) -> list[str]:
-    """Shortest path (by number of street links) from a zone to Senado, through zones.json edges."""
+def route(src: str, dst: str) -> list[str]:
+    """Shortest path (by number of street links) between two zones, through zones.json edges."""
     prev, q = {src: None}, deque([src])
     while q:
         u = q.popleft()
-        if u == SEN:
+        if u == dst:
             break
         for v in ADJ[u]:
             if v not in prev:
                 prev[v] = u
                 q.append(v)
-    out, u = [], SEN
+    out, u = [], dst
     while u is not None:
         out.append(u)
         u = prev[u]
@@ -200,76 +241,6 @@ def short_name(zid: str) -> str:  # same short names as style.draw_zone_graph
             "almeida_ribeiro": "Av. de Almeida Ribeiro"}.get(zid, ZONES[zid]["name"])
 
 
-rng = random.Random(606)
-DOT_R = 4.6
-PILE_N, PILE_C = 84, 6.3                     # Vogel-spiral pile around Senado (radius ~ PILE_C*sqrt(N))
-PILE_R = PILE_C * math.sqrt(PILE_N)
-GOLD = math.pi * (3 - math.sqrt(5))
-sx, sy = POS[SEN]
-pile_slots = []
-for i in range(PILE_N):
-    r, th = PILE_C * math.sqrt(i + 0.5), i * GOLD
-    pile_slots.append((sx + r * math.cos(th) + rng.uniform(-1.2, 1.2), sy + r * math.sin(th) + rng.uniform(-1.2, 1.2)))
-
-
-def queue_slots(nb: str, n: int) -> list[tuple[float, float]]:
-    """Dots backing up along the street from Senado towards neighbour `nb` (two loose lanes)."""
-    bx, by = POS[nb]
-    L = math.hypot(bx - sx, by - sy)
-    ux, uy = (bx - sx) / L, (by - sy) / L
-    vx, vy = -uy, ux
-    out = []
-    for k in range(n):
-        dist = PILE_R + 7 + (k // 2) * 10.5
-        lane = (-5.6 if k % 2 == 0 else 5.6) + rng.uniform(-1.3, 1.3)
-        out.append((sx + ux * dist + vx * lane, sy + uy * dist + vy * lane))
-    return out
-
-
-Q_DOM = queue_slots("st_dominic", 10)
-Q_ALM = queue_slots("almeida_ribeiro", 8)
-
-# Dots that walk to Senado: entry zones of zones.json (Almeida Ribeiro; the Ruins side, which
-# reaches Senado through Rua de S. Paulo and St. Dominic's) plus the squares on the way.
-entry = [zid for zid, z in ZONES.items() if z.get("entry")]
-north_sources = ["st_dominic", "st_dominic", "rua_sao_paulo", "jesus_square"]
-south_sources = [z for z in entry if path_to_senado(z)[-2] == "almeida_ribeiro"]
-
-
-def dot_path(src: str, slot) -> list[tuple[float, float]]:
-    nodes = path_to_senado(src)[:-1]                     # drop Senado itself: the slot is the end
-    lat = rng.uniform(-4.0, 4.0)
-    pts = []
-    for j, zid in enumerate(nodes):
-        x, y = POS[zid]
-        if j == 0:
-            a, rr = rng.uniform(0, 2 * math.pi), rng.uniform(4, 20)
-            pts.append((x + rr * math.cos(a), y + rr * math.sin(a)))
-        else:
-            pts.append((x + lat, y + lat * 0.6))
-    pts.append(slot)
-    return pts
-
-
-movers = []  # each: path, cumulative lengths, start, end, phase
-slots = [(s, None) for s in pile_slots] + [(s, "dom") for s in Q_DOM] + [(s, "alm") for s in Q_ALM]
-n_all = len(slots)
-p0, p1 = BEATS["pile_start"], BEATS["pile_full"]
-for i, (slot, q) in enumerate(slots):          # inner slots fill first, queues last
-    arrive = p0 + 0.55 + (p1 - p0 - 0.55) * (i / (n_all - 1)) ** 0.9 + rng.uniform(-0.06, 0.06)
-    if q == "dom":
-        src = rng.choice(north_sources)
-    elif q == "alm":
-        src = "almeida_ribeiro"
-    else:
-        src = rng.choice(north_sources + south_sources * 3)
-    pts = dot_path(src, slot)
-    cum = [0.0]
-    for a, b in zip(pts, pts[1:]):
-        cum.append(cum[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
-    dur = max(0.75, cum[-1] / 270.0)
-    movers.append(dict(pts=pts, cum=cum, t0=arrive - dur, t1=arrive, ph=rng.uniform(0, 6.3), ph2=rng.uniform(0, 6.3)))
-
 def seg_dist(p, a, b) -> float:
     """Distance from point p to the segment a-b."""
     vx, vy = b[0] - a[0], b[1] - a[1]
@@ -277,11 +248,108 @@ def seg_dist(p, a, b) -> float:
     return math.hypot(p[0] - a[0] - u * vx, p[1] - a[1] - u * vy)
 
 
-# Ambient people elsewhere (more at the Ruins, which the line names too); kept off the pile/queues.
-taken = [s for s, _ in slots]
+rng = random.Random(606)
+DOT_R = 4.6
+GOLD = math.pi * (3 - math.sqrt(5))
+
+
+def spiral(centre, n, c=6.2):
+    cx, cy = centre
+    return [(cx + c * math.sqrt(i + 0.5) * math.cos(i * GOLD) + rng.uniform(-1.1, 1.1),
+             cy + c * math.sqrt(i + 0.5) * math.sin(i * GOLD) + rng.uniform(-1.1, 1.1)) for i in range(n)]
+
+
+# The pile (illustration): people walking uphill to the Ruins back up on Rua de S. Paulo below them:
+# Company of Jesus Square at the foot of the steps fills first, then the upper street, the Rua de
+# S. Paulo node, and a queue down the lower street towards St. Dominic's.
+PILE_J_N, PILE_R_N = 18, 34
+PILE_J_R, PILE_R_R = 6.2 * math.sqrt(PILE_J_N), 6.2 * math.sqrt(PILE_R_N)
+jx, jy = POS[JESUS]
+rx_, ry_ = POS[RSP]
+dxs, dys = POS[DOM]
+slots_j = [p for p in spiral(POS[JESUS], PILE_J_N + 6) if all(seg_dist(p, a, b) > 9 for a, b in STAIRS)][:PILE_J_N]
+L_up = math.hypot(rx_ - jx, ry_ - jy)
+ux, uy = (rx_ - jx) / L_up, (ry_ - jy) / L_up         # down the upper street, Jesus -> Rua de S. Paulo
+vx, vy = -uy, ux
+slots_up = []
+d_ = PILE_J_R + 6
+while d_ < L_up - PILE_R_R - 2:
+    for lane in (-15.0, -5.0, 5.0, 15.0):
+        if rng.random() < 0.9:
+            ln = lane + rng.uniform(-1.4, 1.4)
+            slots_up.append((jx + ux * d_ + vx * ln, jy + uy * d_ + vy * ln, d_))
+    d_ += 10.2
+slots_up = [(x, y) for x, y, _ in sorted(slots_up, key=lambda s: s[2])]
+slots_r = sorted(spiral(POS[RSP], PILE_R_N), key=lambda p: p[1])            # top of the node pile first
+L_lo = math.hypot(dxs - rx_, dys - ry_)
+wx, wy = (dxs - rx_) / L_lo, (dys - ry_) / L_lo
+slots_q = []
+for k in range(14):
+    dist = PILE_R_R + 6 + (k // 2) * 10.5
+    lane = (-5.6 if k % 2 == 0 else 5.6) + rng.uniform(-1.2, 1.2)
+    slots_q.append((rx_ + wx * dist - wy * lane, ry_ + wy * dist + wx * lane))
+
+# Where each slot's walkers come from: the Avenida de Almeida Ribeiro entry (zones.json "entry")
+# and the squares on the way up, plus Rua da Tercena, which joins Rua de S. Paulo.
+SOUTH = ["almeida_ribeiro", "almeida_ribeiro", "senado_square", DOM]
+
+
+def walk_points(src: str, via_rsp_to: tuple[float, float] | None, slot) -> list[tuple[float, float]]:
+    nodes = route(src, RSP)
+    lat = rng.uniform(-4.0, 4.0)
+    pts = []
+    for j, zid in enumerate(nodes):
+        x, y = POS[zid]
+        if j == 0:
+            a, rr = rng.uniform(0, 2 * math.pi), rng.uniform(4, 20)
+            pts.append((x + rr * math.cos(a), y + rr * math.sin(a)))
+        elif zid == RSP:
+            pts.append((x + lat, y + lat * 0.4))
+        else:
+            pts.append((x + lat, y + lat * 0.6))
+    if via_rsp_to:
+        pts.append(via_rsp_to)
+    pts.append(slot)
+    return pts
+
+
+def queue_points(src: str, slot) -> list[tuple[float, float]]:
+    nodes = route(src, DOM)
+    pts = []
+    for j, zid in enumerate(nodes):
+        x, y = POS[zid]
+        jitter = rng.uniform(4, 18) if j == 0 else 0
+        a = rng.uniform(0, 2 * math.pi)
+        pts.append((x + jitter * math.cos(a), y + jitter * math.sin(a)))
+    pts.append(slot)
+    return pts
+
+
+movers = []  # each: path, cumulative lengths, start, end, phases
+ordered = [("j", s) for s in slots_j] + [("up", s) for s in slots_up] + [("r", s) for s in slots_r] + [("q", s) for s in slots_q]
+n_all = len(ordered)
+a0, a1 = BEATS["schematic"] + 0.3, BEATS["pile_full"]
+for i, (kind, slot) in enumerate(ordered):          # the top fills first, the queue last
+    arrive = a0 + (a1 - a0) * (i / (n_all - 1)) ** 0.85 + rng.uniform(-0.05, 0.05)
+    if kind == "q":
+        pts = queue_points(rng.choice(["almeida_ribeiro", "senado_square", "senado_square"]), slot)
+    else:
+        src = rng.choice(SOUTH * 3 + ["tercena_corridor"])
+        via = None
+        if kind == "j":   # up the street to the foot of the steps
+            via = (jx + ux * (PILE_J_R + 4), jy + uy * (PILE_J_R + 4))
+        pts = walk_points(src, via, slot)
+    cum = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        cum.append(cum[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+    dur = max(0.9, cum[-1] / 250.0)
+    movers.append(dict(pts=pts, cum=cum, t0=arrive - dur, t1=arrive, ph=rng.uniform(0, 6.3), ph2=rng.uniform(0, 6.3)))
+
+# Ambient people elsewhere (more at the Ruins); kept off the pile, the stairs and the label rows.
+taken = [s for _, s in ordered]
 ambient = []
-for zid, n, rad in (("ruins_st_paul", 26, 42), ("jesus_square", 10, 34), ("rua_sao_paulo", 6, 28),
-                    ("st_dominic", 8, 32), ("almeida_ribeiro", 9, 34), ("tercena_corridor", 4, 26)):
+for zid, n, rad in ((RUINS, 24, 42), ("st_dominic", 7, 32), ("senado_square", 10, 36), ("almeida_ribeiro", 8, 34),
+                    ("tercena_corridor", 4, 26)):
     x, y = POS[zid]
     placed, tries = 0, 0
     while placed < n and tries < 4000:
@@ -289,7 +357,7 @@ for zid, n, rad in (("ruins_st_paul", 26, 42), ("jesus_square", 10, 34), ("rua_s
         a, rr = rng.uniform(0, 2 * math.pi), rad * math.sqrt(rng.random())
         p = (x + rr * math.cos(a), y + rr * math.sin(a))
         in_label = p[0] > x + NODE_R + 2 and abs(p[1] - y) < 22
-        on_stairs = any(seg_dist(p, POS[e["from"]], POS[e["to"]]) < 10 for e in G["edges"] if e.get("has_stairs"))
+        on_stairs = any(seg_dist(p, a_, b_) < 10 for a_, b_ in STAIRS)
         if not in_label and not on_stairs and all(math.hypot(p[0] - q[0], p[1] - q[1]) >= 11 for q in taken):
             taken.append(p)
             ambient.append(dict(p=p, ph=rng.uniform(0, 6.3), ph2=rng.uniform(0, 6.3)))
@@ -350,7 +418,7 @@ def arrived_fraction(t: float) -> float:
 
 # ---------- static layers (drawn once) ----------
 
-def build_static():
+def build_map():
     S = {}
     # zone graph (no labels: the labels go on top of the dots, with a backing pill)
     g = transparent()
@@ -358,33 +426,64 @@ def build_static():
     S["graph"] = Sprite(g)
 
     lab = transparent()
+    offset = {JESUS: PILE_J_R + 14, RSP: PILE_R_R + 14}
     for zid, z in ZONES.items():
         x, y = POS[zid]
         text = f'{z["name_zh"]} {short_name(zid)}'
-        wt = 700 if zid == SEN else 600
-        tx = x + (PILE_R + 16 if zid == SEN else NODE_R + 12)
+        wt = 700 if zid == RSP else 600
+        tx = x + offset.get(zid, NODE_R + 12)
         tw, _ = text_size(text, 22, wt)
         rounded(lab, (tx - 8, y - 19, tx + tw + 8, y + 17), 10, fill=NAVY, alpha=0.82)
         draw_text(lab, (tx, y - 1), text, 22, wt, INK, anchor="lm")
     S["labels"] = Sprite(lab)
 
-    # warm glow under the Senado pile (illustrative emphasis, grows with the pile)
-    gr = int(PILE_R * 2.1)
-    glow = Image.new("L", (gr * 2, gr * 2), 0)
-    ImageDraw.Draw(glow).ellipse((gr - PILE_R * 1.15, gr - PILE_R * 1.15, gr + PILE_R * 1.15, gr + PILE_R * 1.15), fill=255)
-    glow = glow.filter(ImageFilter.GaussianBlur(PILE_R * 0.45))
-    gim = Image.new("RGBA", glow.size, (*CRITICAL, 0))
-    gim.putalpha(glow.point(lambda v: int(v * 0.55)))
-    S["glow"] = Sprite(img=gim, x=int(sx - gr), y=int(sy - gr))
+    # soft neutral glow under the pile (illustrative emphasis, grows with the pile; no state colour)
+    gl = Image.new("L", (W, H), 0)
+    gd = ImageDraw.Draw(gl)
+    for _, (x, y) in ordered:
+        gd.ellipse((x - 16, y - 16, x + 16, y + 16), fill=255)
+    gl = gl.filter(ImageFilter.GaussianBlur(16))
+    gim = Image.new("RGBA", (W, H), (*INK_2, 0))
+    gim.putalpha(gl.point(lambda v: int(v * 0.22)))
+    S["glow"] = Sprite(gim)
 
-    # group extents -> the centred position (4-7 s) and the left position (from the medical line)
-    boxes = [S["graph"].box, S["labels"].box, (DX0, DY0, DX1, DY1)]
+    # date chips beside the Ruins: "Crowd control:" then three chips stacked, joined to the Ruins
+    ruins_x, ruins_y = POS[RUINS]
+    chip_h, chip_gap, fs = 50, 10, 30
+    widths = [text_size(c, fs, 600)[0] + 40 for c in CHIPS]
+    col_r = ruins_x - NODE_R - 92                         # right edge of the widest chip
+    col_l = col_r - max(widths)
+    chips = []
+    for i, (c, w_) in enumerate(zip(CHIPS, widths)):
+        y0 = ruins_y - chip_h / 2 + i * (chip_h + chip_gap)
+        im = transparent()
+        rounded(im, (col_l, y0, col_l + w_, y0 + chip_h), 12, fill=NAVY_3, outline=INK_3, width=2)
+        draw_text(im, (col_l + 20, y0 + chip_h / 2 + 1), c, fs, 600, INK, anchor="lm")
+        chips.append(Sprite(im))
+    S["chips"] = chips
+    hd = transparent()
+    hw_, _ = text_size(CHIP_HEAD, fs, 700)
+    draw_text(hd, (col_l - 16, ruins_y + 1), CHIP_HEAD, fs, 700, INK_2, anchor="rm")
+    S["chip_head"] = Sprite(hd)
+
+    def conn(d, s):
+        x0 = col_l + widths[0] + 8
+        d.line([(x0 * s, ruins_y * s), ((ruins_x - NODE_R - 8) * s, ruins_y * s)], fill=(*INK_3, 255), width=int(3 * s))
+        d.ellipse(((ruins_x - NODE_R - 13) * s, (ruins_y - 5) * s, (ruins_x - NODE_R - 3) * s, (ruins_y + 5) * s), fill=(*INK_3, 255))
+    S["conn"] = Sprite(smooth_shapes((W, H), conn))
+    S["conn_x0"] = col_l + widths[0] + 8
+    S["conn_x1"] = ruins_x - NODE_R - 3
+
+    # centre the whole group (graph, labels, dots, chips) horizontally
+    boxes = [S["graph"].box, S["labels"].box, (DX0, DY0, DX1, DY1), S["chip_head"].box] + [c.box for c in chips]
     gx0, gx1 = min(b[0] for b in boxes), max(b[2] for b in boxes)
-    S["dx_centre"] = round(W / 2 - (gx0 + gx1) / 2)
-    S["dx_left"] = round(100 - gx0)
-    S["group_right_left"] = gx1 + S["dx_left"]
+    S["dx"] = round(W / 2 - (gx0 + gx1) / 2)
+    S["extent"] = (gx0 + S["dx"], min(b[1] for b in boxes), gx1 + S["dx"], max(b[3] for b in boxes))
+    return S
 
-    # camera slate (0-4 s): stands in for the [MEMBER 4] take
+
+def build_slate():
+    """Camera slate (0-4 s): stands in for the [MEMBER 4] take."""
     sl = canvas()
     box = (240, 150, 1680, 770)
     d = ImageDraw.Draw(sl)
@@ -405,133 +504,111 @@ def build_static():
     t_in, t_out = START_S, START_S + BEATS["schematic"]
     sub = f"{SHOT} · {int(t_in // 60)}:{t_in % 60:04.1f}-{int(t_out // 60)}:{t_out % 60:04.1f} · on camera, then voice-over · replace this slate with the take"
     draw_text(sl, (W / 2, 580), sub, 26, 500, INK_2, anchor="mm")
-    S["slate"] = sl
-
-    # footer: the source placeholder, verbatim, in an amber dashed box in the footer slot
-    fb = placeholder_box(FOOTER, 20, 1150, pad_x=14, pad_y=5, border=2, radius=9)
-    S["footer"] = Sprite(img=fb, x=60, y=1062 - fb.height)
-
-    # body-outline diagram panel (from the medical sentence)
-    S.update(build_body(S["group_right_left"]))
-    return S
+    return sl
 
 
-def build_body(left_edge: int):
+def build_tag() -> Sprite:
+    """The small scale tag over the camera (lower-left, in the lower-third slot, y 800-890)."""
+    im = transparent()
+    w1, _ = text_size(TAG_LINES[0], 32, 700)
+    w2, _ = text_size(TAG_LINES[1], 28, 500)
+    x0, y0, y1 = 60, 798, 892
+    rounded(im, (x0, y0, x0 + 28 + max(w1, w2) + 28, y1), 14, fill=NAVY_2, alpha=0.92)
+    rounded(im, (x0, y0, x0 + 6, y1), 3, fill=CYAN)
+    draw_text(im, (x0 + 28, y0 + 28), TAG_LINES[0], 32, 700, INK, anchor="lm")
+    draw_text(im, (x0 + 28, y0 + 67), TAG_LINES[1], 28, 500, INK_2, anchor="lm")
+    return Sprite(im)
+
+
+def build_body():
+    """Side-view body outline (facing right) from shapes, the two chest arrows and the label."""
     out = {}
-    px0 = max(left_edge + 70, 980)
-    panel = (px0, 150, 1860, 862)
-    pnl = transparent()
-    rounded(pnl, panel, 22, fill=NAVY_2, alpha=0.96)
-    out["panel"] = Sprite(pnl)
+    cx, top, foot = 600, 158, 872
+    sh = top + 112                                    # shoulder line
+    chest_y = sh + 74
+    knee_y = (sh + 300 + foot) // 2
+    out["chest_y"] = chest_y
 
-    cx = px0 + 190
-    top, foot = 212, 806
-    head_r = 38
+    def torso_head_legs(d, s, fill):
+        P = lambda pts: [(x * s, y * s) for x, y in pts]  # noqa: E731
+        d.ellipse(((cx - 34) * s, top * s, (cx + 48) * s, (top + 92) * s), fill=fill)                       # head
+        d.polygon(P([(cx + 44, top + 34), (cx + 62, top + 58), (cx + 42, top + 64)]), fill=fill)          # nose
+        d.rounded_rectangle(((cx - 10) * s, (top + 74) * s, (cx + 22) * s, (sh + 16) * s), int(8 * s), fill=fill)  # neck
+        d.polygon(P([(cx - 48, sh + 4), (cx + 30, sh), (cx + 58, sh + 36), (cx + 68, sh + 84), (cx + 58, sh + 160),
+                     (cx + 52, sh + 210), (cx + 58, sh + 256), (cx + 50, sh + 304), (cx - 56, sh + 304),
+                     (cx - 64, sh + 262), (cx - 48, sh + 196), (cx - 56, sh + 120), (cx - 60, sh + 56)]), fill=fill)  # torso
+        d.polygon(P([(cx + 46, sh + 290), (cx + 34, knee_y), (cx + 22, foot - 30), (cx - 20, foot - 30),
+                     (cx - 34, knee_y + 80), (cx - 30, knee_y), (cx - 54, sh + 290)]), fill=fill)          # legs
+        d.rounded_rectangle(((cx - 30) * s, (foot - 34) * s, (cx + 70) * s, foot * s), int(14 * s), fill=fill)  # foot
 
-    def silhouette(d, s, fill):
-        def S_(v):
-            return v * s
-        d.ellipse((S_(cx - head_r), S_(top), S_(cx + head_r), S_(top + 2 * head_r)), fill=fill)          # head
-        d.rounded_rectangle((S_(cx - 16), S_(top + 2 * head_r - 8), S_(cx + 16), S_(top + 2 * head_r + 26)), int(S_(6)), fill=fill)  # neck
-        sh = top + 2 * head_r + 18
-        d.rounded_rectangle((S_(cx - 102), S_(sh), S_(cx + 102), S_(sh + 110)), int(S_(48)), fill=fill)    # shoulders
-        d.polygon([(S_(cx - 84), S_(sh + 44)), (S_(cx + 84), S_(sh + 44)), (S_(cx + 64), S_(sh + 262)), (S_(cx - 64), S_(sh + 262))], fill=fill)  # torso
-        d.rounded_rectangle((S_(cx - 66), S_(sh + 230), S_(cx + 66), S_(sh + 286)), int(S_(24)), fill=fill)  # hips
-        for sgn in (-1, 1):                                                                             # arms
-            ax0, ay0, ax1, ay1 = cx + sgn * 84, sh + 52, cx + sgn * 120, sh + 266
-            d.line([(S_(ax0), S_(ay0)), (S_(ax1), S_(ay1))], fill=fill, width=int(S_(34)))
-            for (qx, qy, rr) in ((ax0, ay0, 17), (ax1, ay1, 17), (ax1 + sgn * 2, ay1 + 22, 19)):
-                d.ellipse((S_(qx - rr), S_(qy - rr), S_(qx + rr), S_(qy + rr)), fill=fill)
-            lx0, ly0, lx1, ly1 = cx + sgn * 34, sh + 270, cx + sgn * 44, foot - 26               # legs
-            d.line([(S_(lx0), S_(ly0)), (S_(lx1), S_(ly1))], fill=fill, width=int(S_(46)))
-            for (qx, qy) in ((lx0, ly0), (lx1, ly1)):
-                d.ellipse((S_(qx - 23), S_(qy - 23), S_(qx + 23), S_(qy + 23)), fill=fill)
-            d.ellipse((S_(lx1 - 22 + sgn * 10), S_(foot - 26), S_(lx1 + 22 + sgn * 10), S_(foot)), fill=fill)  # feet
+    def arm(d, s, fill):
+        d.line([((cx - 4) * s, (sh + 34) * s), ((cx + 14) * s, (sh + 262) * s)], fill=fill, width=int(36 * s))
+        for (qx, qy, rr) in ((cx - 4, sh + 34, 19), (cx + 14, sh + 262, 18), (cx + 17, sh + 284, 19)):
+            d.ellipse(((qx - rr) * s, (qy - rr) * s, (qx + rr) * s, (qy + rr) * s), fill=fill)
 
-    # silhouette mask at SS, then an outline band around its edge (no inner seams)
     big = Image.new("L", (W * SS, H * SS), 0)
-    silhouette(ImageDraw.Draw(big), SS, 255)
-    bb = big.getbbox()
-    pad = 12 * SS
-    crop = (bb[0] - pad, bb[1] - pad, bb[2] + pad, bb[3] + pad)
-    m = big.crop(crop).filter(ImageFilter.GaussianBlur(5 * SS)).point(lambda v: 255 if v > 110 else 0)  # rounds joints
-    blur = m.filter(ImageFilter.GaussianBlur(2.2 * SS))
-    outer = blur.point(lambda v: 255 if v > 18 else 0)
-    inner = blur.point(lambda v: 255 if v > 237 else 0)
-    band = ImageChops.subtract(outer, inner)
-    size = ((crop[2] - crop[0]) // SS, (crop[3] - crop[1]) // SS)
-    band_s = band.resize(size, Image.LANCZOS)
-    fill_s = inner.resize(size, Image.LANCZOS)
-    body = Image.new("RGBA", size, (*NAVY_3, 0))
-    body.putalpha(fill_s.point(lambda v: int(v * 0.85)))
-    line = Image.new("RGBA", size, (*INK_2, 0))
-    line.putalpha(band_s)
-    body.alpha_composite(line)
-    out["body"] = Sprite(img=body, x=crop[0] // SS, y=crop[1] // SS)
-    out["body_top"], out["body_bottom"] = top, foot
+    torso_head_legs(ImageDraw.Draw(big), SS, 255)
+    body, body_fill, (bx, by) = outlined(big)
+    big_arm = Image.new("L", (W * SS, H * SS), 0)
+    arm(ImageDraw.Draw(big_arm), SS, 255)
+    arm_im, _, (ax, ay) = outlined(big_arm, round_px=3, band_px=1.8, fill_alpha=1.0)
+    body.alpha_composite(arm_im, (ax - bx, ay - by))
+    out["body"] = Sprite(img=body, x=bx, y=by)
 
-    # annotation: the research placeholder only, joined to the body by a bracket over its full height
-    ax0 = cx + 196
-    ann = placeholder_box(MECHANISM, 26, 1830 - ax0, pad_x=24, pad_y=18, full_width=True)
-    ay = int((top + foot) / 2 - ann.height / 2) - 40
-    out["ann"] = Sprite(img=ann, x=ax0, y=ay)
-    cit = placeholder_box(CITATION, 20, 1830 - ax0, pad_x=14, pad_y=9, border=2, radius=10, full_width=True)
-    out["cit"] = Sprite(img=cit, x=ax0, y=ay + ann.height + 22)
+    # chest tint (shown while pressed), clipped to the body fill
+    ch = Image.new("L", body.size, 0)
+    ImageDraw.Draw(ch).ellipse((cx - 56 - bx, chest_y - 64 - by, cx + 64 - bx, chest_y + 70 - by), fill=255)
+    ch = ch.filter(ImageFilter.GaussianBlur(14))
+    tint = Image.new("RGBA", body.size, (*WARNING, 0))
+    tint.putalpha(ImageChops.multiply(ch, body_fill).point(lambda v: int(v * 0.30)))
+    out["chest"] = Sprite(img=tint, x=bx, y=by)
 
-    bx = cx + 168
-    mid = ay + ann.height // 2
+    # the chest's front and back edges at chest height (from the fill mask)
+    row = [body_fill.getpixel((x, chest_y - by)) for x in range(body.width)]
+    inside = [x for x, v in enumerate(row) if v > 128]
+    out["back_x"], out["front_x"] = bx + inside[0], bx + inside[-1]
 
-    def bracket(dd, s, k):
-        """Bracket along the body, grown from its middle (k = 0..1), with a link to the annotation."""
-        col = (*INK_3, 255)
-        wdt = int(3 * s)
-        half = (foot - top) / 2 * k
-        c = (top + foot) / 2
-        if MECH_TARGET is None:
-            y0, y1 = c - half, c + half
-            dd.line([(bx * s, y0 * s), (bx * s, y1 * s)], fill=col, width=wdt)
-            tick = 14 * clamp((k - 0.8) / 0.2)       # end ticks grow in over the last steps (no pop)
-            if tick > 0.5:
-                dd.line([((bx - tick) * s, y0 * s), (bx * s, y0 * s)], fill=col, width=wdt)
-                dd.line([((bx - tick) * s, y1 * s), (bx * s, y1 * s)], fill=col, width=wdt)
-            dd.line([(bx * s, mid * s), ((bx + (ax0 - bx) * k) * s, mid * s)], fill=col, width=wdt)
+    # arrows: shaft + head, pointing at the chest (drawn once, moved per frame)
+    def arrow(direction: int):
+        length, shaft, head_w, head_l = 168, 20, 54, 46
+        w_, h_ = length + 8, head_w + 8
+
+        def draw(d, s):
+            y = h_ / 2
+            if direction > 0:   # pointing right: tip at the right end
+                tip = length + 4
+                d.rectangle((4 * s, (y - shaft / 2) * s, (tip - head_l + 2) * s, (y + shaft / 2) * s), fill=(*WARNING, 255))
+                d.polygon([((tip - head_l) * s, (y - head_w / 2) * s), (tip * s, y * s), ((tip - head_l) * s, (y + head_w / 2) * s)], fill=(*WARNING, 255))
+            else:               # pointing left: tip at the left end
+                tip = 4
+                d.rectangle(((tip + head_l - 2) * s, (y - shaft / 2) * s, (length + 4) * s, (y + shaft / 2) * s), fill=(*WARNING, 255))
+                d.polygon([((tip + head_l) * s, (y - head_w / 2) * s), (tip * s, y * s), ((tip + head_l) * s, (y + head_w / 2) * s)], fill=(*WARNING, 255))
+        return smooth_shapes((int(w_), int(h_)), draw)
+
+    out["arrow_r"], out["arrow_l"] = arrow(+1), arrow(-1)
+
+    # label: the sourced mechanism, one line per step, line 1 level with the arrows
+    lx = out["front_x"] + 14 + 168 + 84
+    out["label_x"] = lx
+    lines = []
+    for i, ln in enumerate(LABEL_LINES):
+        im = transparent()
+        y = chest_y + i * 74
+        if ln.startswith("→ "):
+            aw, _ = text_size("→ ", 46, 600)
+            draw_text(im, (lx, y), "→ ", 46, 600, INK_2, anchor="lm")
+            draw_text(im, (lx + aw, y), ln[2:], 46, 600, INK, anchor="lm")
         else:
-            tx, ty = MECH_TARGET
-            ex, ey = lerp(ax0, tx, k), lerp(mid, ty, k)
-            dd.line([(ax0 * s, mid * s), (ex * s, ey * s)], fill=col, width=wdt)
-            dd.ellipse(((ex - 7) * s, (ey - 7) * s, (ex + 7) * s, (ey + 7) * s), outline=col, width=wdt)
-
-    reg = (bx - 30, top - 10, ax0 + 4, foot + 10) if MECH_TARGET is None else (min(MECH_TARGET[0], ax0) - 20, min(MECH_TARGET[1], mid) - 20, ax0 + 4, max(MECH_TARGET[1], mid) + 20)
-    reg = tuple(int(v) for v in reg)
-    out["bracket_frames"] = []
-    for k in [i / 15 for i in range(16)]:
-        def draw_k(dd, s, k=k):
-            bracket(_Shift(dd, -reg[0] * s, -reg[1] * s), s, k)
-        im = smooth_shapes((reg[2] - reg[0], reg[3] - reg[1]), draw_k)
-        out["bracket_frames"].append(Sprite(img=im, x=reg[0], y=reg[1]))
+            draw_text(im, (lx, y), ln, 46, 700, WARNING, anchor="lm")
+        lines.append(Sprite(im))
+    out["label"] = lines
     return out
 
 
-class _Shift:
-    """ImageDraw proxy that offsets every coordinate (to draw canvas-space shapes into a sub-image)."""
-
-    def __init__(self, d, ox, oy):
-        self.d, self.ox, self.oy = d, ox, oy
-
-    def _p(self, pts):
-        out = []
-        for p in pts:
-            out.append((p[0] + self.ox, p[1] + self.oy))
-        return out
-
-    def line(self, pts, **kw):
-        self.d.line(self._p(pts), **kw)
-
-    def ellipse(self, box, **kw):
-        self.d.ellipse((box[0] + self.ox, box[1] + self.oy, box[2] + self.ox, box[3] + self.oy), **kw)
-
-
-STATIC = build_static()
+STATIC = build_map()
+SLATE = build_slate()
+TAG_SPRITE = build_tag()
+BODY = build_body()
 WIPE = Image.linear_gradient("L").resize((1, 90))  # 0 at top -> 255 at bottom: soft wipe edge
 
 
@@ -549,64 +626,91 @@ def wipe_mask(h: int, k: float) -> Image.Image:
 
 # ---------- frame ----------
 
-def chrome(img: Image.Image, t: float, on_camera: bool) -> None:
-    """Card, badge and footer (the overlay slots)."""
-    chapter_card(img, CARD, fade(t, BEATS["card_in"], BEATS["card_out"], 0.3))
-    if not on_camera:
-        badge(img, "ILLUSTRATION", alpha=progress(t, BEATS["schematic"], 0.3))
-    put_sprite(img, STATIC["footer"], progress(t, BEATS["voice_in"], 0.35))
+_fl, _ft, _fr, _fb = text_font(FOOTER_CAM, 20, 500).getbbox(FOOTER_CAM)
+FOOTER_CAM_SCRIM = (60 + _fl - 12, 1034 + _ft - 5, 60 + _fr + 12, 1034 + _fb + 5)   # where style.footer draws it
+
+
+def camera_chrome(img: Image.Image, t: float) -> None:
+    """0-4 s, over the camera: card (2 s), the arrivals tag (from 0.5 s) and its source footer. The
+    footer gets a dark scrim (as in S17's camera overlay) so it stays legible over the real take."""
+    chapter_card(img, CARD, fade(t, BEATS["card_in"], BEATS["card_out"], 0.25))
+    k_tag = progress(t, BEATS["tag_in"], 0.15)      # quick fade-in: the 12-word tag gets the whole 0.5-4 s window
+    put_sprite(img, TAG_SPRITE, k_tag, 0, (1 - k_tag) * 14)
+    a_f = progress(t, 0.0, 0.3)
+    if a_f > 0:
+        rounded(img, FOOTER_CAM_SCRIM, 8, fill=NAVY, alpha=0.92 * a_f)
+        footer(img, FOOTER_CAM, a_f)
 
 
 def draw_frame(t: float) -> Image.Image:
     if t < BEATS["schematic"]:                       # 0-4 s: [MEMBER 4] on camera (slate for now)
-        img = STATIC["slate"].copy()
-        chrome(img, t, on_camera=True)
+        img = SLATE.copy()
+        camera_chrome(img, t)
         return img
 
     img = canvas()
-    med = BEATS["medical"]
-    k_move = progress(t, BEATS["map_left"], 0.75)
-    dx = lerp(STATIC["dx_centre"], STATIC["dx_left"], k_move)
-    a_in = 1 - (1 - clamp((t - BEATS["schematic"]) / 0.4)) ** 3   # ease-out: no near-empty frames after the cut
-    a_panel = progress(t, med, 0.5)
-    rise = (1 - a_panel) * 28
-    put_sprite(img, STATIC["panel"], a_panel, 0, rise)     # under the map while it finishes moving
+    dx = STATIC["dx"]
+    a_in = 0.45 + 0.55 * (1 - (1 - clamp((t - BEATS["schematic"]) / 0.3)) ** 3)   # quick ease-out: no empty frame at the cut
+    a_map = a_in * (1 - progress(t, BEATS["map_out"], 0.3))
 
-    put_sprite(img, STATIC["graph"], a_in, dx)
-    glow_k = ease(arrived_fraction(t))
-    put_sprite(img, STATIC["glow"], a_in * glow_k, dx)
-    put(img, dots_layer(t), DX0 + dx, DY0, a_in)
-    put_sprite(img, STATIC["labels"], a_in, dx)
+    if a_map > 0:                                    # 4-6.35 s: the schematic, the pile and the date chips
+        put_sprite(img, STATIC["graph"], a_map, dx)
+        put_sprite(img, STATIC["glow"], a_map * ease(arrived_fraction(t)), dx)
+        put(img, dots_layer(t), DX0 + dx, DY0, a_map)
+        put_sprite(img, STATIC["labels"], a_map, dx)
+        k_head = progress(t, BEATS["chip_0"], CHIP_FADE)
+        put_sprite(img, STATIC["chip_head"], a_map * k_head, dx)
+        # connector to the Ruins grows from the chips
+        k_conn = progress(t, BEATS["chip_0"] + 0.05, 0.3)
+        if k_conn > 0:
+            c = STATIC["conn"]
+            x_cut = STATIC["conn_x0"] + (STATIC["conn_x1"] - STATIC["conn_x0"]) * k_conn - c.x
+            im = c.img.crop((0, 0, max(1, int(x_cut)), c.img.height))
+            put(img, im, c.x + dx, c.y, a_map)
+        for i, chip in enumerate(STATIC["chips"]):
+            k = progress(t, BEATS[f"chip_{i}"], CHIP_FADE)
+            put_sprite(img, chip, a_map * k, dx, -(1 - k) * 16)
+        footer(img, FOOTER_MAP, a_map)
 
-    # body diagram, from the medical sentence
-    if a_panel > 0:
-        k_body = progress(t, med + 0.1, 0.9)
-        if k_body > 0:
-            b = STATIC["body"]
-            im = b.img.copy()
-            im.putalpha(ImageChops.multiply(im.getchannel("A"), wipe_mask(im.height, k_body).resize(im.size)))
-            put(img, im, b.x, b.y + rise, a_panel)
-        k_br = progress(t, BEATS["annotation"] - 0.2, 0.45)
-        if k_br > 0:
-            frames = STATIC["bracket_frames"]
-            put_sprite(img, frames[min(len(frames) - 1, int(round(k_br * (len(frames) - 1))))], a_panel)
-        a_ann = progress(t, BEATS["annotation"], 0.4)
-        put_sprite(img, STATIC["ann"], a_ann, (1 - a_ann) * 18)
-        a_cit = progress(t, BEATS["citation"], 0.4)
-        put_sprite(img, STATIC["cit"], a_cit, (1 - a_cit) * 18)
+    u_body = clamp((t - BEATS["body_in"]) / 0.55)     # from 6.35 s: the body diagram on plain navy (never over the map)
+    k_body = 1 - (1 - u_body) ** 2 if t >= BEATS["body_in"] else 0.0   # ease-out wipe: no empty beat after the map
+    if k_body > 0:
+        b = BODY["body"]
+        im = b.img.copy()
+        im.putalpha(ImageChops.multiply(im.getchannel("A"), wipe_mask(im.height, k_body).resize(im.size)))
+        put(img, im, b.x, b.y, clamp((t - BEATS["body_in"]) / 0.2))
+        k_ar = progress(t, BEATS["arrows"], 0.5)
+        if k_ar > 0:
+            pulse = 0.0
+            if t >= BEATS["press"]:                  # one more press on "chest compression"
+                u = (t - BEATS["press"]) / 0.7
+                pulse = 8 * math.sin(math.pi * clamp(u)) if u < 1 else 0.0
+            gap = 10 + (1 - k_ar) * 110 - pulse
+            cy = BODY["chest_y"]
+            ar, al = BODY["arrow_r"], BODY["arrow_l"]
+            put(img, ar, BODY["back_x"] - gap - ar.width + 4, cy - ar.height / 2, k_ar)
+            put(img, al, BODY["front_x"] + gap - 4, cy - al.height / 2, k_ar)
+            k_tint = progress(t, BEATS["arrows"] + 0.3, 0.4) * (0.75 + 0.25 * (pulse / 8))
+            put_sprite(img, BODY["chest"], k_tint)
+        for i, key in enumerate(("arrows", "label_2", "label_3")):
+            k = progress(t, BEATS[key] + (0.1 if i == 0 else 0.0), 0.4)
+            put_sprite(img, BODY["label"][i], k, (1 - k) * 20)
+        footer(img, CITATION, progress(t, BEATS["body_in"], 0.3))
 
-    chrome(img, t, on_camera=False)
+    badge(img, BADGE, alpha=progress(t, BEATS["schematic"], 0.3))
     return img
 
 
 def cam_overlay(t: float) -> Image.Image:
-    """0-4 s overlay (card + footer) to lay over the real camera take."""
+    """0-4 s overlay (card + tag + footer) to lay over the real camera take."""
     img = transparent()
-    chrome(img, t, on_camera=True)
+    camera_chrome(img, t)
     return img
 
 
-STILLS = {"card": 1.0, "pile": 5.4, "crowded": 6.5, "move": 7.15, "body": 8.6, "end": DURATION - 1 / FPS}
+STILLS = {"card": 1.0, "tag_in": 0.65, "tag": 3.0, "cut": 4.1, "chips": 4.5, "chips_full": 4.95, "pile": 5.5,
+          "map_full": 6.0, "fade": 6.2, "body": 6.6,
+          "arrows": 7.7, "label": 8.8, "press": 10.3, "end": DURATION - 1 / FPS}
 
 if __name__ == "__main__":
     for name, ts in STILLS.items():
