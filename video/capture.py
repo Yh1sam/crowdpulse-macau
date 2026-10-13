@@ -62,7 +62,7 @@ class Page:
                 p = msg["params"]
                 path = self.frames_dir / f"f{len(self.frames):05d}.jpg"
                 path.write_bytes(base64.b64decode(p["data"]))
-                self.frames.append((p["metadata"]["timestamp"], path))
+                self.frames.append((time.time(), path))  # arrival time: one clock for frames and the final hold
                 await self.send("Page.screencastFrameAck", {"sessionId": p["sessionId"]}, wait=False)
 
     async def send(self, method, params=None, wait=True):
@@ -145,6 +145,8 @@ async def record(shot: dict, frames_dir: Path, frames: list, port: int) -> None:
         await asyncio.sleep(0.3)
         await page.send("Page.stopScreencast")
         pump.cancel()
+        if frames:  # the screencast only sends frames on change: hold the last one until recording stopped
+            frames.append((time.time(), frames[-1][1]))
 
 
 def encode(frames: list[tuple[float, Path]], out: Path) -> None:

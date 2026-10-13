@@ -1,0 +1,35 @@
+{
+ "url": "http://localhost:3100/map",
+ "viewport": [
+  1280,
+  720
+ ],
+ "scale": 1.5,
+ "settle": 3,
+ "steps": [
+  {
+   "eval": "setInterval(() => { const m = [...document.querySelectorAll('.cp-zone-marker')].find(e => e.textContent.includes('Senado Square')); if (m) m.id = 'senado-marker'; }, 500)"
+  },
+  {
+   "wait_for": "#senado-marker"
+  },
+  {
+   "wait_for_js": "(() => { const m = document.body.innerText.match(/SIM CLOCK (\\d\\d:\\d\\d:\\d\\d)/); return m && m[1] >= '14:08:00'; })()"
+  },
+  {
+   "click": "#senado-marker"
+  },
+  {
+   "wait": 1
+  },
+  {
+   "click_text": "open zone detail"
+  },
+  {
+   "wait_for_js": "[...document.querySelectorAll('[data-testid=risk-badge]')].filter(b => b.textContent.includes('CRITICAL')).length >= 2"
+  },
+  {
+   "wait": 12
+  }
+ ]
+}

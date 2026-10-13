@@ -1,0 +1,20 @@
+{
+ "url": "file:///Users/yhsam/Documents/Imperial_hackathon/video/build/README.html",
+ "viewport": [
+  1280,
+  720
+ ],
+ "scale": 1.5,
+ "settle": 2,
+ "steps": [
+  {
+   "eval": "[...document.querySelectorAll('p')].find(p => p.textContent.startsWith('Correction:')).id = 'correction'"
+  },
+  {
+   "scroll_to": "#correction"
+  },
+  {
+   "wait": 4
+  }
+ ]
+}

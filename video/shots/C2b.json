@@ -1,0 +1,68 @@
+{
+ "url": "http://localhost:3100/interventions",
+ "viewport": [
+  1280,
+  720
+ ],
+ "scale": 1.5,
+ "settle": 3,
+ "steps": [
+  {
+   "eval": "setInterval(() => { const card = t => [...document.querySelectorAll('h3')].find(h => h.textContent.includes(t))?.parentElement; const s = card('around Senado Square'); if (s) { s.id = 'senado-card'; const b = t => [...s.querySelectorAll('button')].find(x => x.textContent.trim() === t); if (b('APPROVE')) b('APPROVE').id = 'senado-approve'; if (b('VIEW EVIDENCE')) b('VIEW EVIDENCE').id = 'senado-evidence'; const n = s.querySelector('summary'); if (n) n.id = 'senado-notice'; } const d = card('around St. Dominic'); const a = d && d.querySelector('[data-testid=sketchfuture-link]'); if (a) { a.id = 'stdom-sf'; a.removeAttribute('target'); } const h2 = t => [...document.querySelectorAll('h2')].find(h => h.textContent.includes(t)); if (h2('Decided')) h2('Decided').id = 'decided'; if (h2('Audit log')) h2('Audit log').id = 'audit-log'; }, 500)"
+  },
+  {
+   "wait_for": "#senado-approve"
+  },
+  {
+   "scroll_to": "#senado-card"
+  },
+  {
+   "wait": 3
+  },
+  {
+   "click": "#senado-notice"
+  },
+  {
+   "wait": 3
+  },
+  {
+   "click": "#senado-evidence"
+  },
+  {
+   "wait": 2
+  },
+  {
+   "click": "#senado-approve"
+  },
+  {
+   "wait": 2
+  },
+  {
+   "scroll_to": "#decided"
+  },
+  {
+   "wait": 2
+  },
+  {
+   "scroll_to": "#audit-log"
+  },
+  {
+   "wait": 3
+  },
+  {
+   "wait_for": "#stdom-sf"
+  },
+  {
+   "eval": "document.querySelector('#stdom-sf').scrollIntoView({behavior: 'smooth', block: 'center'})"
+  },
+  {
+   "wait": 2
+  },
+  {
+   "click": "#stdom-sf"
+  },
+  {
+   "wait": 15
+  }
+ ]
+}
