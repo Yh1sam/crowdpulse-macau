@@ -105,19 +105,19 @@ def to_out(box, x: float, y: float) -> tuple[int, int]:
 
 def s03(dur: float):
     c2a = CLIPS / "C2a.mp4"
-    side, rows = (1100, 380, 820), (300, 470, 1080)
+    side, rows = (1180, 600, 740), (300, 470, 1080)
     base = segments("S03", c2a, [
         (100.4, 101.4, FULL, FULL),                 # Live map, Senado amber
         (101.6, 103.2, FULL, (760, 120, 1160)),     # click Senado; the sidebar fills
         (104.0, 105.2, side, side),                 # forecast rows and the reasons
         (105.5, 106.7, FULL, FULL),                 # Zone detail opens (WARNING)
         (111.6, 112.8, FULL, FULL),                 # the zone turns CRITICAL
-        (117.0, 120.8, FULL, rows),                 # forecast rows turn CRITICAL, with confidence
+        (116.2, 120.0, FULL, rows),                 # forecast rows turn from WARNING to CRITICAL, with confidence
     ])
     x0, y0 = to_out(side, 1385, 715); x1, y1 = to_out(side, 1870, 975)
     ov = [
         (png("S03_badge", lambda img: badge(img, "LIVE SOFTWARE", "SIMULATED CROWD", sub="Simulated Golden Week afternoon · SIM CLOCK, 10× speed")), 0.0, dur),
-        (png("S03_why", lambda img: (highlight(img, (x0, y0, x1, y1)), callout(img, max(40, x0 - 250), max(140, y0 - 80), "why"))), 2.7, 3.8),
+        (png("S03_why", lambda img: (highlight(img, (x0, y0, x1, min(y1, 1072))), callout(img, x0, max(130, y0 - 74), "why"))), 2.7, 3.8),
         (png("S03_rows", lambda img: (callout(img, 980, 760, "+5 / +10 / +15 min"), callout(img, 980, 840, "confidence"))), 7.6, dur),
         (png("S03_footer", lambda img: footer(img, "Map © OpenStreetMap contributors")), 0.0, 2.6),
     ]

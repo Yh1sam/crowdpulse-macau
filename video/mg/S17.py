@@ -118,7 +118,7 @@ FOOTER_SEGMENTS = [
     (0.0, BEATS["cost"], "Operational model: docs/deployment.md · design intent, not field-tested"),
     (BEATS["cost"], BEATS["broll"], "Cost panel: no figures until sourced; the sources will be shown on screen"),
     (BEATS["broll"], BEATS["tests"], "B-roll: the Python test suite, run as in docs/testing.md"),
-    (BEATS["tests"], DURATION, "docs/testing.md · experiments/results/simulation_run/README.md · "
+    (BEATS["tests"], DURATION, "docs/testing.md · experiments/results/simulation_run/ · "
                                "THIRD_PARTY_NOTICES.md · docs/experiment-protocol.md"),
 ]
 

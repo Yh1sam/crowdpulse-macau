@@ -180,6 +180,7 @@ def badge(img: Image.Image, kind: str, detail: str = "", sub: str = "", alpha: f
         draw_text(img, (x0 + 22, y0 + 10), label, 24, 700, NAVY, alpha)
     if sub:
         sw, _ = text_size(sub, 20, 500)
+        rounded(img, (x1 - sw - 14, y0 + 52, x1 + 8, y0 + 84), 8, fill=NAVY, alpha=0.78 * alpha)
         draw_text(img, (x1 - sw, y0 + 58), sub, 20, 500, INK_2, alpha)
 
 
