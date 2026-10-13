@@ -2,7 +2,7 @@
 
 Generated from `docs/video/shotlist.json` (script: `docs/video/script.md`). Record each voice-over line as its own file, named by shot, and put the files in `video/build/voice/` (for example `video/build/voice/S03.wav`); `video/assemble.py` then uses your take instead of the robot guide track, shot by shot. Shots spoken on camera (S05, the first 4 s of S06, S12, S19) keep the camera's own sound.
 
-How to record (script section 5C): a phone voice memo 15-20 cm from the mouth, a quiet soft-furnished room, standing, 2-3 takes per line, about 140 words per minute. Read numbers as the pronunciation guide says ("point eight six five", "twenty nineteen", "a hundred and four", "Saint Paul's", "se-NAH-doo"). Bracketed slots are filled after the research is done; record them separately when they exist.
+How to record (script section 5C): a phone voice memo 15-20 cm from the mouth, a quiet soft-furnished room, standing, 2-3 takes per line, about 140 words per minute. Read numbers as the pronunciation guide says ("point eight six five", "a hundred and four", "Saint Paul's", "se-NAH-doo"). The research slots in S06 and S17 were filled on 13 Oct; the only bracketed slot left is the S16 Melbourne result, filled after the analysis and recorded separately when it exists.
 
 | shot | speaker | line (verbatim) | slot | robot reading | file |
 |---|---|---|---|---|---|
@@ -11,8 +11,8 @@ How to record (script section 5C): a phone voice memo 15-20 cm from the mouth, a
 | S03 | [MEMBER 5] | On our dashboard, with a simulated Golden Week crowd, Senado Square's forecast turns critical, with a confidence score and the reasons why. | 10.0 s | 8.7 s | `S03.wav` |
 | S04 | [MEMBER 3] | It recommends a stair-free detour, with notices in Chinese, English and Portuguese. A person decides: approved, and logged. | 9.0 s | 8.3 s | `S04.wav` |
 | S05 | ALL | [M1] Technology. [M2] Science. [M3] Engineering. [M4] Medicine. [M5] Business. [ALL] We are CrowdPulse Macau. | 8.5 s | 6.3 s | camera audio |
-| S06 | [MEMBER 4] | Every Golden Week, the Ruins of St. Paul's and Senado Square become dangerously crowded. [TEAM TO RESEARCH - MEDICINE: one sentence, at most 12 words, from a cited peer-reviewed source, on how a crowd crush injures the body] | 12.0 s | 5.6 s | `S06.wav` |
-| S07 | [MEMBER 5] | In 2019, Macau's tourism office announced attraction forecasts, hours to days ahead. We forecast the next five to fifteen minutes, street by street, from phones staff place temporarily. | 13.0 s | 13.0 s | `S07.wav` |
+| S06 | [MEMBER 4] | This Golden Week, police briefly imposed crowd control at the Ruins on three afternoons. In a crush, victims typically suffocate standing up, from chest compression. | 12.0 s | 10.7 s | `S06.wav` |
+| S07 | [MEMBER 5] | Macau's police already run a crowd warning system here, and plan to expand it. We propose movable, numbers-only phones, and forecasts with a confidence score. | 13.0 s | 10.3 s | `S07.wav` |
 | S08 | [MEMBER 3] | Privacy is enforced in code. A numbers-only reading: accepted. Add a face-ID field: rejected. Upload an image: refused. | 9.0 s | 8.8 s | `S08.wav` |
 | S09 | [MEMBER 3] | Confidence is discounted for unreliable sensors and unusual conditions. Below sixty percent, a person must review it. | 8.0 s | 7.7 s | `S09.wav` |
 | S10 | [MEMBER 2] | On held-out simulated days, fifteen-minute forecasts score an F1 of 0.865, against 0.795 for assuming nothing changes, and catch 91 percent of critical minutes, against 79. Forecasts flagged as uncertain are right only about 56 percent of the time; the rest, 97. | 22.0 s | 21.0 s | `S10.wav` |
@@ -22,7 +22,7 @@ How to record (script section 5C): a phone voice memo 15-20 cm from the mouth, a
 | S14 | [MEMBER 3] | In a recorded simulation, approving the redirect left Senado less crowded by the end than doing nothing, but only modestly: it stayed critical. The effect rests on a diversion we assumed, not measured, and the crowd built so fast the alert came with it, not before. | 20.5 s | 16.6 s | `S14.wav` |
 | S15 | [MEMBER 4] | One click tests another recommendation, at St. Dominic's, on our model of Macau's streets: walkers lose seventeen seconds, wheelchair users thirty. And 24 of our 40 simulated wheelchair users had no step-free route either way. Real barrier, or missing map data? Only a street survey can tell. | 21.0 s | 19.5 s | `S15.wav` |
 | S16 | [MEMBER 2] | Because our forecasting results are simulated, we're testing them on real counts from 99 Melbourne street sensors: a test announced before its result. [RESULT PENDING - fill after analysis, report honestly whatever it shows] | 17.0 s | 9.4 s | `S16.wav` |
-| S17 | [MEMBER 5] | Phones on temporary mounts can serve one festival, then move to the next. [TEAM TO RESEARCH - BUSINESS: at most 10 words, sources on screen: cost of a phone kit vs a fixed counting camera] The whole chain runs end to end in simulation, with 104 automated tests passing. | 18.0 s | 10.2 s | `S17.wav` |
+| S17 | [MEMBER 5] | Phones on temporary mounts can serve one festival, then move to the next. The intended user is Macau's police, who run crowd control. The whole chain runs end to end in simulation, with 104 automated tests passing. | 18.0 s | 14.4 s | `S17.wav` |
 | S18 | [MEMBER 4] | Back to Ah Po: her main route stays open, with staff beside her. | 6.0 s | 4.5 s | `S18.wav` |
 | S19 | [MEMBER 5], [MEMBER 3], [MEMBER 2], [MEMBER 1] | [M5] Next: a supervised street pilot in Macau, with permission. [M3] The AI recommends. [M2] A person decides. [M1] Nothing identifying leaves the phone. | 11.0 s | 9.4 s | camera audio |
 
