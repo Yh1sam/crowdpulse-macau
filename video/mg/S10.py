@@ -28,7 +28,8 @@ import json
 from functools import lru_cache
 import sys
 
-sys.path.insert(0, "/Users/yhsam/Documents/Imperial_hackathon/video/mg")
+from pathlib import Path  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # video/mg, for style.py
 from style import *  # noqa: E402,F401,F403
 from style import ROOT  # noqa: E402
 

@@ -350,7 +350,7 @@ The repository holds no record of the organisers' reply on AI tools (docs/ and t
 - **Badges:** SIMULATED (amber), REAL DATA (green), MODEL CHECK (purple), PENDING (grey, dashed), CORRECTED (white outline), LIVE SOFTWARE (cyan), ILLUSTRATION (grey). No other badge text: S08 is LIVE SOFTWARE, and S14 is SIMULATED (one of the five legend badges, like every shot from S10 to S16).
 - **STEMB strip:** in every lower-third, lighting the speaker's letter.
 - **Faces:** CC0 covers copyright, not the likeness of the people in the clip. Mosaic every recognisable stranger's face in S02, S11 and S12 (Pillow mosaic on the head region: shrink by about 10× with BOX, enlarge with NEAREST), keeping the detection boxes visible.
-- **Fonts:** Geist (Latin) and Noto Sans TC (Chinese), both SIL OFL, are in `video/build/fonts/` with their licence files (git-ignored). Both are variable fonts: set the weight with Pillow's `set_variation_by_axes`. The end card credits "fonts: Geist, Noto Sans TC (SIL OFL)".
+- **Fonts:** Geist (Latin) and Noto Sans TC (Chinese), both SIL OFL, are committed in `video/fonts/` with their licence files (SIL OFL allows redistribution with the licence). Both are variable fonts: set the weight with Pillow's `set_variation_by_axes`. The end card credits "fonts: Geist, Noto Sans TC (SIL OFL)".
 - **Tools present:**
   - Pillow 12.3.0 in `.venv`.
   - The installed ffmpeg **has no `subtitles` or `drawtext` filter**. It does have overlay, zoompan, xfade, crop, scale, setpts, gblur, boxblur, loudnorm and afftdn. So every caption, badge and lower-third is a transparent Pillow PNG composited with `overlay=...:enable='between(t,a,b)'`.

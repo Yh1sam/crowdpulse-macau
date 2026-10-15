@@ -10,6 +10,8 @@ CrowdPulse Macau's own code, documentation, synthetic data, trained models and f
 | "Diagonal crosswalk at Yonge & Dundas in Toronto" video, by Raysonho @ Open Grid Scheduler / Grid Engine | `ios/CrowdPulseSensor/Resources/sample_crowd.mp4` (640×360, 10 fps transcode), `ios/CrowdPulseSensor/Tests/Resources/crossing_t32.png` (frame 324), the hand counts in `experiments/datasets/video/` and the frames shown in `experiments/results/video/` and `experiments/results/simulation_run/` | Wikimedia Commons, <https://commons.wikimedia.org/wiki/File:DiagonalCrosswalkYongeDundas.webm> | CC0 1.0 (public-domain dedication); see `experiments/datasets/video/README.md` |
 | OpenStreetMap extract and the street graph derived from it | `sketchfuture/data/macau-osm.json.gz`, `sketchfuture/src/data/macau.json`, and the street-segment ids and names in `shared/sketchfuture_crosswalk.json` | © OpenStreetMap contributors, <https://www.openstreetmap.org/copyright> | Open Database License 1.0; see `sketchfuture/DATA_NOTICE.md` |
 | Template icons | `dashboard/public/*.svg` | create-next-app (Next.js) | MIT |
+| Geist (variable font) | `video/fonts/Geist[wght].ttf`, used by the pitch-video motion graphics | The Geist Project Authors, <https://github.com/vercel/geist-font>, as packaged in <https://github.com/google/fonts/tree/main/ofl/geist> | SIL Open Font License 1.1; full text in `video/fonts/Geist-OFL.txt` |
+| Noto Sans TC (variable font) | `video/fonts/NotoSansTC[wght].ttf`, used by the pitch-video motion graphics | Google / Adobe, as packaged in <https://github.com/google/fonts/tree/main/ofl/notosanstc> | SIL Open Font License 1.1; full text in `video/fonts/NotoSansTC-OFL.txt` |
 
 ## Used at run time, not bundled
 

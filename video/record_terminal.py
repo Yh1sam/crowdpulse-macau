@@ -7,7 +7,7 @@ terminal window in DejaVu Sans Mono (the free font bundled with matplotlib).
 
     .venv/bin/python video/record_terminal.py video/shots/S08_terminal.json --out video/build/clips/S08.mp4
 
-The session file is JSON: {"cwd": dir, "title": window title, "cols": 88, "rows": 14, "font_size": 30,
+The session file is JSON: {"cwd": dir (relative to the repo root, or absolute), "title": window title, "cols": 88, "rows": 14, "font_size": 30,
 "duration": seconds, "setup": [hidden shell lines run before recording], "steps": [{"at": s,
 "type": text, "speed": chars per second or 0 to paste at once}, ...]}. Each step's text is sent at
 time `at` (seconds from the start of the recording) followed by Enter.
@@ -32,7 +32,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-MONO = ROOT / ".venv/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf/DejaVuSansMono.ttf"
+import matplotlib  # noqa: E402  (only for its bundled DejaVu Sans Mono)
+MONO = Path(matplotlib.get_data_path()) / "fonts" / "ttf" / "DejaVuSansMono.ttf"
 MONO_BOLD = MONO.with_name("DejaVuSansMono-Bold.ttf")
 W, H, FPS = 1920, 1080, 30
 BG, WINDOW, BAR, TEXT, DIM = (11, 18, 32), (16, 22, 34), (33, 41, 58), (230, 237, 247), (140, 152, 172)
@@ -43,9 +44,12 @@ def record(session: dict) -> list[tuple[float, str]]:
     """Runs the session in a pseudo-terminal; returns [(time, output text)]."""
     env = {"PATH": os.environ["PATH"], "HOME": os.environ.get("HOME", "/tmp"), "TERM": "dumb", "LANG": "en_US.UTF-8",
            "PS1": "$ ", "PS2": "> ", "COLUMNS": str(session["cols"]), "LINES": str(session["rows"]), **session.get("env", {})}
+    cwd = Path(session["cwd"])
+    cwd = cwd if cwd.is_absolute() else ROOT / cwd   # relative to the repo root
+    cwd.mkdir(parents=True, exist_ok=True)
     pid, fd = pty.fork()
     if pid == 0:
-        os.chdir(session["cwd"])
+        os.chdir(cwd)
         os.execvpe("bash", ["bash", "--noprofile", "--norc", "-i"], env)
     # real window size, so wrapping matches the drawn terminal
     fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", session["rows"], session["cols"], 0, 0))

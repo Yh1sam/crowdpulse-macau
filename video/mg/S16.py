@@ -32,7 +32,8 @@ import sys
 from datetime import datetime, timedelta
 from functools import lru_cache
 
-sys.path.insert(0, "/Users/yhsam/Documents/Imperial_hackathon/video/mg")
+from pathlib import Path  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # video/mg, for style.py
 from style import *  # noqa: E402,F401,F403
 from style import FONTS, ROOT  # noqa: E402
 

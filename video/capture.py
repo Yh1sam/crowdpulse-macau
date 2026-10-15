@@ -7,7 +7,7 @@ is the real software showing real data from the running backend.
 
     .venv/bin/python video/capture.py video/shots/overview.json --out video/build/clips/overview.mp4
 
-A shot file is JSON: {"url": "...", "viewport": [1280, 720], "scale": 1.5, "steps": [...]}, where each
+A shot file is JSON: {"url": "..." (a web URL, or "file:path" relative to the repo root), "viewport": [1280, 720], "scale": 1.5, "steps": [...]}, where each
 step is one of {"wait": s}, {"click": css-selector}, {"click_text": text}, {"click_js": js returning an
 element}, {"scroll": px}, {"scroll_to": css-selector}, {"eval": js}, {"navigate": url},
 {"wait_for": css-selector} or {"wait_for_js": js expression}; waits poll for up to 180 s, so steps can
@@ -29,6 +29,15 @@ import tempfile
 import time
 import urllib.request
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def resolve_url(url: str) -> str:
+    """'file:some/path' (no slashes after the colon) is a file relative to the repo root."""
+    if url.startswith("file:") and not url.startswith("file:/"):
+        return (ROOT / url[len("file:"):]).resolve().as_uri()
+    return url
 
 import websockets
 
@@ -115,7 +124,7 @@ async def record(shot: dict, frames_dir: Path, frames: list, port: int) -> None:
         scale = shot.get("scale", 1.5)
         await page.send("Page.enable")
         await page.send("Emulation.setDeviceMetricsOverride", {"width": w, "height": h, "deviceScaleFactor": scale, "mobile": False})
-        await page.send("Page.navigate", {"url": shot["url"]})
+        await page.send("Page.navigate", {"url": resolve_url(shot["url"])})
         await asyncio.sleep(shot.get("settle", 3))
         await page.send("Page.startScreencast", {"format": "jpeg", "quality": 92, "maxWidth": int(w * scale), "maxHeight": int(h * scale), "everyNthFrame": 1})
         for step in shot["steps"]:
@@ -123,7 +132,7 @@ async def record(shot: dict, frames_dir: Path, frames: list, port: int) -> None:
             if kind == "wait":
                 await asyncio.sleep(arg)
             elif kind == "navigate":
-                await page.send("Page.navigate", {"url": arg})
+                await page.send("Page.navigate", {"url": resolve_url(arg)})
             elif kind == "click":
                 await page.point_and_click(f"document.querySelector({json.dumps(arg)})")
             elif kind == "click_text":

@@ -29,7 +29,8 @@ import math
 import random
 import sys
 
-sys.path.insert(0, "/Users/yhsam/Documents/Imperial_hackathon/video/mg")
+from pathlib import Path  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # video/mg, for style.py
 from style import *  # noqa: E402,F401,F403
 import ahpo  # noqa: E402
 from ahpo import MapScene, HOME, MAIN_PATH, DETOUR_PATH, POS, AHPO_S01_END, FIRST_LEG, paste, text_sprite  # noqa: E402

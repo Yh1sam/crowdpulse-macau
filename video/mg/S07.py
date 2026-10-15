@@ -47,7 +47,7 @@ from collections import deque
 from functools import lru_cache
 from pathlib import Path
 
-sys.path.insert(0, "/Users/yhsam/Documents/Imperial_hackathon/video/mg")
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # video/mg, for style.py
 from style import *  # noqa: E402,F401,F403
 from PIL import Image, ImageChops, ImageDraw, ImageFilter  # noqa: E402
 

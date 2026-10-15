@@ -5,7 +5,7 @@ them with ffmpeg at 30 fps. This module holds the canvas, colours, fonts, the fi
 (chapter card, status badge, lower-third with the STEMB strip, caption, evidence legend, footer),
 easing, simple shape icons, the zone-graph projection and the encoder, so all shots look alike.
 
-Fonts: video/build/fonts/Geist[wght].ttf (Latin) and NotoSansTC[wght].ttf (Chinese), SIL OFL.
+Fonts: video/fonts/Geist[wght].ttf (Latin) and NotoSansTC[wght].ttf (Chinese), SIL OFL, committed with their licence files.
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / "video" / "build"
-FONTS = BUILD / "fonts"
+FONTS = ROOT / "video" / "fonts"   # committed with their OFL licence files
 W, H, FPS = 1920, 1080, 30
 
 # colours (script section 6: navy background, off-white text, dashboard state colours)
