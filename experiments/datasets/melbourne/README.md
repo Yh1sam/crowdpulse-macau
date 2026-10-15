@@ -32,6 +32,8 @@ python3 experiments/melbourne_archive.py --out experiments/datasets/melbourne
 | `sensors.csv` | sensor id, description, coordinates, direction names, status; refreshed daily |
 | `archive_log.jsonl` | one line per server run: rows downloaded, new rows, the window's first and last minute, or the error. Gaps between one run's `last` and the next run's `first` are gaps in the archive. `archive_log.mac.jsonl` holds the first runs on a team Mac. |
 
+In git: `sensors.csv` and the `minute/` files of 11-12 Oct 2026 (UTC) are committed, so the video's S16 renders from a fresh clone. They are a snapshot; the server keeps archiving. The analysis will commit the full archive it uses, with its date, so the result can be reproduced. The archive logs stay out of git.
+
 ## Things to know before analysing
 
 - A sensor writes a record only for minutes in which someone passed it. A missing minute for a working sensor means **zero**, not missing data; a sensor with no rows for hours may be offline (check `sensors.csv` status and neighbouring hours).
