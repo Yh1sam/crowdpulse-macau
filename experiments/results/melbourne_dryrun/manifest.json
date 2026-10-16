@@ -1,0 +1,36 @@
+{
+  "mode": "DRY RUN \u2014 NOT A RESULT",
+  "generated_at_utc": "2026-10-16 15:05",
+  "git_head": "79595e9a10c32beeb177b7377b40b3b5e494e28e",
+  "prereg_sha256": "36f6ff9f99ecdd610f5b74ca433d9bea8317b2f4360cdaf9436fb33b7664f66e",
+  "prereg_commit": null,
+  "prereg_pushed_to_remote": null,
+  "prereg_remote_branches": null,
+  "allow_short_window": null,
+  "files": [
+    {
+      "file": "minute/2026-10-11.csv.gz",
+      "sha256": "63881027114dd6794c44093e243a83935624bfdb5a0ec5b127452664b00a9b35"
+    },
+    {
+      "file": "minute/2026-10-12.csv.gz",
+      "sha256": "b4da1663a081b295e2387180ec95c1e05daaf957a851698a715cf3777adef3bc"
+    },
+    {
+      "file": "archive_log.jsonl",
+      "sha256": "8b244b2d7cfb530be2cdf5ae906b3e2b47c5927737b47264fa714f1a1c14b1ce"
+    },
+    {
+      "file": "archive_log.mac.jsonl",
+      "sha256": "d7fb0278ce7b9bf67756347778392cb919a0751bf43593503f0b8f4a6c1e2814"
+    },
+    {
+      "file": "sensors.csv",
+      "sha256": "58333c536b2ed3806ed7ef7ffc957e202f73bdd457b106b8266c66df8852e470"
+    }
+  ],
+  "python": "3.12.13",
+  "numpy": "2.5.3",
+  "pandas": "3.0.6",
+  "scikit_learn": "1.9.1"
+}

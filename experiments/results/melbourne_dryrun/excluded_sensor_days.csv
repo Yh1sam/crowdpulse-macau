@@ -1,0 +1,2 @@
+location_id,local_date,reason,empty_bins_in_a_row,first_empty_bin_local,last_empty_bin_local
+21,2026-10-12,outage rule,33,10:50,13:30
