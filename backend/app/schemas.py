@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class IngestResponse(BaseModel):
@@ -121,6 +121,7 @@ class AlertOut(BaseModel):
     prediction_id: Optional[int]
     confidence: Optional[float]
     acknowledged: bool
+    acknowledged_by: Optional[str] = None
 
 
 class InterventionOut(BaseModel):
@@ -150,8 +151,26 @@ class InterventionOut(BaseModel):
 
 
 class DecisionIn(BaseModel):
-    operator: str = Field(default="operator", max_length=64)
+    """A person's decision: approve or reject a recommendation, or acknowledge an alert.
+
+    ``operator`` is written to the audit log as the actor, so the log can say who decided. It has no default, and
+    an empty name, the old generic default "operator" and "system" (the actor of the engine's automatic audit
+    entries, so a decision signed with it would look automatic) are refused with HTTP 422, in any case and with
+    surrounding spaces ignored. The prototype has no login: the name is what the person typed in the dashboard."""
+    operator: str = Field(max_length=64)
     note: Optional[str] = Field(default=None, max_length=1000)
+
+    @field_validator("operator")
+    @classmethod
+    def _names_a_person(cls, value: str) -> str:
+        name = value.strip()
+        if not name:
+            raise ValueError("enter the name of the person deciding")
+        if name.casefold() == "operator":
+            raise ValueError('"operator" is a placeholder, not a name: enter the name of the person deciding')
+        if name.casefold() == "system":
+            raise ValueError('"system" is the actor of automatic audit entries, not a name: enter the name of the person deciding')
+        return name
 
 
 class AuditOut(BaseModel):

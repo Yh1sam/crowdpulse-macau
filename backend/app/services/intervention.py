@@ -9,7 +9,7 @@ from typing import Any
 
 from shared.geo import bearing_deg
 
-PUBLIC_MESSAGES = {
+_NOTICE_TEXT = {
     "redirect_flow": {
         "en": "{zone} is very crowded. Please use the alternative route via {route} to continue. Staff are available to assist visitors with reduced mobility.",
         "zh": "{zone}目前非常擁擠。請改經{route}前往。工作人員可協助行動不便的遊客。",
@@ -27,6 +27,18 @@ PUBLIC_MESSAGES = {
     },
     "increase_monitoring": {"en": "", "zh": "", "pt": ""},
 }
+# Every public notice tells the public that the advice comes from an AI forecast and that a person approved it.
+# The zh and pt wording is a first draft awaiting a fluent team member's check; pt says "afluência", like the
+# notices above.
+AI_NOTICE = {
+    "en": "Advice from an AI crowd forecast, approved by staff.",
+    "zh": "此建議來自人工智能人流預測，並經工作人員批准。",
+    "pt": "Recomendação baseada numa previsão de afluência feita por inteligência artificial, aprovada pelo pessoal.",
+}
+_SENTENCE_GAP = {"en": " ", "zh": "", "pt": " "}
+# The notice templates with the AI clause appended; an empty template (internal-only action) stays empty.
+PUBLIC_MESSAGES = {kind: {lang: f"{text}{_SENTENCE_GAP[lang]}{AI_NOTICE[lang]}" if text else "" for lang, text in texts.items()}
+                   for kind, texts in _NOTICE_TEXT.items()}
 # Portuguese notices put the place name before a colon, so the sentence never depends on its gender or article.
 ROUTE_SEPARATOR = {"en": " / ", "zh": "、", "pt": " / "}
 

@@ -5,6 +5,8 @@ import { useApi, post } from "@/lib/api";
 import type { AuditEntry, Config, Intervention, Prediction } from "@/lib/types";
 import { RiskBadge } from "@/components/Badges";
 import { SketchFutureCheck } from "@/components/SketchFutureCheck";
+import { OperatorField } from "@/components/OperatorField";
+import { useOperatorName } from "@/lib/operator";
 import { auditDetails, localDateTime, localTime, pct } from "@/lib/format";
 
 export default function Interventions() {
@@ -13,19 +15,22 @@ export default function Interventions() {
   const { data: config } = useApi<Config>("/config", 60000);
   const [evidence, setEvidence] = useState<Intervention | null>(null);
   const [busy, setBusy] = useState<number | null>(null);
+  const { signer, problem } = useOperatorName();
   const pending = (ivs ?? []).filter((i) => i.status === "pending");
   const others = (ivs ?? []).filter((i) => i.status !== "pending");
   const decide = async (iv: Intervention, approve: boolean) => {
+    if (!signer) return;
     setBusy(iv.id);
-    try { await post(`/interventions/${iv.id}/${approve ? "approve" : "reject"}`, { operator: "operator", note: approve ? "approved from dashboard" : "rejected from dashboard" }); await mutate(); }
+    try { await post(`/interventions/${iv.id}/${approve ? "approve" : "reject"}`, { operator: signer, note: approve ? "approved from dashboard" : "rejected from dashboard" }); await mutate(); }
     catch (e) { alert(String(e)); } finally { setBusy(null); }
   };
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Interventions</h1>
-      <p className="text-sm text-zinc-400">The system recommends; you decide. Approvals and rejections are written to the audit log. In the live simulation an approved redirect/inflow reduction is applied to the crowd model so the forecast is recalculated.</p>
+      <p className="text-sm text-zinc-400">The system recommends; you decide. Approvals and rejections are written to the audit log under the name in “Deciding as”. In the live simulation an approved redirect/inflow reduction is applied to the crowd model so the forecast is recalculated.</p>
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-zinc-300">Awaiting decision ({pending.length})</h2>
+        <OperatorField />
         {pending.length === 0 && <p className="text-sm text-zinc-500">No pending recommendations.</p>}
         {pending.map((iv) => (
           <div key={iv.id} className="rounded-lg border border-amber-700/60 bg-zinc-900 p-4">
@@ -45,10 +50,11 @@ export default function Interventions() {
               <details className="mt-2 text-xs text-zinc-300"><summary className="cursor-pointer text-zinc-400">Public notice (中文 / English / Português)</summary>
                 <ul className="mt-1 space-y-1"><li>ZH: {iv.messages.zh}</li><li>EN: {iv.messages.en}</li><li>PT: {iv.messages.pt}</li></ul></details>
             )}
-            <div className="mt-3 flex gap-2">
-              <button disabled={busy === iv.id} className="rounded bg-emerald-700 px-3 py-1 text-sm font-semibold hover:bg-emerald-600 disabled:opacity-50" onClick={() => decide(iv, true)}>APPROVE</button>
-              <button disabled={busy === iv.id} className="rounded bg-red-800 px-3 py-1 text-sm font-semibold hover:bg-red-700 disabled:opacity-50" onClick={() => decide(iv, false)}>REJECT</button>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button disabled={busy === iv.id || !signer} title={problem ?? undefined} className="rounded bg-emerald-700 px-3 py-1 text-sm font-semibold hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-700" onClick={() => decide(iv, true)}>APPROVE</button>
+              <button disabled={busy === iv.id || !signer} title={problem ?? undefined} className="rounded bg-red-800 px-3 py-1 text-sm font-semibold hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-red-800" onClick={() => decide(iv, false)}>REJECT</button>
               <button className="rounded border border-zinc-600 px-3 py-1 text-sm hover:bg-zinc-800" onClick={() => setEvidence(evidence?.id === iv.id ? null : iv)}>VIEW EVIDENCE</button>
+              {problem ? <span className="text-xs text-amber-200" data-testid="decision-hint">{problem}</span> : <span className="text-xs text-zinc-500">deciding as {signer}</span>}
             </div>
             <SketchFutureCheck iv={iv} crosswalk={config?.sketchfuture} />
             {evidence?.id === iv.id && <Evidence iv={iv} />}

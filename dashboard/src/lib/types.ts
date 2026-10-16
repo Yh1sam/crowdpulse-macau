@@ -33,7 +33,7 @@ export interface Sensor {
   placement: "gps" | "zone_hint" | "none"; distance_to_zone_m: number | null;
 }
 
-export interface Alert { id: number; zone_id: string; created_at: string; level: string; title: string; message: string; horizon_min: number | null; prediction_id: number | null; confidence: number | null; acknowledged: boolean }
+export interface Alert { id: number; zone_id: string; created_at: string; level: string; title: string; message: string; horizon_min: number | null; prediction_id: number | null; confidence: number | null; acknowledged: boolean; acknowledged_by?: string | null }
 
 export interface Route { from: string; to: string; via: string[]; edges: string[]; length_m: number; has_stairs: boolean; steep: boolean; min_capacity_per_min: number; accessibility_penalty: number; score: number }
 

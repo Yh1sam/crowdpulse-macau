@@ -5,7 +5,9 @@
 Timeline: polls the backend every ~3 real seconds and appends one row to DIR/<tag>_timeline.csv.
 Screenshots: taken through headless Chrome (cdp.py) when simulated-time conditions are met.
 Operator action: when a Senado Square redirect/inflow recommendation is pending, clicks APPROVE in the
-Interventions page (a real UI click), exactly as an operator would.
+Interventions page (a real UI click), exactly as an operator would. The dashboard only enables APPROVE once a name is
+set under "Deciding as" (it is recorded in the audit log); the harness decides as the fictional OPERATOR_NAME by
+writing the dashboard's localStorage key before the page loads.
 """
 import argparse, csv, json, os, subprocess, sys, threading, time
 from datetime import datetime, timedelta
@@ -18,6 +20,8 @@ import cdp  # noqa: E402
 API = os.environ.get("CROWDPULSE_API", "http://localhost:8000")
 WEB = os.environ.get("CROWDPULSE_WEB", "http://localhost:3100")
 PHONE = os.environ.get("CROWDPULSE_PHONE_NODE", "node-a3cd4a")  # the iOS app's anonymous node id (Setup page)
+OPERATOR_NAME = "demo-operator-1"  # fictional demo name shown in "Deciding as" and written to the audit log
+OPERATOR_STORAGE_KEY = "crowdpulse.operatorName"  # dashboard/src/lib/operator.ts
 client = httpx.Client(timeout=30)
 lock = threading.Lock()
 events: list[dict] = []
@@ -164,6 +168,9 @@ def main():
     with cdp.connect(cdp.page_ws(), max_size=64 * 1024 * 1024) as ws:
         cdp.call(ws, "Page.enable"); cdp.call(ws, "Runtime.enable")
         cdp.call(ws, "Emulation.setDeviceMetricsOverride", width=1440, height=1000, deviceScaleFactor=1, mobile=False)
+        # sign in before the page's scripts run, so APPROVE is enabled when the page renders
+        cdp.call(ws, "Page.addScriptToEvaluateOnNewDocument",
+                 source=f"try {{ localStorage.setItem({json.dumps(OPERATOR_STORAGE_KEY)}, {json.dumps(OPERATOR_NAME)}); }} catch (e) {{}}")
         cdp.call(ws, "Page.navigate", url=WEB + "/interventions")
         time.sleep(8)
         card_js = f"""(() => {{ const cards = [...document.querySelectorAll('main div.rounded-lg')].filter(d => d.innerText.includes('#{iv['id']} ·'));
@@ -175,7 +182,8 @@ def main():
         cdp.screenshot(ws, str(P("07_intervention_evidence")))
         note("screenshot", file=P("07_intervention_evidence").name, page="/interventions")
         clicked = cdp.evaluate(ws, f"""(() => {{ const c = {card_js}; if (!c) return 'card not found';
-            const b = [...c.querySelectorAll('button')].find(b => b.innerText.trim() === 'APPROVE'); if (!b) return 'no approve button'; b.click(); return 'approve clicked'; }})()""")
+            const b = [...c.querySelectorAll('button')].find(b => b.innerText.trim() === 'APPROVE'); if (!b) return 'no approve button';
+            if (b.disabled) return 'approve disabled (no operator name set)'; b.click(); return 'approve clicked'; }})()""")
         note("ui", action="approve", result=clicked, intervention=iv["id"])
         time.sleep(5)
         cdp.screenshot(ws, str(P("08_after_approval_audit")))

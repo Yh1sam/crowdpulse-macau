@@ -30,6 +30,8 @@ def get_intervention(iv_id: int, db: Session = DB):
 
 
 def _decide(iv_id: int, approve: bool, body: DecisionIn, engine: Engine) -> Intervention:
+    """The body names the person deciding (DecisionIn refuses an empty name, the placeholder "operator" and "system", the actor of automatic entries);
+    the name is stored as decided_by and as the audit-log actor."""
     try:
         return engine.decide_intervention(iv_id, approve, body.operator, body.note)
     except KeyError:
@@ -39,12 +41,12 @@ def _decide(iv_id: int, approve: bool, body: DecisionIn, engine: Engine) -> Inte
 
 
 @router.post("/interventions/{iv_id}/approve", response_model=InterventionOut)
-def approve(iv_id: int, body: DecisionIn = DecisionIn(), engine: Engine = ENGINE):
+def approve(iv_id: int, body: DecisionIn, engine: Engine = ENGINE):
     return _decide(iv_id, True, body, engine)
 
 
 @router.post("/interventions/{iv_id}/reject", response_model=InterventionOut)
-def reject(iv_id: int, body: DecisionIn = DecisionIn(), engine: Engine = ENGINE):
+def reject(iv_id: int, body: DecisionIn, engine: Engine = ENGINE):
     return _decide(iv_id, False, body, engine)
 
 

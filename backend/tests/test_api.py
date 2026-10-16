@@ -110,7 +110,7 @@ def test_unreliable_sensor_lowers_reliability_and_flags_review(client):
 def test_unknown_zone_and_intervention_errors(client):
     assert client.get("/zones/nowhere").status_code == 404
     assert client.get("/zones/nowhere/prediction").status_code == 404
-    assert client.post("/interventions/999/approve", json={}).status_code == 404
+    assert client.post("/interventions/999/approve", json={"operator": "demo-operator-1"}).status_code == 404
     assert client.get("/export/nope.csv").status_code == 404
     preds = client.get("/zones/tercena_corridor/prediction").json()
     assert all(p["status"] == "insufficient_data" for p in preds)
@@ -137,7 +137,7 @@ def test_critical_forecast_creates_alert_and_intervention_with_audit(client):
         assert set(iv["messages"]) == {"zh", "en", "pt"} and all(iv["messages"].values())
     r = client.post(f"/interventions/{iv['id']}/approve", json={"operator": "tester", "note": "ok"})
     assert r.status_code == 200 and r.json()["status"] == "approved" and r.json()["decided_by"] == "tester"
-    assert client.post(f"/interventions/{iv['id']}/reject", json={}).status_code == 409
+    assert client.post(f"/interventions/{iv['id']}/reject", json={"operator": "demo-operator-1"}).status_code == 409
     audit = client.get("/audit").json()
     actions = {a["action"] for a in audit}
     assert "intervention_recommended" in actions and "intervention_approved" in actions
@@ -342,7 +342,7 @@ def test_confident_critical_supersedes_pending_monitoring(client):
         assert ivs[1].status == "pending" and ivs[1].kind in ("redirect_flow", "reduce_inflow") and ivs[1].horizon_min == 10
         assert db.execute(select(AuditLog).where(AuditLog.action == "intervention_superseded")).scalars().first() is not None
     # a superseded recommendation can no longer be approved
-    assert client.post(f"/interventions/{ivs[0].id}/approve", json={}).status_code == 409
+    assert client.post(f"/interventions/{ivs[0].id}/approve", json={"operator": "demo-operator-1"}).status_code == 409
 
 
 def test_equal_or_weaker_recommendation_does_not_replace_pending_or_approved(client):
@@ -485,7 +485,7 @@ def test_audit_lists_newest_written_first_across_simulation_runs(client):
     with session_scope() as db:
         db.add(AuditLog(timestamp=t0 + timedelta(days=3), actor="system", action="intervention_expired", target_type="intervention", target_id="1", details={}))
     with session_scope() as db:
-        db.add(AuditLog(timestamp=t0, actor="operator", action="intervention_approved", target_type="intervention", target_id="2", details={}))
+        db.add(AuditLog(timestamp=t0, actor="demo-operator-1", action="intervention_approved", target_type="intervention", target_id="2", details={}))
     audit = client.get("/audit").json()
     assert [(a["action"], a["target_id"]) for a in audit[:2]] == [("intervention_approved", "2"), ("intervention_expired", "1")]
 
@@ -526,3 +526,92 @@ def test_phone_at_a_school_joins_the_zone_chosen_in_the_app(client):
     client.post("/sensor/observation", json=obs(sensor_id="node-dist1", zone_hint="ruins_st_paul"))
     s = client.get("/sensors/node-dist1").json()
     assert s["zone_id"] == "senado_square" and s["placement"] == "gps"
+
+
+def _pending_intervention(client) -> int:
+    from backend.app.db import session_scope
+    from backend.app.services.engine import get_engine
+    eng = get_engine()
+    with session_scope() as db:
+        eng._maybe_recommend(db, "senado_square", [_pred("CRITICAL", 0.9, False)], eng.clock.now())
+    return client.get("/interventions?status=pending").json()[0]["id"]
+
+
+def test_decisions_must_name_the_person_deciding(client):
+    """Review finding: the dashboard sent operator "operator" for every decision and the API defaulted to it, so the
+    audit log could not say who decided. An empty name, the placeholder "operator" and "system" (the actor of the
+    engine's automatic audit entries) are refused."""
+    iv_id = _pending_intervention(client)
+    for body in ({}, {"operator": ""}, {"operator": "   "}, {"operator": "operator"}, {"operator": " Operator "},
+                 {"operator": "system"}, {"operator": " System "}, {"operator": "SYSTEM"}, {"note": "ok"}):
+        for verb in ("approve", "reject"):
+            r = client.post(f"/interventions/{iv_id}/{verb}", json=body)
+            assert r.status_code == 422, (verb, body, r.status_code)
+    assert client.post(f"/interventions/{iv_id}/approve").status_code == 422, "no body at all"
+    assert client.get(f"/interventions/{iv_id}").json()["status"] == "pending", "a refused decision changes nothing"
+    assert not [a for a in client.get("/audit").json() if a["action"] in ("intervention_approved", "intervention_rejected")]
+
+
+def test_named_approval_is_recorded_with_the_name(client):
+    iv_id = _pending_intervention(client)
+    r = client.post(f"/interventions/{iv_id}/approve", json={"operator": "  demo-operator-1 ", "note": "checked the evidence"})
+    assert r.status_code == 200 and r.json()["status"] == "approved" and r.json()["decided_by"] == "demo-operator-1"
+    entry = next(a for a in client.get("/audit").json() if a["action"] == "intervention_approved")
+    assert entry["actor"] == "demo-operator-1" and entry["target_id"] == str(iv_id) and entry["details"]["note"] == "checked the evidence"
+
+
+def test_named_rejection_is_recorded_with_the_name(client):
+    iv_id = _pending_intervention(client)
+    r = client.post(f"/interventions/{iv_id}/reject", json={"operator": "demo-operator-2"})
+    assert r.status_code == 200 and r.json()["status"] == "rejected" and r.json()["decided_by"] == "demo-operator-2"
+    entry = next(a for a in client.get("/audit").json() if a["action"] == "intervention_rejected")
+    assert entry["actor"] == "demo-operator-2" and entry["target_id"] == str(iv_id)
+
+
+def test_alert_acknowledgement_must_name_the_person(client):
+    from backend.app.db import session_scope
+    from backend.app.models import Alert
+    with session_scope() as db:
+        db.add(Alert(zone_id="senado_square", created_at=datetime.now(timezone.utc) - timedelta(minutes=1), level="warning", title="test alert", message="test"))
+    alert_id = client.get("/alerts").json()[0]["id"]
+    for body in ({}, {"operator": ""}, {"operator": "operator"}, {"operator": "OPERATOR"}, {"operator": "system"}, {"operator": " System "}):
+        assert client.post(f"/alerts/{alert_id}/ack", json=body).status_code == 422, body
+    assert client.get("/alerts").json()[0]["acknowledged"] is False
+    r = client.post(f"/alerts/{alert_id}/ack", json={"operator": "demo-operator-1"})
+    assert r.status_code == 200 and r.json()["acknowledged"] is True and r.json()["acknowledged_by"] == "demo-operator-1"
+    entry = next(a for a in client.get("/audit").json() if a["action"] == "alert_acknowledged")
+    assert entry["actor"] == "demo-operator-1" and entry["target_id"] == str(alert_id)
+
+
+def test_public_notices_say_ai_is_involved_and_staff_approved():
+    """Public notices tell people that the advice comes from an AI crowd forecast and was approved by staff, in all
+    three languages; the rest of each notice is unchanged and internal-only actions still publish nothing."""
+    from backend.app.services.intervention import _NOTICE_TEXT, AI_NOTICE, ROUTE_SEPARATOR, build_recommendation, place_name
+    from shared.config import load_config
+    from shared.geo import bearing_deg
+    assert AI_NOTICE == {"en": "Advice from an AI crowd forecast, approved by staff.",
+                         "zh": "此建議來自人工智能人流預測，並經工作人員批准。",
+                         "pt": "Recomendação baseada numa previsão de afluência feita por inteligência artificial, aprovada pelo pessoal."}
+    zones, edges = {z["id"]: z for z in GRAPH["zones"]}, {e["name"]: e for e in GRAPH["edges"]}
+    senado, dominic = zones["senado_square"], zones["st_dominic"]
+    toward_senado = bearing_deg(dominic["lat"], dominic["lon"], senado["lat"], senado["lon"])
+    flowing = {"st_dominic": {"density": 0.8, "flow_speed_mps": 0.8, "flow_coherence": 0.9, "flow_direction_deg": toward_senado}}
+    cases = [("redirect_flow", flowing, _pred("CRITICAL", 0.9, False)), ("reduce_inflow", {}, _pred("CRITICAL", 0.9, False)),
+             ("deploy_staff", flowing, _pred("WARNING", 0.9, False)), ("increase_monitoring", {}, _pred("CRITICAL", 0.4, True))]
+    for kind, states, pred in cases:
+        rec = build_recommendation(senado, GRAPH, states, pred, load_config())
+        assert rec["kind"] == kind
+        if kind == "increase_monitoring":
+            assert not any(rec["messages"].values()), "monitoring is internal: no public notice"
+            continue
+        msgs = rec["messages"]
+        assert set(msgs) == {"zh", "en", "pt"}
+        assert msgs["en"].endswith(". Advice from an AI crowd forecast, approved by staff.")
+        assert msgs["zh"].endswith("。此建議來自人工智能人流預測，並經工作人員批准。")
+        assert msgs["pt"].endswith(". Recomendação baseada numa previsão de afluência feita por inteligência artificial, aprovada pelo pessoal.")
+        route_edges = [edges[name] for name in (rec["route"] or {}).get("edges", [])]
+        for lang, text in msgs.items():
+            original = _NOTICE_TEXT[kind][lang].format(zone=place_name(senado, lang), route=ROUTE_SEPARATOR[lang].join(place_name(e, lang) for e in route_edges))
+            assert text == original + ("" if lang == "zh" else " ") + AI_NOTICE[lang], (kind, lang)
+        if kind == "deploy_staff":
+            assert msgs["en"] == "Senado Square is busy. Please follow staff guidance and keep moving. Advice from an AI crowd forecast, approved by staff."
