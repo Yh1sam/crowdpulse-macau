@@ -18,14 +18,6 @@ Security for the prototype: HTTPS at the platform edge, secrets only in environm
 
 Temporary "smartphone sensing kits" (phone + tripod/clamp + battery pack + laminated instructions) are deployed by Macau tourism authorities, police, event staff or crowd-management contractors for peak periods (Golden Week, Chinese New Year, Grand Prix, festivals). Staff place phones at agreed points around each hotspot in the morning, register them in the app, and collect them in the evening. The dashboard runs in the operations room.
 
-## One-year cost model (assumptions stated; illustrative, not quoted prices)
+## One-year cost
 
-| item | assumption | cost (MOP, approx.) |
-|---|---|---|
-| 20 refurbished/loan smartphones + mounts + power banks | MOP 2,500 per kit, 3-year life | 50,000 / 3 ≈ 17,000 per year |
-| cloud backend + database | small managed instance + Postgres | ≈ 6,000 per year |
-| staff time for placement/collection | 2 staff × 4 h × 40 peak days × MOP 100/h | ≈ 32,000 per year |
-| maintenance / retraining / support | 0.2 FTE engineer | ≈ 60,000 per year |
-| **total** | | **≈ MOP 115,000 per year** |
-
-For comparison, a permanent smart-CCTV analytics point is commonly quoted in the tens of thousands of MOP each for hardware, cabling and installation, plus licences — 20 such points would exceed this budget several times over and would still not be movable. The smartphone approach reuses commodity hardware, can be repositioned daily, and collects far less sensitive data. All figures are assumptions for discussion, not supplier quotes.
+See [cost-estimate.md](cost-estimate.md) for the one-year build and running estimate. It is labelled **TEAM ESTIMATE — draft, inputs to be confirmed by the team; not a quote.** No published price for a fixed counting camera was found ([research/brief-evidence.md](research/brief-evidence.md), section 8), so no comparison is made.
