@@ -53,11 +53,13 @@ What this shows:
 | `B05_zone_senado_critical_forecast.png` | run B at the first CRITICAL forecast |
 | `A_timeline.csv`, `B_timeline.csv` | per-sample recording: observed and true density, state, forecasts and confidence, phone status and count, pending recommendations, refresh time |
 | `A_events.json`, `B_events.json` | what happened when (screenshots, UI clicks, decisions) |
-| `ios_app_live_detection.png`, `ios_app_video_mode_30s.mp4` | the iOS app counting people in video mode (green boxes are on-screen only) |
+| `ios_app_live_detection.png`, `ios_app_video_mode_30s.mp4` | the iOS app counting people in video mode (green boxes are on-screen only); faces pixelated by us |
 | `ios_app_debug_payload.png` | the exact JSON the phone sent: numbers only, wall-clock timestamp, while the server reply shows simulated time |
-| `ios_app_offline_buffering.png` | the phone buffering readings while the backend was down; they were delivered when it came back |
+| `ios_app_offline_buffering.png` | the phone buffering readings while the backend was down; they were delivered when it came back; faces pixelated by us |
 
 The three `ios_app_*` images and the clip were taken during earlier runs with the same setup on the same day, not during run A.
+
+Street footage in `ios_app_live_detection.png`, `ios_app_offline_buffering.png` and `ios_app_video_mode_30s.mp4`: "Diagonal crosswalk at Yonge & Dundas in Toronto", Raysonho, Wikimedia Commons, CC0 (see `THIRD_PARTY_NOTICES.md`). Faces pixelated by us after capture, frame by frame in the clip (`experiments/mask_faces.py`, head boxes in `experiments/mask_faces_boxes.json`); counts, boxes and labels are as the app showed them.
 
 ## Reproduce
 

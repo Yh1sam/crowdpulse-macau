@@ -39,6 +39,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -48,6 +49,9 @@ import matplotlib.patches as mpatches  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from mask_faces import mask_overlay_frame  # noqa: E402
 
 SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#4a3aa7"]
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#e6e5e1"
@@ -104,7 +108,9 @@ def score(truth: np.ndarray, est: np.ndarray) -> dict:
 
 def overlay_figure(data: Path, out: Path, decoded: np.ndarray, frame_index: int, truth_row: pd.Series) -> None:
     panels = [("Apple built-in (upper body)", "640_upper", True), ("YOLO11n CoreML (new default)", "yolo11n", False)]
-    img = decoded[frame_index]
+    # The figure is published: passers-by's faces are mosaicked in the frame before plotting
+    # (head boxes in experiments/mask_faces_boxes.json), so boxes and the kerb line stay on top.
+    img = mask_overlay_frame(decoded[frame_index], frame_index)
     h, w = img.shape[:2]
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.1))
     for ax, (title, key, _upper) in zip(axes, panels):
