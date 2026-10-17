@@ -679,7 +679,7 @@ The lock used up the old cuts 3 (S11's "Apple's detector, 55") and 5 (S13's "Ele
 - stating "a map-data gap" as the cause of 24 of 40
 - "for the day" (battery life is unmeasured)
 - Senado turning green
-- a recognisable stranger's face (mosaic near-field faces in S02, S11 and S12; CC0 covers copyright, not likeness)
+- a recognisable stranger's face (mosaic near-field faces in S02, S11 and S12; CC0 covers copyright, not likeness). S02 uses video/build/clips/S02_sim_masked.mp4, made by video/mask_s02.py from head boxes stored in video/shots/S02_heads.json; the recipe refuses to build S02 without it
 - a hand on a mouse over the scripted C2 APPROVE click, or that click without its "click scripted for this recording" footer
 - "operator approves" (or any label implying a person) on S14's run A approval marker: the recorded runs' operator was a script (label it "approval (scripted operator), 14:14")
 - 32 vs 31 minutes above CRITICAL as if it held for both pairs of runs (it is the final pair only)

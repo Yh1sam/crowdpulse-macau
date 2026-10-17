@@ -102,8 +102,12 @@ def stamp(img, x: int, y: int, text: str, colour) -> None:
 
 
 def s02(dur: float):
-    # Simulator screen scaled to full height at x 383-880, where the S02 overlay expects it
-    return (["-ss", "5", "-i", str(CLIPS / "S02_sim.mp4")], [], [(OVL / "S02.mov", 0.0)],
+    # Simulator screen scaled to full height at x 383-880, where the S02 overlay expects it. The source is
+    # S02_sim.mp4 from 5.0 s with every head in the app's camera picture mosaicked (video/mask_s02.py).
+    masked = CLIPS / "S02_sim_masked.mp4"
+    if not masked.exists():
+        raise SystemExit("S02 needs video/build/clips/S02_sim_masked.mp4: run video/mask_s02.py (faces must be masked)")
+    return (["-i", str(masked)], [], [(OVL / "S02.mov", 0.0)],
             "scale=-2:1080,pad=1920:1080:383:0:color=0x0B1220")
 
 
