@@ -1,4 +1,4 @@
-"""Shot S14 (2:40.0-3:00.5, 20.5 s): "Does acting help?" - the recorded simulation, approve vs no action.
+"""Shot S14 (2:34.5-2:56.0, 21.5 s): "Does acting help?" - the recorded simulation, approve vs no action.
 
 Storyboard: docs/video/script.md section 3, row S14; claims table section 4, row S14; section 6
 ("Global look and tools", "motion_graphic"); shot list docs/video/shotlist.json (id S14).
@@ -9,7 +9,8 @@ Run A markers (each tagged "run A"): first CRITICAL forecast, redirect recommend
 "approval (scripted operator), 14:14". End labels: this pair (from the CSVs) and, faint, the earlier
 pair (README only). The under-chart line and the axis note follow the storyboard verbatim. As the
 assumed effect is spoken, a light band marks the effect window (14:14-14:34) and the limit chip slides
-in. From "and the crowd built so fast..." the chart slides left and a clock panel comes in beside it:
+in. From "Our failure case:" the chart slides left and a clock panel comes in beside it, under the
+header "Our failure case" (source: simulation_run/README.md, "No early warning in this scenario"):
 crowd build-up ~3 min vs the 5-15 min forecast horizon, with its label. Senado is never drawn green.
 
 Data (read, never retyped):
@@ -45,21 +46,33 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 SHOTS = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOTS if s["id"] == "S14")
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 20.5 s
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 21.5 s
+assert DURATION == 21.5, DURATION
 
-# Seconds from the shot start, keyed to the narration at 140 wpm (0.43 s per word, voice from 0.1 s).
-# re-key to the real voice take
+# Seconds from the shot start. Keyed to the guide voice video/build/guide/S14.wav (say -v Daniel -r 155,
+# about 148 wpm), which assemble.py lays 0.2 s into the shot (VOICE_START): clause starts are the
+# silencedetect pauses (noise -35 dB, d 0.12 s) + 0.2 s; word onsets inside a clause come from
+# synthesising prefixes of the line with the same voice. Pauses in the wav: 1.57-1.79, 6.15-6.38,
+# 7.49-7.71, 8.80-9.04, 11.60-11.81, 12.52-12.76, 13.95-14.18 and 16.77-16.98 s; speech ends at 17.83 s.
+# Shot times:
+#   "In a recorded simulation," 0.2-1.77 | "approving the redirect" 1.99-3.37 | "left Senado less crowded" 3.37-4.89 |
+#   "by the end" 4.89-5.48 | "than doing nothing," 5.48-6.35 | "but only modestly:" 6.58-7.69 |
+#   "it stayed critical." 7.91-9.00 | "The effect rests on a diversion we assumed," 9.24-11.80 |
+#   "not measured." 12.01-12.72 | "Our failure case:" 12.96-14.15 | "the crowd built so fast" 14.38-15.96 |
+#   "the alert came with it," 15.96-16.97 | "not before." 17.18-18.03 | the clock panel holds to 21.5.
+# re-key to the real voice take (the team reads at about 140 wpm, so everything moves ~5% later)
 BEATS = {
     "draw": 0.5,               # "In a recorded simulation," -> both lines start drawing left to right
-    "approving": 1.8,          # "approving the redirect" (run A markers appear as the sweep passes them)
-    "by_the_end": 4.8,         # "by the end" -> lines reach 14:40, this pair's end values
-    "doing_nothing": 6.1,      # "than doing nothing" -> faint earlier-pair end values
-    "only_modestly": 7.4,      # "but only modestly:" -> the under-chart line
-    "stayed_critical": 8.65,   # "it stayed critical." -> the CRITICAL line pulses, region above it tinted
-    "effect": 9.95,            # "The effect rests on a diversion we assumed, not measured," -> band + chip
-    "crowd_built": 14.25,      # "and the crowd built so fast" -> chart slides left, clock panel in
-    "alert": 16.8,             # "the alert came with it," -> run A's first-forecast marker emphasised
-    "not_before": 18.95,       # "not before."
+    "approving": 1.99,         # "approving the redirect" (run A markers appear as the sweep passes them)
+    "by_the_end": 4.89,        # "by the end" -> lines reach 14:40, this pair's end values
+    "doing_nothing": 5.68,     # "doing nothing" -> faint earlier-pair end values
+    "only_modestly": 6.58,     # "but only modestly:" -> the under-chart line
+    "stayed_critical": 7.91,   # "it stayed critical." -> the CRITICAL line pulses, region above it tinted
+    "effect": 9.24,            # "The effect rests on a diversion we assumed, not measured." -> band + chip
+    "failure": 12.96,          # "Our failure case:" -> chart slides left, clock panel in under its header
+    "crowd_built": 14.38,      # "the crowd built so fast" -> red wedge 0 -> 3 min, then the 5-15 min ring
+    "alert": 15.96,            # "the alert came with it," -> run A's first-forecast marker lifted, clock label
+    "not_before": 17.18,       # "not before." (speech ends 18.03; the panel holds to the end)
 }
 CHAPTER_END = 2.0              # chapter card for about 2 s
 DRAW_END = BEATS["by_the_end"] + 0.5
@@ -125,6 +138,7 @@ UNDER = ("At 14:40 · approved 0.75 vs no action 0.82 (earlier pair 0.73 vs 0.87
          "this pair: 32 vs 31 min above CRITICAL")
 AXIS = "relative density index, not people per m²"
 CHIP = "Assumed: routes into Senado made 30% less attractive for 20 min (prototype setting, not measured)"
+CLOCK_HEADER = "Our failure case"       # header above the clock panel (round-2 lock)
 CLOCK_BUILD = "crowd build-up ≈3 min"
 CLOCK_HORIZON = "forecast horizon 5-15 min"
 CLOCK_LABEL = ("First CRITICAL forecast within ~1 min of the crossing: no early warning · "
@@ -142,6 +156,9 @@ BAND_LABEL = f"assumed effect window {APPROVE_T}–{EFFECT_END_T}"
 _ost = SHOT["on_screen_text"]
 for s_ in (CHAPTER, BADGE_DETAIL, UNDER, AXIS, CHIP, CLOCK_BUILD, CLOCK_HORIZON, CLOCK_LABEL, FOOTER):
     assert s_ in _ost, f"not in the storyboard's on-screen text: {s_!r}"
+assert f"Header above the clock panel: {CLOCK_HEADER}" in _ost
+assert f"{CLOCK_HEADER}:" in SHOT["narration"], "the clock panel enters on the spoken 'Our failure case:'"
+assert "No early warning in this scenario" in README, "source of 'Our failure case' (simulation_run/README.md)"
 assert f"approved {END_A:.2f} vs no action {END_B:.2f}" in UNDER
 assert f"{MIN_A} vs {MIN_B} min above CRITICAL" in UNDER
 assert f"earlier pair {EARLIER_A} vs {EARLIER_B}" in UNDER and f"{EARLIER_A} vs {EARLIER_B}" in README
@@ -166,7 +183,8 @@ LINE_B_C = ORANGE
 CH_W, CH_H, CH_Y = 1240, 640, 140      # chart panel
 CH_X_CENTRE = (W - CH_W) // 2          # 340 while the chart is alone
 CH_X_LEFT = 60                         # from "and the crowd built so fast"
-CK_X, CK_Y, CK_W, CK_H = 1340, 140, 520, 640   # clock panel
+CK_X, CK_Y, CK_W, CK_H = 1340, 196, 520, 584   # clock panel, under its header (bottom level with the chart's)
+HEADER_BASE = 170                      # "Our failure case": cap top level with the chart panel's top (y 140)
 UNDER_Y = 812                          # baseline of the under-chart line (below the panel)
 
 PX0, PX1 = 100, 1040                   # plot x for 13:53 and 14:40 (local to the panel)
@@ -509,8 +527,8 @@ def chart_frame(t: float) -> Image.Image:
 
 # ---------- clock panel ----------
 
-DIAL_C = (260, 178)
-R_FACE, R_WEDGE, R_RING_IN, R_RING_OUT, R_LABEL = 96, 86, 106, 124, 146
+DIAL_C = (260, 166)
+R_FACE, R_WEDGE, R_RING_IN, R_RING_OUT, R_LABEL = 88, 79, 97, 114, 134
 
 
 def ang(minutes: float) -> float:
@@ -542,19 +560,22 @@ def clock_static() -> Image.Image:
 
 
 CLOCK_BG = clock_static()
-ROW_Y = (362, 410)
+ROW_Y = (330, 374)
+DIVIDER_Y, LABEL_Y0 = 406, 442
 ROW_S = (T(CLOCK_BUILD, 28, 700, INK), T(CLOCK_HORIZON, 28, 700, INK))
 _lab1, _lab2 = CLOCK_LABEL.split(" · ")
 LABEL_LINES = [(l_, INK, 600) for l_ in wrap(_lab1, 22, 600, CK_W - 80)] + [(l_, INK_2, 500) for l_ in wrap(_lab2, 22, 500, CK_W - 80)]
 LABEL_S = [T(l_, 22, w_, c_) for l_, c_, w_ in LABEL_LINES]
+HEADER_S = T(CLOCK_HEADER, 34, 700, INK)
+assert len(LABEL_LINES) == 4 and LABEL_Y0 + 3 * 30 + 10 + 8 <= CK_H - 24, "clock label runs into the panel's bottom edge"
 N_LAB1 = len(wrap(_lab1, 22, 600, CK_W - 80))
 
 
 def clock_frame(t: float) -> Image.Image:
     img = CLOCK_BG.copy()
     cb = BEATS["crowd_built"]
-    w1 = progress(t, cb + 0.45, 0.9)          # red wedge: 0 -> 3 min
-    w2 = progress(t, cb + 1.35, 0.9)          # cyan ring: 5 -> 15 min
+    w1 = progress(t, cb + 0.1, 0.9)           # red wedge: 0 -> 3 min, on "the crowd built so fast"
+    w2 = progress(t, cb + 1.0, 0.9)           # cyan ring: 5 -> 15 min, done as "the alert came" ends
     cx, cy = DIAL_C
 
     def fn(d, k):
@@ -588,12 +609,12 @@ def clock_frame(t: float) -> Image.Image:
         rounded(img, (40, yb - 22, 62, yb), 5, fill=col, alpha=a)
         spr.draw(img, 76 + (1 - a) * 10, yb, a)
     # divider and label
-    la = progress(t, BEATS["alert"] - 1.1, 0.55)
+    la = progress(t, BEATS["alert"] - 0.3, 0.55)   # label lands with "the alert came with it"
     if la > 0:
         lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
-        ImageDraw.Draw(lay).line([(40, 452), (CK_W - 40, 452)], fill=rgba(INK_3, 0.5 * la), width=2)
+        ImageDraw.Draw(lay).line([(40, DIVIDER_Y), (CK_W - 40, DIVIDER_Y)], fill=rgba(INK_3, 0.5 * la), width=2)
         img.alpha_composite(lay)
-        y = 494
+        y = LABEL_Y0
         for i, spr in enumerate(LABEL_S):
             if i == N_LAB1:
                 y += 10
@@ -634,16 +655,19 @@ def draw_frame(t: float) -> Image.Image:
 
     # chart panel: fades in, then slides left as the clock panel comes in
     a_ch = progress(t, 0.0, 0.5)
-    slide = progress(t, BEATS["crowd_built"] - 0.5, 0.85)
+    slide = progress(t, BEATS["failure"] - 0.5, 0.85)
     cx = lerp(CH_X_CENTRE, CH_X_LEFT, slide)
     paste(img, chart_frame(t), (cx, CH_Y + (1 - a_ch) * 18), a_ch)
     # under-chart line, centred under the panel
     UNDER_S.draw(img, cx + CH_W / 2, UNDER_Y, progress(t, BEATS["only_modestly"] - 0.1, 0.5), align="m")
 
-    # clock panel beside the chart
-    a_ck = progress(t, BEATS["crowd_built"] - 0.15, 0.7)
+    # clock panel beside the chart, under its header "Our failure case"
+    a_ck = progress(t, BEATS["failure"] - 0.15, 0.7)
     if a_ck > 0:
-        paste(img, clock_frame(t), (CK_X + (1 - a_ck) * 60, CK_Y), a_ck)
+        dx = CK_X + (1 - a_ck) * 60
+        paste(img, clock_frame(t), (dx, CK_Y), a_ck)
+        rounded(img, (int(dx), HEADER_BASE - 25, int(dx) + 7, HEADER_BASE), 3, fill=CRITICAL, alpha=a_ck)
+        HEADER_S.draw(img, dx + 21, HEADER_BASE, a_ck)
 
     # overlay slots
     chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
@@ -655,11 +679,12 @@ def draw_frame(t: float) -> Image.Image:
 
 STILLS = {
     "card": 1.5,
-    "end_values": 7.9,
-    "critical": 9.2,
-    "chip": 12.6,
-    "clock": 16.2,
-    "end": 20.4,
+    "end_values": 7.3,
+    "critical": 8.5,
+    "chip": 11.0,
+    "header": 14.0,
+    "clock": 16.7,
+    "end": 21.4,
 }
 
 if __name__ == "__main__":

@@ -1,14 +1,22 @@
-"""Shot S11 (1:50.0-2:08.0, 18.0 s): two on-device detectors against a careful hand count.
+"""Shot S11 (1:52.0-2:07.0, 15.0 s): two on-device detectors against a careful hand count.
 
 Storyboard: docs/video/script.md, section 3 row S11, section 4 claims row S11, section 6
 ("Global look and tools", "figure" S11). Shot list: docs/video/shotlist.json (id S11).
 
-0-8 s   The same CC0 frame twice: Apple's boxes, then (wipe at about 3.5 s) YOLO11n's boxes.
-        Faces are mosaicked at the figure's own resolution before any scaling, with the
-        detection boxes and the dashed far-kerb line kept on top of the mosaic. Each panel is
-        cropped, fitted to 16:9 on navy (no stretching) and slowly pushed in (zoom 1.00 -> 1.06).
-8-18 s  "count vs hand count" bar pairs, Apple -> YOLO11n: within about 20 m, densest frames,
-        whole wide scene.
+0-5.8 s   The same CC0 frame twice: Apple's boxes, then YOLO11n's boxes. The wipe runs 2.8-3.8 s,
+          starting in the pause after "clip," so the YOLO11n panel (and its label) is complete as
+          "Yo-lo" is spoken; it holds in full to 5.35 s, then cross-fades to the bars (to 5.8 s).
+          Faces are mosaicked at the figure's own resolution before any scaling, with the
+          detection boxes and the dashed far-kerb line kept on top of the mosaic. Each panel is
+          cropped, fitted to 16:9 on navy (no stretching) and slowly pushed in (zoom 1.00 -> 1.06).
+5.35-15 s "count vs hand count" bar pairs, Apple -> YOLO11n: within about 20 m (97% lands at about
+          6.5 s, inside "ninety-seven percent"), densest frames (not spoken), whole wide scene (on
+          "across the whole scene", 27% just before "only twenty-seven").
+The storyboard's times (panels to 6.5 s, bars from 6.5 s, "97" at about 7.2 s) are at 140 wpm with
+the voice from 0.3 s; the beats below are keyed to the guide voice, which reads faster and speaks
+"ninety-seven" from 5.5 s, so the panels end (and the bars start) at 5.35 s instead.
+"Apple's detector, 55" and "In the densest frames, 82" are no longer spoken (round-2 lock): both
+stay on screen in the bars, with no spoken-number emphasis.
 
 Data sources (read at render time, never retyped):
 - experiments/results/video/detector_overlay.png  the two-panel figure (picture only)
@@ -41,24 +49,33 @@ from style import *  # noqa: E402,F401,F403
 
 SHOT = "S11"
 _shot = next(s for s in json.loads((ROOT / "docs/video/shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = _shot["end_s"] - _shot["start_s"]          # 18.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 15.0 s
 
-# Beat times in seconds from the shot start, keyed to the narration at 140 wpm (0.43 s a word):
-# "On eleven frames of a public-domain street clip, | the open YOLO model in our app counted
-#  ninety-seven percent as many | nearby people as a careful hand count; | Apple's detector,
-#  fifty-five. | In the densest frames, eighty-two; | across the whole scene, only twenty-seven."
-# re-key to the real voice take
+# Beat times in seconds from the shot start, keyed to the guide voice video/build/guide/S11.wav
+# (say -v Daniel -r 155, 12.12 s) laid from VOICE_START: word times from its pauses (silencedetect:
+# 2.71-3.00, 9.19-9.39, 10.64-10.86 s into the file) and prefix syntheses, 17 Oct. Shot times:
+# "On eleven frames of a public-domain street clip," 0.2-2.9 (pause 2.91-3.20) | "the open Yo-lo
+# model" 3.2-4.5 ("Yo-lo" 3.7-4.3) | "in our app counted" 4.5-5.5 | "ninety-seven percent" 5.5-6.8 |
+# "as many nearby people" 6.8-7.9 | "as a careful hand count;" 7.9-9.4 | "across the whole scene,"
+# 9.6-10.8 | "only twenty-seven." 11.1-12.2 (the voice ends at 12.3; the bars hold to 15.0).
+# Re-key to the real voice take.
+VOICE_START = 0.2                 # video/assemble.py default
 BEATS = {
     "label_in": 0.0,     # shot start: Apple panel and its label
-    "wipe": 3.5,         # "...street clip, | the open YOLO model" (word 9 at 3.4 s): wipe Apple -> YOLO11n (1 s)
-    "to_bars": 7.7,      # picture cross-fades to the bar chart (storyboard: bars from 8 s)
-    "near": 8.5,         # "nearby people" (word 21 at 8.6 s): within ~20 m pair grows
-    "apple_55": 11.5,    # "Apple's detector, fifty-five" (words 28-30, 11.6-12.4 s): Apple bar ring
-    "dense": 13.5,       # "In the densest frames, eighty-two" (words 31-35, 12.9-15.0 s)
-    "whole": 15.6,       # "across the whole scene, only twenty-seven" (words 36-41, 15.0-17.6 s)
+    "wipe": 2.8,         # end of "clip," (2.91; the eased edge has moved about 10 px by then): Apple ->
+                         # YOLO11n, 97% across (label fully in) by 3.6, complete by 3.8, as "Yo-lo" is
+                         # spoken (3.7-4.3)
+    "to_bars": 5.35,     # "counted" (4.9-5.5): picture cross-fades to the bars; the YOLO11n panel held ~1.75 s
+    "near": 5.5,         # "ninety-seven percent" (5.5-6.8): within ~20 m pair grows, 97% lands by 6.5
+    "dense": 7.6,        # not spoken ("as a careful hand count", 7.9-9.4): densest pair, with its tag
+    "whole": 10.25,      # "across the whole scene" ("whole" 10.3): 27% lands by 11.3, before "twenty-seven" (11.5)
 }
 WIPE_DUR = 1.0
-XFADE_DUR = 0.5
+APPLE_LABEL_OUT = 0.32            # after "wipe": the Apple label fades out (0.2 s), gone by 3.32 s, just before
+                                  # the wipe edge reaches the YOLO11n label's right end (x ~850 at 3.32 s), so
+                                  # the two labels are never seen spliced into one line
+XFADE_DUR = 0.45
+TITLE_IN, FRAME_IN = 0.1, 0.15    # after to_bars: title and bar tracks fade in (0.5 s) as the bars start
 GROW_DUR = 0.9
 PUSH_IN = 0.06                    # zoom 1.00 -> 1.06 over the picture part
 
@@ -103,6 +120,19 @@ FOOTER = "experiments/results/video/summary.md"
 TITLE = "count vs hand count"
 DEFINITION = ("= detector count ÷ hand count, summed over the frames in each group "
               "(not the share of individuals detected)")
+
+# guards: the shot list's wording must match what is drawn, and the spoken numbers the data
+_ost = _shot["on_screen_text"]
+for v in (f"Badge (top-right): REAL DATA · {BADGE_DETAIL}", f"Panel labels: {LABEL_APPLE} / {LABEL_YOLO}",
+          f"Bar title: {TITLE} {DEFINITION}", f"Small, under the densest pair: {GROUPS[1][3]}", GROUPS[0][3],
+          f"Credit: {CREDIT}", f"Footer: {FOOTER}"):
+    assert v in _ost, f"shotlist.json on_screen_text no longer matches: {v!r}"
+_vis = _shot["visual"]
+for label, apple, yolo, _note, _beat in GROUPS:
+    assert f"{apple:.0f}% → {yolo:.0f}%" in _vis, (label, apple, yolo)
+for v in ("on eleven frames", f"counted {GROUPS[0][2]:.0f} percent as many nearby people", f"only {GROUPS[2][2]:.0f}."):
+    assert v in _shot["narration"].lower(), f"narration no longer matches the data: {v!r}"
+assert N_FRAMES == 11  # "eleven frames" is spoken as a word
 
 # ---------- picture prep: mosaic faces, crop panels ----------
 FIGURE = RES / "detector_overlay.png"            # 1950 x 615
@@ -338,7 +368,7 @@ def picture(t: float) -> Image.Image:
     apple = yolo = None
     if k < 1:
         apple = pushed(APPLE_FIT, z)
-        layer_alpha(apple, LABEL_APPLE_L, lab)
+        layer_alpha(apple, LABEL_APPLE_L, lab * (1 - progress(t, BEATS["wipe"] + APPLE_LABEL_OUT, 0.2)))
     if k > 0:
         yolo = pushed(YOLO_FIT, z)
         layer_alpha(yolo, LABEL_YOLO_L, 1.0)
@@ -378,11 +408,6 @@ def draw_bars(img: Image.Image, t: float) -> None:
             put(img, (BAR_X0, y), text, 22, 500, INK_2, a)
         else:
             put(img, (x, y), text, 28, 700, NAVY, a, anchor="rm")
-    # emphasis on "Apple's detector, fifty-five": a ring round Apple's near bar
-    ring = fade(t, BEATS["apple_55"], BEATS["apple_55"] + 1.6, 0.4)
-    if ring > 0:
-        y = bar_y(0, 0)
-        rounded(img, (BAR_X0 - 7, y - 5, bar_x(GROUPS[0][1]) + 7, y + BAR_H + 4), 12, outline=INK, width=3, alpha=ring)
 
 
 def draw_frame(t: float) -> Image.Image:
@@ -395,8 +420,8 @@ def draw_frame(t: float) -> Image.Image:
         img = canvas()
     img.alpha_composite(SCRIMS)
     if t >= BEATS["to_bars"]:
-        layer_alpha(img, TITLE_L, progress(t, BEATS["to_bars"] + 0.25, 0.5))
-        layer_alpha(img, FRAME_L, progress(t, BEATS["to_bars"] + 0.4, 0.5))
+        layer_alpha(img, TITLE_L, progress(t, BEATS["to_bars"] + TITLE_IN, 0.5))
+        layer_alpha(img, FRAME_L, progress(t, BEATS["to_bars"] + FRAME_IN, 0.5))
         draw_bars(img, t)
     img.alpha_composite(PERSIST)
     return img
@@ -404,11 +429,11 @@ def draw_frame(t: float) -> Image.Image:
 
 STILLS = {  # beat name -> time (s)
     "apple": 2.0,
-    "wipe": 4.0,
-    "yolo": 6.8,
-    "near": 10.0,
-    "apple55": 12.0,
-    "all": 17.6,
+    "wipe": 3.2,
+    "yolo": 4.6,
+    "near": 6.6,
+    "dense": 8.8,
+    "all": 14.9,
 }
 
 

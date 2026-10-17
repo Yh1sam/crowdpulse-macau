@@ -1,18 +1,22 @@
-"""S20 · End card (4:13.5-4:19.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
+"""S20 · End card (4:20.5-4:26.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
 
 Storyboard: docs/video/script.md section 3, row S20 (visual and on-screen text), section 1 "Team roles" (which
 member carries which STEMB letter), section 5A item 1 (fill names, school, supervisor and the grid before
 submitting) and 5E (the optional AI-assistance line); docs/video/shotlist.json, entry S20.
 
 Data sources (nothing is retyped):
-  - docs/video/shotlist.json: the shot duration (end_s - start_s).
+  - docs/video/shotlist.json: the shot duration (end_s - start_s), and the repository line (checked equal to
+    the storyboard's).
   - docs/video/script.md, section 3, S20 row, "on-screen text" cell: every line on the card, verbatim:
       1. "CrowdPulse Macau · [SCHOOL] · Supervisor: [NAME] · Imperial College London Hackathon ... Responsible AI"
          -> the wordmark (first item) plus two identity lines (the other items, split at their " · ");
-      2. "Who built what: [TEAM TO FILL]" -> the grid header;
-      3. the evidence legend line, each "Term = meaning" item with a swatch in its badge colour;
-      4. the credits line, one item per " · ", set in two columns;
-      5. "[optional: AI-assistance line per the organisers' reply]".
+      2. "Code and evidence: github.com/Yh1sam/crowdpulse-macau" -> the repository line, directly under the
+         wordmark, larger than the credits, on screen at full strength for the whole 6 s (frame 0 to the end);
+         its address is checked against this checkout's origin remote (git remote get-url origin);
+      3. "Who built what: [TEAM TO FILL]" -> the grid header;
+      4. the evidence legend line, each "Term = meaning" item with a swatch in its badge colour;
+      5. the credits line, one item per " · ", set in two columns;
+      6. "[optional: AI-assistance line per the organisers' reply]".
     When the team fills a bracketed placeholder in the storyboard, re-running this script picks it up.
   - docs/video/script.md, section 1, "Team roles" table: [MEMBER n] -> STEMB letter for the grid columns.
   - shared/zones.json (via style.project): the 7-zone mark next to the wordmark, as in S05.
@@ -29,6 +33,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import subprocess
 import sys
 
 from pathlib import Path  # noqa: E402
@@ -46,6 +51,7 @@ DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 6.0 s
 # S19 and then holds still so the grid and credits can be read.
 # re-key to the real voice take (only if S19's last line moves the cut)
 BEATS = {
+    "repo": 0.0,        # the repository line is on screen, at full strength, from the first frame to the last
     "mark": 0.0,        # cut from S19's "all together": the zone mark pops in, top to bottom
     "word": 0.12,       # "CrowdPulse Macau" wipes in from the mark
     "identity": 0.30,   # [SCHOOL] · Supervisor: [NAME] / event and challenge line
@@ -79,7 +85,7 @@ def storyboard_cell(shot: str, col: int) -> str:
 
 
 ON_SCREEN = [p.strip().strip('"') for p in storyboard_cell(SHOT, 5).split("<br>")]
-assert len(ON_SCREEN) == 5, ON_SCREEN
+assert len(ON_SCREEN) == 6, ON_SCREEN
 _ident = [p.strip() for p in ON_SCREEN[0].split(" · ")]
 WORDMARK = _ident[0]
 assert WORDMARK == "CrowdPulse Macau", WORDMARK
@@ -87,12 +93,23 @@ TITLE_A, TITLE_B = WORDMARK.split(" ", 1)
 ID_LINE_1 = " · ".join(_ident[1:3])          # [SCHOOL] · Supervisor: [NAME]
 ID_LINE_2 = " · ".join(_ident[3:])           # Imperial College London Hackathon ... · Challenge 2(c) Responsible AI
 assert ID_LINE_1.startswith("[SCHOOL]") or "Supervisor" in ID_LINE_1, ID_LINE_1
-GRID_HEAD = ON_SCREEN[1]                     # Who built what: [TEAM TO FILL]
-LEGEND = [p.strip() for p in ON_SCREEN[2].split(" · ")]
-assert ON_SCREEN[3].startswith("Credits: "), ON_SCREEN[3]
-CREDITS = [p.strip() for p in ON_SCREEN[3][len("Credits: "):].split(" · ")]
+REPO_LINE = ON_SCREEN[1]                     # Code and evidence: github.com/Yh1sam/crowdpulse-macau
+GRID_HEAD = ON_SCREEN[2]                     # Who built what: [TEAM TO FILL]
+LEGEND = [p.strip() for p in ON_SCREEN[3].split(" · ")]
+assert ON_SCREEN[4].startswith("Credits: "), ON_SCREEN[4]
+CREDITS = [p.strip() for p in ON_SCREEN[4][len("Credits: "):].split(" · ")]
 assert CREDITS[-1] == "fonts: Geist, Noto Sans TC (SIL OFL)", CREDITS[-1]
-AI_LINE = ON_SCREEN[4]
+AI_LINE = ON_SCREEN[5]
+
+# the repository line: the same words in the shotlist, and the address is this checkout's origin remote
+assert REPO_LINE in [p.strip() for p in _entry["on_screen_text"].split(" | ")], (REPO_LINE, _entry["on_screen_text"])
+REPO_LABEL, REPO_URL = REPO_LINE.split(": ", 1)
+REPO_LABEL += ":"
+assert REPO_LABEL == "Code and evidence:", REPO_LABEL
+_origin = subprocess.run(["git", "-C", str(ROOT), "remote", "get-url", "origin"], capture_output=True, text=True,
+                         check=True).stdout.strip()
+assert re.sub(r"^(https://|git@)|\.git$", "", _origin).replace("github.com:", "github.com/") == REPO_URL, (_origin, REPO_URL)
+assert "for the full 6 s" in storyboard_cell(SHOT, 6) and "full 6 s" in _entry["notes"]   # shown frame 0 to the end
 
 # [MEMBER n] -> STEMB letter (section 1, Team roles); columns follow the S T E M B strip order
 _roles = {m.group(2): m.group(1) for m in re.finditer(
@@ -105,14 +122,17 @@ LEGEND_BADGE = {"simulated": "SIMULATED", "real": "REAL DATA", "model check": "M
 
 # ---------- layout ----------
 
-LOCK_Y = 124                 # centre line of the mark + wordmark lockup
-WORD_SIZE, MARK_H = 92, 116
-ID1_Y, ID2_Y = 218, 266      # centre lines of the two identity lines
-GRID = (60, 312, 1860, 604)  # who-built-what panel
-LEGEND_Y = 650               # centre line of the evidence legend
+LOCK_Y = 120                 # centre line of the mark + wordmark lockup
+WORD_SIZE, MARK_H = 88, 100
+REPO_Y = 226                 # centre line of the repository line (directly under the wordmark)
+REPO_LABEL_SIZE, REPO_SIZE = 30, 38   # both larger than the credits (CRED_SIZE)
+ID1_Y, ID2_Y = 294, 342      # centre lines of the two identity lines
+GRID = (60, 372, 1860, 624)  # who-built-what panel
+LEGEND_Y = 662               # centre line of the evidence legend
 CRED_Y = 700                 # top of the credits block
 CRED_LABEL_X, CRED_COLS = 60, ((214, 1010), (1066, 1860))
 CRED_SIZE, CRED_PITCH, CRED_GAP = 22, 29, 9
+assert min(REPO_LABEL_SIZE, REPO_SIZE) > CRED_SIZE
 
 
 # ---------- helpers (own) ----------
@@ -323,6 +343,26 @@ def _wordmark(img, d2):
 WORD = sprite_from(_wordmark)
 
 
+# ---------- the repository line (directly under the wordmark; full strength from frame 0) ----------
+
+REPO_GAP = 14                # between the label and the address (px)
+REPO_PAD_X, REPO_H = 30, 56  # the pill around it
+
+
+def _repo(img, d2):
+    fl, fu = text_font(REPO_LABEL, REPO_LABEL_SIZE, 500), text_font(REPO_URL, REPO_SIZE, 650)
+    wl, wu = fl.getlength(REPO_LABEL), fu.getlength(REPO_URL)
+    x0 = (W - (wl + REPO_GAP + wu)) / 2
+    box = (x0 - REPO_PAD_X, REPO_Y - REPO_H / 2, x0 + wl + REPO_GAP + wu + REPO_PAD_X, REPO_Y + REPO_H / 2)
+    d2.rounded_rectangle(tuple(S(v) for v in box), S(REPO_H / 2), fill=(*NAVY_2, 255), outline=(*NAVY_3, 255),
+                         width=S(2))
+    draw_text(img, (x0, REPO_Y), REPO_LABEL, REPO_LABEL_SIZE, 500, INK_2, anchor="lm")
+    draw_text(img, (x0 + wl + REPO_GAP, REPO_Y), REPO_URL, REPO_SIZE, 650, CYAN, anchor="lm")
+
+
+REPO = sprite_from(_repo)
+
+
 def wipe(dst: Image.Image, sp: Sprite, k: float, feather: float = 90.0) -> None:
     """Left-to-right reveal with a soft leading edge (k 0..1)."""
     if k <= 0:
@@ -355,15 +395,17 @@ ID2 = sprite_from(_centred_rich(ID2_Y, ID_LINE_2, 26, 500, INK_2))
 COL_GAP = 22
 COL_W = (GRID[2] - GRID[0] - 2 * 32 - 4 * COL_GAP) / 5
 COL_X = [GRID[0] + 32 + i * (COL_W + COL_GAP) for i in range(5)]
-TILE = 62
-TILE_Y = GRID[1] + 92
-CHIP_Y = TILE_Y + TILE + 22           # top of the member chip
-CELL = (CHIP_Y + 54, GRID[3] - 26)    # contribution slot (top, bottom)
+TILE = 56
+HEAD_Y = GRID[1] + 40                 # centre line of the grid header
+TILE_Y = GRID[1] + 76
+CHIP_Y = TILE_Y + TILE + 16           # top of the member chip
+CELL = (CHIP_Y + 48, GRID[3] - 20)    # contribution slot (top, bottom)
+assert CELL[1] - CELL[0] >= 36, CELL  # room for one line of the team's text
 
 
 def _grid_panel(img, d2):
     d2.rounded_rectangle(tuple(S(v) for v in GRID), S(22), fill=(*NAVY_2, 255))
-    draw_rich(img, d2, GRID[0] + 32, GRID[1] + 46, GRID_HEAD, 30, 700, INK)
+    draw_rich(img, d2, GRID[0] + 32, HEAD_Y, GRID_HEAD, 30, 700, INK)
 
 
 GRID_PANEL = sprite_from(_grid_panel)
@@ -375,7 +417,7 @@ def _grid_col(i):
 
     def fn(img, d2):
         d2.rounded_rectangle(tuple(S(v) for v in (x, TILE_Y, x + TILE, TILE_Y + TILE)), S(14), fill=(*CYAN, 255))
-        draw_text(img, (x + TILE / 2, TILE_Y + TILE / 2), letter, 36, 800, NAVY, anchor="mm")
+        draw_text(img, (x + TILE / 2, TILE_Y + TILE / 2), letter, 33, 800, NAVY, anchor="mm")
         draw_text(img, (x + TILE + 18, TILE_Y + TILE / 2), word, 30, 600, INK, anchor="lm")
         draw_rich(img, d2, x, CHIP_Y + 20, member, 24, 700, INK, pad=12, chip_h=40)
         cell = (x, CELL[0], x + COL_W, CELL[1])
@@ -463,8 +505,23 @@ CRED_COL_L = sprite_from(_credit_col(CRED_L, CRED_COLS[0], False))
 CRED_COL_R = sprite_from(_credit_col(CRED_R, CRED_COLS[1], True))
 
 # layout checks: nothing in the caption band, nothing off-frame, columns inside their slots
-for _sp in [ID1, ID2, GRID_PANEL, *GRID_COLS, LEGEND_S, CRED_LABEL, CRED_COL_L, CRED_COL_R, WORD, MARK_FINAL]:
+for _sp in [REPO, ID1, ID2, GRID_PANEL, *GRID_COLS, LEGEND_S, CRED_LABEL, CRED_COL_L, CRED_COL_R, WORD, MARK_FINAL]:
     assert _sp.x >= 56 and _sp.right <= W - 56 and _sp.y >= 40 and _sp.bottom <= 898, (_sp.x, _sp.y, _sp.right, _sp.bottom)
+
+
+def _ink_rows(sp: Sprite) -> tuple[int, int]:
+    """Top and bottom frame rows of a sprite's visible pixels."""
+    rows = np.nonzero(np.array(sp.img)[..., 3].max(axis=1) > 8)[0]
+    return sp.y + int(rows[0]), sp.y + int(rows[-1]) + 1
+
+
+# vertical order with air between blocks: wordmark and mark, repository line, identity lines, grid, legend, credits
+_stack = [("lockup", min(_ink_rows(WORD)[0], _ink_rows(MARK_FINAL)[0]), max(_ink_rows(WORD)[1], _ink_rows(MARK_FINAL)[1])),
+          ("repo", *_ink_rows(REPO)), ("id1", *_ink_rows(ID1)), ("id2", *_ink_rows(ID2)), ("grid", *_ink_rows(GRID_PANEL)),
+          ("legend", *_ink_rows(LEGEND_S)), ("credits", _ink_rows(CRED_LABEL)[0],
+                                             max(_ink_rows(CRED_COL_L)[1], _ink_rows(CRED_COL_R)[1]))]
+for (_a, _, _a1), (_b, _b0, _) in zip(_stack, _stack[1:]):
+    assert _b0 - _a1 >= 10, (_a, _a1, _b, _b0)
 
 # ---------- frames ----------
 
@@ -474,6 +531,7 @@ SETTLED = None
 
 def compose(t: float) -> Image.Image:
     img = BG.copy()
+    put(img, REPO, 1.0 if t >= BEATS["repo"] else 0.0)   # no fade: readable on every frame of the shot
     settled_mark = t >= BEATS["mark"] + len(ZONE_ORDER) * 0.035 + 0.5
     put(img, MARK_FINAL if settled_mark else mark_sprite(t), 1.0)
     wipe(img, WORD, progress(t, BEATS["word"], 0.6))
@@ -504,6 +562,7 @@ def frame(t: float) -> Image.Image:
 
 
 STILLS = {  # name: time (s)
+    "first": 0.0,
     "build": 0.42,
     "grid_in": 0.80,
     "settled": 1.6,

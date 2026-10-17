@@ -1,7 +1,7 @@
-"""Shot S17 (3:38.5-3:56.5, 18.0 s): "Can it happen?" Feasibility and the intended user.
+"""Shot S17 (3:35.0-3:53.5, 18.5 s): "Can it happen?" Feasibility and the intended user.
 
 Storyboard: docs/video/script.md section 3, row S17; claims table section 4, rows S17; section 6
-"motion_graphic" (S17: the cost panel appears only with the team's itemised, sourced estimate,
+"motion_graphic" (S17: the cost panel appears only after the team approves docs/cost-estimate.md,
 labelled TEAM ESTIMATE, otherwise the operator card holds, never an empty panel; the "No partner
 yet" chip is readable on its own) and "Never say or show"; shot list docs/video/shotlist.json (id S17).
 
@@ -10,23 +10,27 @@ Beats (shot seconds, keyed to the guide voice; re-key to the real voice take):
             clamp kit hops between festival pages of a calendar (hops on "then move" and "the next")
             while a pole-mounted counting camera stays bolted in place (badge ILLUSTRATION, design
             intent, not field-tested).
-4.95-9.13   "The intended user is Macau's police, who run crowd control": the operator card (generic
+4.95-9.12   "The intended user is Macau's police, who run crowd control": the operator card (generic
             shapes, no emblems) and, on "Macau's police", the separate "No partner yet" chip; footer
             Law 14/2018, Art. 3. The cost panel would slide in beside the card only if the shot
-            list's cost text were filled; it is still a bracketed placeholder, so it is not drawn.
-9.13-13.6   "The whole chain runs end to end in simulation": slate for the team's B-roll of a real
-            pytest run (hard cuts in and out, so the footage drops straight in; the window is 4.5 s,
-            so the take must run at least 5 s). From 10.7 s the counters 49 · 15 · 27 · 13 tick up
-            over it and the total lands on 104 with "a hundred" (12.15), holding ~1.4 s (badge LIVE
-            SOFTWARE).
-13.6-18     the roadmap arrow alone, four stations (cut on "tests").
+            list's cost text were filled (labelled TEAM ESTIMATE, and the footer then adds
+            "cost: docs/cost-estimate.md"); it is still a bracketed placeholder, so it is not drawn.
+9.12-13.88  "The whole chain runs end to end in simulation": slate for the team's B-roll of a real
+            pytest run (hard cuts in and out, so the footage drops straight in; the window is about
+            4.8 s, so the take must run at least 5 s). From 10.7 s the counters 54 · 24 · 33 · 13 tick
+            up over it and the total lands on 124 with "a hundred" (12.1), holding ~1.8 s through
+            "and twenty-four automated" (badge LIVE SOFTWARE).
+13.88-18.5  the roadmap arrow alone, four stations (cut on "tests").
 
 Data (read, never retyped):
-  docs/testing.md, section 1 table          the four suite counts (49 / 15 / 27 / 13) and their sum
-  docs/deployment.md, "Operational model"   the peak periods on the calendar pages (not its cost table)
   docs/video/shotlist.json, S17             chapter card, intended-user line, chip, law footer, cost
-                                            text, counters line and roadmap stations, split verbatim
-                                            from on_screen_text; the slate wording from "visual"
+                                            text, the counters line (the four suite counts and their
+                                            sum: 54 / 24 / 33 / 13 = 124, recounted 16-17 Oct) and
+                                            roadmap stations, split verbatim from on_screen_text; the
+                                            slate wording from "visual"
+  docs/testing.md, section 1 table          cross-check of the four counts (iOS must agree; the other
+                                            three are reported if the table still has older counts)
+  docs/deployment.md, "Operational model"   the peak periods on the calendar pages (not its cost table)
   docs/video/script.md, row S17             cross-check: the narration and every quoted line
 Footer sources: docs/deployment.md, Law 14/2018 (claims table), experiments/results/simulation_run/,
 docs/testing.md, experiments/datasets/melbourne/, docs/experiment-protocol.md, brief-evidence.md s. 6.
@@ -51,14 +55,18 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 NAME = "S17"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == NAME)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 18.0 s
-assert DURATION == 18.0, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 18.5 s
+assert DURATION == 18.5, DURATION
 
 # ---------- timing ----------
-# Shot seconds. Keyed to the guide voice video/build/guide/S17.wav (say -v Daniel, about 147 wpm),
-# which assemble.py lays 0.2 s into the shot: clause starts are the silencedetect boundaries
-# (noise -35 dB, d 0.12 s) + 0.2 s; word onsets inside a clause come from the RMS envelope.
-# re-key to the real voice take (about 140 wpm, so everything after 0.2 s moves about 5% later).
+# Shot seconds. Keyed to the guide voice video/build/guide/S17.wav of 17 Oct (say -v Daniel -r 155,
+# about 148 wpm; 14.74 s of speech, with 124 spoken "a hundred and twenty-four" as guide.py and
+# script.md 5C say it), which assemble.py lays 0.2 s into the shot: clause starts are the
+# silencedetect boundaries (noise -35 dB, d 0.12 s: 3.25, 4.75, 7.25, 8.92, 11.71 s into the file)
+# + 0.2 s; word onsets inside the last clause come from its 10 ms spectrum (into the file: the /h/ of
+# "hundred" 11.90, the /t/ of "twenty" 12.39, the /f/ of "four" 12.74, the /t/ of "tests" 13.68,
+# the /p/ of "passing" 14.08; speech ends 14.71), cross-checked against `say` prefixes of the
+# clause. Re-key to the real voice take (about 140 wpm, so everything after 0.2 s moves about 5% later).
 BEATS = {
     "phones": 0.2,         # "Phones on temporary mounts" -> calendar up, kit drops onto page 1
     "kit_down": 0.45,      # kit drop starts (lands ~1.05 s)
@@ -68,11 +76,11 @@ BEATS = {
     "user": 4.95,          # "The intended user is Macau's police" (4.95-7.18) -> operator card, law footer
     "police": 6.27,        # "Macau's police" -> the separate "No partner yet" chip
     #                        "who run crowd control" (7.45-8.89): the card, chip and footer hold
-    "broll": 9.13,         # "The whole chain runs end to end in simulation" (9.13-11.68) -> hard cut to B-roll
-    "counters": 10.7,      # spec "from about 11 s": counters over the B-roll, on "in simulation"
-    "with_104": 11.91,     # "with a hundred and four automated tests passing" (11.91-14.59)
-    "total": 12.15,        # "a hundred" -> the total lands on 104 and holds through "... and four automated"
-    "roadmap": 13.6,       # "tests" -> hard cut to the roadmap, alone to the end (4.4 s)
+    "broll": 9.12,         # "The whole chain runs end to end in simulation" (9.12-11.68) -> hard cut to B-roll
+    "counters": 10.7,      # "in simulation" -> counters over the B-roll (spec: "from about 11.5 s" at 140 wpm)
+    "with_total": 11.91,   # "with a hundred and twenty-four automated tests passing" (11.91-14.91)
+    "total": 12.1,         # "a | hundred" -> the total lands and holds through "... and twenty-four automated"
+    "roadmap": 13.88,      # "tests" (onset 13.88) -> hard cut to the roadmap, alone to the end (4.62 s)
 }
 CHAPTER_END = 2.2
 HOP = 0.30                 # seconds per hop
@@ -80,16 +88,6 @@ HOP_LIFT = 90              # px; the kit stays below the event names in the page
 DROP_LIFT = 80             # px; the kit fades in while it drops onto page 1
 
 # ---------- data ----------
-
-TESTING = (ROOT / "docs" / "testing.md").read_text()
-SUITE_ROWS = [  # (label on screen, regex on the docs/testing.md section 1 table)
-    ("Python", r"^\| backend API \+ ML pipeline \|.*\| (\d+) passed \|$"),
-    ("dashboard", r"^\| dashboard components \|.*\| (\d+) passed \|$"),
-    ("SketchFuture", r"^\| SketchFuture model \+ CrowdPulse hand-over \|.*\| (\d+) passed \|$"),
-    ("iOS", r"^\| iOS logic \+ detector \|.*\| (\d+) tests, 0 failures \|$"),
-]
-SUITES = [(label, int(re.search(rx, TESTING, re.M).group(1))) for label, rx in SUITE_ROWS]
-TOTAL = sum(n for _, n in SUITES)
 
 DEPLOY = (ROOT / "docs" / "deployment.md").read_text()
 _opmodel = DEPLOY.split("## Operational model", 1)[1].split("\n## ", 1)[0]
@@ -103,27 +101,60 @@ OST = [p.strip() for p in SHOT["on_screen_text"].split(" | ")]
 assert len(OST) == 7, OST   # chapter card + the six parts below; a new part needs a new drawing
 
 
-def ost_part(prefix: str) -> str:
-    hits = [p for p in OST if p.startswith(prefix)]
-    assert len(hits) == 1, (prefix, OST)
-    return hits[0][len(prefix):].strip()
+def ost_part(label: str) -> str:
+    """The text after '<label>:' or '<label> (<timing note>):' (the timing notes change with each
+    re-key, the labels do not)."""
+    rx = re.compile(rf"^{re.escape(label)}(?: \([^)]*\))?: (.*)$")
+    hits = [m.group(1).strip() for m in map(rx.match, OST) if m]
+    assert len(hits) == 1, (label, OST)
+    return hits[0]
 
 
-CHAPTER = ost_part("Chapter card (top-left):")                          # Can it happen?
-USER_LINE = "Intended user: " + ost_part("Intended user:")              # shown whole, as written
+CHAPTER = ost_part("Chapter card")                                      # Can it happen?
+USER_LINE = "Intended user: " + ost_part("Intended user")               # shown whole, as written
 USER_HEAD, USER_BODY = USER_LINE.split(": ", 1)
 USER_HEAD += ":"
 USER_NAME, USER_ROLE = USER_BODY.split(" · ")                           # Public Security Police Force / gets counts, never images
-CHIP = ost_part("Chip:")                                                # No partner yet
-LAW_FOOTER = ost_part("Footer (5-10 s):")                               # Law 14/2018, Art. 3: ...
-COST_TEXT = ost_part("Cost panel (only if filled):")
-COUNTERS_LINE = ost_part("Counters (from about 11 s):")
-ROAD = ost_part("Roadmap (13-18 s):").split(" → ")
+CHIP = ost_part("Chip")                                                 # No partner yet
+LAW_FOOTER = ost_part("Footer")                                         # Law 14/2018, Art. 3: ...
+COST_TEXT = ost_part("Cost panel")
+COUNTERS_LINE = ost_part("Counters")                                    # Python 54 · dashboard 24 · ... = 124 automated tests
+ROAD = ost_part("Roadmap").split(" → ")
 STATIONS = []                                                          # (name, aside) exactly as written
 for s_ in ROAD:
     m = re.match(r"^(.*?)(?: (\([^)]*\)))?$", s_)
     STATIONS.append((m.group(1), m.group(2) or ""))
 assert len(STATIONS) == 4, ROAD
+
+# the four suite counts and their sum, from the shot list's counters line (recounted 16-17 Oct:
+# pytest --collect-only 54, dashboard vitest 24, SketchFuture vitest 33; iOS 13 from docs/testing.md)
+TOTAL_LABEL = "automated tests"
+_cm = re.fullmatch(rf"(.+) = (\d+) {TOTAL_LABEL}", COUNTERS_LINE)
+assert _cm, COUNTERS_LINE
+SUITES = []
+for _p in _cm.group(1).split(" · "):
+    _sm = re.fullmatch(r"(.+) (\d+)", _p)
+    assert _sm, _p
+    SUITES.append((_sm.group(1), int(_sm.group(2))))
+assert [label for label, _ in SUITES] == ["Python", "dashboard", "SketchFuture", "iOS"], SUITES
+TOTAL = sum(n for _, n in SUITES)
+assert TOTAL == int(_cm.group(2)), f"counters line: the suites sum to {TOTAL}, not {_cm.group(2)}"
+
+# cross-check with docs/testing.md, section 1 (the canonical table of expected results)
+TESTING = (ROOT / "docs" / "testing.md").read_text()
+SUITE_ROWS = {  # label on screen -> regex on the docs/testing.md section 1 table
+    "Python": r"^\| backend API \+ ML pipeline \|.*\| (\d+) passed \|$",
+    "dashboard": r"^\| dashboard components \|.*\| (\d+) passed \|$",
+    "SketchFuture": r"^\| SketchFuture model \+ CrowdPulse hand-over \|.*\| (\d+) passed \|$",
+    "iOS": r"^\| iOS logic \+ detector \|.*\| (\d+) tests, 0 failures \|$",
+}
+DOC_COUNTS = {label: int(re.search(rx, TESTING, re.M).group(1)) for label, rx in SUITE_ROWS.items()}
+assert dict(SUITES)["iOS"] == DOC_COUNTS["iOS"], "iOS is not re-run: its count must be docs/testing.md's"
+TESTING_STALE = [(label, n, DOC_COUNTS[label]) for label, n in SUITES if DOC_COUNTS[label] != n]
+if TESTING_STALE:
+    print("WARNING: docs/testing.md section 1 still lists " +
+          ", ".join(f"{label} {doc} (shot list: {n})" for label, n, doc in TESTING_STALE) +
+          "; update it before the cut (the B-roll footer cites it)", file=sys.stderr)
 
 # the storyboard row must carry the same narration and lines (script.md section 3)
 _ROW = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {NAME} |"))
@@ -137,13 +168,14 @@ CLAUSES = ["Phones on temporary mounts can serve one festival,", "then move to t
            "The whole chain runs end to end in simulation,", f"with {TOTAL} automated tests passing."]
 assert SHOT["narration"] == " ".join(CLAUSES), SHOT["narration"]
 
-# guards: the screen text must agree with docs/testing.md and the narration
-TOTAL_LABEL = "automated tests"
+# guards: the screen text must agree with the narration, the visual column and the B-roll
 _expect = " · ".join(f"{label} {n}" for label, n in SUITES) + f" = {TOTAL} {TOTAL_LABEL}"
 assert COUNTERS_LINE == _expect, (COUNTERS_LINE, _expect)
 assert f"with {TOTAL} automated tests passing" in SHOT["narration"], SHOT["narration"]
+assert " · ".join(str(n) for _, n in SUITES) in SHOT["visual"] and f"lands on {TOTAL}" in SHOT["visual"], SHOT["visual"]
 assert f"'{SUITES[0][1]} passed'" in SHOT["visual"], SHOT["visual"]
-_m = re.search(r"(B-roll filmed by the team) \([^)]*\), (a member runs \S+ -m pytest -q and the screen shows '(\d+) passed')", SHOT["visual"])
+# filmed without -q (pyproject.toml already adds one; a second hides the "N passed" line)
+_m = re.search(r"(B-roll filmed by the team) \([^)]*\), (a member runs \S+ -m pytest and the screen shows '(\d+) passed')", SHOT["visual"])
 assert _m and int(_m.group(3)) == SUITES[0][1], SHOT["visual"]
 SLATE_TEXT = f"{_m.group(1)}: {_m.group(2)}"
 
@@ -159,9 +191,14 @@ BADGE_SEGMENTS = [  # (start, end, kind, detail, sub-line); no badge on the card
     (0.0, BEATS["user"], "ILLUSTRATION", "", "design intent, not field-tested"),
     (BEATS["broll"], BEATS["roadmap"], "LIVE SOFTWARE", "", "real test runs"),
 ]
+# section 6: a filled cost panel is "labelled TEAM ESTIMATE with that sheet in the footer", so the
+# sheet joins the law footer for as long as the panel can be on screen (the width assert below holds)
+COST_SHEET = "docs/cost-estimate.md"
+USER_FOOTER = LAW_FOOTER + (f" · cost: {COST_SHEET}" if SHOW_COST else "")
+assert (ROOT / COST_SHEET).is_file(), COST_SHEET
 FOOTER_SEGMENTS = [
     (0.0, BEATS["user"], "Operational model: docs/deployment.md"),
-    (BEATS["user"], BEATS["broll"], LAW_FOOTER),
+    (BEATS["user"], BEATS["broll"], USER_FOOTER),
     (BEATS["broll"], BEATS["roadmap"], "Simulation run: experiments/results/simulation_run/ · test counts: docs/testing.md"),
     (BEATS["roadmap"], DURATION, "experiments/datasets/melbourne/ · docs/experiment-protocol.md · "
                                  "docs/research/brief-evidence.md, section 6"),
@@ -575,7 +612,7 @@ def part_calendar(img: Image.Image, t: float) -> None:
             put(img, (ARCS, (kx + KIT_W / 2 - 50, ky + KIT_PHONE_TOP - 50)), act * out * pulse)
 
 
-# ---------- part 2 (4.95-9.13 s): the operator card, the chip and (only if filled) the cost panel ----------
+# ---------- part 2 (4.95-9.12 s): the operator card, the chip and (only if filled) the cost panel ----------
 
 ICON_W, ICON_H = 230, 170
 
@@ -689,7 +726,7 @@ def part_user(img: Image.Image, t: float, sc: dict = USER_SCENE) -> None:
         draw_cost_panel(img, sc, t)
 
 
-# ---------- part 3 (9.13-13.55 s): B-roll slate and the counters over it ----------
+# ---------- part 3 (9.12-13.88 s): B-roll slate and the counters over it ----------
 
 SLATE = (120, 150, 1800, 880)
 
@@ -699,8 +736,14 @@ def slate_static():
     frame_ = dashed_panel(SLATE, 22, WARNING, fill=NAVY_2, width=3)
     glyph = (hires((70, 50), lambda d, q: camera_glyph(d, 4 * q, 3 * q, 1.1 * q, (*WARNING, 255))), (x0 + 60, y0 + 46))
     title = text_sprite((x0 + 150, y0 + 50), "[TEAM FOOTAGE]", 40, 700, WARNING)
-    body = text_sprite((x0 + 60, y0 + 124), SLATE_TEXT, 34, 500, INK, max_width=x1 - x0 - 120)
-    when = (f"{NAME}: {BEATS['broll']:.1f}-{BEATS['roadmap']:.1f} s into the shot, hard cuts (film at least 5 s) · "
+    head_, _, rest_ = SLATE_TEXT.partition(": ")                      # the command and '54 passed' stay whole
+    body_lines = [head_ + ":", rest_]
+    assert all(text_size(ln, 34, 500)[0] <= x1 - x0 - 120 for ln in body_lines), body_lines
+    body = layer_sprite(lambda im: [draw_text(im, (x0 + 60, y0 + 124 + i * 42), ln, 34, 500, INK)
+                                    for i, ln in enumerate(body_lines)])
+    # these are the guide-voice times this render is keyed to (BEATS); the shot list's "about 9.9-14.9 s" and
+    # "from about 11.5 s" are 140 wpm estimates for the real take, so the slate says which clock it uses
+    when = (f"{NAME}, guide voice: {BEATS['broll']:.1f}-{BEATS['roadmap']:.1f} s into the shot, hard cuts (film at least 5 s) · "
             f"the counters run over the take from {BEATS['counters']:.1f} s")
     assert text_size(when, 24, 500)[0] <= x1 - x0 - 120, when
     sub = text_sprite((x0 + 60, y0 + 222), when, 24, 500, INK_2)
@@ -733,7 +776,7 @@ TOTAL_TILE = (_x, _x + TOT_W)
 BACKING = (TILES[0][0] - 20, TILE_Y0 - 18, TOTAL_TILE[1] + 20, TILE_Y1 + 18)
 assert BACKING[3] < 900 and BACKING[0] >= 60 and BACKING[2] <= 1860, BACKING
 LABEL_Y, NUM_Y = TILE_Y0 + 34, TILE_Y0 + 108
-TOT_NUM_CX = TOTAL_TILE[0] + 26 + 100                # "104" centred in a 200 px box at the tile's left
+TOT_NUM_CX = TOTAL_TILE[0] + 26 + 100                # the total ("124") centred in a 200 px box at the tile's left
 TOT_TXT_X = TOTAL_TILE[0] + 26 + 200 + 22
 
 
@@ -797,7 +840,7 @@ def pulse_ring(k: float):
 
 def tick_window(i: int) -> tuple[float, float]:
     """Suite i counts up from start to end (ends 0.2 s apart); the last one lands with the total
-    on "a hundred", so the finished row holds about 1.4 s before the roadmap cut."""
+    on "a hundred", so the finished row holds about 1.8 s before the roadmap cut."""
     t0 = BEATS["counters"]
     return t0 + 0.25 + 0.1 * i, BEATS["total"] - 0.2 * (3 - i)
 
@@ -834,7 +877,7 @@ def part_counters(img: Image.Image, t: float) -> None:
         put(img, pulse_ring(ease(kp)), (1 - kp) * 0.9)
 
 
-# ---------- part 4 (13.55-18 s): the roadmap arrow, alone ----------
+# ---------- part 4 (13.88-18.5 s): the roadmap arrow, alone ----------
 
 ROAD_Y, ROAD_X0, ROAD_X1 = 520, 150, 1772
 ST_X = [300 + i * (1620 - 300) / 3 for i in range(4)]
@@ -965,8 +1008,8 @@ def frame_mp4(t: float) -> Image.Image:
 
 
 STILLS = {"chapter": 1.2, "hop": 3.6, "page2": 3.9, "hop2": 4.15, "page3": 4.7, "handover": 4.97,
-          "card": 5.9, "chip": 7.5, "slate": 10.2, "ticking": 11.5, "total": 12.4, "held": 13.4,
-          "roadmap": 15.5, "end": 17.9}
+          "card": 5.9, "chip": 7.5, "slate": 10.2, "ticking": 11.5, "total": 12.3, "held": 13.8,
+          "roadmap": 16.0, "end": 18.4}
 
 if __name__ == "__main__":
     for k_, tt in STILLS.items():

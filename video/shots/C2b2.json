@@ -17,7 +17,7 @@
    "wait_for": "#senado-approve"
   },
   {
-   "scroll_to": "#senado-card"
+   "wait_for_js": "!document.querySelector('#senado-approve').disabled"
   },
   {
    "wait": 3
@@ -26,7 +26,7 @@
    "click": "#senado-notice"
   },
   {
-   "wait": 3
+   "wait": 3.5
   },
   {
    "click": "#senado-evidence"
@@ -35,10 +35,16 @@
    "wait": 2.5
   },
   {
+   "eval": "window.scrollTo({top: document.querySelector('[data-testid=operator-field]').getBoundingClientRect().top + scrollY - 60, behavior: 'smooth'})"
+  },
+  {
+   "wait": 2
+  },
+  {
    "wait_for_js": "!document.querySelector('#senado-approve').disabled"
   },
   {
-   "click": "#senado-approve"
+   "click_in_place": "#senado-approve"
   },
   {
    "wait_for_js": "!document.querySelector('#senado-card') || !document.body.contains(document.querySelector('#senado-approve'))"

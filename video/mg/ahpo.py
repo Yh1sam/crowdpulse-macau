@@ -245,22 +245,48 @@ def sim_clock(t: float, keys: list[tuple[float, int]]) -> float:
 
 
 @lru_cache(maxsize=1)
-def notice_first_sentences() -> dict[str, str]:
-    """Run A's approved card (#5, redirect_flow at Senado via the detour edges): the public notice that
-    backend/app/services/intervention.py writes, first sentence of each language (the place name and the
-    'very crowded' line); the full notice continues with the route and the staff sentence."""
+def _intervention_module():
+    """backend/app/services/intervention.py, loaded by path (it imports shared.geo, so the repo root goes on sys.path)."""
     import importlib.util
     if str(ROOT) not in sys.path:
-        sys.path.insert(0, str(ROOT))                      # intervention.py imports shared.geo
+        sys.path.insert(0, str(ROOT))
     spec = importlib.util.spec_from_file_location("_intervention", ROOT / "backend" / "app" / "services" / "intervention.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    return mod
+
+
+@lru_cache(maxsize=1)
+def card_notice() -> dict[str, str]:
+    """Run A's approved card (#5, redirect_flow at Senado via the detour edges): the full public notice that
+    backend/app/services/intervention.py writes, per language (it ends with the AI clause, AI_NOTICE)."""
     by_name = {e["name"]: e for e in EDGES}
-    msgs = mod.public_messages("redirect_flow", ZONES["senado_square"], [by_name[n] for n in CARD_ROUTE_NAMES])
+    return _intervention_module().public_messages("redirect_flow", ZONES["senado_square"], [by_name[n] for n in CARD_ROUTE_NAMES])
+
+
+@lru_cache(maxsize=1)
+def notice_first_sentences() -> dict[str, str]:
+    """The card's notice, first sentence of each language (the place name and the 'very crowded' line); the
+    full notice continues with the route, the staff sentence and the AI clause."""
     out = {}
-    for lang, text in msgs.items():
+    for lang, text in card_notice().items():
         cut = text.index("。") + 1 if lang == "zh" else text.index(". ") + 1
         out[lang] = text[:cut]
+    return out
+
+
+@lru_cache(maxsize=1)
+def notice_excerpts() -> dict[str, str]:
+    """The same first sentences as excerpts: the closing stop becomes '…', as on S04's gloss panel
+    (video/recipes.py, gloss_panel), so a board that shows only them never reads as a whole notice.
+    Checks that the AI clause (AI_NOTICE) still closes every language's full notice, so the '…' stands for it."""
+    ai = _intervention_module().AI_NOTICE
+    out = {}
+    for lang, first in notice_first_sentences().items():
+        full = card_notice()[lang]
+        assert full.startswith(first) and full.endswith(ai[lang]) and len(full) > len(first) + len(ai[lang]), (lang, full)
+        assert first[-1] in ".。", first
+        out[lang] = first[:-1] + "…"
     return out
 
 

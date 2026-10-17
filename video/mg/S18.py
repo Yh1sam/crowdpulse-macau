@@ -1,4 +1,4 @@
-"""Shot S18 (3:56.5-4:02.5, 6.0 s): back to Ah Po. "Back to Ah Po: her main route stays open, with staff beside her."
+"""Shot S18 (4:03.5-4:09.5, 6.0 s): back to Ah Po. "Back to Ah Po: her main route stays open, with staff beside her."
 
 Same map and framing as S01 (ahpo.py). An APPROVED stamp lands; the approved card's step-free detour draws as a
 dashed line and grey walkers take it; a small zh / en / pt notice flashes at Av. de Almeida Ribeiro (where the
@@ -14,7 +14,9 @@ Data sources (read here, never retyped):
     approval (14:14) to the end of the run (14:40); Senado's colour is its recorded true_density, thresholded with
     shared/config.json, and the script asserts it is CRITICAL for the whole window (it ended at 0.75).
   - backend/app/services/intervention.py: the notice (public_messages for that card, first sentence of each
-    language) and the source of the on-screen recommendation line.
+    language, ending in "…" as on S04's gloss panel: the full notice goes on to the route, the staff sentence
+    and the AI clause, so the board must not read as a whole notice without it) and the source of the
+    on-screen recommendation line.
   - docs/video/script.md section 3 row S18: the two on-screen lines (verbatim).
 Ah Po, the staff member, the walkers and the dots are illustrative choreography (badge ILLUSTRATION).
 
@@ -66,7 +68,7 @@ STATEMENT = "Every redirect recommendation includes keeping the main route open,
 SOURCE = "Detour from run A's approved card · recommendation and notice wording: backend/app/services/intervention.py"
 BADGE = "ILLUSTRATION"
 STAMP = "APPROVED"
-NOTICE = ahpo.notice_first_sentences()                 # {"en", "zh", "pt"} from intervention.py
+NOTICE = ahpo.notice_excerpts()                       # {"en", "zh", "pt"} from intervention.py, each ending "…"
 CHIP = "CRITICAL"
 
 

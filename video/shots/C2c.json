@@ -8,6 +8,9 @@
  "settle": 3,
  "steps": [
   {
+   "eval": "try { localStorage.setItem('crowdpulse.operatorName', 'demo-operator-1'); } catch (e) {} window.dispatchEvent(new StorageEvent('storage', {key: 'crowdpulse.operatorName'}))"
+  },
+  {
    "eval": "setInterval(() => { const card = t => [...document.querySelectorAll('h3')].find(h => h.textContent.includes(t))?.parentElement; const s = card('around Senado Square'); if (s) { s.id = 'senado-card'; const b = t => [...s.querySelectorAll('button')].find(x => x.textContent.trim() === t); if (b('APPROVE')) b('APPROVE').id = 'senado-approve'; if (b('VIEW EVIDENCE')) b('VIEW EVIDENCE').id = 'senado-evidence'; const n = s.querySelector('summary'); if (n) n.id = 'senado-notice'; } const d = card('around St. Dominic'); const a = d && d.querySelector('[data-testid=sketchfuture-link]'); if (a) { a.id = 'stdom-sf'; a.removeAttribute('target'); } const h2 = t => [...document.querySelectorAll('h2')].find(h => h.textContent.includes(t)); if (h2('Decided')) h2('Decided').id = 'decided'; if (h2('Audit log')) h2('Audit log').id = 'audit-log'; }, 500)"
   },
   {

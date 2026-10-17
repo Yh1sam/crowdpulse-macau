@@ -1,21 +1,26 @@
-"""Shot S13 (2:18.0-2:40.0, 22.0 s): 2,000 annotated mall frames, a steady under-count, and a
-post-hoc calibration shown as a lead, not proof.
+"""Shot S13 (2:17.0-2:34.5, 17.5 s): 2,000 annotated mall frames, a steady under-count, and a
+post-hoc calibration shown as a lead, not proof, beside a guess that uses no detector.
 
 Storyboard: docs/video/script.md, section 3 row S13, section 4 claims row S13, section 6 ("Global
 look and tools", "motion_graphic", "figure" S13, "On-screen text load"). Shot list:
 docs/video/shotlist.json (id S13). Badge: REAL DATA · Mall research benchmark · charts only.
 
-Layout (no chapter card: the "Does it work?" card belongs to S10):
+Layout (no chapter card: the "Does it work?" card belongs to S10; no lower-third: [MEMBER 1]'s
+is in S02):
   right   the repo chart mall_count_scatter.png at 1:1 on a light card. The orange Apple cloud is
           dimmed with a Pillow mask (and its legend row faded); the blue cloud is labelled
           "YOLO11n, the app default"; the dashed perfect-count line is traced and labelled; an
-          arrow marks the gap between the line and the cloud (the under-count).
+          arrow marks the gap between the line and the cloud (the under-count), on "steadily
+          under-counted".
   left    stage 1: "2,000 annotated frames", then "count vs annotated count: 59% · 93% of boxes
-          are people", then near / middle / far recall bars.
+          are people" (93% on "ninety-three percent"; 59% is no longer spoken), then near /
+          middle / far recall bars.
           stage 2 (from "Twenty labelled frames"): the schematic "true ≈ a × detected + b", the
-          "20 labelled frames" tag, the counter 13.4 → 3.3 people per frame and the caveat line.
-  The left column stays empty for the first 3 s, so the speaker lower-third (added at assembly,
-  x 60-780, y 795-895) is never covered. Nothing is drawn in the caption band (y 900-995).
+          "20 labelled frames" tag, the counter 13.4 → 3.3 people per frame over an error bar,
+          the no-detector guess as a second bar on the same scale with its label "a fixed guess,
+          no detector: 4.8" (28 px, larger than the 26 px limits line; from the countdown to the
+          end), and the limits line (from "that one camera" to the end).
+  Nothing is drawn in the caption band (y 900-995).
 
 Never any Mall imagery: only the chart is used (it contains no dataset frame).
 
@@ -31,8 +36,11 @@ Data (read at render time, never retyped):
       .held_out_frames                                   801-2000
       .raw_mae_held_out                                  13.4 people per frame
       ."20 frames spread over 1-800".mae_held_out        3.3 people per frame (20 labelled frames)
-  docs/video/shotlist.json                               duration and the verbatim on-screen lines
-                                                         (badge, bar title, caveat, footer)
+  experiments/results/uncertainty/metrics.json (summary.md, section 6)
+    mall.detector_free.mean_of_20_calibration_frames.mae_held_out    4.8 (4.79): always say 30.05
+  docs/video/shotlist.json                               duration, narration and the verbatim
+                                                         on-screen lines (badge, bar title, guess,
+                                                         caveat, footer)
 
 Run: .venv/bin/python video/mg/S13.py            -> video/build/mg/S13.mp4 + stills
      .venv/bin/python video/mg/S13.py --stills   (stills only, for checking the layout)
@@ -56,33 +64,39 @@ from style import ROOT  # noqa: E402
 
 SHOT_ID = "S13"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT_ID)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)   # 22.0 s
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)   # 17.5 s
 
-# Seconds from the shot start, keyed to the narration at 140 wpm (0.43 s a word, voice from 0.3 s):
-# "Eleven frames is small, so we tested | two thousand annotated mall frames. | The detector counted
-#  only | fifty-nine percent, | but ninety-three percent of its boxes were people: | a steady
-#  under-count. | Twenty labelled frames | calibrated | that one camera, | cutting error | from
-#  thirteen | to about three people per frame. | A lead, not proof."
-# re-key to the real voice take
+# Seconds from the shot start, keyed to the guide voice video/build/guide/S13.wav (say -v Daniel
+# -r 155, 15.78 s) laid from VOICE_START: word times from its pauses (silencedetect: 2.40-2.62,
+# 4.49-4.71, 7.54-7.79, 10.64-10.91, 14.09-14.33, 14.72-14.94 s into the file) and prefix
+# syntheses, 17 Oct. Shot times: "On two thousand annotated mall frames," 0.2-2.6 | "the detector
+# steadily under-counted," 2.8-4.7 ("steadily" 3.5) | "yet ninety-three percent of its boxes were
+# people." 4.9-7.7 ("ninety-three" 5.3) | "Twenty labelled frames calibrated that one camera," 8.0-10.8
+# ("calibrated" 9.5, "that one camera" 9.9) | "cutting error from thirteen to about three people per
+# frame." 11.1-14.3 ("thirteen" 12.2, "three" 13.0-13.4) | "A lead, not proof." 14.5-16.0.
+# The storyboard's times (calibration from about 7.7 s, limits line from about 9.5 s, counter on
+# about 12.0-13.7 s) are at 140 wpm. Re-key to the real voice take.
+VOICE_START = 0.2           # video/assemble.py default
 BEATS = {
-    "card_in": 0.0,         # scatter card fades in (voice from 0.3 s)
-    "dim_apple": 1.0,       # "frames is small" -> orange Apple cloud dims
-    "yolo_label": 1.9,      # "so we tested" -> the blue cloud is labelled
-    "two_thousand": 3.25,   # "two thousand annotated mall frames" (word 8, 3.3 s) -> frames card
-    "perfect_line": 4.1,    # "annotated" (word 10, 4.2 s) -> dashed perfect-count line traced
-    "counted": 6.2,         # "counted only" (word 15, 6.3 s) -> count card + under-count arrow
-    "fifty_nine": 7.1,      # "fifty-nine percent" (word 17, 7.2 s)
-    "ninety_three": 8.4,    # "ninety-three percent of its boxes" (word 20, 8.4 s)
-    "recall_bars": 9.3,     # "were people" -> near / middle / far recall bars (the cause)
-    "under_count": 11.85,   # "a steady under-count" (word 28, 11.9 s) -> arrow label emphasised
-    "calibrate_in": 12.3,   # stage 2 starts just before "Twenty"
-    "twenty": 12.75,        # "Twenty labelled frames" (word 30, 12.7 s) -> tag
-    "formula": 13.95,       # "calibrated" (word 33, 14.0 s) -> true ≈ a × detected + b
-    "one_camera": 14.85,    # "that one camera" (words 34-36, 14.4-15.3 s) -> caveat line
-    "error": 15.75,         # "cutting error" (words 37-38, 15.7-16.2 s) -> "count error" label
-    "thirteen": 16.95,      # "from thirteen" (word 40, 17.0 s) -> 13.4, then the arrow grows towards the counter
-    "three": 17.5,          # "to about three" (words 41-43, 17.4-18.3 s) -> counts down to 3.3
-    "lead": 20.0,           # "A lead, not proof." (words 47-50, 20.0-21.7 s) -> caveat emphasised
+    "card_in": 0.0,         # scatter card fades in (voice from 0.2 s)
+    "two_thousand": 0.5,    # "two thousand annotated mall frames" (0.5-2.6) -> frames card
+    "dim_apple": 0.9,       # "annotated" (1.1) -> orange Apple cloud dims
+    "yolo_label": 1.5,      # "mall frames" (1.7) -> the blue cloud is labelled
+    "perfect_line": 2.2,    # before "the detector" (2.8) -> dashed perfect-count line traced
+    "under_arrow": 3.45,    # "steadily under-counted" (3.5-4.7) -> under-count arrow and its label
+    "under_count": 4.0,     # "under-counted" (4.0) -> arrow label emphasised
+    "count_card": 4.45,     # end of "under-counted," -> count card, 59% (on screen only)
+    "ninety_three": 5.3,    # "ninety-three percent of its boxes" (5.3)
+    "recall_bars": 5.5,     # "of its boxes were people" -> near / middle / far recall bars (the cause)
+    "calibrate_in": 8.3,    # stage 2, during "Twenty labelled frames" (8.0-9.5)
+    "twenty": 8.7,          # "labelled frames" (8.5-9.5) -> "20 labelled frames" tag
+    "formula": 9.45,        # "calibrated" (9.5) -> true ≈ a × detected + b
+    "one_camera": 9.85,     # "that one camera" (9.9-10.8) -> calibration limits line, to the end
+    "error": 11.1,          # "cutting error" (11.1-11.8) -> "count error" label
+    "thirteen": 12.05,      # "from thirteen" ("thirteen" 12.2) -> 13.4, the error bar fills
+    "three": 12.5,          # "to about three" (12.5; "three" 13.0-13.4) -> counts down to 3.3 by 13.35
+    "guess": 12.5,          # the same moment, to the end: the no-detector guess bar and its label
+    "lead": 14.5,           # "A lead, not proof." (14.5-16.0) -> limits line emphasised
 }
 COUNT_DOWN = 0.85           # 13.4 -> 3.3 takes this long, landing on "three"
 
@@ -100,6 +114,7 @@ BAR_TITLE = _field("Bar title:")
 FOOTER = _field("Footer:")
 COUNT_LINE = next(p for p in _OST if p.startswith("count vs annotated count"))
 CAVEAT = next(p for p in _OST if p.startswith("Calibration:"))
+GUESS_LINE = _field("Beside the counter (required, at least the limits line's size):")
 
 # ---------- data ----------
 
@@ -120,15 +135,29 @@ RAW_MAE = CAL["raw_mae_held_out"]
 _K20 = next(k for k in CAL if re.match(r"^\d+ frames spread", k))
 N_LABELLED = int(re.match(r"^(\d+)", _K20).group(1))
 CAL_MAE = CAL[_K20]["mae_held_out"]
+# the no-detector guess: always say the mean annotated count of the same 20 calibration frames
+UNC = json.loads((ROOT / "experiments" / "results" / "uncertainty" / "metrics.json").read_text())["mall"]
+GUESS_MAE = UNC["detector_free"]["mean_of_20_calibration_frames"]["mae_held_out"]      # 4.79
 
-# guards: the storyboard wording must still match the data file (fails loudly if metrics.json changes)
+# guards: the storyboard wording must still match the data files (fails loudly if either changes)
 assert BADGE_KIND in BADGES, BADGE_KIND
 assert COUNT_LINE == f"count vs annotated count: {COUNT_PCT}% · {PREC_PCT}% of boxes are people", COUNT_LINE
 assert CAVEAT == f"Calibration: post-hoc · one camera · held-out frames {HELD_OUT} · not yet in the app", CAVEAT
+assert GUESS_LINE == f"a fixed guess, no detector: {GUESS_MAE:.1f}", GUESS_LINE
+assert UNC["held_out_frames"] == HELD_OUT and UNC["calibration_frames"].startswith(_K20), UNC["calibration_frames"]
+_unc_yolo = UNC["detectors"]["yolo11n"]                       # the same two errors, unrounded
+assert round(_unc_yolo["raw_mae_held_out"], 2) == RAW_MAE and round(_unc_yolo["calibrated_20"]["mae_held_out"], 2) == CAL_MAE
 assert f"{RAW_MAE:.1f} → {CAL_MAE:.1f} people per frame" in SHOT["visual"]
 assert f"'{N_LABELLED} labelled frames'" in SHOT["visual"]
 assert "(" + " / ".join(str(r[2]) for r in REGIONS) + "%)" in SHOT["visual"]
-assert f"{COUNT_PCT} percent" in SHOT["narration"] and f"{PREC_PCT} percent" in SHOT["narration"]
+assert f"no-detector guess ({GUESS_MAE:.1f})" in SHOT["visual"]
+# spoken: "two thousand", "93 percent", "Twenty labelled frames", "from thirteen to about three"
+_said = SHOT["narration"]
+assert FRAMES == 2000 and "two thousand annotated mall frames" in _said
+assert f"{PREC_PCT} percent of its boxes were people" in _said and f"{COUNT_PCT} percent" not in _said
+assert N_LABELLED == 20 and "Twenty labelled frames" in _said
+assert (round(RAW_MAE), round(CAL_MAE)) == (13, 3) and "from thirteen to about three people per frame" in _said
+assert "that one camera" in _said and _said.endswith("A lead, not proof.")
 
 FRAMES_TXT = f"{FRAMES:,}"
 COUNT_LABEL, PREC_LABEL = "count vs annotated count:", "of boxes are people"
@@ -339,7 +368,7 @@ def scatter_card(t: float) -> Image.Image:
         d.line([(lx, ly), (lerp(lx, pill_x, q), ly)], fill=rgba(BLUE, q), width=3)
 
     # the under-count: an arrow from the perfect-count line down to the top of the blue cloud
-    u = progress(t, BEATS["counted"], 0.6)
+    u = progress(t, BEATS["under_arrow"], 0.6)
     if u > 0:
         ux, top = cp(45, 43.6)
         _, bot = cp(45, 31.2)
@@ -356,7 +385,7 @@ def scatter_card(t: float) -> Image.Image:
         mx, my = cp(36, 36)
         nx, ny = -math.sin(math.radians(_ANG)), -math.cos(math.radians(_ANG))   # normal, up-left of the line
         paste(img, PERFECT_LABEL, (mx + nx * 34 - PERFECT_LABEL.width / 2, my + ny * 34 - PERFECT_LABEL.height / 2), pl)
-    lu = progress(t, BEATS["counted"] + 0.4, 0.45)
+    lu = progress(t, BEATS["under_arrow"] + 0.4, 0.45)
     if lu > 0:
         ux, _ = cp(45, 0)
         _, ym = cp(0, 37.4)
@@ -389,7 +418,7 @@ CARD1_IMG = card1(0)
 def card2(t: float) -> Image.Image:
     w_, h_ = COL_W, CARD2[1] - CARD2[0]
     img = panel(w_, h_)
-    a1 = progress(t, BEATS["fifty_nine"] - 0.05, 0.4)
+    a1 = progress(t, BEATS["count_card"] + 0.1, 0.4)        # 59%: on screen only, no longer spoken
     a2 = progress(t, BEATS["ninety_three"] - 0.05, 0.4)
     y1, y2 = 104, 196
     draw_text(img, (36, y1), COUNT_LABEL, 34, 600, INK, anchor="ls")
@@ -456,9 +485,13 @@ L_RIGHT = (CAL_W - _row_w) / 2 + adv(RAW_TXT, NUM, 700)    # right edge of 13.4
 A_X0, A_X1 = L_RIGHT + GAP, L_RIGHT + GAP + ARROW_W         # arrow span
 R_LEFT = A_X1 + GAP                                         # left edge of the counting number
 DIGIT_MID = ROW_BASE - 34                                   # arrow height (middle of the digits)
-BAR_Y0, BAR_Y1 = 446, 478
+BAR_Y0, BAR_Y1 = 440, 472                                   # count error: raw (outline) -> calibrated (solid)
 BAR_X0, BAR_X1 = 36, CAL_W - 36
-CHIP = (36, 548, CAL_W - 36, 712)
+GUESS_Y0, GUESS_Y1 = 496, 528                               # the no-detector guess, on the same scale
+GUESS_SIZE = 28                                             # >= the limits line's 26 px (storyboard)
+GUESS_X1 = BAR_X0 + (BAR_X1 - BAR_X0) * GUESS_MAE / RAW_MAE
+assert GUESS_X1 + 18 + adv(GUESS_LINE, GUESS_SIZE, 600) <= BAR_X1, "guess label runs past the card"
+CHIP = (36, 572, CAL_W - 36, 700)
 
 
 def caveat_lines(width: int) -> list[tuple[str, str]]:
@@ -544,6 +577,16 @@ def cal_card(t: float) -> Image.Image:
         bar(dl, BAR_X0, BAR_Y0, BAR_X0 + cur, BAR_Y1, rgba(col))
         img.alpha_composite(lay)
 
+    # the no-detector guess (required, from the countdown to the end): a grey bar on the error bar's
+    # scale, so 3.3 (calibrated) and 4.8 (always say 30.05, no detector) can be compared at a glance
+    gg = progress(t, BEATS["guess"], 0.6)
+    if gg > 0:
+        lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        bar(ImageDraw.Draw(lay), BAR_X0, GUESS_Y0, lerp(BAR_X0, GUESS_X1, gg), GUESS_Y1, rgba(GREY))
+        img.alpha_composite(lay)
+        draw_text(img, (GUESS_X1 + 18, (GUESS_Y0 + GUESS_Y1) / 2), GUESS_LINE, GUESS_SIZE, 600, INK,
+                  progress(t, BEATS["guess"] + 0.3, 0.4), anchor="lm")
+
     # caveat chip; its outline brightens on "A lead, not proof."
     ca = progress(t, BEATS["one_camera"], 0.5)
     if ca > 0:
@@ -580,7 +623,7 @@ def draw_frame(t: float) -> Image.Image:
 
     # left, stage 1: frames -> count / boxes -> recall bars; they leave as stage 2 starts
     for i, (beat, y0, maker) in enumerate(((BEATS["two_thousand"], CARD1[0], lambda tt: CARD1_IMG),
-                                           (BEATS["counted"], CARD2[0], card2),
+                                           (BEATS["count_card"], CARD2[0], card2),
                                            (BEATS["recall_bars"], CARD3[0], card3))):
         a_in = progress(t, beat - 0.25, 0.5)
         out = progress(t, BEATS["calibrate_in"] + 0.05 * i, 0.4)
@@ -601,12 +644,12 @@ def draw_frame(t: float) -> Image.Image:
 
 
 STILLS = {
-    "open": 1.5,           # chart in, Apple dimming, left column empty (lower-third area clear)
-    "scatter": 5.6,        # dimmed, labelled, perfect line traced, 2,000 frames
-    "count": 9.2,          # count vs annotated count 59% · 93% of boxes are people, under-count arrow
-    "recall": 12.15,       # near / middle / far recall bars
-    "formula": 16.3,       # tag, schematic, caveat
-    "counter": 21.9,       # 13.4 -> 3.3 people per frame, caveat emphasised
+    "open": 1.5,           # chart in, Apple dimming, 2,000 annotated frames
+    "scatter": 4.3,        # dimmed, labelled, perfect line traced, under-count arrow
+    "count": 6.0,          # count vs annotated count 59% · 93% of boxes are people, recall bars growing
+    "recall": 8.2,         # near / middle / far recall bars, just before stage 2
+    "formula": 10.8,       # tag, schematic, limits line
+    "counter": 17.45,      # 13.4 -> 3.3 people per frame beside the guess, limits line emphasised
 }
 
 if __name__ == "__main__":

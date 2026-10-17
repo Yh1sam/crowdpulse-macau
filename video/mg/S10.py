@@ -1,15 +1,21 @@
-"""Shot S10 (1:28.0-1:50.0, 22.0 s): "Does it work? Every result is labelled."
+"""Shot S10 (1:30.0-1:52.0, 22.0 s): "Does it work? Every result is labelled."
 
-Storyboard: docs/video/script.md section 3, row S10; claims table section 4, rows S10; shot list
-docs/video/shotlist.json (id S10).
+Storyboard: docs/video/script.md section 3, row S10; claims table section 4, rows S10; section 6
+("motion_graphic" shot rules, "On-screen text load"); shot list docs/video/shotlist.json (id S10).
 
 0-1.5 s   the five evidence badges appear centre-screen, then shrink and dock as the bottom-right
-          legend strip (style.legend_strip), where they stay for the rest of the shot.
+          legend strip (style.legend_strip), where they stay for the rest of the shot. The voice
+          starts at 0.8 s, over the docking legend (VOICE_START below; video/assemble.py must use it).
+          The row drops to the strip's height by 1.3 s and slides right into place, so it passes
+          behind the first caption box for 1 frame (1.27 s), not about 4 (see DOCK_DROP).
 then      grouped macro-F1 bars, model vs "no change", at 3 decimals, +15 pair highlighted, no gap labels.
+7.5 s-end the one-line accuracy comparison, in a pill one line under the chart (y 810-858: under the
+          chart and cards, above the caption band, clear of the legend strip and the footer).
 then      "91% vs 79% of critical minutes caught (+15 min)".
 then      flagged as uncertain vs the rest (+15 min).
 Badge SIMULATED pinned. Secondary figures (recall at 3 decimals, flagged share, other horizons'
-gating, the stress day) stay off screen.
+gating, the stress day, the +15 min gain interval) stay off screen. The gain interval is not in the
+footer: with its source it measures about 1,500-1,800 px at the footer size, over the 1,150 px slot.
 
 Data (read, never retyped):
   ml/models/metrics.json
@@ -18,7 +24,11 @@ Data (read, never retyped):
     per_horizon.h15.test.per_class.CRITICAL.recall             91%
     per_horizon.h15.persistence_baseline.test.per_class.CRITICAL.recall   79%
     per_horizon.h15.confidence_gating.accuracy_flagged / accuracy_confident   56% / 97%
+    per_horizon.h15.test.accuracy                              accuracy line: model 96.4%
+    per_horizon.h15.persistence_baseline.test.accuracy         accuracy line: "no change" 94.3%
+    per_horizon.h15.test.support.SAFE / test.n                 accuracy line: always SAFE 84.6%
     split_days (train / val / test day lists)                  footer 14 days: 9 / 2 / 3
+  docs/video/shotlist.json: duration, narration and every on-screen line (asserted below)
 
 Run: .venv/bin/python video/mg/S10.py   -> video/build/mg/S10.mp4 and stills in video/build/mg/stills/
 """
@@ -41,23 +51,27 @@ SHOT = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOT if s["id"] == "S10")
 DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 22.0 s
 
-# Seconds from the shot start. Guide timing: voice from 1.0 s at 140 wpm (0.43 s per spoken word,
-# numbers read as words: "an F one of point eight six five ..."). re-key to the real voice take.
+# Seconds from the shot start, keyed to the guide voice video/build/guide/S10.wav (say -v Daniel
+# -r 155, 21.02 s) laid from VOICE_START: word times measured from its pauses (silencedetect) and
+# prefix syntheses, 17 Oct. Guide pauses end at 2.00 / 5.81 / 9.61 / 12.57 / 14.27 / 19.25 /
+# 20.05 s into the file. Re-key to the real voice take.
+VOICE_START = 0.8              # script.md section 6 (S10 voice from 0.8 s); assemble.py VOICE_START["S10"]
 BEATS = {
     "legend_in": 0.0,          # five badges appear centre-screen (no voice yet)
     "legend_dock": 0.85,       # they shrink and dock bottom-right, docked by 1.5 s
-    "voice_on": 1.0,           # "On held-out simulated days,"
+    "voice_on": 0.8,           # "On held-out simulated days," (0.80-2.55)
     "chart_in": 1.3,           # macro-F1 panel fades in; bars grow left to right
-    "fifteen_minute": 2.7,     # "fifteen-minute forecasts" -> +15 pair highlighted
-    "f1_model": 5.7,           # "point eight six five"
-    "f1_nochange": 7.85,       # "against point seven nine five"
-    "and_catch": 11.3,         # "and catch" -> chart slides left, critical-minutes card in
-    "ninety_one": 12.15,       # "ninety-one percent of critical minutes"
-    "seventy_nine": 14.3,      # "against seventy-nine"
-    "flagged": 15.15,          # "Forecasts flagged as uncertain"
-    "right_only": 17.3,        # "are right only about" -> flagged bar grows, "right 56%" lands
-    "fifty_six": 18.55,        # "fifty-six percent of the time"
-    "the_rest": 20.7,          # "the rest, ninety-seven" (97% must be readable before the cut at 22.0)
+    "fifteen_minute": 2.8,     # "fifteen-minute forecasts" (2.80) -> +15 pair highlighted
+    "f1_model": 5.2,           # "point eight six five" (5.19-6.36)
+    "f1_nochange": 7.2,        # "against point seven nine five" (6.61; "point" 7.20, "five" ends 8.48)
+    "accuracy_line": 7.5,      # storyboard: the accuracy line from about 7.5 s to the end (held 14.5 s)
+    "and_catch": 10.4,         # "and catch" (10.41) -> chart slides left, critical-minutes card in
+    "ninety_one": 11.1,        # "ninety-one percent of critical minutes" (11.09)
+    "seventy_nine": 13.9,      # "against seventy-nine" ("seventy-nine" 13.94-14.79)
+    "flagged": 15.05,          # "Forecasts flagged as uncertain" (15.07)
+    "right_only": 16.95,       # "are right only about" (16.96) -> flagged bar grows, "right 56%" lands
+    "fifty_six": 18.05,        # "fifty-six percent of the time" (18.05)
+    "the_rest": 20.05,         # "the rest, ninety-seven" (20.05; "97" 20.85-21.69; voice ends 21.82)
 }
 CHAPTER_END = 2.0              # chapter card shown for about 2 s
 
@@ -76,6 +90,13 @@ ACC_FLAGGED = round(100 * GATE["accuracy_flagged"])
 ACC_REST = round(100 * GATE["accuracy_confident"])
 SPLIT = METRICS["split_days"]
 N_TRAIN, N_VAL, N_TEST = len(SPLIT["train"]), len(SPLIT["val"]), len(SPLIT["test"])
+# accuracy line (round-2 lock): +15 min test accuracy, "no change" accuracy, and the always-SAFE
+# accuracy worked out from the test support (SAFE 14,505 of 17,152; not a stored metric)
+_test, _base = H15["test"], H15["persistence_baseline"]["test"]
+assert sum(_test["support"].values()) == _test["n"], "support does not add up to n"
+ACC_MODEL = 100 * _test["accuracy"]                              # 96.4
+ACC_BASE = 100 * _base["accuracy"]                               # 94.3
+ACC_SAFE = 100 * _test["support"]["SAFE"] / _test["n"]           # 84.6
 
 # guard: the spoken narration must match the data file (fails loudly if metrics.json changes)
 _spoken = SHOT["narration"]
@@ -83,7 +104,7 @@ for v in (f"{F1_MODEL[-1]:.3f}", f"{F1_BASE[-1]:.3f}", f"{CRIT_MODEL} percent", 
           f"{ACC_FLAGGED} percent", f"the rest, {ACC_REST}"):
     assert v in _spoken, f"metrics.json no longer matches the narration: {v!r}"
 
-# ---------- on-screen text (storyboard wording) ----------
+# ---------- on-screen text (storyboard wording, asserted against the shot list) ----------
 
 CHAPTER = "Does it work? Every result is labelled."
 AXIS = "macro-F1 (0-1): how well SAFE, WARNING and CRITICAL are all predicted"
@@ -95,6 +116,17 @@ REST_LABEL, REST_VALUE = "the rest:", f"{ACC_REST}%"
 H_TAG = "(+15 min)"
 FOOTER = (f"ml/models/metrics.json · {N_TRAIN + N_VAL + N_TEST} simulated days, split by day: "
           f"{N_TRAIN} train / {N_VAL} validate / {N_TEST} test")
+ACC_HEAD = "Accuracy (+15 min):"
+ACC_BODY = (f'model {ACC_MODEL:.1f}% vs "no change" {ACC_BASE:.1f}% · always SAFE {ACC_SAFE:.1f}% '
+            f"· so we rank by F1")
+
+_ost = SHOT["on_screen_text"]
+for v in (f"Chapter card (top-left): {CHAPTER}", "Badge (top-right): SIMULATED (pinned)", f"Axis: {AXIS}",
+          f"Bar legend: {LEG_MODEL} / {LEG_BASE}", f"Big numbers: {CRIT_MODEL}% vs {CRIT_BASE}% {CRIT_LINE}",
+          f"Bars: {FLAG_LABEL} {FLAG_VALUE} · {REST_LABEL} {REST_VALUE} {H_TAG}",
+          f"Accuracy line (from about {BEATS['accuracy_line']} s to the end): {ACC_HEAD} {ACC_BODY}",
+          f"Footer: {FOOTER}"):
+    assert v in _ost, f"shotlist.json on_screen_text no longer matches: {v!r}"
 
 MODEL_C = CYAN
 BASE_C = GREY
@@ -224,6 +256,17 @@ def centre_boxes() -> dict[str, tuple[float, float, float, float]]:
 CENTRE = centre_boxes()
 DOCK_START = BEATS["legend_dock"]
 DOCK_ARRIVE = DOCK_START + 0.65       # the pills land in the strip slot at 1.5 s
+# The row drops to the strip's y faster than it travels in x, accelerating (ease-in) and reaching
+# y 1012 at 1.3 s, then slides right along the strip row into its slots. The first caption (from
+# 0.8 s, box y 926-990 at x 344-1576) lies between the centre row and the strip, over the slots of
+# SIMULATED, REAL DATA and MODEL CHECK, so the pills must pass behind it somewhere: on an eased
+# straight path they took about 4 frames (1.25-1.4 s, slowing down); falling fast they take about 1.
+DOCK_DROP = 0.45
+
+
+def drop(t: float) -> float:
+    """Vertical progress of the docking row: quadratic ease-in, complete DOCK_DROP s after the start."""
+    return clamp((t - DOCK_START) / DOCK_DROP) ** 2
 
 
 def strip_pills() -> dict[str, Image.Image]:
@@ -249,14 +292,16 @@ def draw_legend(img: Image.Image, t: float) -> None:
     # then dissolve the sprite into legend_strip's own pixels (scaled; the letters already sit in the
     # same places), so each pill lands as exactly the strip that stays
     mix = clamp((1.2 - s) / (1.2 - 1.02))
+    py = drop(t)
     for i, kind in enumerate(LEGEND):
         a_in = progress(t, BEATS["legend_in"] + 0.07 * i, 0.35)
         if a_in <= 0:
             continue
         pop = lerp(0.86, 1.0, a_in)                          # gentle grow-in
         c0, d0 = CENTRE[kind], DOCK[kind]
-        box = tuple(lerp(c0[n], d0[n], p) for n in range(4))
-        cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2 + (1 - a_in) * 14
+        box = tuple(lerp(c0[n], d0[n], p) for n in range(4))         # x and size follow p
+        cy = lerp((c0[1] + c0[3]) / 2, (d0[1] + d0[3]) / 2, py)     # y follows the faster drop
+        cx, cy = (box[0] + box[2]) / 2, cy + (1 - a_in) * 14
         w_, h_ = (box[2] - box[0]) * pop, (box[3] - box[1]) * pop
         dw, dh = d0[2] - d0[0], d0[3] - d0[1]
         size = (max(1, int(round(w_ * (dw + 1) / dw))), max(1, int(round(h_ * (dh + 1) / dh))))
@@ -413,6 +458,30 @@ def card_b(t: float) -> Image.Image:
     return img
 
 
+# ---------- 5. accuracy line: one line under the chart, from about 7.5 s to the end ----------
+
+ACC_SIZE = 26                      # the footer is 20 px; this line is read, not small print
+ACC_Y0, ACC_Y1 = 810, 858          # under the chart and cards (y 790), above the caption band (y 920)
+
+
+def accuracy_pill() -> Image.Image:
+    """The line, head in bold, on a NAVY_2 pill, centred under the chart (and, after the slide,
+    under the chart and the two cards, which together are centred too)."""
+    f_head, f_body = font(ACC_SIZE, 700), font(ACC_SIZE, 500)
+    head_w = f_head.getlength(ACC_HEAD + " ")
+    tw = head_w + f_body.getlength(ACC_BODY)
+    w_, h_ = int(round(tw + 56)), ACC_Y1 - ACC_Y0
+    img = Image.new("RGBA", (w_, h_), (0, 0, 0, 0))
+    rounded(img, (0, 0, w_ - 1, h_ - 1), 14, fill=NAVY_2)
+    draw_text(img, (28, h_ / 2), ACC_HEAD, ACC_SIZE, 700, INK, anchor="lm")
+    draw_text(img, (28 + head_w, h_ / 2), ACC_BODY, ACC_SIZE, 500, INK, anchor="lm")
+    return img
+
+
+ACC_PILL = accuracy_pill()
+assert ACC_PILL.width <= W - 120, ACC_PILL.width
+
+
 # ---------- frame ----------
 
 BASE = canvas()
@@ -439,6 +508,11 @@ def draw_frame(t: float) -> Image.Image:
     if a_b > 0:
         paste(img, card_b(t), (COL_X0 + (1 - a_b) * 50, CB_Y0), a_b)
 
+    # accuracy line, rising 10 px as it fades in, then held to the end
+    a_acc = progress(t, BEATS["accuracy_line"], 0.5)
+    if a_acc > 0:
+        paste(img, ACC_PILL, ((W - ACC_PILL.width) / 2, ACC_Y0 + (1 - a_acc) * 10), a_acc)
+
     # overlay slots
     chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
     badge(img, "SIMULATED", alpha=progress(t, BEATS["legend_dock"] + 0.25, 0.4))
@@ -450,8 +524,8 @@ def draw_frame(t: float) -> Image.Image:
 STILLS = {
     "legend_centre": 0.6,
     "legend_docking": 1.15,
-    "f1_bars": 9.0,
-    "critical_minutes": 15.0,
+    "f1_bars": 9.0,          # both +15 values emphasised, accuracy line in
+    "critical_minutes": 14.6,
     "flagged_vs_rest": 21.95,
 }
 

@@ -9,9 +9,10 @@ in video/build/voice/SNN.wav, which are used instead, shot by shot, as soon as t
     .venv/bin/python video/assemble.py                 # -> video/build/cut/pitch_cut.mp4
     .venv/bin/python video/assemble.py --only S08 S10  # rebuild some shots, then re-join
 
-Captions are made from each shot's narration, split into chunks of a few words and spread over
-that shot's speech in proportion to their length; with the team's takes, re-time them from the
-real word timestamps if a chunk drifts.
+--only also rebuilds any clip written with other colour tags than CLIP_TAGS, so the joined stream
+never mixes them. Captions are made from each shot's narration, split into chunks of a few words,
+spread over that shot's speech in proportion to their length and moved onto the voice's pauses
+(caption_bounds); with the team's takes, check them against the real word timestamps.
 """
 from __future__ import annotations
 
@@ -31,7 +32,9 @@ SHOTLIST = ROOT / "docs" / "video" / "shotlist.json"
 CUT = BUILD / "cut"
 OV = BUILD / "overlays" / "assembly"
 GUIDE, VOICE = BUILD / "guide", BUILD / "voice"
-VOICE_START = {"S01": 1.0, "S10": 1.0}  # narration offset into the shot (s); others 0.2
+COLOUR = ["-pix_fmt", "yuv420p", "-color_range", "tv", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709"]
+CLIP_TAGS = "yuv420p,tv,bt709,bt709,bt709"  # what colour_tags() reads back from a clip written with COLOUR
+VOICE_START = {"S01": 3.0, "S10": 0.8, "S17b": 0.5}  # narration offset into the shot (s); others 0.2
 SPEAKER = {  # first VO shot per member gets a lower-third for 3 s
     "S01": ("[MEMBER 4]", "M", "Medicine · health and accessibility"),
     "S02": ("[MEMBER 1]", "T", "Technology · app and detection"),
@@ -43,6 +46,14 @@ SPEAKER = {  # first VO shot per member gets a lower-third for 3 s
 
 def run(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True)
+
+
+def colour_tags(path: Path) -> str:
+    """'pix_fmt,range,matrix,transfer,primaries' of a file's video stream (CLIP_TAGS for an assembled clip)."""
+    out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                          "stream=pix_fmt,color_range,color_space,color_transfer,color_primaries", "-of", "csv=p=0", str(path)],
+                         capture_output=True, text=True, check=True)
+    return out.stdout.strip()
 
 
 def probe_duration(path: Path) -> float:
@@ -119,31 +130,66 @@ def pauses(path: Path) -> list[tuple[float, float]]:
     return list(zip(starts, ends))
 
 
-def caption_overlays(shot: dict) -> list[tuple[Path, float, float]]:
-    """[(png, start, end)] for the shot's burned-in captions, timed over its speech.
+MARKS, STOPS = (",", ";", ":", ".", "?", "!"), (".", "?", "!", ";", ":")  # a voice pauses after a mark; a stop ends a clause
 
-    Chunks share the speech in proportion to their length; a chunk that ends a sentence (or a
-    clause ending in ; or :) is then snapped to the nearest pause in the voice file, within 1 s,
-    so a sentence's caption appears when it is spoken, not a few tenths of a second early."""
-    chunks = caption_chunks(shot.get("narration", ""))
-    v = voice_file(shot["id"])
-    if not chunks or not v:
-        return []
-    start = VOICE_START.get(shot["id"], 0.2)
-    speech = probe_duration(v)
-    slot = shot["end_s"] - shot["start_s"]
+
+def pause_mark(word: str) -> bool:
+    """Whether a voice pauses after this word: it ends in a punctuation mark ("St." does not count)."""
+    return word.endswith(MARKS) and word != "St."
+
+
+def caption_bounds(chunks: list[str], speech: float, gaps: list[tuple[float, float]]) -> list[float]:
+    """Caption switch times, in seconds into the voice file: chunk i is up from bounds[i] to bounds[i + 1].
+
+    Chunks share the speech in proportion to their length. A boundary after a punctuation mark then
+    moves to the end of that mark's pause, which is when the next chunk's first word starts:
+    - when the take has exactly one pause per mark (the guide voice does), the k-th pause is the
+      k-th mark's, so each boundary takes its own pause;
+    - otherwise (a real take, with breaths and unpaused commas), after a stop (. ? ! ; :) the
+      longest pause within 1 s of the proportional boundary wins (people pause longer at a sentence
+      end than at a comma), the nearer one when two are within 10% of each other; after a comma,
+      the nearest pause within 0.5 s. The guide voice's pauses are all about 0.2-0.3 s long, so for
+      it length cannot tell a stop's pause from a comma's; that is why its pauses are matched by count.
+    Silence before the first word and after the last is not a pause."""
+    gaps = [g for g in gaps if g[0] > 0.01 and g[1] < speech - 0.01]
     total = sum(len(c) for c in chunks)
     bounds, acc = [0.0], 0.0
     for c in chunks:
         acc += speech * len(c) / total
         bounds.append(acc)
-    gaps = pauses(v)
+    upto, n = [], 0  # marks up to the end of each chunk
+    for c in chunks:
+        n += sum(map(pause_mark, c.split()))
+        upto.append(n)
+    ordinal = len(gaps) == upto[-1] - pause_mark(chunks[-1].split()[-1])
+    mid = lambda g: (g[0] + g[1]) / 2  # noqa: E731
     for i in range(1, len(chunks)):
-        if not chunks[i - 1].endswith((".", "?", "!", ";", ":")) or not gaps:
+        if not pause_mark(chunks[i - 1].split()[-1]):
+            continue  # a break between words: no pause to snap to
+        if ordinal and abs(mid(gaps[upto[i - 1] - 1]) - bounds[i]) <= 1.5:
+            bounds[i] = gaps[upto[i - 1] - 1][1]
             continue
-        near = min(gaps, key=lambda g: abs((g[0] + g[1]) / 2 - bounds[i]))
-        if abs((near[0] + near[1]) / 2 - bounds[i]) <= 1.0 and bounds[i - 1] < near[1] < bounds[i + 1]:
-            bounds[i] = near[1]
+        stop = chunks[i - 1].endswith(STOPS)
+        near = [g for g in gaps if abs(mid(g) - bounds[i]) <= (1.0 if stop else 0.5) and bounds[i - 1] < g[1] < bounds[i + 1]]
+        if not near:
+            continue
+        if stop:
+            longest = max(g[1] - g[0] for g in near)
+            near = [g for g in near if g[1] - g[0] >= 0.9 * longest]
+        bounds[i] = min(near, key=lambda g: abs(mid(g) - bounds[i]))[1]
+    return bounds
+
+
+def caption_overlays(shot: dict) -> list[tuple[Path, float, float]]:
+    """[(png, start, end)] for the shot's burned-in captions, timed over its speech by caption_bounds,
+    so each caption appears when its first word is spoken, not a few tenths of a second off."""
+    chunks = caption_chunks(shot.get("narration", ""))
+    v = voice_file(shot["id"])
+    if not chunks or not v:
+        return []
+    start = VOICE_START.get(shot["id"], 0.2)
+    slot = shot["end_s"] - shot["start_s"]
+    bounds = caption_bounds(chunks, probe_duration(v), pauses(v))
     out = []
     for i, c in enumerate(chunks):
         t, end = start + bounds[i], start + bounds[i + 1] + (0.25 if i == len(chunks) - 1 else 0.0)
@@ -161,23 +207,35 @@ def lower_third_overlay(shot: dict) -> list[tuple[Path, float, float]]:
 
 def composite(base: list[str], overlays: list[tuple[Path, float, float]], movs: list[tuple[Path, float]], duration: float, out: Path,
               pre_filter: str = "") -> None:
-    """base: ffmpeg input args producing one video stream; overlays: PNGs with enable windows;
-    movs: alpha .mov overlays starting at an offset. Writes exactly `duration` s at 1080p30."""
+    """base: ffmpeg input args producing one video stream; overlays: PNGs shown from a up to (not at) b,
+    so a caption ending on the frame where the next one starts does not share that frame with it;
+    movs: alpha .mov overlays starting at an offset. Writes exactly `duration` s at 1080p30.
+
+    The sources differ in colour range and tags (screen captures are full-range BT.601 from JPEG
+    frames, the phone recording limited-range BT.709, the motion graphics untagged), so each one is
+    read into RGB by its own tags, the overlays are blended in RGB, and every clip is written the
+    same way: limited ("tv") range yuv420p tagged BT.709 (COLOUR). The clips then join with -c copy
+    into one stream with one set of tags, which players that read colour once per file need."""
     args = ["ffmpeg", "-loglevel", "error", "-y", *base]
     filters, last = [], "[0:v]"
-    head = f"{last}{pre_filter + ',' if pre_filter else ''}fps={FPS},scale={W}:{H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=0x0B1220,setsar=1,tpad=stop_mode=clone:stop_duration={duration},trim=0:{duration},setpts=PTS-STARTPTS[b]"
+    head = (f"{last}{pre_filter + ',' if pre_filter else ''}fps={FPS},"
+            f"scale={W}:{H}:force_original_aspect_ratio=decrease:in_range=auto:in_color_matrix=auto,format=gbrp,"
+            f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=0x0B1220,setsar=1,"
+            f"tpad=stop_mode=clone:stop_duration={duration},trim=0:{duration},setpts=PTS-STARTPTS[b]")
     filters.append(head)
     last, idx = "[b]", 1
     for mov, offset in movs:
         args += ["-itsoffset", f"{offset}", "-i", str(mov)]
-        filters.append(f"{last}[{idx}:v]overlay=0:0:eof_action=pass[m{idx}]")
+        filters.append(f"{last}[{idx}:v]overlay=0:0:eof_action=pass:format=gbrp[m{idx}]")
         last, idx = f"[m{idx}]", idx + 1
     for p, a, b in overlays:
         args += ["-loop", "1", "-framerate", str(FPS), "-t", f"{duration}", "-i", str(p)]
-        filters.append(f"{last}[{idx}:v]overlay=0:0:enable='between(t,{a:.3f},{b:.3f})'[o{idx}]")
+        filters.append(f"{last}[{idx}:v]overlay=0:0:format=gbrp:enable='gte(t,{a:.3f})*lt(t,{b:.3f})'[o{idx}]")  # [a, b)
         last, idx = f"[o{idx}]", idx + 1
-    args += ["-filter_complex", ";".join(filters), "-map", last, "-t", f"{duration}", "-r", str(FPS),
-             "-c:v", "libx264", "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p", "-an", str(out)]
+    filters.append(f"{last}scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,"  # the frames' own tags win over -color_*,
+                   "setparams=range=tv:colorspace=bt709:color_primaries=bt709:color_trc=bt709[v]")  # so set them on the frames
+    args += ["-filter_complex", ";".join(filters), "-map", "[v]", "-t", f"{duration}", "-r", str(FPS),
+             "-c:v", "libx264", "-crf", "18", "-preset", "medium", *COLOUR, "-an", str(out)]
     run(args)
 
 
@@ -209,11 +267,19 @@ def main() -> None:
     for s in shots:
         clip = CUT / f"{s['id']}.mp4"
         dur = round(s["end_s"] - s["start_s"], 3)
-        if not args.only or s["id"] in args.only or not clip.exists():
+        need = not args.only or s["id"] in args.only or not clip.exists()
+        stale = False
+        if not need:  # a kept clip written before the clips shared one set of colour tags, or left unreadable by a killed encode
+            try:
+                stale = colour_tags(clip) != CLIP_TAGS
+            except subprocess.CalledProcessError:
+                stale = True
+        if need or stale:
             base, overlays, movs, pre = recipes.recipe(s, dur)
             overlays = overlays + caption_overlays(s) + lower_third_overlay(s)
             composite(base, overlays, movs, dur, clip, pre)
-            print(f"{s['id']}: {dur:.2f} s -> {clip.name}", flush=True)
+            print(f"{s['id']}: {dur:.2f} s -> {clip.name}{' (rebuilt: other colour tags)' if stale and args.only and s['id'] not in args.only else ''}",
+                  flush=True)
         clips.append(clip)
     total = shots[-1]["end_s"]
     listing = CUT / "clips.txt"
@@ -222,7 +288,7 @@ def main() -> None:
     run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(listing), "-c", "copy", str(silent)])
     mix_audio(shots, total, audio)
     run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(silent), "-i", str(audio), "-c:v", "copy", "-c:a", "copy", "-shortest", str(final)])
-    print(f"{final}: {probe_duration(final):.2f} s")
+    print(f"{final}: {probe_duration(final):.2f} s, colour {colour_tags(final)}")
 
 
 if __name__ == "__main__":

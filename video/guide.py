@@ -20,7 +20,7 @@ OUT = ROOT / "video" / "build" / "guide"
 VOICE, RATE = "Daniel", "155"
 SPOKEN = [  # written -> spoken (script section 5C)
     (r"\bSt\. ", "Saint "), (r"\bF1\b", "F one"), (r"0\.865", "point eight six five"), (r"0\.795", "point seven nine five"),
-    (r"\b2019\b", "twenty nineteen"), (r"\b104\b", "a hundred and four"), (r"\bface-ID\b", "face I D"), (r"\bYOLO\b", "Yo-lo"),
+    (r"\b2019\b", "twenty nineteen"), (r"\b124\b", "a hundred and twenty-four"), (r"\bface-ID\b", "face I D"), (r"\bYOLO\b", "Yo-lo"),
     (r"\bAh Po\b", "Ah Paw"), (r"\bSenado\b", "Se-nah-doo"),
 ]
 

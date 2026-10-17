@@ -1,4 +1,4 @@
-"""Shot S06 (0:46.0-0:58.0, 12.0 s): "Why does it matter?"
+"""Shot S06 (0:48.0-1:00.0, 12.0 s): "Why does it matter?"
 
 [MEMBER 4] on camera for 4 s (a placeholder slate until the take is filmed) with the arrivals tag,
 then voice-over over the zone schematic: illustrative dots pile up on Rua de S. Paulo below the

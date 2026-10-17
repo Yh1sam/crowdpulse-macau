@@ -1,24 +1,41 @@
-"""Shot S16 (3:21.5-3:38.5, 17.0 s): "What's next?" - the Melbourne real-data test, announced before its result.
+"""Shot S16 (3:17.0-3:35.0, 18.0 s): "What's next?" - the Melbourne real-data test, announced before its result.
 
-Storyboard: docs/video/script.md section 3, row S16; claims table section 4, rows S16; section 6
-("Global look and tools", "motion_graphic": S16 reads minute/*.csv.gz, filtering sensors.csv to the ids
-present); shot list docs/video/shotlist.json (id S16).
+Storyboard: docs/video/script.md section 3, row S16; claims table section 4, rows S16; section 5B (the result
+slot and the rules line); section 6 ("Global look and tools", "motion_graphic": S16 reads minute/*.csv.gz,
+filtering sensors.csv to the ids present, and the S16 shot rule on where each line goes); shot list
+docs/video/shotlist.json (id S16).
 
-Left: one dot per sensor at its real latitude / longitude, only for the location_ids that actually occur
-in the minute archive (no basemap; a 1 km scale bar and a north arrow only). Each dot's area follows that
-sensor's archived pedestrians per minute (total_of_directions, a 15-minute centred average so the playback
-does not flicker; a missing minute counts as zero, as the dataset README says), played back over the whole
-archived period. Right: the sensor count (counted here, not assumed), the Melbourne-time playback clock and
-a calendar strip of hour cells filling from 12 Oct 2026 to the latest archived date, and the "Not Macau"
-caveat. From "...before its result" the map dims and the result panel comes in: a grey dashed PENDING
-stamp and the verbatim result placeholder in an amber dashed box. The count-to-level mapping line is NOT
-drawn: no mapping has been committed to experiments/datasets/melbourne/README.md.
+Left: one dot per sensor at its real latitude / longitude, only for the location_ids that occur in the
+archive's first 24 hours (no basemap; a 1 km scale bar and a north arrow only). Each dot's area follows
+that sensor's pedestrians per minute over a centred 15-minute window, played back over those 24 hours (see
+"Counts and zeros" below). Right: the sensor count (counted here, not assumed) with its basis line under it,
+the Melbourne-time playback clock and a calendar strip of hour cells filling from 12 Oct 2026, and the "Not
+Macau" caveat. On "a test announced" the calendar block gives way to the rules line (the commit that fixed
+the test rules, checked against git below); on "...before its result" the map dims and the result panel
+comes in: a grey dashed PENDING stamp and the verbatim result placeholder in an amber dashed box.
+
+Counts and zeros (experiments/datasets/melbourne/README.md, "Things to know", corrected 16 Oct 2026): 57 of
+the 99 sensors write one row per 5-minute mark, holding about a 5-minute total; the other 42 write per
+minute. A sensor writes a row only for an interval in which someone passed it, so for a working sensor in a
+stretch the archive covered, a missing row is zero: a missing minute for a per-minute sensor, a missing
+5-minute mark for a 5-minute sensor. The minutes between a 5-minute sensor's marks are NOT zeros: those
+people are inside its 5-minute totals. Any 15 consecutive minutes hold exactly three 5-minute marks, so the
+sum of a sensor's rows over a centred 15-minute window, divided by 15, is people per minute for both kinds
+of sensor (a 5-minute row may be stamped at the start or the end of its 5 minutes, which only shifts the
+window by up to 5 minutes). The first 24 hours come from one download that covered every minute of them
+(archive_log.jsonl, checked below), so they hold no gaps (a gap would be missing data, not zero). Outages
+are not flagged (sensors.csv gives every sensor status "A"), so a sensor that stopped reporting shows as
+quiet. Playback covers only the minutes whose whole window lies inside the 24 hours.
 
 Data (read, never retyped):
-  experiments/datasets/melbourne/minute/*.csv.gz   location_id, sensing_datetime (UTC), sensing_date /
-                                                   sensing_time (Melbourne local), total_of_directions
-  experiments/datasets/melbourne/sensors.csv       latitude / longitude of the ids present
-  docs/video/shotlist.json                         duration and the on-screen wording (checked below)
+  experiments/datasets/melbourne/minute/*.csv.gz    location_id, sensing_datetime (UTC), sensing_date /
+                                                    sensing_time (Melbourne local), total_of_directions;
+                                                    only rows in the archive's first 24 hours are used
+  experiments/datasets/melbourne/sensors.csv        latitude / longitude of the ids present
+  experiments/datasets/melbourne/archive_log*.jsonl the download window that covered those 24 hours
+  experiments/datasets/melbourne/README.md (+ git)  its "Pre-registered analysis" section must be unchanged
+                                                    since the commit the rules line cites (script.md 5B)
+  docs/video/shotlist.json                          duration and the on-screen wording (checked below)
 
 Run: .venv/bin/python video/mg/S16.py [--stills]  -> video/build/mg/S16.mp4, stills in video/build/mg/stills/
 """
@@ -28,8 +45,10 @@ import csv
 import gzip
 import json
 import math
+import re
+import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 
 from pathlib import Path  # noqa: E402
@@ -44,46 +63,65 @@ from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 SHOTS = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOTS if s["id"] == "S16")
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 17.0 s
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 18.0 s
+assert DURATION == 18.0, DURATION
 
-# Seconds from the shot start, keyed to the narration at 140 wpm (0.43 s per word, voice from 0.3 s;
-# "99" is read "ninety-nine", two words). re-key to the real voice take
+# Seconds from the shot start. Keyed to the guide voice video/build/guide/S16.wav (say -v Daniel -r 155,
+# about 148 wpm; "99" is read "ninety-nine"), which assemble.py lays 0.2 s into the shot (VOICE_START):
+# clause starts are the silencedetect pauses (noise -35 dB, d 0.12 s; 2.77-2.98 and 7.70-7.91 s of the wav)
+# + 0.2 s; word onsets inside a clause come from synthesising prefixes of the line with the same voice.
+# Shot times:
+#   "Because our forecasting results are simulated," 0.2-2.97 | "we're testing the same method" 3.18-4.76 |
+#   "on real counts" 4.76-5.81 ("real" 5.01) | "from ninety-nine" 5.81-6.57 ("ninety-nine" 6.10) |
+#   "Melbourne street sensors:" 6.57-7.90 | "a test announced" 8.11-9.22 | "before its result." 9.22-10.23
+#   ("result" 9.79) | the result slot (silent in the guide; at most 15 words in the real take) to 18.0.
+# re-key to the real voice take (the team reads at about 140 wpm, so everything moves ~5% later)
 BEATS = {
-    "dots": 0.3,          # "Because our forecasting results..." -> sensor dots ripple in from the centre
-    "playback": 1.6,      # "...are simulated," -> the archive starts playing; clock and calendar strip fill
-    "real_counts": 4.5,   # "real counts" -> the sensor count ticks up, each dot pinging as it is counted
-    "ninety_nine": 5.9,   # "ninety-nine" -> the count lands on the number of ids found
-    "melbourne": 6.7,     # "Melbourne street sensors:" -> the "Not Macau" caveat card
-    "result": 10.1,       # "...before its result." -> map dims, the result panel slides in
-    "pending": 10.6,      # result slot starts -> the PENDING stamp lands
-    "placeholder": 11.1,  # -> the verbatim result placeholder in its amber dashed box
+    "dots": 0.2,          # "Because our forecasting results..." -> sensor dots ripple in from the centre
+    "playback": 1.71,     # "...results are simulated," -> the archive starts playing; clock and calendar strip fill
+    "real_counts": 5.01,  # "real counts" -> the sensor count ticks up, each dot pinging as it is counted
+    "ninety_nine": 6.10,  # "ninety-nine" -> the count lands on the number of ids found; its basis line under it
+    "melbourne": 6.57,    # "Melbourne street sensors:" -> the "Not Macau" caveat card
+    "announced": 8.11,    # "a test announced" -> the calendar block gives way to the rules line
+    "result": 9.6,        # "...its result." -> map dims, the result panel comes in
+    "pending": 10.1,      # result slot starts -> the PENDING stamp lands
+    "placeholder": 10.6,  # -> the verbatim result placeholder in its amber dashed box
 }
-CHAPTER_END = 2.0                 # chapter card for about 2 s
-PLAYBACK_END = DURATION - 0.6     # the whole archived period plays from BEATS["playback"] to here
+CHAPTER_END = 2.0                          # chapter card for about 2 s
+PLAYBACK_END = BEATS["announced"] - 0.2    # the 24 hours play from BEATS["playback"] to here, then hold
 
 # ---------- on-screen text (storyboard wording, checked against the shot list) ----------
 
 CHAPTER = "What's next?"
-CREDIT = "City of Melbourne pedestrian counts · per minute · CC BY"
+CREDIT = "City of Melbourne pedestrian counts · per minute or per 5 minutes · CC BY"
 SINCE = "archived hourly since 12 Oct 2026"
 CAVEAT_LEAD = "Not Macau:"
 CAVEAT_REST = "counts people crossing a line, not camera density. Tests the method, not accuracy in Macau."
 PLACEHOLDER = "[RESULT PENDING - fill after analysis, report honestly whatever it shows]"
 BADGE_SUB = "Real data, analysis pending"            # section 4 claims table, status of the S16 row
 SENSORS_LABEL = "Melbourne street sensors"           # narration: "...from 99 Melbourne street sensors"
-SENSORS_SUB = "real counts · one dot per sensor"
+BASIS_TAIL = "sensors with counts in the archive's first 24 hours"   # the line reads f"{N} {BASIS_TAIL}"
+RULES = (                                            # three lines, in the picture area (section 6, S16 rule)
+    "Test rules and count → SAFE / WARNING / CRITICAL mapping",
+    "committed 16 Oct 2026, before the test days (18-22 Oct):",
+    "experiments/datasets/melbourne/README.md (commit 95057e2)",
+)
 RESULT_HEAD = "Melbourne test · result"
 
 _ost = SHOT["on_screen_text"]
-for s_ in (CHAPTER, "City of Melbourne pedestrian counts · per minute", "CC BY", SINCE,
-           f"{CAVEAT_LEAD} {CAVEAT_REST}", PLACEHOLDER):
+_row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith("| S16 | 3:"))
+for s_ in (f"Chapter card (top-left): {CHAPTER}", "Badge (top-right): PENDING", f"Footer: {CREDIT}",
+           f"Calendar strip header: {SINCE}", f"{CAVEAT_LEAD} {CAVEAT_REST}", " / ".join(RULES), PLACEHOLDER):
     assert s_ in _ost, f"not in the storyboard's on-screen text: {s_!r}"
+for s_ in (CREDIT, SINCE, *RULES):
+    assert f'"{s_}"' in _row, f"not in script.md's S16 row: {s_!r}"
 assert SENSORS_LABEL in SHOT["narration"]
 assert BADGE_SUB in (ROOT / "docs" / "video" / "script.md").read_text()
 
 # ---------- data ----------
 
 MEL = ROOT / "experiments" / "datasets" / "melbourne"
+FIRST_HOURS = timedelta(hours=24)                 # the archive's first 24 hours (the on-screen basis)
 
 
 def load_archive():
@@ -92,48 +130,126 @@ def load_archive():
     for f in sorted((MEL / "minute").glob("*.csv.gz")):
         with gzip.open(f, "rt", newline="") as fh:
             for r in csv.DictReader(fh):
-                utc = datetime.fromisoformat(r["sensing_datetime"]).replace(tzinfo=None)
+                utc = datetime.fromisoformat(r["sensing_datetime"]).astimezone(timezone.utc).replace(tzinfo=None)
                 loc = datetime.strptime(f'{r["sensing_date"]} {r["sensing_time"]}', "%Y-%m-%d %H:%M")
                 rows.append((r["location_id"], utc, loc, int(r["total_of_directions"])))
     return rows
 
 
-ROWS = load_archive()
+_ALL = load_archive()
+UTC0 = min(r[1] for r in _ALL)                                   # the archive's first minute (11 Oct 13:55 UTC)
+ROWS = [r for r in _ALL if r[1] <= UTC0 + FIRST_HOURS]           # later files, if committed, are not drawn
+UTC1 = max(r[1] for r in ROWS)
+assert UTC1 == UTC0 + FIRST_HOURS, f"the archive's first 24 hours are incomplete ({UTC0} to {UTC1} UTC)"
+assert all(r[1].second == 0 for r in ROWS)
 with open(MEL / "sensors.csv", newline="") as fh:
     SENSORS = {r["location_id"]: r for r in csv.DictReader(fh)}
 
-IDS = sorted({r[0] for r in ROWS}, key=int)                      # only the ids present in the archive
+
+def covering_run() -> tuple[str, str] | None:
+    """A download (archive_log*.jsonl) whose window covered the whole 24 hours, so a missing row there is zero."""
+    for name in ("archive_log.mac.jsonl", "archive_log.jsonl"):
+        path = MEL / name
+        if not path.exists():
+            continue
+        for line in path.read_text().splitlines():
+            run = json.loads(line)
+            if run.get("error") or "first" not in run or "last" not in run:
+                continue
+            first = datetime.fromisoformat(run["first"]).astimezone(timezone.utc).replace(tzinfo=None)
+            last = datetime.fromisoformat(run["last"]).astimezone(timezone.utc).replace(tzinfo=None)
+            if first <= UTC0 and last >= UTC1:
+                return name, run["run_at"]
+    return None
+
+
+COVER = covering_run()
+assert COVER, "no single download covered the first 24 hours: check the gaps (missing data, not zeros)"
+
+IDS = sorted({r[0] for r in ROWS}, key=int)                      # only the ids present in those 24 hours
 missing = [i for i in IDS if i not in SENSORS]
 assert not missing, f"location_ids with no row in sensors.csv: {missing}"
 N = len(IDS)
 LAT = np.array([float(SENSORS[i]["latitude"]) for i in IDS])
 LON = np.array([float(SENSORS[i]["longitude"]) for i in IDS])
+SENSOR_LINE = f"{N} {BASIS_TAIL}"
+assert f"Under the sensor count beside the dots: {SENSOR_LINE}" in _ost and f'"{SENSOR_LINE}"' in _row, \
+    f"{N} location_ids in the archive's first 24 hours: update the storyboard's sensor line"
+assert f"from {N} Melbourne" in SHOT["narration"], f"{N} location_ids: update the voice line"
 
 offsets = {loc - utc for _, utc, loc, _ in ROWS}
 assert len(offsets) == 1, f"several UTC offsets in the archive (daylight-saving change?): {offsets}"
 LOCAL_OFFSET = offsets.pop()                                     # +11 h (AEDT)
-UTC0 = min(r[1] for r in ROWS)
-UTC1 = max(r[1] for r in ROWS)
 M = int((UTC1 - UTC0).total_seconds() // 60) + 1                 # archived minutes, first to last
 LOC0, LOC1 = UTC0 + LOCAL_OFFSET, UTC1 + LOCAL_OFFSET
 
-COUNTS = np.zeros((N, M), dtype=np.float32)                       # a missing minute is zero (README)
+COUNTS = np.zeros((N, M), dtype=np.float32)                       # each row at its own minute; no row = 0
 _col = {i: k for k, i in enumerate(IDS)}
 for lid, utc, _, c in ROWS:
     COUNTS[_col[lid], int((utc - UTC0).total_seconds() // 60)] = c
 
-SMOOTH_MIN = 15                                                   # display smoothing: centred 15-min mean
-_pad = np.pad(COUNTS, ((0, 0), (SMOOTH_MIN // 2, SMOOTH_MIN // 2)), mode="edge")
-_cs = np.concatenate([np.zeros((N, 1)), np.cumsum(_pad, axis=1, dtype=np.float64)], axis=1)
-SMOOTH = ((_cs[:, SMOOTH_MIN:] - _cs[:, :-SMOOTH_MIN]) / SMOOTH_MIN).astype(np.float32)
-assert SMOOTH.shape == (N, M)
+SMOOTH_MIN = 15                                                   # window length (three 5-minute marks)
+HALF = SMOOTH_MIN // 2
+_cs = np.concatenate([np.zeros((N, 1)), np.cumsum(COUNTS, axis=1, dtype=np.float64)], axis=1)
+RATE = ((_cs[:, SMOOTH_MIN:] - _cs[:, :-SMOOTH_MIN]) / SMOOTH_MIN).astype(np.float32)
+# RATE[:, j]: people per minute over archive minutes j .. j + 14, i.e. the window centred on minute j + HALF
+assert RATE.shape == (N, M - SMOOTH_MIN + 1)
+P0, P1 = HALF, M - 1 - HALF                                       # window centres played back (minutes after UTC0)
 
 DAY0 = datetime(LOC0.year, LOC0.month, LOC0.day)                 # first archived local day (12 Oct)
 DAYS = (datetime(LOC1.year, LOC1.month, LOC1.day) - DAY0).days + 1
 assert SINCE.endswith(f"{DAY0.day} {DAY0:%b %Y}"), f"archive starts on {DAY0:%d %b %Y}, not as the storyboard says"
-if f"{N} sensors" not in _ost or f"from {N} Melbourne" not in SHOT["narration"]:
-    print(f"WARNING: the archive has {N} distinct location_ids; the storyboard and narration say otherwise. "
-          f"Update the voice line and captions to {N}.")
+
+# ---------- the rules line: only while the cited commit fixes the rules (script.md 5B) ----------
+
+README_REL = "experiments/datasets/melbourne/README.md"
+RULES_COMMIT = re.search(r"\(commit ([0-9a-f]{7,40})\)", RULES[2]).group(1)
+WINDOW_OPENS = datetime(2026, 10, 17, 13, 0, tzinfo=timezone.utc)   # 18 Oct 00:00 AEDT (README, point 2)
+
+
+def prereg_section(text: str | None) -> str | None:
+    """The README's "## Pre-registered analysis" section, cut as experiments/melbourne_eval.py cuts it."""
+    if text is None:
+        return None
+    lines = text.splitlines()
+    start = next((i for i, line in enumerate(lines) if line.startswith("## Pre-registered analysis")), None)
+    if start is None:
+        return None
+    end = next((j for j in range(start + 1, len(lines)) if lines[j].startswith("## ")), len(lines))
+    body = [line.rstrip() for line in lines[start:end]]
+    while body and not body[-1]:
+        body.pop()
+    return "\n".join(body) + "\n"
+
+
+def git(*args: str) -> str | None:
+    try:
+        r = subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return r.stdout if r.returncode == 0 else None
+
+
+def check_rules_line() -> str:
+    """Fails loudly if the rules line would no longer be true; returns a one-line status."""
+    now = prereg_section((MEL / "README.md").read_text())
+    assert now is not None, f"{README_REL} has no 'Pre-registered analysis' section: delete the rules line (5B)"
+    assert "18, 19, 20, 21 and 22 Oct 2026" in now and "(18-22 Oct)" in RULES[1]
+    then = prereg_section(git("show", f"{RULES_COMMIT}:{README_REL}"))
+    if then is None:
+        return f"WARNING: git cannot show {RULES_COMMIT}; the rules line is drawn unchecked"
+    assert now == then, (f"the pre-registered section has changed since {RULES_COMMIT}: cite the amending commit "
+                         "and its date if it was pushed before the window opened, otherwise delete the rules line (5B)")
+    when = datetime.fromisoformat(git("show", "-s", "--format=%cI", RULES_COMMIT).strip())
+    assert when < WINDOW_OPENS, f"{RULES_COMMIT} is dated {when}, after the test window opened"
+    assert RULES[1].startswith(f"committed {when.day} {when:%b %Y},"), f"{RULES_COMMIT} is dated {when}"
+    remotes = [b.strip() for b in (git("branch", "-r", "--contains", RULES_COMMIT) or "").splitlines()]
+    pushed = "origin/main" in remotes
+    return (f"rules line: {RULES_COMMIT} ({when.isoformat()}), section unchanged since, "
+            + ("on origin/main" if pushed else "WARNING: not on origin/main"))
+
+
+RULES_STATUS = check_rules_line()
 
 # ---------- layout ----------
 
@@ -142,10 +258,12 @@ MW, MH = MAP_BOX[2] - MAP_BOX[0], MAP_BOX[3] - MAP_BOX[1]
 SS = 3                                 # supersampling for the dots
 FIT = (130, 205, 790, 700)             # where the sensors are fitted (frame coordinates); key below y 710
 RX0, RX1 = 900, 1860                   # right column
-NUM_BASE = 282                         # baseline of the sensor count
-CAL_HEAD, CLOCK_BASE, DAYLAB_BASE = 392, 446, 492
-STRIP_Y0, STRIP_Y1 = 512, 550
-HOURLAB_BASE = 578
+NUM_BASE = 276                         # baseline of the sensor count
+LABEL_BASE = NUM_BASE - 40             # "Melbourne street sensors", beside the count
+BASIS_BASE = NUM_BASE + 50             # the basis line ("99 sensors with counts in ..."), under the count
+CAL_HEAD, CLOCK_BASE, DAYLAB_BASE = 408, 462, 508
+STRIP_Y0, STRIP_Y1 = 528, 566
+HOURLAB_BASE = 594
 CAVEAT_Y1 = MAP_BOX[3]                 # the caveat card's bottom lines up with the map panel
 
 
@@ -466,6 +584,29 @@ CAVEAT = caveat_sprite()
 CAVEAT_XY = (RX0, CAVEAT_Y1 - CAVEAT.height)
 
 
+def rules_sprite() -> Image.Image:
+    """The rules line on a card like the caveat's: a commit glyph (a ring on a line) and three lines of text."""
+    w_ = RX1 - RX0
+    size, lh, tx, top = 24, 36, 84, 56
+    h_ = top + 2 * lh + 32
+    spr = hires((w_, h_), lambda d, k: d.rounded_rectangle((0, 0, w_ * k - 1, h_ * k - 1), 18 * k, fill=rgba(NAVY_2)))
+
+    def glyph(d, k):
+        d.line([(0, 17 * k), (34 * k, 17 * k)], fill=rgba(INK_2), width=3 * k)
+        d.ellipse((8 * k, 8 * k, 26 * k, 26 * k), fill=rgba(NAVY_2), outline=rgba(INK_2), width=3 * k)
+    spr.alpha_composite(hires((34, 34), glyph), (32, top - 27))
+    for i, (ln, wt, col) in enumerate(zip(RULES, (600, 500, 500), (INK, INK, INK_2))):
+        assert font(size, wt).getlength(ln) <= w_ - tx - 36, f"rules line too wide: {ln!r}"
+        put(spr, tx, top + i * lh, ln, size, wt, col)
+    return spr
+
+
+RULES_CARD = rules_sprite()
+# centred in the calendar block's place, between the basis line and the caveat card
+RULES_XY = (RX0, round((BASIS_BASE + 8 + CAVEAT_XY[1]) / 2 - RULES_CARD.height / 2))
+assert RULES_XY[1] > BASIS_BASE + 40 and RULES_XY[1] + RULES_CARD.height < CAVEAT_XY[1] - 40
+
+
 def stamp_sprite() -> Image.Image:
     """Grey dashed PENDING stamp (unrotated), drawn large."""
     size, track = 92, 10
@@ -510,15 +651,17 @@ assert PLACE.width <= MW - 40 and PLACE_Y + PLACE.height <= MAP_BOX[3] - 30
 
 
 def playback_pos(t: float) -> float:
-    """Archive minute (float, 0 .. M-1) shown at shot time t (linear playback)."""
-    return clamp((t - BEATS["playback"]) / (PLAYBACK_END - BEATS["playback"])) * (M - 1)
+    """Archive minute (float, P0 .. P1: a window centre) shown at shot time t (linear playback, then hold)."""
+    return P0 + clamp((t - BEATS["playback"]) / (PLAYBACK_END - BEATS["playback"])) * (P1 - P0)
 
 
 def values_at(pos: float) -> np.ndarray:
-    i0 = int(math.floor(pos))
-    i1 = min(M - 1, i0 + 1)
-    f = pos - i0
-    return SMOOTH[:, i0] * (1 - f) + SMOOTH[:, i1] * f
+    """People per minute per sensor over the 15-minute window centred on archive minute pos."""
+    j = pos - HALF
+    i0 = int(math.floor(j))
+    i1 = min(RATE.shape[1] - 1, i0 + 1)
+    f = j - i0
+    return RATE[:, i0] * (1 - f) + RATE[:, i1] * f
 
 
 def ease_out(x: float) -> float:
@@ -579,7 +722,7 @@ def clock_prefix(d: datetime) -> str:
 def shot_time_of_local(dt: datetime) -> float:
     """Shot time at which the playback clock reaches local time dt."""
     pos = (dt - LOC0).total_seconds() / 60
-    return BEATS["playback"] + pos / max(1, M - 1) * (PLAYBACK_END - BEATS["playback"])
+    return BEATS["playback"] + (pos - P0) / (P1 - P0) * (PLAYBACK_END - BEATS["playback"])
 
 
 # when the date changes at midnight, the time and its label glide to their new place (no jump)
@@ -605,11 +748,14 @@ def draw_right_column(img: Image.Image, t: float) -> None:
         nw = tabular_width(str(N), 150, 800)
         put_tabular(img, RX0 + nw - tabular_width(str(shown), 150, 800), NUM_BASE, str(shown), 150, 800, col, a_num)
         lx = RX0 + nw + 34
-        put(img, lx, NUM_BASE - 58, SENSORS_LABEL, 40, 700, INK, a_num)
-        put(img, lx, NUM_BASE - 8, SENSORS_SUB, 26, 500, INK_2, a_num)
+        put(img, lx, LABEL_BASE, SENSORS_LABEL, 40, 700, INK, a_num)
+    # the count's basis, under it, once the count has landed
+    a_bas = progress(t, BEATS["ninety_nine"], 0.45)
+    if a_bas > 0:
+        put(img, RX0, BASIS_BASE + (1 - a_bas) * 10, SENSOR_LINE, 24, 500, INK_2, a_bas)
 
-    # playback clock and calendar strip
-    a_cal = progress(t, BEATS["playback"] - 0.3, 0.5)
+    # playback clock and calendar strip, until "a test announced"
+    a_cal = progress(t, BEATS["playback"] - 0.3, 0.5) * (1 - progress(t, BEATS["announced"] - 0.1, 0.35))
     if a_cal > 0:
         put(img, RX0, CAL_HEAD, SINCE, 24, 600, INK_2, a_cal)
         lt = local_time(t)
@@ -637,6 +783,11 @@ def draw_right_column(img: Image.Image, t: float) -> None:
         d.polygon([(hx - 6 - oxl, STRIP_Y0 - 10 - oyl), (hx + 6 - oxl, STRIP_Y0 - 10 - oyl), (hx - oxl, STRIP_Y0 - 2 - oyl)], fill=rgba(INK))
         d.line([(hx - oxl, STRIP_Y0 - 2 - oyl), (hx - oxl, STRIP_Y1 + 3 - oyl)], fill=rgba(INK), width=2)
         paste(img, lay, (oxl, oyl), a_cal)
+
+    # the rules line, in the calendar block's place, from "a test announced" to the end
+    a_rul = progress(t, BEATS["announced"] + 0.15, 0.45)
+    if a_rul > 0:
+        paste(img, RULES_CARD, (RULES_XY[0], RULES_XY[1] + (1 - a_rul) * 16), a_rul)
 
     # "Not Macau" caveat
     a_cav = progress(t, BEATS["melbourne"], 0.5)
@@ -680,18 +831,21 @@ def draw_frame(t: float) -> Image.Image:
 
 STILLS = {
     "card": 1.2,
-    "night": 3.4,
-    "count": 5.3,
-    "day": 9.2,
-    "pending": 11.6,
-    "end": 16.9,
+    "night": 3.0,
+    "count": 5.6,
+    "basis": 7.2,
+    "rules": 9.0,
+    "pending": 11.2,
+    "end": 17.9,
 }
 
 if __name__ == "__main__":
-    vmax = float(SMOOTH.max())
-    print(f"S16: {DURATION} s; {N} location_ids in the archive (of {len(SENSORS)} in sensors.csv); "
-          f"{M} minutes, {LOC0:%d %b %H:%M} - {LOC1:%d %b %H:%M} Melbourne time ({DAYS} calendar days); "
-          f"busiest {SMOOTH_MIN}-min average {vmax:.0f}/min; {PX_PER_KM:.0f} px per km")
+    vmax = float(RATE.max())
+    print(f"S16: {DURATION} s; {N} location_ids in the archive's first 24 hours (of {len(SENSORS)} in sensors.csv); "
+          f"{M} minutes, {LOC0:%d %b %H:%M} - {LOC1:%d %b %H:%M} Melbourne time ({DAYS} calendar days), "
+          f"covered by the {COVER[1]} run in {COVER[0]}; busiest {SMOOTH_MIN}-min average {vmax:.0f}/min; "
+          f"{PX_PER_KM:.0f} px per km")
+    print(RULES_STATUS)
     for name, ts in STILLS.items():
         print(still(f"S16_{name}", draw_frame(ts)))
     if "--stills" not in sys.argv:

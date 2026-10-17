@@ -8,7 +8,8 @@ is the real software showing real data from the running backend.
     .venv/bin/python video/capture.py video/shots/overview.json --out video/build/clips/overview.mp4
 
 A shot file is JSON: {"url": "..." (a web URL, or "file:path" relative to the repo root), "viewport": [1280, 720], "scale": 1.5, "steps": [...]}, where each
-step is one of {"wait": s}, {"click": css-selector}, {"click_text": text}, {"click_js": js returning an
+step is one of {"wait": s}, {"click": css-selector}, {"click_in_place": css-selector} (no scroll to centre
+the element first, when it is already wholly in view), {"click_text": text}, {"click_js": js returning an
 element}, {"scroll": px}, {"scroll_to": css-selector}, {"eval": js}, {"navigate": url},
 {"wait_for": css-selector} or {"wait_for_js": js expression}; waits poll for up to 180 s, so steps can
 wait for things that appear at a run-dependent time (e.g. the Senado redirect card).
@@ -90,8 +91,12 @@ class Page:
         r = await self.send("Runtime.evaluate", {"expression": js, "awaitPromise": True, "returnByValue": True})
         return r.get("result", {}).get("value")
 
-    async def point_and_click(self, js_element):
-        box = await self.eval(f"(() => {{ const e = {js_element}; if (!e) return null; e.scrollIntoView({{block: 'center'}}); const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }})()")
+    async def point_and_click(self, js_element, scroll: bool = True):
+        """Moves the pointer to the element and clicks it. By default the element is first scrolled to the
+        centre of the viewport; with scroll=False the view stays where it is (the element is scrolled only
+        if it is not wholly inside the viewport), so a shot can keep something else in frame at the click."""
+        keep = "false" if scroll else "true"
+        box = await self.eval(f"(() => {{ const e = {js_element}; if (!e) return null; let r = e.getBoundingClientRect(); const inside = r.top >= 0 && r.left >= 0 && r.bottom <= innerHeight && r.right <= innerWidth; if (!({keep} && inside)) {{ e.scrollIntoView({{block: 'center'}}); r = e.getBoundingClientRect(); }} return [r.left + r.width / 2, r.top + r.height / 2]; }})()")
         if not box:
             raise RuntimeError(f"element not found: {js_element}")
         await self.eval(POINTER_JS)
@@ -135,6 +140,8 @@ async def record(shot: dict, frames_dir: Path, frames: list, port: int) -> None:
                 await page.send("Page.navigate", {"url": resolve_url(arg)})
             elif kind == "click":
                 await page.point_and_click(f"document.querySelector({json.dumps(arg)})")
+            elif kind == "click_in_place":
+                await page.point_and_click(f"document.querySelector({json.dumps(arg)})", scroll=False)
             elif kind == "click_text":
                 await page.point_and_click(f"[...document.querySelectorAll('button, a, summary')].find(e => e.textContent.trim().includes({json.dumps(arg)}))")
             elif kind == "click_js":
