@@ -1,26 +1,28 @@
-"""S19 · Relay close (4:02.5-4:13.5, 11.0 s): the team on camera, one line each, then all together.
+"""S19 · Relay close (4:09.5-4:20.5, 11.0 s): the four team members on camera, one line each, then all together.
 
 Storyboard: docs/video/script.md section 3, row S19 (narration, visual, on-screen text); section 4, the three S19
 claims rows (the "Next" line is a plan, with "which approvals apply: to be confirmed"; "The AI recommends. A person
-decides." and "Nothing identifying leaves the phone" are real code); section 1 "Team roles" (who carries which STEMB
-letter); section 5D and section 6 "team_footage" (wide shot, same set as S05); the S19 row of the overrun plan (drop
+decides." and "Nothing identifying leaves the phone" are real code); section 2 "Team roles" (who carries which STEMB
+letters); section 5D and section 6 "team_footage" (wide shot, same set as S05); the S19 row of the overrun plan (drop
 the separate all-together second first, never cut a line). docs/video/shotlist.json, entry S19.
 
 Data sources (nothing is retyped):
   - docs/video/shotlist.json: the shot duration (end_s - start_s); its narration and on_screen_text are cross-checked
     against the storyboard row.
   - docs/video/script.md, section 3, S19 row:
-      narration cell  -> the four relay lines and who says them ([M5], [M3], [M2], [M1]), in order;
+      narration cell  -> the four relay lines and who says them ([M3], [M4], [M2], [M1]), in order;
       visual cell     -> the slate's direction line (its first sentence);
       on-screen cell  -> the two text lines, verbatim: the "Next" line (its "(...)" aside in a quieter colour; any
                          [bracketed placeholder] would be drawn in an amber dashed box) and, after the label
                          "Final all-together second only:", the tagline "The AI recommends. A person decides.", shown
                          only in the shot's final all-together second.
-  - docs/video/script.md, section 1, "Team roles" table: [MEMBER n] -> STEMB letter.
+  - docs/video/script.md, section 2, "Team roles" table: [MEMBER n] -> STEMB letters, every **L** in the member's
+    discipline cell ([MEMBER 3] carries two, E and B); the four members together must cover all five letters.
 
-The team has not filmed yet, so the picture is an amber "[TEAM FOOTAGE]" slate: five silhouettes in a wide shot,
-the speaker lit in turn (M5, M3, M2, M1; M4 in frame), then everyone together. The two on-screen lines take turns in
-the top band (y 44-about 175: the "Next" card from M5's first word to the hand-off to M1, the tagline in the last
+The team has not filmed yet, so the picture is an amber "[TEAM FOOTAGE]" slate: four silhouettes in a wide shot,
+the speaker lit in turn (M3, M4, M2, M1; all four speak, nobody is in frame without a line), then everyone together.
+Each member's chip shows their STEMB tiles (two for M3). The two on-screen lines take turns in
+the top band (y 44-about 175: the "Next" card from M3's first word to the hand-off to M1, the tagline in the last
 second), so they stay above the faces in the real wide shot; the slate keeps the lower-third slot (x 60-780,
 y 795-895) and the caption band (y 900-995) clear for the whole shot, because a new speaker starts four times.
 No chapter card, badge or footer: the storyboard gives S19 none. Captions and lower-thirds are added at assembly.
@@ -55,14 +57,15 @@ DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 11.0 s
 # Times in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S19.wav, say -v Daniel at
 # about 147 wpm; assemble.py lays it 0.2 s into the shot). Sentence boundaries from
 #   ffmpeg -i video/build/guide/S19.wav -af silencedetect=noise=-35dB:d=0.12 -f null -
-# (speech 0.00-4.03 | 4.27-5.51 | 5.75-7.02 | 7.27-about 9.30, the tail of "phone" fading out), each + 0.2 s.
+# (speech 0.00-4.03 | 4.27-5.51 | 5.75-7.02 | 7.27-about 9.30, the tail of "phone" fading out), each + 0.2 s;
+# re-measured on the four-member guide (17 Oct): the same boundaries.
 # The guide has 0.25 s gaps, not the 0.3-0.5 s hand-offs of the real relay; the final second stays at the shot end.
 # re-key to the real voice take
 BEATS = {
-    "m5": 0.20,         # [M5] "Next: a supervised street pilot in Macau, with permission."  -> the "Next" card
-    "m5_end": 4.23,
-    "m3": 4.47,         # [M3] "The AI recommends."
-    "m3_end": 5.71,
+    "m3": 0.20,         # [M3] "Next: a supervised street pilot in Macau, with permission."  -> the "Next" card
+    "m3_end": 4.23,
+    "m4": 4.47,         # [M4] "The AI recommends."
+    "m4_end": 5.71,
     "m2": 5.95,         # [M2] "A person decides."
     "m2_end": 7.22,
     "m1": 7.47,         # [M1] "Nothing identifying leaves the phone."  (the "Next" card has left in the hand-off)
@@ -94,8 +97,8 @@ def storyboard_cell(shot: str, col: int) -> str:
 NARRATION = storyboard_cell(SHOT, 3)
 assert NARRATION == _entry["narration"], (NARRATION, _entry["narration"])
 RELAY = [(f"[MEMBER {n}]", line.strip()) for n, line in re.findall(r"\[M(\d)\]\s*([^\[]+)", NARRATION)]
-assert [m for m, _ in RELAY] == ["[MEMBER 5]", "[MEMBER 3]", "[MEMBER 2]", "[MEMBER 1]"], RELAY
-SPEAKER_BEATS = ["m5", "m3", "m2", "m1"]
+assert [m for m, _ in RELAY] == ["[MEMBER 3]", "[MEMBER 4]", "[MEMBER 2]", "[MEMBER 1]"], RELAY
+SPEAKER_BEATS = ["m3", "m4", "m2", "m1"]
 
 DIRECTION = storyboard_cell(SHOT, 4).split("<br>")[0].split(". ")[0].strip().rstrip(".") + "."
 assert DIRECTION.startswith("Wide shot of the whole team"), DIRECTION
@@ -112,15 +115,17 @@ assert (TAG_A, TAG_B) == ("The AI recommends.", "A person decides."), (TAG_A, TA
 # the shot list says the same (its two lines joined by " | ", without the quotes)
 assert _entry["on_screen_text"] == f"{NEXT_LINE} | {FINAL_LABEL} {TAGLINE}", _entry["on_screen_text"]
 
-# [MEMBER n] -> STEMB letter (section 1, Team roles)
-ROLE = {m.group(1): m.group(2) for m in re.finditer(r"^\| (\[MEMBER \d\])(?: \(optional\))? \| \*\*([STEMB])\*\* ", SCRIPT, re.M)}
-assert sorted(ROLE.values()) == sorted(l for l, _ in STEMB), ROLE
+# [MEMBER n] -> STEMB letters (section 2, Team roles): every **L** in the discipline cell, in the cell's order
+# ("**E** Engineering · **B** Business" -> "EB"), the same string form style.lower_third lights
+ROLE = {m.group(1): "".join(re.findall(r"\*\*([STEMB])\*\*", m.group(2)))
+        for m in re.finditer(r"^\| (\[MEMBER \d\])(?: \(optional\))? \| ([^|]*) \|", SCRIPT, re.M)}
+assert len(ROLE) == 4 and all(ROLE.values()), ROLE
+assert set("".join(ROLE.values())) == {l for l, _ in STEMB}, ROLE   # the four together cover S T E M B
+assert ROLE["[MEMBER 3]"] == "EB", ROLE
 
-# Slate columns, left to right: the four speakers in relay order, then M4 (in frame, no line).
-_in_frame = [m for m in sorted(ROLE) if m not in {r for r, _ in RELAY}]
-assert _in_frame == ["[MEMBER 4]"], _in_frame
-COLUMNS = [dict(member=m, letter=ROLE[m], line=f"“{l}”", beat=b) for (m, l), b in zip(RELAY, SPEAKER_BEATS)]
-COLUMNS += [dict(member=m, letter=ROLE[m], line="in frame", beat=None) for m in _in_frame]
+# Slate columns, left to right: the four speakers in relay order; everyone in the table speaks (no silent member).
+assert sorted(ROLE) == sorted(m for m, _ in RELAY), (ROLE, RELAY)
+COLUMNS = [dict(member=m, letters=ROLE[m], line=f"“{l}”", beat=b) for (m, l), b in zip(RELAY, SPEAKER_BEATS)]
 
 # ---------- small helpers (own) ----------
 
@@ -376,16 +381,16 @@ SCRIM = _scrim()
 NEXT_OUT_T = BEATS["m2_end"]     # the "Next" card starts to leave as M2 finishes (the hand-off to M1)
 TAG_T = BEATS["together"]        # the tagline starts with the final all-together second, not earlier
 assert TAG_T >= DURATION - 1.0 - 1e-6 and TAG_T > BEATS["m1_end"], (TAG_T, BEATS)
-assert NEXT_OUT_T + NEXT_OUT <= TAG_T and NEXT_OUT_T - (BEATS["m5"] + 0.05 + TEXT_IN) >= 6.0  # ≥6 s fully readable
+assert NEXT_OUT_T + NEXT_OUT <= TAG_T and NEXT_OUT_T - (BEATS["m3"] + 0.05 + TEXT_IN) >= 6.0  # ≥6 s fully readable
 
 
 def overlay_at(t: float, img: Image.Image | None = None) -> Image.Image:
     """The top band at time t, drawn onto img (a transparent frame by default)."""
     img = img if img is not None else transparent()
     put(img, SCRIM, progress(t, 0.0, 0.3))
-    # the "Next" card: in on M5's first word, holds through M3 and M2 so its 19 words can be read, out in the
+    # the "Next" card: in on M3's first word, holds through M4 and M2 so its 19 words can be read, out in the
     # hand-off to M1
-    k_in = progress(t, BEATS["m5"] + 0.05, TEXT_IN)
+    k_in = progress(t, BEATS["m3"] + 0.05, TEXT_IN)
     k_out = progress(t, NEXT_OUT_T, NEXT_OUT)
     put(img, NEXT_CARD, k_in * (1 - k_out), dy=(1 - k_in) * 12 - k_out * 10)
     # the tagline: only in the final all-together second, both halves at once, then the rule draws in
@@ -456,39 +461,58 @@ def _people(colour):
     return fn
 
 
+TILE, TILE_GAP, CHIP_GAP = 40, 6, 10   # STEMB tile size, gap between a member's tiles, gap before the member chip
+
+
+def chip_layout(i: int):
+    """The column's STEMB tile boxes (one per letter, left to right) and its [MEMBER n] chip box, centred together."""
+    col = COLUMNS[i]
+    tw = text_font(col["member"], 24, 700).getlength(col["member"]) + 2 * PH_PAD
+    n = len(col["letters"])
+    tiles_w = n * TILE + (n - 1) * TILE_GAP
+    x0 = COL_CX[i] - (tiles_w + CHIP_GAP + tw) / 2
+    tiles = [(x0 + k * (TILE + TILE_GAP), CHIP_CY - TILE / 2, x0 + k * (TILE + TILE_GAP) + TILE, CHIP_CY + TILE / 2)
+             for k in range(n)]
+    chip = (x0 + tiles_w + CHIP_GAP, CHIP_CY - 20, x0 + tiles_w + CHIP_GAP + tw, CHIP_CY + 20)
+    return tiles, chip
+
+
 def _labels(img, d2):
     """Member chips (amber dashed: [MEMBER n] is a placeholder) with their STEMB tiles, unlit."""
-    for col, cx in zip(COLUMNS, COL_CX):
-        tw = text_font(col["member"], 24, 700).getlength(col["member"]) + 2 * PH_PAD
-        tile, gap = 40, 10
-        x0 = cx - (tile + gap + tw) / 2
-        d2.rounded_rectangle(SB((x0, CHIP_CY - tile / 2, x0 + tile, CHIP_CY + tile / 2)), S(9), fill=(*NAVY_3, 255))
-        draw_text(img, (x0 + tile / 2, CHIP_CY), col["letter"], 24, 800, INK_3, anchor="mm")
-        box = (x0 + tile + gap, CHIP_CY - 20, x0 + tile + gap + tw, CHIP_CY + 20)
+    for i, col in enumerate(COLUMNS):
+        tiles, box = chip_layout(i)
+        for letter, (x0, y0, x1, y1) in zip(col["letters"], tiles):
+            d2.rounded_rectangle(SB((x0, y0, x1, y1)), S(9), fill=(*NAVY_3, 255))
+            draw_text(img, ((x0 + x1) / 2, CHIP_CY), letter, 24, 800, INK_3, anchor="mm")
         d2.rounded_rectangle(SB(box), S(9), fill=(*NAVY, 255))
         dashed_rrect(d2, SB(box), S(9), (*WARNING, 255), S(2))
         draw_text(img, (box[0] + PH_PAD, CHIP_CY), col["member"], 24, 700, WARNING, anchor="lm")
 
 
-def tile_box(i: int):
-    col = COLUMNS[i]
-    tw = text_font(col["member"], 24, 700).getlength(col["member"]) + 2 * PH_PAD
-    x0 = COL_CX[i] - (40 + 10 + tw) / 2
-    return (x0, CHIP_CY - 20, x0 + 40, CHIP_CY + 20)
-
-
 def _tile_lit(i: int):
+    """All of the column's STEMB tiles lit (M3 lights E and B together)."""
     def fn(img, d2):
-        x0, y0, x1, y1 = tile_box(i)
-        d2.rounded_rectangle(SB((x0, y0, x1, y1)), S(9), fill=(*CYAN, 255))
-        draw_text(img, ((x0 + x1) / 2, (y0 + y1) / 2), COLUMNS[i]["letter"], 24, 800, NAVY, anchor="mm")
+        for letter, (x0, y0, x1, y1) in zip(COLUMNS[i]["letters"], chip_layout(i)[0]):
+            d2.rounded_rectangle(SB((x0, y0, x1, y1)), S(9), fill=(*CYAN, 255))
+            draw_text(img, ((x0 + x1) / 2, (y0 + y1) / 2), letter, 24, 800, NAVY, anchor="mm")
     return fn
+
+
+def quote_lines(text: str) -> list[str]:
+    """Wrapped at QUOTE_W; a two-line quote is balanced (no one-word last line)."""
+    lines = wrap(text, QUOTE_SIZE, 500, QUOTE_W)
+    if len(lines) != 2:
+        return lines
+    ws, f = text.split(), text_font(text, QUOTE_SIZE, 500)
+    splits = [(" ".join(ws[:k]), " ".join(ws[k:])) for k in range(1, len(ws))]
+    fits = [s for s in splits if max(f.getlength(s[0]), f.getlength(s[1])) <= QUOTE_W]
+    return list(min(fits, key=lambda s: max(f.getlength(s[0]), f.getlength(s[1]))))
 
 
 def _quote(i: int, colour):
     def fn(img, d2):
         col = COLUMNS[i]
-        for k, ln in enumerate(wrap(col["line"], QUOTE_SIZE, 500, QUOTE_W)):
+        for k, ln in enumerate(quote_lines(col["line"])):
             draw_text(img, (COL_CX[i], QUOTE_Y + k * 31), ln, QUOTE_SIZE, 500, colour, anchor="ma")
     return fn
 
@@ -551,6 +575,12 @@ for _sp in [NEXT_CARD, TAG_S, RULE_S, *Q_ACTIVE, TOG_LIT]:
     assert _sp.x >= 56 and _sp.x + _sp.img.width <= W - 56 and _sp.y >= 20, (_sp.x, _sp.y)  # (incl. soft shadows)
     assert _sp.y + _sp.img.height <= 790, (_sp.y, _sp.img.height)
 assert PANEL[1] > TEXT_BOTTOM, (PANEL, TEXT_BOTTOM)
+for _i in range(len(COLUMNS)):   # each column's tiles + chip and its quote stay inside the column, clear of neighbours
+    _tiles, _chip = chip_layout(_i)
+    _lo, _hi = PANEL[0] + _i * COL_W + 12, PANEL[0] + (_i + 1) * COL_W - 12
+    assert _lo <= _tiles[0][0] and _chip[2] <= _hi, (_i, _tiles, _chip)
+    assert _lo <= Q_ACTIVE[_i].x and Q_ACTIVE[_i].x + Q_ACTIVE[_i].img.width <= _hi, _i
+    assert Q_ACTIVE[_i].y + Q_ACTIVE[_i].img.height <= SPOT[1] - 6, (_i, Q_ACTIVE[_i].y, Q_ACTIVE[_i].img.height)
 
 # ---------- timing of the spotlight ----------
 
@@ -571,8 +601,6 @@ def together_k(t: float) -> float:
 
 
 def speaking(t: float, i: int) -> float:
-    if i >= len(SPEAK_T):
-        return 0.0
     return fade(t, SPEAK_T[i], SPEAK_END[i], 0.15)
 
 
@@ -618,9 +646,8 @@ def frame(t: float) -> Image.Image:
     spotlight(img, t)
     put(img, STAGE, 1.0)
     for i in range(len(COLUMNS)):
-        lit = max(0.0, 1 - abs(s - i)) * progress(t, 0.0, 0.3) if i < len(SPEAK_T) else 0.0
-        lit = max(lit, kt)
-        done = clamp(s - i) if i < len(SPEAK_T) else 0.0
+        lit = max(max(0.0, 1 - abs(s - i)) * progress(t, 0.0, 0.3), kt)
+        done = clamp(s - i)
         put(img, LIT[i], lit)
         put(img, TILES_LIT[i], lit)
         put(img, Q_DONE[i], done * (1 - lit))
@@ -645,8 +672,8 @@ def overlay_check(t: float) -> Image.Image:
 
 
 STILLS = {  # name: time (s)
-    "next": 2.2,                 # M5 speaking, the "Next" card up
-    "ai_recommends": 5.1,        # M3 speaking, the "Next" card holds (no tagline yet)
+    "next": 2.2,                 # M3 speaking, the "Next" card up
+    "ai_recommends": 5.1,        # M4 speaking, the "Next" card holds (no tagline yet)
     "person_decides": 6.6,       # M2 speaking, the "Next" card holds (no tagline yet)
     "m1_phone": 8.5,             # M1 speaking, top band clear
     "together": DURATION - 1 / FPS,   # the final all-together second, tagline up

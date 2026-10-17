@@ -1,10 +1,14 @@
-"""S05 · Team roll call and title card (0:37.5-0:46.0, 8.5 s).
+"""S05 · Team roll call and title card (0:39.5-0:48.0, 8.5 s).
 
-Storyboard: docs/video/script.md section 3, row S05; section 5D and section 6 "team_footage" (what to film);
-docs/video/shotlist.json, entry S05. Section 4 has no claims row for S05 (no numbers are spoken or shown).
+Storyboard: docs/video/script.md section 3, row S05; section 2 "Team roles" (four members, [MEMBER 3] carries both
+Engineering and Business); section 5D and section 6 "team_footage" (what to film); docs/video/shotlist.json, entry
+S05. Section 4 has no claims row for S05 (no numbers are spoken or shown).
 
 Data sources:
-  - docs/video/shotlist.json: the shot duration (end_s - start_s).
+  - docs/video/shotlist.json: the shot duration (end_s - start_s) and the narration (asserted below, and checked
+    against the storyboard row): four one-line cuts, M1 T, M2 S, M3 E and B, M4 M, then all four together.
+  - docs/video/script.md, section 2 "Team roles": the STEMB letters each member's tile strip lights (checked).
+  - video/build/guide/S05.wav (video/guide.py): the beats are keyed to its word boundaries.
   - shared/zones.json: the 7 zones and 7 street links that collapse into the wordmark, and the step-free route
     (Senado Square -> St. Dominic's -> Rua de S. Paulo -> Company of Jesus Square, no stairs) drawn on M4's map prop.
   - ml/models/metrics.json: bar heights on M2's printed-F1-chart prop (per_horizon.h5/h10/h15, test f1_macro vs
@@ -26,6 +30,7 @@ from __future__ import annotations
 import heapq
 import json
 import math
+import re
 import sys
 
 from pathlib import Path  # noqa: E402
@@ -39,22 +44,40 @@ SHOT = "S05"
 _entry = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
 DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 8.5 s
 
-# Times in seconds from the shot start, keyed to the narration at about 140 words per minute.
-# re-key to the real voice take
+# The narration, verbatim (shotlist.json and the storyboard row must agree); the slates and BEATS follow it.
+NARRATION = ("[M1] Technology. [M2] Science. [M3] Engineering and business. [M4] Medicine. "
+             "[ALL] We are CrowdPulse Macau.")
+assert _entry["narration"] == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
+_script = (ROOT / "docs" / "video" / "script.md").read_text()
+_row = next(l for l in _script.splitlines() if l.startswith(f"| {SHOT} |"))
+assert [c.strip() for c in _row.strip().strip("|").split(" | ")][3] == NARRATION, "storyboard row S05 disagrees"
+ROLL = dict(re.findall(r"\[(M\d|ALL)\]\s*([^\[]+?)\s*(?=\[|$)", NARRATION))  # speaker -> line
+# STEMB letters per member, from the "Team roles" table (section 2): "| [MEMBER 3] | **E** Engineering · **B** ..."
+ROLE_LETTERS = {f"M{n}": "".join(re.findall(r"\*\*([STEMB])\*\*", cell))
+                for n, cell in re.findall(r"^\| \[MEMBER (\d)\] \| ([^|]+) \|", _script, re.M)}
+
+# Times in seconds from the shot start, keyed to the guide voice (video/build/guide/S05.wav, from video/guide.py),
+# which assemble.py starts 0.2 s into the shot. Word boundaries: its pauses (ffmpeg silencedetect=noise=-35dB:d=0.08)
+# and, inside the last line, its 10 ms energy envelope. Speech, in shot time:
+#   0.20-1.00 "Technology."  1.25-1.96 "Science."  2.19-3.54 "Engineering and business."  3.78-4.41 "Medicine."
+#   4.66-6.23 "We are CrowdPulse Macau." ("are" 4.99, "CrowdPulse" 5.33-5.78, "Macau" 5.83-6.23)
+#   6.23-8.5 silence; the title card is complete for the 2 s hold from 6.5.
+# Each member cut is a hard cut on the first sound of that member's line (the first one is the shot's first frame).
+# The title build (scrim to hold) keeps its timing. re-key to the real voice take
 BEATS = {
-    "m1": 0.0,          # [M1] "Technology."   (hard cut)
-    "m2": 0.8,          # [M2] "Science."      (hard cut)
-    "m3": 1.6,          # [M3] "Engineering."  (hard cut)
-    "m4": 2.4,          # [M4] "Medicine."     (hard cut)
-    "m5": 3.2,          # [M5] "Business."     (hard cut)
-    "group": 4.0,       # [ALL] "We are CrowdPulse Macau." (hard cut to the group slate)
-    "question": 4.5,    # "...are...": the research question rises on a band under the group (readable ~4 s to the end)
-    "scrim": 5.0,       # "CrowdPulse": navy starts to cover the group shot (fully covered ~0.9 s later)
-    "graph_in": 5.1,    # "CrowdPulse": the 7-zone graph draws in
-    "collapse": 5.5,    # "...Macau": the graph shrinks into the mark, then the wordmark unrolls from it
-    "challenge": 6.1,   # "Responsible AI · Challenge 2(c)" settles
-    "hold": 6.5,        # silence: title card held to the end of the shot (never cut, section 6)
+    "m1": 0.0,          # [M1] "Technology."                (from 0.20)
+    "m2": 1.25,         # [M2] "Science."                   (hard cut)
+    "m3": 2.19,         # [M3] "Engineering and business."  (hard cut; E and B lit)
+    "m4": 3.78,         # [M4] "Medicine."                  (hard cut)
+    "group": 4.66,      # [ALL] "We are CrowdPulse Macau."  (hard cut to the group slate, all five letters lit)
+    "question": 4.86,   # "We...": the research question rises on a band under the group (on screen 3.6 s to the end)
+    "scrim": 5.0,       # "are": navy starts to cover the group shot (fully covered ~0.9 s later)
+    "graph_in": 5.1,    # "are": the 7-zone graph draws in
+    "collapse": 5.5,    # "CrowdPulse": the graph shrinks into the mark; the wordmark unrolls on "Macau" (5.86-6.46)
+    "challenge": 6.1,   # "Responsible AI · Challenge 2(c)" settles as "Macau" ends
+    "hold": 6.5,        # silence: title card held to the end of the shot (2 s, never cut, section 6)
 }
+assert BEATS["hold"] == round(DURATION - 2.0, 3), "the silent title hold is 2 s"
 
 COL_DUR, COL_STAGGER = 0.6, 0.012   # graph collapse: duration and per-node stagger (s)
 WORD_DELAY, WORD_DUR = 0.36, 0.6    # wordmark wipe: starts this long after "collapse", lasts this long (s)
@@ -100,19 +123,20 @@ def step_free_route(src: str = "senado_square", dst: str = "jesus_square") -> li
 
 ROUTE = {frozenset(p) for p in step_free_route()}
 
-MEMBERS = [  # roll-call order (storyboard): T, S, E, M, B
-    dict(beat="m1", tag="[MEMBER 1]", letter="T", word="Technology", prop="phone",
+MEMBERS = [  # roll-call order (storyboard): T, S, E + B, M; "word" is the member's line without its full stop
+    dict(beat="m1", tag="[MEMBER 1]", letters="T", word=ROLL["M1"].rstrip("."), prop="phone",
          film="head-and-shoulders, holding a phone on a clamp. Screen off, unless the app was really installed "
               "on that phone (then the Setup tab, no street clip). Nothing that suggests a field run."),
-    dict(beat="m2", tag="[MEMBER 2]", letter="S", word="Science", prop="f1",
+    dict(beat="m2", tag="[MEMBER 2]", letters="S", word=ROLL["M2"].rstrip("."), prop="f1",
          film="head-and-shoulders, holding the printed F1 chart."),
-    dict(beat="m3", tag="[MEMBER 3]", letter="E", word="Engineering", prop="laptop",
+    dict(beat="m3", tag="[MEMBER 3]", letters="EB", word=ROLL["M3"].rstrip("."), prop="laptop",
          film="head-and-shoulders, with a laptop showing the server log."),
-    dict(beat="m4", tag="[MEMBER 4]", letter="M", word="Medicine", prop="map",
+    dict(beat="m4", tag="[MEMBER 4]", letters="M", word=ROLL["M4"].rstrip("."), prop="map",
          film="head-and-shoulders, holding the printed step-free route map."),
-    dict(beat="m5", tag="[MEMBER 5]", letter="B", word="Business", prop="deploy",
-         film="head-and-shoulders, holding the blank cost panel or the AGPL/deployment diagram (no figures)."),
 ]
+assert [m["beat"].upper() for m in MEMBERS] == [k for k in ROLL if k != "ALL"], "one slate per member line, in order"
+assert {m["beat"].upper(): m["letters"] for m in MEMBERS} == ROLE_LETTERS, ROLE_LETTERS
+assert {l for m in MEMBERS for l in m["letters"]} == {l for l, _ in STEMB}, "the four members cover all of STEMB"
 
 # ---------- text of the title card (storyboard, verbatim) ----------
 
@@ -120,7 +144,9 @@ TITLE_A, TITLE_B = "CrowdPulse", "Macau"
 QUESTION = ("Our question: can ordinary phones, sending only numbers, help forecast crowds "
             "without identifying anyone?")
 CHALLENGE = "Responsible AI · Challenge 2(c)"
-GROUP_FILM = "all five: 'We are CrowdPulse Macau'"
+GROUP_LABEL = "All four"
+assert len(MEMBERS) == 4 and GROUP_LABEL.lower().endswith("four"), "the group label names the team size"
+GROUP_FILM = f"all four: '{ROLL['ALL'].rstrip('.')}'"   # all four: 'We are CrowdPulse Macau'
 
 # ---------- layout ----------
 
@@ -360,29 +386,7 @@ def prop_map(d, cx, cy):
     wheelchair_icon(d, S(x0 + 196), S(y0 + 112), s=SS * 1.25, colour=SAFE, width=4)
 
 
-def prop_deploy(d, cx, cy):
-    """AGPL / deployment diagram: phone -> server -> dashboard boxes and arrows, no figures."""
-    w_, h_ = 300, 170
-    x0, y0 = cx - w_ / 2, cy - h_ / 2
-    d.rounded_rectangle(SB((x0, y0, x0 + w_, y0 + h_)), S(8), fill=PAPER)
-    d.rounded_rectangle(SB((x0 + 20, y0 + 18, x0 + 130, y0 + 28)), S(4), fill=INK_3)
-    bw, bh, by = 66, 84, y0 + 56
-    xs = [x0 + 22, x0 + 117, x0 + 212]
-    for bx in xs:
-        d.rounded_rectangle(SB((bx, by, bx + bw, by + bh)), S(8), outline=NAVY_3, width=S(3))
-    phone_icon(d, S(xs[0] + bw / 2), S(by + bh / 2), s=SS * 0.62, fill=NAVY_3, screen=PAPER)
-    server_icon(d, S(xs[1] + bw / 2), S(by + bh / 2 + 6), s=SS * 0.42, fill=NAVY_3)
-    for k, col in enumerate((SAFE, WARNING, CRITICAL)):
-        yy = by + 22 + k * 20
-        d.ellipse(SB((xs[2] + 14, yy - 6, xs[2] + 26, yy + 6)), fill=col)
-        d.rounded_rectangle(SB((xs[2] + 32, yy - 3, xs[2] + 54, yy + 3)), S(2), fill=NAVY_3)
-    for k in range(2):
-        ax0, ax1, ay = xs[k] + bw + 5, xs[k + 1] - 7, by + bh / 2
-        d.line(SB((ax0, ay, ax1, ay)), fill=NAVY_3, width=S(3))
-        d.polygon([(S(ax1 + 4), S(ay)), (S(ax1 - 6), S(ay - 7)), (S(ax1 - 6), S(ay + 7))], fill=NAVY_3)
-
-
-PROPS = {"phone": prop_phone, "f1": prop_f1, "laptop": prop_laptop, "map": prop_map, "deploy": prop_deploy}
+PROPS = {"phone": prop_phone, "f1": prop_f1, "laptop": prop_laptop, "map": prop_map}
 
 
 def silhouette(d, cx, top, s=1.0, col=SIL, outline=None, sw=215):
@@ -402,8 +406,9 @@ def viewfinder(member: dict | None) -> Image.Image:
     if member:
         silhouette(d, vw / 2, 52)
         PROPS[member["prop"]](d, vw / 2, 340 if member["prop"] == "laptop" else 330)
-    else:
-        xs = [128, 264, 400, 536, 672]
+    else:  # the group: one silhouette per member, centred, alternate ones a step back
+        step = 168
+        xs = [vw / 2 + (k - (len(MEMBERS) - 1) / 2) * step for k in range(len(MEMBERS))]
         for k, x in enumerate(xs):
             kw = dict(col=SIL if k % 2 else (56, 77, 114), sw=185)
             silhouette(d, x, 118 if k % 2 else 100, 0.6, outline=NAVY, **kw)
@@ -425,6 +430,32 @@ def camera_glyph(d, x, y, colour=WARNING):
 
 # ---------- slates (static, built once) ----------
 
+WORD_SIZE, WORD_TOP, WORD_W = 112, 432, 836   # a member's line on the slate: size, top (one line), left column width
+WORD_BAND = (432, 568)                        # a two-line word's glyphs: 30 px under the tag pill (402) and over
+                                              # the tiles (598)
+
+
+def word_layout(word: str) -> list[tuple[str, int, float]]:
+    """[(text, size, baseline y)] for a member's line: one line at WORD_SIZE, or, when it is too long for the left
+    column (M3's "Engineering and business"), two balanced lines at the largest size whose glyphs fit WORD_BAND,
+    centred in it."""
+    f = text_font(word, WORD_SIZE, 700)
+    base = WORD_TOP + f.getmetrics()[0]                       # the baseline of a one-line word drawn from WORD_TOP
+    if f.getlength(word) <= WORD_W:
+        return [(word, WORD_SIZE, base)]
+    words = word.split()
+    a, b = min(((" ".join(words[:i]), " ".join(words[i:])) for i in range(1, len(words))),
+               key=lambda p: max(text_size(p[0], WORD_SIZE, 700)[0], text_size(p[1], WORD_SIZE, 700)[0]))
+    for size in range(WORD_SIZE, 40, -2):
+        fa, fb = text_font(a, size, 700), text_font(b, size, 700)
+        pitch = round(size * 1.08)
+        top, bottom = fa.getbbox(a, anchor="ls")[1], pitch + fb.getbbox(b, anchor="ls")[3]
+        if bottom - top <= WORD_BAND[1] - WORD_BAND[0] and max(fa.getlength(a), fb.getlength(b)) <= WORD_W:
+            b1 = (WORD_BAND[0] + WORD_BAND[1]) / 2 - (top + bottom) / 2
+            return [(a, size, b1), (b, size, b1 + pitch)]
+    raise ValueError(f"no size fits {word!r}")
+
+
 def build_slate(member: dict | None, index: int = 0) -> Image.Image:
     img = canvas(NAVY)
     shapes = Image.new("RGBA", (S(W), S(H)), (0, 0, 0, 0))
@@ -435,8 +466,8 @@ def build_slate(member: dict | None, index: int = 0) -> Image.Image:
     shapes.alpha_composite(viewfinder(member), dest=(S(VF[0]), S(VF[1])))
     tile, gap = (84, 14) if member else (70, 12)
     strip_y = 598 if member else 300
-    strip_x = LX if member else LX + text_size("All five", 104, 700)[0] + 44
-    lit = {member["letter"]} if member else {l for l, _ in STEMB}
+    strip_x = LX if member else LX + text_size(GROUP_LABEL, 104, 700)[0] + 44
+    lit = set(member["letters"]) if member else {l for l, _ in STEMB}   # M3 lights E and B; the group all five
     for i, (l, _) in enumerate(STEMB):
         x = strip_x + i * (tile + gap)
         d.rounded_rectangle(SB((x, strip_y, x + tile, strip_y + tile)), S(14), fill=CYAN if l in lit else NAVY_3)
@@ -456,11 +487,12 @@ def build_slate(member: dict | None, index: int = 0) -> Image.Image:
     if member:
         draw_text(img, (LX, 184), member["film"], 28, 500, INK, max_width=836, line_gap=1.3)
         draw_text(img, (pill[0] + 24, (pill[1] + pill[3]) / 2), member["tag"], 34, 700, WARNING, anchor="lm")
-        draw_text(img, (LX - 4, 432), member["word"], 112, 700, INK)
+        for text, size, baseline in word_layout(member["word"]):
+            draw_text(img, (LX - 4 * size / WORD_SIZE, baseline), text, size, 700, INK, anchor="ls")
     else:
         draw_text(img, (LX, 184), GROUP_FILM, 34, 600, INK, max_width=800)
         draw_text(img, (LX, 236), "same background as S19", 26, 500, INK_2)
-        draw_text(img, (LX - 3, strip_y + tile / 2), "All five", 104, 700, INK, anchor="lm")
+        draw_text(img, (LX - 3, strip_y + tile / 2), GROUP_LABEL, 104, 700, INK, anchor="lm")
     for i, (l, _) in enumerate(STEMB):
         x = strip_x + i * (tile + gap)
         on = l in lit
@@ -617,7 +649,9 @@ def frame(t: float) -> Image.Image:
 
 STILLS = {  # name: time (s)
     "m1_technology": BEATS["m1"] + 0.4,
+    "m3_engineering_business": BEATS["m3"] + 0.4,
     "m4_medicine": BEATS["m4"] + 0.4,
+    "group_all_four": BEATS["group"] + 0.1,
     "group_question": BEATS["graph_in"] - 0.1,
     "collapse": BEATS["collapse"] + 0.25,
     "wordmark": BEATS["collapse"] + WORD_DELAY + WORD_DUR * 0.55,

@@ -1,7 +1,7 @@
 """S20 · End card (4:20.5-4:26.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
 
-Storyboard: docs/video/script.md section 3, row S20 (visual and on-screen text), section 1 "Team roles" (which
-member carries which STEMB letter), section 5A item 1 (fill names, school, supervisor and the grid before
+Storyboard: docs/video/script.md section 3, row S20 (visual and on-screen text), section 2 "Team roles" (which
+member carries which STEMB letter or letters), section 5A item 1 (fill names, school, supervisor and the grid before
 submitting) and 5E (the optional AI-assistance line); docs/video/shotlist.json, entry S20.
 
 Data sources (nothing is retyped):
@@ -18,7 +18,9 @@ Data sources (nothing is retyped):
       5. the credits line, one item per " · ", set in two columns;
       6. "[optional: AI-assistance line per the organisers' reply]".
     When the team fills a bracketed placeholder in the storyboard, re-running this script picks it up.
-  - docs/video/script.md, section 1, "Team roles" table: [MEMBER n] -> STEMB letter for the grid columns.
+  - docs/video/script.md, section 2, "Team roles" table: [MEMBER n] -> STEMB letter(s), every **L** in the
+    discipline cell (four members; [MEMBER 3] carries E and B). The grid has one column per member, in member
+    order, each headed by the full S T E M B strip with that member's letter(s) lit (as in the lower-thirds).
   - shared/zones.json (via style.project): the 7-zone mark next to the wordmark, as in S05.
 
 Bracketed placeholders ([SCHOOL], [NAME], [TEAM TO FILL], [MEMBER n], [optional: ...]) are drawn in amber dashed
@@ -55,15 +57,16 @@ BEATS = {
     "mark": 0.0,        # cut from S19's "all together": the zone mark pops in, top to bottom
     "word": 0.12,       # "CrowdPulse Macau" wipes in from the mark
     "identity": 0.30,   # [SCHOOL] · Supervisor: [NAME] / event and challenge line
-    "grid": 0.45,       # who-built-what panel; the S T E M B columns follow 0.06 s apart
+    "grid": 0.45,       # who-built-what panel; the four member columns follow 0.06 s apart
     "legend": 0.80,     # evidence legend line
     "credits": 0.92,    # credits, two columns (left, then right with the AI-assistance placeholder)
     "settled": 1.45,    # everything readable; hold to the end (the last block, the right credits column, lands here)
 }
 IN_DUR = 0.45           # fade-and-rise of each block (s)
 RISE = 14               # px
-# the held frame must not replace a block that is still fading in (that would be a small step at "settled")
-assert BEATS["settled"] >= max(BEATS["credits"] + 0.08, BEATS["legend"], BEATS["grid"] + 0.08 + 4 * 0.06,
+# the held frame must not replace a block that is still fading in (that would be a small step at "settled");
+# the last of the four member columns starts 3 x 0.06 s after the first
+assert BEATS["settled"] >= max(BEATS["credits"] + 0.08, BEATS["legend"], BEATS["grid"] + 0.08 + 3 * 0.06,
                                BEATS["identity"] + 0.06) + IN_DUR - 1e-9, BEATS
 
 SS = 2                  # supersampling for shapes
@@ -111,11 +114,17 @@ _origin = subprocess.run(["git", "-C", str(ROOT), "remote", "get-url", "origin"]
 assert re.sub(r"^(https://|git@)|\.git$", "", _origin).replace("github.com:", "github.com/") == REPO_URL, (_origin, REPO_URL)
 assert "for the full 6 s" in storyboard_cell(SHOT, 6) and "full 6 s" in _entry["notes"]   # shown frame 0 to the end
 
-# [MEMBER n] -> STEMB letter (section 1, Team roles); columns follow the S T E M B strip order
-_roles = {m.group(2): m.group(1) for m in re.finditer(
-    r"^\| (\[MEMBER \d\])(?: \(optional\))? \| \*\*([STEMB])\*\* ", SCRIPT, re.M)}
-assert sorted(_roles) == sorted(l for l, _ in STEMB), _roles
-COLUMNS = [(letter, word, _roles[letter]) for letter, word in STEMB]
+# [MEMBER n] -> STEMB letters (section 2, Team roles): every **L** in the discipline cell, so one member may carry
+# several ("**E** Engineering · **B** Business"). One grid column per member, in member order.
+_team = SCRIPT[SCRIPT.index("### Team roles"):]
+_team = _team[:_team.index("\n## ")]   # the Team roles section only (up to section 3)
+_rows = re.findall(r"^\| (\[MEMBER (\d)\])(?: \(optional\))? \| ([^|]*) \|", _team, re.M)
+assert [int(n) for _, n, _ in _rows] == [1, 2, 3, 4], _rows                     # four members, in order
+COLUMNS = [(tag, re.findall(r"\*\*([STEMB])\*\*", cell)) for tag, _, cell in _rows]  # (member, its letters)
+assert all(letters for _, letters in COLUMNS), COLUMNS                         # every member carries a letter
+_all = [l for _, letters in COLUMNS for l in letters]
+assert sorted(_all) == sorted(l for l, _ in STEMB), COLUMNS                   # together: all five, none twice
+WORDS = dict(STEMB)                                                             # letter -> discipline word
 
 LEGEND_BADGE = {"simulated": "SIMULATED", "real": "REAL DATA", "model check": "MODEL CHECK",
                 "pending": "PENDING", "corrected": "CORRECTED"}
@@ -390,42 +399,78 @@ def _centred_rich(cy, text, size, weight, fill):
 ID1 = sprite_from(_centred_rich(ID1_Y, ID_LINE_1, 30, 600, INK))
 ID2 = sprite_from(_centred_rich(ID2_Y, ID_LINE_2, 26, 500, INK_2))
 
-# ---------- who-built-what grid (the full S T E M B strip heads its columns) ----------
+# ---------- who-built-what grid (one column per member, each headed by the full S T E M B strip) ----------
+# Column: header row = [MEMBER n] chip (left) and the S T E M B strip with that member's letter(s) lit (right, as in
+# the lower-thirds); then the discipline word(s) ("Engineering · Business" for a member with two letters); then the
+# dashed contribution slot for the team's text.
 
-COL_GAP = 22
-COL_W = (GRID[2] - GRID[0] - 2 * 32 - 4 * COL_GAP) / 5
-COL_X = [GRID[0] + 32 + i * (COL_W + COL_GAP) for i in range(5)]
-TILE = 56
+N_COLS = len(COLUMNS)                 # four members
+COL_GAP = 40                          # with a thin divider in the middle, so each strip reads with its own chip
+COL_W = (GRID[2] - GRID[0] - 2 * 32 - (N_COLS - 1) * COL_GAP) / N_COLS
+COL_X = [GRID[0] + 32 + i * (COL_W + COL_GAP) for i in range(N_COLS)]
+TILE = 56                             # height of the column header row
 HEAD_Y = GRID[1] + 40                 # centre line of the grid header
-TILE_Y = GRID[1] + 76
-CHIP_Y = TILE_Y + TILE + 16           # top of the member chip
+TILE_Y = GRID[1] + 76                 # top of the column header row
+CHIP_Y = TILE_Y + TILE + 16           # top of the discipline line
 CELL = (CHIP_Y + 48, GRID[3] - 20)    # contribution slot (top, bottom)
 assert CELL[1] - CELL[0] >= 36, CELL  # room for one line of the team's text
+ST_W, ST_H, ST_PITCH = 36, 48, 42     # strip tiles (about the lower-third's strip)
+STRIP_W = 4 * ST_PITCH + ST_W
+WORD_SIZE_G, MEMBER_SIZE = 30, 24
+WORD_SEP = "  ·  "
+
+
+def discipline_parts(letters):
+    """[(text, colour)] for the discipline line: the words of the member's letters, separated by a grey dot."""
+    out = []
+    for i, l in enumerate(letters):
+        if i:
+            out.append((WORD_SEP, INK_3))
+        out.append((WORDS[l], INK))
+    return out
+
+
+# each column's header row and discipline line fit inside the column
+for _tag, _letters in COLUMNS:
+    assert rich_width(_tag, MEMBER_SIZE, 700, 12) + 16 <= COL_W - STRIP_W, (_tag, COL_W)
+    assert sum(text_font(t, WORD_SIZE_G, 600).getlength(t) for t, _ in discipline_parts(_letters)) <= COL_W, _letters
 
 
 def _grid_panel(img, d2):
     d2.rounded_rectangle(tuple(S(v) for v in GRID), S(22), fill=(*NAVY_2, 255))
     draw_rich(img, d2, GRID[0] + 32, HEAD_Y, GRID_HEAD, 30, 700, INK)
+    for cx in COL_X[1:]:  # dividers between the member columns
+        d2.line([(S(cx - COL_GAP / 2), S(TILE_Y - 4)), (S(cx - COL_GAP / 2), S(CELL[1]))], fill=(*NAVY_3, 255),
+                width=S(2))
 
 
 GRID_PANEL = sprite_from(_grid_panel)
 
 
 def _grid_col(i):
-    letter, word, member = COLUMNS[i]
+    member, letters = COLUMNS[i]
     x = COL_X[i]
+    cy = TILE_Y + TILE / 2
 
     def fn(img, d2):
-        d2.rounded_rectangle(tuple(S(v) for v in (x, TILE_Y, x + TILE, TILE_Y + TILE)), S(14), fill=(*CYAN, 255))
-        draw_text(img, (x + TILE / 2, TILE_Y + TILE / 2), letter, 33, 800, NAVY, anchor="mm")
-        draw_text(img, (x + TILE + 18, TILE_Y + TILE / 2), word, 30, 600, INK, anchor="lm")
-        draw_rich(img, d2, x, CHIP_Y + 20, member, 24, 700, INK, pad=12, chip_h=40)
+        draw_rich(img, d2, x, cy, member, MEMBER_SIZE, 700, INK, pad=12, chip_h=40)
+        sx = x + COL_W - STRIP_W
+        for j, (l, _) in enumerate(STEMB):
+            lit = l in letters
+            tx = sx + j * ST_PITCH
+            d2.rounded_rectangle(tuple(S(v) for v in (tx, cy - ST_H / 2, tx + ST_W, cy + ST_H / 2)), S(10),
+                                 fill=(*(CYAN if lit else NAVY_3), 255))
+            draw_text(img, (tx + ST_W / 2, cy), l, 26, 800, NAVY if lit else INK_3, anchor="mm")
+        wx = x
+        for text, colour in discipline_parts(letters):
+            draw_text(img, (wx, CHIP_Y + 20), text, WORD_SIZE_G, 600, colour, anchor="lm")
+            wx += text_font(text, WORD_SIZE_G, 600).getlength(text)
         cell = (x, CELL[0], x + COL_W, CELL[1])
         dashed_rrect(d2, tuple(S(v) for v in cell), S(10), (*WARNING, 120), S(1.8), S(7), S(6))
     return fn
 
 
-GRID_COLS = [sprite_from(_grid_col(i)) for i in range(5)]
+GRID_COLS = [sprite_from(_grid_col(i)) for i in range(N_COLS)]
 
 # ---------- evidence legend line ----------
 

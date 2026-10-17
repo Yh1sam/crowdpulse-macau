@@ -35,12 +35,11 @@ GUIDE, VOICE = BUILD / "guide", BUILD / "voice"
 COLOUR = ["-pix_fmt", "yuv420p", "-color_range", "tv", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709"]
 CLIP_TAGS = "yuv420p,tv,bt709,bt709,bt709"  # what colour_tags() reads back from a clip written with COLOUR
 VOICE_START = {"S01": 3.0, "S10": 0.8, "S17b": 0.5}  # narration offset into the shot (s); others 0.2
-SPEAKER = {  # first VO shot per member gets a lower-third for 3 s
+SPEAKER = {  # first VO shot per member gets a lower-third for 3 s (the team has four members)
     "S01": ("[MEMBER 4]", "M", "Medicine · health and accessibility"),
     "S02": ("[MEMBER 1]", "T", "Technology · app and detection"),
-    "S03": ("[MEMBER 5]", "B", "Business · gap, deployment, cost"),
-    "S04": ("[MEMBER 3]", "E", "Engineering · backend and privacy"),
-    "S10": ("[MEMBER 2]", "S", "Science · forecasting and statistics"),
+    "S03": ("[MEMBER 2]", "S", "Science · forecasting and statistics"),
+    "S04": ("[MEMBER 3]", "EB", "Engineering and business · backend, privacy, deployment"),
 }
 
 

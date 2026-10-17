@@ -185,7 +185,7 @@ def badge(img: Image.Image, kind: str, detail: str = "", sub: str = "", alpha: f
 
 
 def lower_third(img: Image.Image, name: str, letter: str, role: str, alpha: float = 1.0) -> None:
-    """Left lower-third (y 800-890): speaker name and the S T E M B strip with their letter lit."""
+    """Left lower-third (y 800-890): speaker name and the S T E M B strip with their letter(s) lit ("EB" lights two)."""
     if alpha <= 0:
         return
     strip_w = 5 * 46
@@ -196,7 +196,7 @@ def lower_third(img: Image.Image, name: str, letter: str, role: str, alpha: floa
     draw_text(img, (88, 852), role, 22, 500, INK_2, alpha)
     x = x1 - strip_w - 20
     for i, (l, _) in enumerate(STEMB):
-        lit = l == letter
+        lit = l in letter
         rounded(img, (x + i * 46, 822, x + i * 46 + 38, 868), 9, fill=CYAN if lit else NAVY_3, alpha=alpha)
         draw_text(img, (x + i * 46 + 19, 845), l, 24, 800, NAVY if lit else INK_3, alpha, anchor="mm")
 

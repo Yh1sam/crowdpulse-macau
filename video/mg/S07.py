@@ -1,4 +1,4 @@
-"""Shot S07, "What is new?" (0:58.0-1:11.0, 13.0 s), [MEMBER 5] voice-over. Motion graphic.
+"""Shot S07, "What is new?" (0:58.0-1:11.0, 13.0 s), [MEMBER 4] voice-over. Motion graphic.
 
 Credits the police crowd forecast and early-warning system and its planned expansion, then claims
 only what CrowdPulse proposes: movable phones that send only numbers, 5-15 minute forecasts with a

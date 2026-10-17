@@ -37,11 +37,11 @@
     "id": "S03",
     "start_s": 20.5,
     "end_s": 30.5,
-    "speaker": "[MEMBER 5] (VO)",
+    "speaker": "[MEMBER 2] (VO)",
     "narration": "On our dashboard, with a simulated Golden Week crowd, Senado Square's forecast turns critical, with a confidence score and the reasons why.",
     "visual_type": "ui_capture",
     "visual": "Dashboard capture: 1 s on the Live map (OSM tiles, Senado amber: WARNING at about 14:08, as in run A); the pointer clicks the Senado marker, the sidebar fills, then it clicks 'open zone detail →': Zone detail at SIM CLOCK about 14:08-14:10. Density line climbs past the dashed CRITICAL line; the +5 / +10 / +15 min rows turn CRITICAL, first flagged LOW CONFIDENCE, then a confident row only if the capture shows one (in run A at 14:09:08: +5 still low-confidence at 0.516, +10 and +15 confident; a jump cut inside Zone detail is allowed); Senado turns red here, not on the map. Cut on whatever the capture actually shows (rows and colours). After the lower-third, a highlight box traces the reasons listed in the Live map sidebar (the dashboard's reasons for the first forecast row, captured while Senado was WARNING); C2a's Zone detail is not scrolled to its WHY list. Status bar with SIM CLOCK stays visible.",
-    "on_screen_text": "Badge (top-right): LIVE SOFTWARE · SIMULATED CROWD | Badge sub-line (small, under the pill): Simulated Golden Week afternoon · SIM CLOCK, 10× speed | Lower-third: [MEMBER 5] · B · Business, B lit (four-member team: [MEMBER 2], S lit) | Callouts: +5 / +10 / +15 min · confidence · why | Footer: Map © OpenStreetMap contributors",
+    "on_screen_text": "Badge (top-right): LIVE SOFTWARE · SIMULATED CROWD | Badge sub-line (small, under the pill): Simulated Golden Week afternoon · SIM CLOCK, 10× speed | Lower-third: [MEMBER 2] · S · Science, S lit | Callouts: +5 / +10 / +15 min · confidence · why | Footer: Map © OpenStreetMap contributors",
     "assets": [
       "dashboard :3100 /map and /zones/senado_square (capture C2a)",
       "fallback: experiments/results/simulation_run/A05_zone_senado_critical_forecast.png"
@@ -67,15 +67,15 @@
     "id": "S05",
     "start_s": 39.5,
     "end_s": 48.0,
-    "speaker": "ALL (on camera: one word each, then together)",
-    "narration": "[M1] Technology. [M2] Science. [M3] Engineering. [M4] Medicine. [M5] Business. [ALL] We are CrowdPulse Macau.",
+    "speaker": "ALL (on camera: one line each, then together)",
+    "narration": "[M1] Technology. [M2] Science. [M3] Engineering and business. [M4] Medicine. [ALL] We are CrowdPulse Macau.",
     "visual_type": "team_footage",
-    "visual": "Five head-and-shoulders cuts of about 0.8 s, identical framing and background, hard cuts on the beat. Each member holds an object from their own work: M1 a phone on a clamp, showing the app (Setup tab, no street clip) only if the app was really installed on that phone (docs/testing.md 6.1, Xcode signing with an Apple ID), otherwise with its screen off, and nothing implying a field run; M2 a printed F1 bar chart; M3 a laptop with the server log; M4 a printed step-free route map; M5 the blank cost panel or the AGPL / deployment diagram (no numbers). Then a group shot (about 2.5 s, 'We are CrowdPulse Macau') as the zone graph collapses into the CrowdPulse wordmark, then a 2 s silent hold on the title card so the research question can be read (it appears with the wordmark and stays about 4 s in all).",
+    "visual": "Four head-and-shoulders cuts of about 0.8 s (M3's line is longer: 'Engineering and business.'), identical framing and background, hard cuts on the beat. Each member holds an object from their own work: M1 a phone on a clamp, showing the app (Setup tab, no street clip) only if the app was really installed on that phone (docs/testing.md 6.1, Xcode signing with an Apple ID), otherwise with its screen off, and nothing implying a field run; M2 a printed F1 bar chart; M3 a laptop with the server log (M3 covers Engineering and Business, so both the E and B tiles light); M4 a printed step-free route map. Then a group shot (about 2.5 s, 'We are CrowdPulse Macau') as the zone graph collapses into the CrowdPulse wordmark, then a 2 s silent hold on the title card so the research question can be read (it appears with the wordmark and stays about 4 s in all).",
     "on_screen_text": "Lower-thirds: [MEMBER n] · S/T/E/M/B · role, with the S T E M B strip lighting the speaker's letter | Title: CrowdPulse Macau | Sub: Our question: can ordinary phones, sending only numbers, help forecast crowds without identifying anyone? | Responsible AI · Challenge 2(c)",
     "assets": [
       "team camera: phone on tripod, landscape 1080p30, window light"
     ],
-    "notes": "Chapter: team + title. Deliberate visual beat: 9 words in 8.5 s, including the 2 s silent title hold, is intentional (roll call and research question). Never cut the title hold. Four-member team: four cuts, M3 says 'Engineering and business.' Never show a cost sheet with figures. Never show the app on a phone it was not installed on: every documented run is the iPhone Simulator."
+    "notes": "Chapter: team + title. Deliberate visual beat: 9 words in 8.5 s, including the 2 s silent title hold, is intentional (roll call and research question). Never cut the title hold. The team has four members: four cuts, and M3 says 'Engineering and business.' Never show a cost sheet with figures. Never show the app on a phone it was not installed on: every documented run is the iPhone Simulator."
   },
   {
     "id": "S06",
@@ -97,7 +97,7 @@
     "id": "S07",
     "start_s": 60.0,
     "end_s": 73.0,
-    "speaker": "[MEMBER 5] (VO)",
+    "speaker": "[MEMBER 4] (VO)",
     "narration": "Macau's police already run a crowd warning system here, and plan to expand it. We propose movable, numbers-only phones, and forecasts with a confidence score.",
     "visual_type": "motion_graphic",
     "visual": "0-4 s (\"Macau's police already run a crowd warning system here\"): the 7-zone map; a soft shaded band lights up over the whole corridor of the zone model (Ruins → Rua de S. Paulo → St. Dominic's → Senado), labelled with the police system's name (no camera positions are drawn). 4-6 s (\"and plan to expand it\"): the map zooms out to a Macau outline; grey pins for border posts and scenic areas pulse once. 6-13 s (\"We propose movable, numbers-only phones...\"): back to the 7-zone graph; phone icons drop both inside the band and on the Tercena route, with no single square highlighted; number packets flow to a server icon; each zone gets three small forecast chips +5 · +10 · +15 min with a confidence dot. Re-key the beats to the word timestamps of the real take.",
@@ -257,7 +257,7 @@
     "id": "S17",
     "start_s": 215.0,
     "end_s": 233.5,
-    "speaker": "[MEMBER 5] (VO over B-roll)",
+    "speaker": "[MEMBER 1] (VO over B-roll)",
     "narration": "Phones on temporary mounts can serve one festival, then move to the next. The intended user is Macau's police, who run crowd control. The whole chain runs end to end in simulation, with 124 automated tests passing.",
     "visual_type": "motion_graphic",
     "visual": "Times at 140 wpm; re-key to the real take. 0-5.6 s: a phone-on-clamp icon hops between festival dates on a calendar while a pole-mounted camera stays bolted in place. 5.0-10.0 s (the intended-user line): an operator card with a separate 'No partner yet' chip (on 'Macau's police', about 7.3 s; generic shapes, no emblems); the cost panel slides in beside it only after the team approves docs/cost-estimate.md (5A item 4). About 9.9-14.9 s: B-roll filmed by the team (film at least 5 s), a member runs .venv/bin/python -m pytest and the screen shows '54 passed'; from about 11.5 s the counters 54 · 24 · 33 · 13 tick up over it and the total lands on 124 on 'a hundred and twenty-four' (about 14.1 s). About 14.9-18.5 s: the roadmap arrow, four stations.",
@@ -277,7 +277,7 @@
     "id": "S17b",
     "start_s": 233.5,
     "end_s": 243.5,
-    "speaker": "[MEMBER 2] (VO)",
+    "speaker": "[MEMBER 3] (VO)",
     "narration": "The approving operator, named in the audit log, and the department running it. Every notice says an AI forecast is involved.",
     "visual_type": "motion_graphic",
     "visual": "Motion-graphics card on navy in the S07 / S17 style: a title and three rows, shapes and icons only, no department emblem, no badge. 0.0 s: the title and row 1 appear (icon: a figure with a walking stick beside a wheelchair outline). About 0.5 s: the voice starts and row 2 builds (icon: a log list with a name line). About 6.1 s ('Every notice'): row 3 builds (icon: a sign). The voice ends about 9.5 s at 140 wpm; the card holds to 10.0 s. Title and rows stay above y 780, clear of the lower-third (y 800-890) and the caption band (y 920-990); the footer sits in the footer slot. Re-key to the real take.",
@@ -290,7 +290,7 @@
       "docs/research/brief-evidence.md (sections 5, 6 and 8)",
       "docs/model-card.md (Fairness considerations)"
     ],
-    "notes": "Chapter: responsible AI (no chapter card: it continues S17's 'Can it happen?'). No lower-third: [MEMBER 2] already had one in S10 (first VO shot per member only). Four-member team: [MEMBER 3] (script.md section 2, option B). Sources: 'named in the audit log': the dashboard's 'Deciding as' field sends a self-declared name (no login), the backend refuses an empty name, 'operator' and 'system' (HTTP 422), and decide_intervention writes the name as decided_by and as the audit-log actor (tests test_decisions_must_name_the_person_deciding and test_named_approval_is_recorded_with_the_name). Say 'named', never 'signed in', 'verified' or 'authenticated'. 'The department running it': brief-evidence.md, section 6, 'Responsibility (for discussion, not settled)': under Law 8/2005 the operating department would be the data controller; the police hold the duty for pedestrian movement (Law 14/2018, Art. 3); 'to be confirmed with the authorities' stays in the footer. 'Every notice says an AI forecast is involved': AI_NOTICE in backend/app/services/intervention.py is appended to every non-empty notice in zh, en and pt (en: 'Advice from an AI crowd forecast, approved by staff.'; test test_public_notices_say_ai_is_involved_and_staff_approved); its zh and pt wording awaits a fluent team member's check before S04 is captured. Row 1 keeps the hedge 'may be more vulnerable' (brief-evidence.md, section 5, 'At-risk groups': Motomura 2019 'may', Chowhan 2026 'face heightened risks'); no wheelchair-specific evidence was found (section 8), so wheelchair users appear only inside 'less mobile'; 'visitors who can't read Chinese' is the team's design reasoning (docs/model-card.md, 'Fairness considerations'), not a cited finding. Row 3's sign is a plan (draft trilingual sign, brief-evidence.md, section 6) and always carries '(planned)'. Never 'most at risk' without the hedge; never 'legal', 'compliant' or 'approved' about the law; never 'in partnership with'. 21 words in 10.0 s (0.90 at 140 wpm with the 0.5 s lead-in; guide 7.41 s from 0.5 s, ending at 7.91 s). Overrun (last in the order, script.md section 6): the short line 'The approving operator, named in the audit log, and the department running it.' (13 words) and a 7.0 s card; row 3 stays on screen. Never shorter than 7 s."
+    "notes": "Chapter: responsible AI (no chapter card: it continues S17's 'Can it happen?'). No lower-third: [MEMBER 3] already had one in S04 (first VO shot per member only). Spoken by [MEMBER 3] (the team has four members). Sources: 'named in the audit log': the dashboard's 'Deciding as' field sends a self-declared name (no login), the backend refuses an empty name, 'operator' and 'system' (HTTP 422), and decide_intervention writes the name as decided_by and as the audit-log actor (tests test_decisions_must_name_the_person_deciding and test_named_approval_is_recorded_with_the_name). Say 'named', never 'signed in', 'verified' or 'authenticated'. 'The department running it': brief-evidence.md, section 6, 'Responsibility (for discussion, not settled)': under Law 8/2005 the operating department would be the data controller; the police hold the duty for pedestrian movement (Law 14/2018, Art. 3); 'to be confirmed with the authorities' stays in the footer. 'Every notice says an AI forecast is involved': AI_NOTICE in backend/app/services/intervention.py is appended to every non-empty notice in zh, en and pt (en: 'Advice from an AI crowd forecast, approved by staff.'; test test_public_notices_say_ai_is_involved_and_staff_approved); its zh and pt wording awaits a fluent team member's check before S04 is captured. Row 1 keeps the hedge 'may be more vulnerable' (brief-evidence.md, section 5, 'At-risk groups': Motomura 2019 'may', Chowhan 2026 'face heightened risks'); no wheelchair-specific evidence was found (section 8), so wheelchair users appear only inside 'less mobile'; 'visitors who can't read Chinese' is the team's design reasoning (docs/model-card.md, 'Fairness considerations'), not a cited finding. Row 3's sign is a plan (draft trilingual sign, brief-evidence.md, section 6) and always carries '(planned)'. Never 'most at risk' without the hedge; never 'legal', 'compliant' or 'approved' about the law; never 'in partnership with'. 21 words in 10.0 s (0.90 at 140 wpm with the 0.5 s lead-in; guide 7.41 s from 0.5 s, ending at 7.91 s). Overrun (last in the order, script.md section 6): the short line 'The approving operator, named in the audit log, and the department running it.' (13 words) and a 7.0 s card; row 3 stays on screen. Never shorter than 7 s."
   },
   {
     "id": "S18",
@@ -312,15 +312,15 @@
     "id": "S19",
     "start_s": 249.5,
     "end_s": 260.5,
-    "speaker": "[MEMBER 5], [MEMBER 3], [MEMBER 2], [MEMBER 1] (on camera, relay)",
-    "narration": "[M5] Next: a supervised street pilot in Macau, with permission. [M3] The AI recommends. [M2] A person decides. [M1] Nothing identifying leaves the phone.",
+    "speaker": "[MEMBER 3], [MEMBER 4], [MEMBER 2], [MEMBER 1] (on camera, relay)",
+    "narration": "[M3] Next: a supervised street pilot in Macau, with permission. [M4] The AI recommends. [M2] A person decides. [M1] Nothing identifying leaves the phone.",
     "visual_type": "team_footage",
-    "visual": "Wide shot of the whole team in the S05 set; each speaker leans in or is lit in turn; M4 is in frame. Allow about 0.3-0.5 s for each of the three hand-offs. Last 1 s: everyone together.",
+    "visual": "Wide shot of the whole team in the S05 set; each speaker leans in or is lit in turn, in the order M3, M4, M2, M1; all four speak. Allow about 0.3-0.5 s for each of the three hand-offs. Last 1 s: everyone together.",
     "on_screen_text": "Next: supervised street pilot, only with police approval and the data-protection bureau's view first (exact approvals to be confirmed) | Final all-together second only: The AI recommends. A person decides.",
     "assets": [
       "team camera"
     ],
-    "notes": "Four-member team: M3 says the 'Next' line. Timing: 20 words + 3 hand-offs + 1 s together in 11.0 s (guide 9.4 s without hand-offs). If the real take overruns, apply cut 5: drop the separate all-together second (the wide shot already holds everyone); never cut a line. The adult supervisor may appear in the wide shot but does not speak. Authorities (brief-evidence.md, section 6): the police hold the legal duty for pedestrian movement (Law 14/2018). Images of identifiable people are personal data under Law 8/2005, Art. 4(1)(1), so the Personal Data Protection Bureau's view comes first; if the phones counted as a video-surveillance system under Law 2/2012, the Chief Executive's authorisation after a binding opinion from that bureau would also apply. Whether the Municipal Affairs Bureau must license the mounts (Reg. Adm. 28/2004) is for that bureau to confirm."
+    "notes": "The team has four members: M3 says the 'Next' line and M4 'The AI recommends.' Timing: 20 words + 3 hand-offs + 1 s together in 11.0 s (guide 9.4 s without hand-offs). If the real take overruns, apply cut 5: drop the separate all-together second (the wide shot already holds everyone); never cut a line. The adult supervisor may appear in the wide shot but does not speak. Authorities (brief-evidence.md, section 6): the police hold the legal duty for pedestrian movement (Law 14/2018). Images of identifiable people are personal data under Law 8/2005, Art. 4(1)(1), so the Personal Data Protection Bureau's view comes first; if the phones counted as a video-surveillance system under Law 2/2012, the Chief Executive's authorisation after a binding opinion from that bureau would also apply. Whether the Municipal Affairs Bureau must license the mounts (Reg. Adm. 28/2004) is for that bureau to confirm."
   },
   {
     "id": "S20",
