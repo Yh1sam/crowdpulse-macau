@@ -45,7 +45,7 @@ Compiled on 2026-10-13. Every item comes from the verified research list. Englis
 | Crowd-control activations (validation labels) | Ground truth for "congested" | Press-reported times: 2 Oct 2025 14:45–16:10 (Macao Daily News, 2025-10-03, https://www.macaodaily.com/html/2025-10/03/content_1861090.htm); 4 Oct 2025 13:00–15:40 and 16:25–17:25; 4 Oct 2026 13:50–15:10 (Macao Daily News, 2026-10-05, https://www.macaodaily.com/html/2026-10/05/content_1938089.htm) | **Real times.** Using them as labels is *team inference*. |
 | Telecom-based attraction crowding | Wider context | MGTO 智慧客流應用: "透過電訊統計數據源進行分析，監測全澳114個景點" (MGTO reply, 2026-02-04, https://www.al.gov.mo/uploads/attachment/2026-02/8c165cf67928aa874b1e92c9d7f5164a.pdf) | **Real system;** no public API or data access verified. |
 | PSP 人流預測預警系統 output | Possible exchange | Internal to PSP. PSP: "對於將人流數據跨部門互通及進一步研究，本局持開放態度" (open to cross-department sharing; reply 10/F-ZC/2026) | **Real; not accessible today.** |
-| Training data | Fit the forecaster | Synthetic Golden Week simulation (repo). Melbourne per-minute pedestrian counts (CC BY), archived since 2026-10-12 (`experiments/datasets/melbourne/`) | Synthetic patterns are **assumed**. Melbourne is **real but not Macau;** analysis not yet done. |
+| Training data | Fit the forecaster | Synthetic Golden Week simulation (repo). Melbourne pedestrian counts (CC BY), per minute or per 5 minutes depending on the sensor, archived since 2026-10-12 ([`experiments/datasets/melbourne/README.md`](../../experiments/datasets/melbourne/README.md)) | Synthetic patterns are **assumed**. Melbourne is **real but not Macau;** the analysis is pre-registered in that README (commit 95057e2, pushed 16 Oct 2026 15:21 UTC, before the test days 18-22 Oct, Melbourne time) and not yet run. |
 
 **Gap:** no source publishes a headcount, density or hourly flow for any of the six zones on any peak day. Only the times of crowd control are reported, so CrowdPulse would have to collect its own counts.
 
@@ -165,6 +165,7 @@ Compiled on 2026-10-13. Every item comes from the verified research list. Englis
 - Gill & Landi counter that the dead are "not just the frail".
 - A 2026 review (Chowhan et al., *Public Health Rev* 47:1609310) says children, older persons and people with disabilities "face heightened risks". This is background framing with no data.
 - Safe line: dense crowds can kill anyone; older, smaller or less mobile people may be more vulnerable.
+- How the design uses this: [docs/model-card.md, "Who may be more at risk"](../model-card.md#who-may-be-more-at-risk-fairness-considerations).
 
 **Best video sentence (10 words):**
 > "Crowd-crush victims typically die standing up, suffocated by chest compression."
@@ -211,7 +212,7 @@ Compiled on 2026-10-13. Every item comes from the verified research list. Englis
 **Responsibility (for discussion, not settled):**
 - PSP holds the legal duty for pedestrian movement (Law 14/2018).
 - Under Law 8/2005, the department that operates CrowdPulse would be the data controller.
-- In the design, a named human operator approves every action and is recorded in the audit log (repo).
+- In the design, a named human operator approves every action and is recorded in the audit log (repo: the dashboard's "Deciding as" field, self-declared with no login; `backend/app/schemas.py` refuses an empty name, "operator" and "system"; see [docs/model-card.md, "Responsibility when it fails"](../model-card.md#responsibility-when-it-fails) and [docs/privacy.md](../privacy.md#the-one-name-the-system-stores-the-person-who-decides)).
 
 **Proposed trilingual sign.** This is a draft to be confirmed with the DSPDP and the operating department. The 61/2012 format could serve as a model.
 
@@ -227,7 +228,7 @@ Compiled on 2026-10-13. Every item comes from the verified research list. Englis
 > Phones placed here temporarily use their cameras to count people on the device, to forecast crowding and keep the public safe. Images are not stored or sent; only numbers are sent. The AI only recommends; staff decide every detour.
 > Responsible body: [department]　Contact: [phone] / [website, with full statement]
 
-The "not stored or sent" wording is a design claim. It must be true of the deployed build.
+The "not stored or sent" wording is a design claim. It must be true of the deployed build. Separately, every public notice the system drafts already ends with an AI clause (`AI_NOTICE` in `backend/app/services/intervention.py`; [docs/privacy.md, "Telling the public"](../privacy.md#telling-the-public)).
 
 ---
 
@@ -274,7 +275,7 @@ The "not stored or sent" wording is a design claim. It must be true of the deplo
 - The PSP system's forecast horizon, algorithm, accuracy, sensor type, vendor or cost.
 - Whether MGTO's app still forecasts today. 2025–26 replies describe monitoring only.
 - Accessibility (step-free) information for the PSP exit lanes, and any PSP plan naming St Dominic's Square (板樟堂前地) itself.
-- Any sourced cost of a phone kit or of a fixed counting camera.
+- Any sourced cost of a phone kit or of a fixed counting camera. (The team's own itemised one-year estimate, built from dated public prices, is a draft in [docs/cost-estimate.md](../cost-estimate.md); it is a team estimate, not a sourced kit cost.)
 - A rain or weather data feed (SMG was not researched).
 - Any DSPDP guidance on on-device people counting. Any Macau rule on AI-use notices. Whether Law 2/2012 or DSPDP authorisation applies to a non-police operator. Any heritage-law (Law 11/2013) rule on attaching devices.
 - Typhoon Matmo on 5 Oct 2025 (Boletim Oficial PDF not opened): unconfirmed. Do not explain the 5 Oct 2025 drop in arrivals by weather.

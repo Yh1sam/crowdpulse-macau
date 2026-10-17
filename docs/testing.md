@@ -1,11 +1,11 @@
 # Testing CrowdPulse
 
-The automated suites and builds in section 1 were last re-run on 2026-10-11, and the Python install in section 0 on a fresh `git archive` export the same day. The other sections were run when they were written, between 2026-09-29 and 2026-10-09. Expected results are what those runs produced.
+The Python, dashboard and SketchFuture test suites in section 1 were last re-run on 2026-10-17 (54, 24 and 33 passed). The iOS tests, the two production builds and the Python install in section 0 (on a fresh `git archive` export) were last run on 2026-10-11; the iOS test files have not changed since 2026-09-30. The other sections were run when they were written, between 2026-09-29 and 2026-10-09, except the "Deciding as" step in section 4 and the unnamed-decision check in section 5, both added on 2026-10-17 for the change of 2026-10-16. Expected results are what those runs produced.
 Run commands from the repository root unless a step says otherwise.
 
 ## 0. Prerequisites
 
-- macOS with Xcode 16+ (iOS tests and the phone app), Python 3.12, `uv`, Node 20+, `pnpm`, `ffmpeg`.
+- macOS with Xcode 16+ (iOS tests and the phone app), Python 3.12, `uv`, `pnpm`, `ffmpeg` and Node 24.15.0 or later in the Node 24 line (the repository's `.nvmrc` selects 24.16.0, the only version tested), or 22.22.2 or later on Node 22, or Node 26 or later. That Node minimum is set by the tests: the dashboard's tests and SketchFuture's `tests/app-errors.test.ts` run under jsdom 30.1.1, whose `engines` field is `^22.22.2 || ^24.15.0 || >=26.0.0` (Node 25 is outside it). SketchFuture's dev server and build alone run from Node 22.12 or 24.0.
 - Optional: `xcodegen` (`brew install xcodegen`) if you change `ios/CrowdPulseSensor/project.yml`.
 
 Python environment (versions pinned in `uv.lock`; scikit-learn is pinned to 1.9.1 because the committed models were pickled with it):
@@ -34,12 +34,13 @@ cd sketchfuture && npm install
 
 | suite | command | expected |
 |---|---|---|
-| backend API + ML pipeline | `.venv/bin/python -m pytest -q` | 49 passed |
-| dashboard components | `cd dashboard && pnpm test` | 15 passed |
+| backend API + ML pipeline | `.venv/bin/python -m pytest` (`pyproject.toml` already adds `-q`) | 54 passed |
+| dashboard components | `cd dashboard && pnpm test` | 24 passed |
 | dashboard production build | `cd dashboard && node node_modules/next/dist/bin/next build` | "Compiled successfully", 10 routes |
-| SketchFuture model + CrowdPulse hand-over | `cd sketchfuture && npm test` | 27 passed |
+| SketchFuture model + CrowdPulse hand-over | `cd sketchfuture && npm test` | 33 passed |
 | SketchFuture production build | `cd sketchfuture && npm run build` | succeeds; Vite prints a chunk-size advisory for the bundled offline map |
 | iOS logic + detector | see below | 13 tests, 0 failures |
+| **total** | | **124 automated tests** (54 + 24 + 33 + 13) |
 
 ```bash
 cd ios/CrowdPulseSensor && xcodebuild test -project CrowdPulseSensor.xcodeproj -scheme CrowdPulseSensor -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
@@ -103,6 +104,8 @@ Then, from the repository root, run each detector over the clip:
 
 Expected: YOLO11n near-field MAE 1.5, found 97%; Apple built-in MAE 3.0, found 55% ("found" = detector count ÷ hand count, not per-person recall). Note: when `frames/` is absent the script prints "alignment ok" without checking anything; the pixel check only runs if the frame images exist.
 
+> **Warning: this step overwrites committed, published files.** `experiments/video_eval.py` writes into `experiments/results/video/` by default (`--out`): `detector_overlay.png`, `video_count_accuracy.png`, `summary.md` and `summary.json` (`video_eval_rows.csv` there is not rewritten). `detector_overlay.png` shows real passers-by from the CC0 clip. The script mosaics their faces before plotting (`mask_overlay_frame` from `experiments/mask_faces.py`, head boxes in `experiments/mask_faces_boxes.json`) and stops if the plotted frame has no head boxes. Before committing a re-run, open the new `detector_overlay.png` and check that every face is pixelated; if the plotted frame changed, mark its faces in `mask_faces_boxes.json` first. To experiment without touching the published figures, pass `--out` with a scratch folder.
+
 ### 3b. The 2,000-frame Mall benchmark
 
 Download and unpack the dataset as described in `experiments/datasets/mall/README.md` (research use only; 92 MB). Wrap the frames into a video without re-encoding (every frame stays byte-identical to the dataset JPEG):
@@ -160,10 +163,10 @@ What you should see, by the SIM CLOCK in the dashboard's top bar (Macau time; ti
 | 13:53 | Overview | Senado Square WARNING (density ≈ 0.45–0.50); some "Deploy staff" recommendations pending |
 | 14:04–14:07 | Live map / Zone detail | event ends at St. Dominic's, tour groups arrive; Senado density rises |
 | 14:08–14:09 | Zone detail → Senado Square | forecasts turn CRITICAL, the first ones flagged LOW CONFIDENCE — HUMAN REVIEW REQUIRED; alert appears |
-| 14:09–14:11 | Interventions | once a CRITICAL forecast reaches 60% confidence, the pending "Deploy staff" is superseded by "Redirect part of … flow around Senado Square" (southbound or north-eastbound, whichever inflow dominates) with route, accessibility note and zh/en/pt notice. Click VIEW EVIDENCE, then APPROVE |
+| 14:09–14:11 | Interventions | once a CRITICAL forecast reaches 60% confidence, the pending "Deploy staff" is superseded by "Redirect part of … flow around Senado Square" (southbound or north-eastbound, whichever inflow dominates) with route, accessibility note and zh/en/pt notice; each notice ends with the AI clause ("Advice from an AI crowd forecast, approved by staff."). Enter a name in the **Deciding as** field at the top of the page (APPROVE, REJECT and the Alerts page's ack stay disabled until a name is set; for rehearsals and recordings use a fictional name such as `demo-operator-1`). Click VIEW EVIDENCE, then APPROVE |
 | 14:20–14:40 | Zone detail | density eases (simulated truth ≈ 0.90 → 0.73–0.75 by 14:40, still above CRITICAL); forecasts move back towards WARNING. Without approval it ends ≈ 0.82–0.87 |
 
-Also check: Alerts (chronological list, ack button), Interventions → audit log shows `intervention_recommended` and `intervention_approved`, Reliability (sensor table), Evaluation (metrics and figures), Privacy.
+Also check: Alerts (chronological list, ack button, enabled once a name is set), Interventions → audit log shows `intervention_recommended` (actor `system`) and `intervention_approved` with the name you entered as the actor, Reliability (sensor table), Evaluation (metrics on simulated test days, and figures), Privacy. The name is self-declared (there is no login): the log records the name typed, not a checked identity.
 
 Optional: the top bar's "inject surge (Senado)" button adds 300 people instantly.
 
@@ -175,7 +178,7 @@ The iOS app can join the running simulation from the iPhone Simulator in video m
 
 ## 4c. SketchFuture route check (no phone)
 
-Start SketchFuture next to the backend and dashboard (`cd sketchfuture && npm install && npm run dev`, http://localhost:4173; set `NEXT_PUBLIC_SKETCHFUTURE_URL` for the dashboard if it runs elsewhere). When the "Redirect part of … flow around Senado Square" card appears (table above), its **Route check in SketchFuture** section names the corridor that will be closed (Largo de S. Domingos link: three 議事亭前地 footway segments) and the model's direct/detour walking distances (125 m → 216 m). Click **TEST IN SKETCHFUTURE**: a new tab opens SketchFuture with the plan "CrowdPulse #N：封閉板樟堂前地↔議事亭前地通道", a notice naming the recommendation it came from, and the comparison of the same 120 people with and without the closure (per-profile travel time, distance, queues, reachability). 撤銷 (undo) restores the plan that was saved in that browser before. After APPROVE the card moves to "Decided / expired" with a smaller *test in SketchFuture* link.
+Start SketchFuture next to the backend and dashboard (`cd sketchfuture && npm install && npm run dev`, http://localhost:4173; set `NEXT_PUBLIC_SKETCHFUTURE_URL` for the dashboard if it runs elsewhere). Only redirect cards whose corridor is on SketchFuture's map have the button. The "Redirect part of … flow around Senado Square" card (table above) has it only when it targets the southbound flow from St. Dominic's: its **Route check in SketchFuture** section then names the corridor that will be closed (Largo de S. Domingos link: three 議事亭前地 footway segments) and the model's direct/detour walking distances (125 m → 216 m), and the plan is "CrowdPulse #N：封閉板樟堂前地↔議事亭前地通道". When it targets the north-eastbound flow from Avenida de Almeida Ribeiro, as in both final recorded runs (`experiments/results/simulation_run/README.md`) and the 17 Oct S04 capture, it reads "SketchFuture route check unavailable: Avenida de Almeida Ribeiro is outside SketchFuture's pedestrian map (no crossing of the avenue is mapped)." Then use the pending "Redirect part of southbound flow around St. Dominic's Square" card (flow from Rua de S. Paulo), as the video's S15 does: its plan is "CrowdPulse #N：封閉大三巴街↔板樟堂前地通道" (three 板樟堂街 / 板樟堂前地 segments; recommendation #721 in `sketchfuture/VERIFICATION.md`). Click **TEST IN SKETCHFUTURE**: a new tab opens SketchFuture with that plan, a notice naming the recommendation it came from, and the comparison of the same 120 people with and without the closure (per-profile travel time, distance, queues, reachability). 撤銷 (undo) restores the plan that was saved in that browser before. After APPROVE the card moves to "Decided / expired" with a smaller *test in SketchFuture* link.
 
 Automated checks: `cd sketchfuture && npm test` (URL plan round-trip and validation; crosswalk consistent with the map: valid closures, recorded distances reproduced by the model's router, at least one cohort route changes, no walker stranded), `cd dashboard && pnpm test` (plan built from a recommendation, card rendering, unsupported corridors), and `backend` tests (`/config` serves the crosswalk for every zone-graph corridor). `cd sketchfuture && npm run crosswalk` regenerates `shared/sketchfuture_crosswalk.json`; commit it together with any map change.
 
@@ -195,6 +198,12 @@ Expected `403`. An identifying field is refused:
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" -X POST localhost:8000/sensor/observation -H 'content-type: application/json' -d '{"sensor_id":"node-test1","timestamp":"2026-10-03T06:00:00Z","latitude":22.1934,"longitude":113.5397,"location_accuracy_m":5,"heading_deg":10,"device_motion_stability":0.95,"person_count":10,"estimated_density":0.2,"flow_direction_deg":90,"flow_speed_mps":1.0,"vision_confidence":0.9,"camera_obstructed":false,"model_version":"t","face_id":"abc"}'
+```
+
+Expected `422`. A decision without a person's name is refused (an empty name, `operator` and `system` are all refused; the request body is checked before the intervention is looked up, so any id works):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" -X POST localhost:8000/interventions/1/approve -H 'content-type: application/json' -d '{"operator":"operator"}'
 ```
 
 Expected `422`.
