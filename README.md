@@ -21,7 +21,7 @@ Imperial College London Hackathon Hong Kong & Macau 2026 · High School track ·
 
 ## How this entry meets the brief
 
-Video timecodes are from [docs/video/shotlist.json](docs/video/shotlist.json) (planned cut, 4:26.5; re-timed after the team's real voice takes).
+Video timecodes are from [docs/video/shotlist.json](docs/video/shotlist.json) (planned cut, 4:44.5; re-timed after the team's real voice takes).
 
 | the brief asks for | proposal ([docs/proposal.md](docs/proposal.md)) | video shot | repo |
 |---|---|---|---|

@@ -1,4 +1,4 @@
-"""Shot S13 (2:17.0-2:34.5, 17.5 s): 2,000 annotated mall frames, a steady under-count, and a
+"""Shot S13 (2:29.5-2:48.0, 18.5 s): 2,000 annotated mall frames, a steady under-count, and a
 post-hoc calibration shown as a lead, not proof, beside a guess that uses no detector.
 
 Storyboard: docs/video/script.md, section 3 row S13, section 4 claims row S13, section 6 ("Global
@@ -15,7 +15,7 @@ is in S02):
   left    stage 1: "2,000 annotated frames", then "count vs annotated count: 59% · 93% of boxes
           are people" (93% on "ninety-three percent"; 59% is no longer spoken), then near /
           middle / far recall bars.
-          stage 2 (from "Twenty labelled frames"): the schematic "true ≈ a × detected + b", the
+          stage 2 (from "With twenty labelled frames"): the schematic "true ≈ a × detected + b", the
           "20 labelled frames" tag, the counter 13.4 → 3.3 people per frame over an error bar,
           the no-detector guess as a second bar on the same scale with its label "a fixed guess,
           no detector: 4.8" (28 px, larger than the 26 px limits line; from the countdown to the
@@ -64,18 +64,20 @@ from style import ROOT  # noqa: E402
 
 SHOT_ID = "S13"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT_ID)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)   # 17.5 s
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)   # 18.5 s
 
 # Seconds from the shot start, keyed to the guide voice video/build/guide/S13.wav (say -v Daniel
-# -r 155, 15.78 s) laid from VOICE_START: word times from its pauses (silencedetect: 2.40-2.62,
-# 4.49-4.71, 7.54-7.79, 10.64-10.91, 14.09-14.33, 14.72-14.94 s into the file) and prefix
-# syntheses, 17 Oct. Shot times: "On two thousand annotated mall frames," 0.2-2.6 | "the detector
+# -r 155, 16.66 s) laid from VOICE_START: word times from its pauses (silencedetect: 2.40-2.62,
+# 4.49-4.71, 7.54-7.78, 9.48-9.70, 11.52-11.80, 14.97-15.21, 15.61-15.82 s into the file) and prefix
+# syntheses, 18 Oct (the first two sentences are the same audio as on 17 Oct, so stage 1 is
+# unchanged). Shot times: "On two thousand annotated mall frames," 0.2-2.6 | "the detector
 # steadily under-counted," 2.8-4.7 ("steadily" 3.5) | "yet ninety-three percent of its boxes were
-# people." 4.9-7.7 ("ninety-three" 5.3) | "Twenty labelled frames calibrated that one camera," 8.0-10.8
-# ("calibrated" 9.5, "that one camera" 9.9) | "cutting error from thirteen to about three people per
-# frame." 11.1-14.3 ("thirteen" 12.2, "three" 13.0-13.4) | "A lead, not proof." 14.5-16.0.
-# The storyboard's times (calibration from about 7.7 s, limits line from about 9.5 s, counter on
-# about 12.0-13.7 s) are at 140 wpm. Re-key to the real voice take.
+# people." 4.9-7.7 ("ninety-three" 5.3) | "With twenty labelled frames," 8.0-9.7 ("twenty" 8.3,
+# "labelled frames" 8.8) | "we calibrated that one camera," 9.9-11.7 ("calibrated" 10.35, "that one
+# camera" 10.9) | "cutting error from thirteen to about three people per frame." 12.0-15.2
+# ("thirteen" 13.15, "three" 13.95-14.35) | "A lead, not proof." 15.4-16.9.
+# The storyboard's times (calibration from about 7.7 s, limits line from about 10.3 s, counter on
+# about 12.9-14.6 s) are at 140 wpm. Re-key to the real voice take.
 VOICE_START = 0.2           # video/assemble.py default
 BEATS = {
     "card_in": 0.0,         # scatter card fades in (voice from 0.2 s)
@@ -88,15 +90,15 @@ BEATS = {
     "count_card": 4.45,     # end of "under-counted," -> count card, 59% (on screen only)
     "ninety_three": 5.3,    # "ninety-three percent of its boxes" (5.3)
     "recall_bars": 5.5,     # "of its boxes were people" -> near / middle / far recall bars (the cause)
-    "calibrate_in": 8.3,    # stage 2, during "Twenty labelled frames" (8.0-9.5)
-    "twenty": 8.7,          # "labelled frames" (8.5-9.5) -> "20 labelled frames" tag
-    "formula": 9.45,        # "calibrated" (9.5) -> true ≈ a × detected + b
-    "one_camera": 9.85,     # "that one camera" (9.9-10.8) -> calibration limits line, to the end
-    "error": 11.1,          # "cutting error" (11.1-11.8) -> "count error" label
-    "thirteen": 12.05,      # "from thirteen" ("thirteen" 12.2) -> 13.4, the error bar fills
-    "three": 12.5,          # "to about three" (12.5; "three" 13.0-13.4) -> counts down to 3.3 by 13.35
-    "guess": 12.5,          # the same moment, to the end: the no-detector guess bar and its label
-    "lead": 14.5,           # "A lead, not proof." (14.5-16.0) -> limits line emphasised
+    "calibrate_in": 8.3,    # stage 2, on "twenty" (8.3) in "With twenty labelled frames," (8.0-9.7)
+    "twenty": 8.9,          # "labelled frames" (8.8-9.7) -> "20 labelled frames" tag
+    "formula": 10.3,        # "calibrated" (10.35) -> true ≈ a × detected + b
+    "one_camera": 10.85,    # "that one camera" (10.9-11.8) -> calibration limits line, to the end
+    "error": 12.0,          # "cutting error" (12.0-12.7) -> "count error" label
+    "thirteen": 13.0,       # "from thirteen" ("thirteen" 13.15) -> 13.4, the error bar fills
+    "three": 13.45,         # "to about three" (13.45; "three" 13.95-14.35) -> counts down to 3.3 by 14.3
+    "guess": 13.45,         # the same moment, to the end: the no-detector guess bar and its label
+    "lead": 15.4,           # "A lead, not proof." (15.4-16.9) -> limits line emphasised
 }
 COUNT_DOWN = 0.85           # 13.4 -> 3.3 takes this long, landing on "three"
 
@@ -151,11 +153,11 @@ assert f"{RAW_MAE:.1f} → {CAL_MAE:.1f} people per frame" in SHOT["visual"]
 assert f"'{N_LABELLED} labelled frames'" in SHOT["visual"]
 assert "(" + " / ".join(str(r[2]) for r in REGIONS) + "%)" in SHOT["visual"]
 assert f"no-detector guess ({GUESS_MAE:.1f})" in SHOT["visual"]
-# spoken: "two thousand", "93 percent", "Twenty labelled frames", "from thirteen to about three"
+# spoken: "two thousand", "93 percent", "With twenty labelled frames", "from thirteen to about three"
 _said = SHOT["narration"]
 assert FRAMES == 2000 and "two thousand annotated mall frames" in _said
 assert f"{PREC_PCT} percent of its boxes were people" in _said and f"{COUNT_PCT} percent" not in _said
-assert N_LABELLED == 20 and "Twenty labelled frames" in _said
+assert N_LABELLED == 20 and "With twenty labelled frames" in _said
 assert (round(RAW_MAE), round(CAL_MAE)) == (13, 3) and "from thirteen to about three people per frame" in _said
 assert "that one camera" in _said and _said.endswith("A lead, not proof.")
 
@@ -648,8 +650,8 @@ STILLS = {
     "scatter": 4.3,        # dimmed, labelled, perfect line traced, under-count arrow
     "count": 6.0,          # count vs annotated count 59% · 93% of boxes are people, recall bars growing
     "recall": 8.2,         # near / middle / far recall bars, just before stage 2
-    "formula": 10.8,       # tag, schematic, limits line
-    "counter": 17.45,      # 13.4 -> 3.3 people per frame beside the guess, limits line emphasised
+    "formula": 11.6,       # tag, schematic, limits line
+    "counter": 18.45,      # 13.4 -> 3.3 people per frame beside the guess, limits line emphasised
 }
 
 if __name__ == "__main__":

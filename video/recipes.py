@@ -8,7 +8,7 @@ from pathlib import Path
 
 from PIL import ImageDraw
 
-from assemble import png
+from assemble import png, probe_duration
 from style import (BUILD, INK, INK_2, NAVY, SAFE, WARNING, CRITICAL, CYAN, badge, chapter_card, draw_text, footer,
                    legend_strip, rounded, text_size, transparent)
 
@@ -112,16 +112,29 @@ def s02(dur: float):
 
 
 def s08(dur: float):
-    # real terminal session; codes appear ~0.1 s after each command (1.6 / 3.9 / 5.8 s in the take)
+    """The real terminal session (video/build/clips/S08.mp4, drawn from S08.cast): each command and its code
+    appear together (code 0.02-0.06 s after the command, at 1.63 / 3.97 / 5.82 s in the take). Each stamp lands
+    on its verb in the guide voice (voice from 0.2 s): 'accepts' 2.85 s, 'rejects' 4.77 s, 'refuses' 7.5 s. So
+    that each code shows just before its stamp (the take was timed to the old lines), idle prompt time between
+    the commands is cut or repeated. Nothing else changes: every command keeps its response and its latency as
+    recorded, and each splice joins two frames of the same screen, so the only difference is the blinking
+    cursor's rhythm at the three splices (on 0.7 s once, on or off 0.3 s three times, instead of 0.5 s). The codes
+    show at 2.83 / 4.80 / 7.43 s, 0.10-0.12 s before their stamps."""
+    take = segments("S08", CLIPS / "S08.mp4", [
+        (0.0, 1.4, FULL, FULL),     # 0.0-1.4: the prompt (cursor on 1.0-1.5 s)
+        (0.2, 2.3, FULL, FULL),     # 1.4-3.5: the prompt again from 0.2 s (cursor on 0.7 s once); command 1 and 202 at 2.83
+        (2.7, 5.0, FULL, FULL),     # 3.5-5.8: 0.4 s of prompt skipped; command 2 and 422 at 4.80
+        (4.2, 7.4, FULL, FULL),     # 5.8-9.0: 0.8 s of prompt repeated; command 3, its message and 403 at 7.43
+    ])
     ov = [
         (png("S08_card", lambda img: chapter_card(img, "Can it be trusted?")), 0.0, 2.0),
         (png("S08_badge", lambda img: badge(img, "LIVE SOFTWARE", "recorded live")), 0.0, dur),
         (png("S08_footer", lambda img: footer(img, "same checks in backend/tests/test_api.py · real requests to a fresh backend on localhost:8001")), 0.0, dur),
-        (png("S08_s1", lambda img: stamp(img, 300, 341, "202 accepted · numbers only", SAFE)), 1.75, dur),
-        (png("S08_s2", lambda img: stamp(img, 300, 446, "422 rejected · extra field face_id (closed schema)", WARNING)), 4.05, dur),
-        (png("S08_s3", lambda img: stamp(img, 300, 586, "403 refused · image upload (PRIVACY_MODE on by default)", CRITICAL)), 5.95, dur),
+        (png("S08_s1", lambda img: stamp(img, 300, 341, "202 accepted · numbers only", SAFE)), 2.95, dur),      # "accepts"
+        (png("S08_s2", lambda img: stamp(img, 300, 446, "422 rejected · extra field face_id (closed schema)", WARNING)), 4.9, dur),  # "rejects"
+        (png("S08_s3", lambda img: stamp(img, 300, 586, "403 refused · image upload (PRIVACY_MODE on by default)", CRITICAL)), 7.55, dur),  # "refuses"
     ]
-    return ["-i", str(CLIPS / "S08.mp4")], ov, [], ""
+    return ["-i", str(take)], ov, [], ""
 
 
 def placeholder(shot: str, what: str, dur: float):
@@ -166,8 +179,13 @@ def s03(dur: float):
     from 116.2 s (14:10:05 sim). Zone detail never scrolls, so its own WHY list is never on screen: the
     'why' beat is the sidebar's reason list (the dashboard's Reasons for the first forecast row, +5 min,
     WARNING at 76% confidence), after the lower-third (0.2-3.2 s). Beats keyed to the guide voice's
-    pauses (voice from 0.2 s): 'Senado Square's forecast' about 3.6-5.2 s, 'turns critical' about 5.3-6.3 s,
-    'with a confidence score and the reasons why' 6.5-8.9 s; re-key to the real take."""
+    pauses (voice from 0.2 s): 'with a simulated Golden Week crowd' 1.4-3.4 s, 'Senado Square's forecast' about
+    3.6-5.5 s, 'turns critical' about 5.7-6.3 s, 'It shows how sure it is' 6.55-8.0 s ('how sure' about
+    7.05-7.6 s: the '+5 / +10 / +15 min' and 'confidence' callouts, once the zoom to the rows has settled),
+    'and why' 8.2-8.8 s. The 'why' highlight cannot move to 'and why': the capture shows the reasons only
+    before Zone detail opens, and cutting back to them after the CRITICAL rows would run the SIM CLOCK
+    backwards and pair a WARNING-time reason list with CRITICAL rows; it stays on 'crowd, Senado Square's'.
+    Re-key to the real take."""
     c2a = CLIPS / "C2a.mp4"
     # side: the sidebar's reasons (source y 735-970) with the +15 row's probability line above them, from
     # just under that row's LOW CONFIDENCE banner (y 603-659), so the badge sits on empty page.
@@ -192,7 +210,8 @@ def s03(dur: float):
         (png("S03_badge", lambda img: badge_solid_sub(img, "LIVE SOFTWARE", "SIMULATED CROWD", "Simulated Golden Week afternoon · SIM CLOCK, 10× speed")), 0.0, dur),
         # from after the lower-third (0.2-3.2 s) to the cut to Zone detail
         (png("S03_why", lambda img: (highlight(img, (x0, y0, x1, y1)), callout(img, x0, y0 - 60, "why"))), 3.3, 4.4),
-        # in the Prediction panel's header line, right of "Prediction updated …", clear of the rows' probabilities
+        # in the Prediction panel's header line, right of "Prediction updated …", clear of the rows' probabilities;
+        # on "how sure", as the zoom settles
         (png("S03_rows", lambda img: (callout(img, 580, hy, "+5 / +10 / +15 min"), callout(img, 900, hy, "confidence"))), 7.3, dur),
         # while the map (or its corner, in the sidebar crop) is on screen
         (png("S03_footer", lambda img: footer(img, "Map © OpenStreetMap contributors")), 0.0, 4.4),
@@ -229,9 +248,10 @@ def s04(dur: float):
     joined at Almeida (node-9970c1); 'Deciding as' = demo-operator-1; Senado card #6 created 14:09:50 sim
     (110.8 s into the clip), notice opened 115.1 s, evidence 120.2 s, scroll back to the 'Deciding as' field
     122.5-123.3 s, APPROVE clicked at 126.72 s (14:12:35 sim in the audit log; 7.23 s into S04), Decided list and audit log
-    from 136.8 s. Beats are keyed to the guide voice (voice from 0.2 s): 'stair-free detour' ends 2.1 s,
-    'notices in Chinese, English and Portuguese' 2.3-5.4 s, 'A person decides' 5.6-6.9 s, 'approved' 7.1 s,
-    'and logged' 7.9-8.5 s; re-key to the real take."""
+    from 136.8 s. Beats are keyed to the guide voice (voice from 0.2 s): 'stair-free detour' 1.1-2.1 s,
+    'with notices in Chinese, English and Portuguese' 2.3-5.4 s, 'A person must approve it' 5.6-7.0 s ('approve'
+    about 6.3-6.7 s; the scripted click lands at 7.23 s, on 'and we'), 'and we log their name' 7.2-8.4 s
+    ('log' about 7.6 s, 'their name' about 7.9-8.4 s); re-key to the real take."""
     b2 = CLIPS / "C2b2.mp4"
     spec("S04", "LIVE SOFTWARE · SIMULATED CROWD", "accessibility check: this route avoids stairs", "中文 · English · Português",
          "needs a person's approval", "audit log", "zh 議事亭前地目前非常擁擠… (Senado Square is very crowded…)",
@@ -253,7 +273,8 @@ def s04(dur: float):
         # beside the button row, right of 'deciding as demo-operator-1' and under the badge (not in the Evidence panel)
         (png("S04_c3a", lambda img: callout(img, 1396, 108, "needs a person's approval")), 5.5, 6.4),
         (png("S04_c3b", lambda img: callout(img, 990, 802, "needs a person's approval")), 6.4, 7.4),
-        (png("S04_c4", lambda img: (callout(img, 200, 640, "audit log"), highlight(img, (450, 722, 1064, 836)))), 7.5, dur),
+        (png("S04_c4", lambda img: callout(img, 200, 640, "audit log")), 7.6, dur),                # "log"
+        (png("S04_c4b", lambda img: highlight(img, (450, 722, 1064, 836))), 7.9, dur),             # "their name": demo-operator-1's row
         # from the APPROVE click (the pointer rests on the button from 6.95 s; it presses at 7.23 s) to the end
         (png("S04_footer", lambda img: solid_footer(img, "click scripted for this recording · the approval runs the real code path")), 7.1, dur),
     ]
@@ -285,28 +306,33 @@ def s09(dur: float):
     base = concat_clips("S09", [MG / "S09_mg.mp4", tail, tail2])
     spec("S09", "Stronger recommendations replace weaker pending ones")
     ov = [
-        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 4.0, dur),
-        (png("S09_rows", lambda img: callout(img, 980, 160, "LOW CONFIDENCE — HUMAN REVIEW REQUIRED", (245, 166, 35))), 4.2, 6.5),
-        (png("S09_dec", lambda img: callout(img, 541, 650, "Stronger recommendations replace weaker pending ones")), 6.5, dur),
+        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 4.5, dur),   # from the cut (S09.py DURATION)
+        (png("S09_rows", lambda img: callout(img, 980, 160, "LOW CONFIDENCE — HUMAN REVIEW REQUIRED", (245, 166, 35))), 4.7, 7.0),
+        (png("S09_dec", lambda img: callout(img, 541, 650, "Stronger recommendations replace weaker pending ones")), 7.0, dur),
     ]
     return ["-i", str(base)], ov, [], ""
+
+
+S12_CUT = 7.0  # = video/mg/S12.py DURATION: the cut to the README insert, as M2's line ends on "correction" (guide voice)
 
 
 def s12(dur: float):
     # README_insert.mp4 (re-captured 17 Oct from the current README.md, video/shots/readme_insert.json):
     # the page settles at 3.4 s with the Correction paragraph at y 171-388, x 528-1384, 30 px below the
-    # previous paragraph, so the highlight box has room above and below it.
+    # previous paragraph, so the highlight box has room above and below it; it is 7.6 s long, still from 3.4 s.
     spec("S12", "Badge (top-right): CORRECTED", "Footer: README.md · Correction")
-    readme = segments("S12_readme", CLIPS / "README_insert.mp4", [(3.6, 5.6, FULL, FULL)])
-    base = concat_clips("S12", [MG / "S12_mg.mp4", readme])
+    mg = MG / "S12_mg.mp4"
+    assert abs(probe_duration(mg) - S12_CUT) < 0.02, f"{mg} is {probe_duration(mg)} s, not {S12_CUT} s: re-render video/mg/S12.py"
+    readme = segments("S12_readme", CLIPS / "README_insert.mp4", [(3.6, round(3.6 + dur - S12_CUT, 3), FULL, FULL)])  # 3.0 s
+    base = concat_clips("S12", [mg, readme])
     # The README page is white, so from the cut the footer and the docked evidence legend (S10-S16) sit on a
     # navy band from y 977, in the gap between two text lines (y 950-970 and 985-1007) of the Limitations
     # list below the highlighted paragraph; the S12 motion graphic before the cut docks the same legend.
     ov = [
-        (png("S12_hl", lambda img: highlight(img, (506, 150, 1408, 410))), 8.2, dur),
-        (png("S12_badge", lambda img: badge(img, "CORRECTED")), 8.0, dur),
-        (png("S12_legend", lambda img: legend_docked(img, band_top=977)), 8.0, dur),
-        (png("S12_footer", lambda img: footer(img, "README.md · Correction")), 8.0, dur),
+        (png("S12_hl", lambda img: highlight(img, (506, 150, 1408, 410))), S12_CUT + 0.2, dur),
+        (png("S12_badge", lambda img: badge(img, "CORRECTED")), S12_CUT, dur),
+        (png("S12_legend", lambda img: legend_docked(img, band_top=977)), S12_CUT, dur),
+        (png("S12_footer", lambda img: footer(img, "README.md · Correction")), S12_CUT, dur),
     ]
     return ["-i", str(base)], ov, [], ""
 

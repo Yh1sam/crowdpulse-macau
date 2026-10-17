@@ -1,14 +1,15 @@
-"""S09 (1:20.0-1:28.0), motion-graphics part only: the first 4.0 s, before the cut to the real
-dashboard crops (C2a zone detail, C2b "Decided / expired" list), which are added at assembly.
+"""S09 (1:30.0-1:38.5, 8.5 s), motion-graphics part only: the first 4.5 s, before the cut to the real
+dashboard crops (C2a zone detail, C2b "Decided / expired" list), which are added at assembly
+(video/recipes.py, s09).
 
-Narration ([MEMBER 3], VO): "Confidence is discounted for unreliable sensors and unusual conditions.
-Below sixty percent, a person must review it."
+Narration ([MEMBER 3], VO): "We lower its confidence when a sensor is unreliable or the data is
+unusual. Below sixty percent, a person must review it."
 
 What it shows (docs/video/script.md, section 3, S09 row):
 - the equation builds term by term:
   effective confidence = model probability × sensor-reliability factor × unusual-data (OOD) factor;
-- a gauge of effective confidence whose needle drops as each factor is applied and ends under a
-  marked 0.60 line;
+- a gauge of effective confidence whose needle drops as each factor is applied: under a marked
+  0.60 line with the sensor-reliability factor, and lower still with the unusual-data factor;
 - the stamp "LOW CONFIDENCE — HUMAN REVIEW REQUIRED" (styled like the dashboard's ConfidenceBadge,
   dashboard/src/components/Badges.tsx) and the line "Below 0.60 → … only 'increase monitoring' is
   recommended";
@@ -17,6 +18,7 @@ What it shows (docs/video/script.md, section 3, S09 row):
 No chapter card (S08 shows "Can it be trusted?"). No status badge: the S09 storyboard row defines none.
 
 Data sources (read at run time, never retyped):
+- docs/video/shotlist.json, S09: the narration (checked; the beats are keyed to it) and the shot length;
 - shared/config.json: confidence.low_confidence_threshold (the 0.60 line) and
   confidence.ood_confidence_multiplier (used only to place the needle's last drop);
 - backend/app/services/prediction.py: the sensor-reliability factor 0.4 + 0.6 × reliability
@@ -24,7 +26,7 @@ Data sources (read at run time, never retyped):
 The needle positions are an example run of that formula (model probability EXAMPLE_MODEL_PROB,
 sensor reliability EXAMPLE_RELIABILITY, unusual data on); no example value is printed on screen.
 
-Output: video/build/mg/S09_mg.mp4 (1920x1080, 30 fps, 4.0 s) and stills in video/build/mg/stills/.
+Output: video/build/mg/S09_mg.mp4 (1920x1080, 30 fps, 4.5 s) and stills in video/build/mg/stills/.
 Run: .venv/bin/python video/mg/S09.py
 """
 from __future__ import annotations
@@ -40,20 +42,33 @@ from style import *  # noqa: E402,F401,F403
 from PIL import Image, ImageDraw  # noqa: E402
 
 NAME = "S09_mg"
-DURATION = 4.0  # part-duration from the brief: S09 is 80.0-88.0 s; its first 4.0 s are motion graphics
+_shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == "S09")
+SHOT_DURATION = round(_shot["end_s"] - _shot["start_s"], 3)      # 8.5 s
+NARRATION = ("We lower its confidence when a sensor is unreliable or the data is unusual. "
+             "Below sixty percent, a person must review it.")
+assert _shot["narration"] == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
+DURATION = 4.5  # the motion-graphics part: recipes.py s09 cuts to the dashboard crops at 4.5 s and keys its overlays to that cut
+assert DURATION < SHOT_DURATION
 
-# Beats in seconds from the shot start, keyed to the narration at 140 wpm (0.43 s per word):
-# "Confidence(0.00) is(0.43) discounted(0.86) for(1.29) unreliable(1.71) sensors(2.14) and(2.57)
-#  unusual(3.00) conditions(3.43) Below(3.86) sixty(4.29) percent(4.71) ..."
+# Beats in seconds from the shot start. The narration starts 0.2 s into the shot (assemble.py,
+# VOICE_START). Keyed to the guide voice (video/build/guide/S09.wav, say -v Daniel -r 155):
+# silencedetect pauses at 4.42-4.65 and 6.12-6.32 s of the wav; word starts from synthesising
+# prefixes of the line, read off the wav's 20 ms energy envelope; + 0.2 s gives the shot times below:
+#   "We lower its confidence" 0.20-1.50 ("confidence" 0.86) | "when a sensor" 1.52 ("sensor" 1.78) |
+#   "is unreliable" 2.36-3.18 | "or the data is unusual." 3.22-4.62 ("unusual" 3.80) | pause |
+#   "Below sixty percent," 4.85-6.34 | "a person must review it." 6.52-7.95 (both over the dashboard crops).
+# The cut comes at 4.5 s, as "unusual" ends; the sensor-reliability drop alone takes the needle
+# under 0.60 ("...when a sensor is unreliable OR the data is unusual") and the rule and stamp land on
+# "unreliable", up for over a second before the cut; the unusual-data factor then takes it lower still.
 # re-key to the real voice take
 BEATS = {
-    "lhs": 0.00,      # "Confidence": "effective confidence =" and the gauge appear
-    "model": 0.40,    # "is discounted": model probability; the needle swings up to it
-    "sensor": 1.45,   # "unreliable sensors" (1.71): × sensor-reliability factor; the needle drops
-    "ood": 2.35,      # "and unusual conditions" (2.57): × unusual-data (OOD) factor; the needle drops under 0.60
-    "rule": 2.85,     # leads "Below sixty percent" (3.86) so the line is up before the 4.0 s cut
-    "stamp": 2.95,    # LOW CONFIDENCE — HUMAN REVIEW REQUIRED stamps on
-    "monitor": 3.15,  # "only 'increase monitoring' is recommended" (on screen only; held to the cut)
+    "lhs": 0.00,      # first frame: "effective confidence =" and the gauge appear
+    "model": 0.10,    # "We lower its confidence": model probability; the needle swings up to it (by ~0.9 s)
+    "sensor": 1.75,   # "sensor" (1.78): × sensor-reliability factor; the needle drops under 0.60 (1.9-2.45)
+    "rule": 2.45,     # "unreliable", as the needle settles: "Below 0.60 →"
+    "stamp": 2.55,    # LOW CONFIDENCE — HUMAN REVIEW REQUIRED stamps on
+    "monitor": 2.8,   # "only 'increase monitoring' is recommended" (on screen only; held to the cut)
+    "ood": 3.15,      # "or the data is unusual" (3.22): × unusual-data (OOD) factor; the needle drops further
 }
 
 # ---------- data ----------
@@ -67,11 +82,11 @@ REL_A, REL_B = float(_m.group(1)), float(_m.group(2))
 
 # example inputs for the needle only (never printed)
 EXAMPLE_MODEL_PROB = 0.88
-EXAMPLE_RELIABILITY = 0.75
+EXAMPLE_RELIABILITY = 0.35
 V0 = EXAMPLE_MODEL_PROB
 V1 = V0 * min(1.0, REL_A + REL_B * EXAMPLE_RELIABILITY)
 V2 = V1 * OOD_MULT
-assert V1 >= THRESHOLD > V2, (V1, V2)
+assert V0 > THRESHOLD > V1 > V2, (V0, V1, V2)   # the sensor drop crosses the line (see BEATS); OOD lowers it further
 
 FOOTER = (f"sensor-reliability factor = {REL_A:g} + {REL_B:g} × reliability (backend/app/services/prediction.py)"
           " · threshold in shared/config.json")
@@ -320,7 +335,7 @@ def draw_frame(t: float) -> Image.Image:
 
     # equation, term by term
     k = progress(t, BEATS["lhs"], 0.4)
-    amber = below_mix(t) if t > BEATS["ood"] else 0.0   # text turns amber only on the final drop
+    amber = below_mix(t) if t > BEATS["sensor"] else 0.0   # text turns amber once a factor takes it under the line
     S_LHS.put(img, k * (1 - amber), dx=-28 * (1 - k))
     S_LHS_AMBER.put(img, k * amber, dx=-28 * (1 - k))
     for key, _, _, _ in TERMS:
@@ -361,5 +376,5 @@ def draw_frame(t: float) -> Image.Image:
 if __name__ == "__main__":
     out = render(NAME, DURATION, draw_frame)
     print("wrote", out)
-    for beat, tt in [("lhs", 0.40), ("model", 1.25), ("sensor", 2.20), ("ood", 2.80), ("stamp", 3.10), ("end", DURATION - 1 / FPS)]:
+    for beat, tt in [("lhs", 0.40), ("model", 1.40), ("sensor", 2.20), ("stamp", 2.90), ("ood", 3.50), ("end", DURATION - 1 / FPS)]:
         print("still", still(f"S09_{beat}", draw_frame(tt)))

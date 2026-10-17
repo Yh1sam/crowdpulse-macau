@@ -1,4 +1,4 @@
-"""Shot S18 (4:03.5-4:09.5, 6.0 s): back to Mrs Chan. "Back to Mrs Chan: her main route stays open, with staff beside her."
+"""Shot S18 (4:20.5-4:27.0, 6.5 s): back to Mrs Chan. "Back to Mrs Chan. Staff keep her main route open, and stay beside her."
 
 Same map and framing as S01 (ahpo.py). An APPROVED stamp lands; the approved card's step-free detour draws as a
 dashed line and grey walkers take it; a small zh / en / pt notice flashes at Av. de Almeida Ribeiro (where the
@@ -41,24 +41,29 @@ from PIL import Image, ImageDraw  # noqa: E402
 
 SHOT = "S18"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 6.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 6.5 s
 
-# Beats in seconds from the shot start, keyed to the narration at about 140 wpm (0.43 s a word), voice from 0.3 s:
-# "Back to Mrs Chan: | her main route stays open, | with staff beside her."
+# Beats in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S18.wav, laid 0.2 s into
+# the shot by assemble.py). Clause boundaries from
+#   ffmpeg -i video/build/guide/S18.wav -af silencedetect=noise=-35dB:d=0.08 -f null -
+# (speech 0.00-1.30 | 1.54-3.38 | 3.59-4.99), each + 0.2 s; words inside a clause from the length of
+# `say -v Daniel -r 155` on the words before them and the level dips between words:
+# "Back to Mrs Chan." 0.2-1.5 | "Staff keep (1.75-2.4) her main route (2.45-3.25) open," (3.3-3.58) | "and stay beside her." 3.8-5.2
+# (the staff member joins on "stay beside her", once she has rolled clear of Almeida's label: on "Staff" it would stand on it)
 # re-key to the real voice take
 BEATS = {
-    "stamp": 0.35,        # "Back": the APPROVED stamp lands
-    "tag_out": 0.7,       # her "Mrs Chan" tag (carried over from S01's last frame) fades before the detour reaches it:
+    "stamp": 0.25,        # "Back": the APPROVED stamp lands
+    "tag_out": 0.6,       # her "Mrs Chan" tag (carried over from S01's last frame) fades before the detour reaches it:
                           # it sits left of her icon, exactly where the detour leaves Almeida, for the whole shot
-    "detour": 0.75,       # "to Mrs Chan": the approved card's dashed step-free detour draws
-    "notice": 1.05,       # the zh / en / pt notice flashes at Almeida ...
-    "walkers": 1.25,      # ... and grey walkers take the detour
-    "route": 2.15,        # "her main route": her route north draws, solid
-    "statement": 2.35,    # the recommendation line appears (read through to the end)
-    "lane": 2.6,          # "stays open": a lane opens through Senado's crowd
-    "move": 2.6,          # she rolls on north
-    "notice_out": 4.4,    # the notice fades
-    "staff": 4.25,        # "with staff": the staff member joins her
+    "detour": 0.65,       # "to Mrs Chan": the approved card's dashed step-free detour draws
+    "notice": 0.95,       # the zh / en / pt notice flashes at Almeida ...
+    "walkers": 1.15,      # ... and grey walkers take the detour
+    "route": 2.45,        # "her main route": her route north draws, solid
+    "statement": 2.65,    # the recommendation line appears (read through to the end: 3.85 s)
+    "lane": 3.1,          # "open": a lane opens through Senado's crowd
+    "move": 3.1,          # she rolls on north
+    "staff": 4.15,        # "and stay beside her": the staff member joins her (settled by 4.75 s, beside her to the end)
+    "notice_out": 4.4,    # the notice fades (up 3.8 s)
 }
 SIM_KEYS = [(0.0, ahpo.approve_sim()), (DURATION, ahpo.end_sim())]    # run A: approval (14:14) -> end (14:40)
 
@@ -284,7 +289,7 @@ def draw_frame(t: float) -> Image.Image:
     return img
 
 
-STILLS = {"stamp": 0.75, "notice": 1.75, "route_open": 3.6, "staff": 4.95, "end": 5.95}
+STILLS = {"stamp": 0.6, "notice": 1.5, "route_open": 4.0, "staff": 4.85, "end": 6.45}
 
 if __name__ == "__main__":
     for name, ts in STILLS.items():

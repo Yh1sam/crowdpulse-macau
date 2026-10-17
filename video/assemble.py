@@ -102,7 +102,7 @@ def caption_chunks(narration: str) -> list[str]:
 
     chunks = [c for sent in re.split(r"(?<=[.?!])(?<!St\.)\s+", text) for c in split(sent)]
     merged: list[str] = []
-    for c in chunks:  # a run of one-word sentences (the S05 roll call) shares one caption
+    for c in chunks:  # a run of one-word sentences shares one caption
         if merged and len(c.split()) == 1 and all(len(x.split()) == 1 for x in re.split(r"(?<=\.)\s+", merged[-1])) \
                 and fits(f"{merged[-1]} {c}"):
             merged[-1] += " " + c

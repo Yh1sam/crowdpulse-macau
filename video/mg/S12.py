@@ -1,6 +1,6 @@
-"""Shot S12 (2:08.0-2:18.0), motion-graphics part only: the public frame-timing correction.
+"""Shot S12 (2:19.5-2:29.5), motion-graphics part only: the public frame-timing correction.
 
-0-8 s of the shot. The last 2 s (the README.md "Correction" paragraph, rendered with pandoc and
+0-7.0 s of the shot. The last 3.0 s (the README.md "Correction" paragraph, rendered with pandoc and
 recorded with video/capture.py) are a capture added at assembly, so they are not drawn here.
 
 Left half:  a [TEAM FOOTAGE] slate standing in for [MEMBER 1] and [MEMBER 2] at a laptop that
@@ -15,7 +15,7 @@ On-screen text (docs/video/script.md section 3, S12 row): badge CORRECTED; the o
 the inset; footer "README.md · Correction". No chapter card. Evidence legend strip (S10-S16).
 
 Data sources:
-- docs/video/shotlist.json: S12 start_s / end_s (DURATION = shot length minus the 2 s README insert).
+- docs/video/shotlist.json: S12 start_s / end_s (DURATION = shot length minus the README insert).
 - experiments/datasets/video/ground_truth.csv: the hand-counted frames sit at t_sec = 2.4 + 5k s.
   experiments/video_eval.py records that v1 labelled them 0, 5, 10 s, so the offset between the
   label and the frame ffmpeg actually sampled is t_sec mod the sampling interval (2.4 s); the clip
@@ -46,24 +46,29 @@ NAME = "S12_mg"
 
 # ---------- timing ----------
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-README_INSERT = 2.0                                    # 8-10 s: README capture, added at assembly
-DURATION = (_shot["end_s"] - _shot["start_s"]) - README_INSERT   # 8.0 s
+README_INSERT = 3.0                                    # 7.0-10 s: README capture, added at assembly
+DURATION = round((_shot["end_s"] - _shot["start_s"]) - README_INSERT, 3)   # 7.0 s
 
-# Times in seconds from the shot start, keyed to the narration at about 140 wpm (0.43 s a word):
-# [M1] "Our first version of this test had a frame-timing bug." (about 0-4.3 s)
-# [M2] "It was caught, fixed, and we published the correction." (about 4.6-8.5 s)
+# Times in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S12.wav, laid 0.2 s
+# into the shot by assemble.py). Clause boundaries from
+#   ffmpeg -i video/build/guide/S12.wav -af silencedetect=noise=-35dB:d=0.08 -f null -
+# (speech 0.00-3.10 | 3.35-4.70 | 4.91-6.48), each + 0.2 s; words inside a clause from the length of
+# `say -v Daniel -r 155` on the words before them and the level dips between words:
+# [M1] "But our first version of this test had a frame-timing bug." (0.2-3.3 s)
+# [M2] "It was caught and fixed, and we published the correction." (3.55-6.68 s; "correction" 5.97-6.68 s)
 # re-key to the real voice take
 BEATS = {
-    "m1_start": 0.0,      # "Our ..."                       M1 speaks (slate indicator)
-    "inset_in": 1.5,      # "... of this test"              inset slides in, film strip draws
-    "label_t": 2.0,       # "test had"                      beat 1: hand-count label at t
-    "red_frame": 3.3,     # "frame-timing bug"              beat 2a: frame actually compared, red
-    "m1_end": 4.3,
-    "m2_start": 4.6,      # "It was ..."                    M2 speaks (slate indicator)
-    "green_frame": 5.5,   # "caught, fixed"                 beat 2b: correct frame aligned, green
-    "kerb_line": 6.4,     # "and we published"              beat 3: dashed far-kerb line drops in
-    "end": DURATION,      # cut to the README insert on M2's word "correction"
-}
+    "m1_start": 0.0,      # "But our ..."                   M1 speaks (slate indicator, lit from the cut)
+    "inset_in": 1.5,      # "version of"                    inset slides in, film strip draws
+    "label_t": 2.0,       # "this test"                     beat 1: hand-count label at t
+    "red_frame": 2.65,    # "frame-timing bug"              beat 2a: frame actually compared, red
+    "m1_end": 3.3,
+    "m2_start": 3.55,     # "It was ..."                    M2 speaks (slate indicator)
+    "green_frame": 3.95,  # "caught and fixed"              beat 2b: correct frame aligned, green
+    "kerb_line": 5.1,     # "and we published"              beat 3: dashed far-kerb line drops in
+    "end": DURATION,      # cut to the README insert as M2's line ends on "correction" (6.68 s; its caption, drawn
+}                         # at assembly, goes at 6.93 s, so it never sits on the white page); the overlay's last
+                          # words ("near field redefined, recounted") are fully up 1.15 s
 
 # ---------- data ----------
 _gt = list(csv.DictReader((ROOT / "experiments" / "datasets" / "video" / "ground_truth.csv").open()))
@@ -579,7 +584,7 @@ def frame_mp4(t: float) -> Image.Image:
     return img
 
 
-STILLS = {"slate": 1.0, "label": 2.9, "red": 4.6, "green": 6.25, "kerb": 7.9}
+STILLS = {"slate": 1.0, "label": 2.55, "red": 3.9, "green": 4.9, "kerb": 6.95}
 
 if __name__ == "__main__":
     for k, tt in STILLS.items():

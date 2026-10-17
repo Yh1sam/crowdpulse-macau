@@ -1,4 +1,4 @@
-"""Shot S14 (2:34.5-2:56.0, 21.5 s): "Does acting help?" - the recorded simulation, approve vs no action.
+"""Shot S14 (2:48.0-3:09.5, 21.5 s): "Does acting help?" - the recorded simulation, approve vs no action.
 
 Storyboard: docs/video/script.md section 3, row S14; claims table section 4, row S14; section 6
 ("Global look and tools", "motion_graphic"); shot list docs/video/shotlist.json (id S14).

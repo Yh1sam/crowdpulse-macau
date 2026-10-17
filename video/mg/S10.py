@@ -1,4 +1,4 @@
-"""Shot S10 (1:30.0-1:52.0, 22.0 s): "Does it work? Every result is labelled."
+"""Shot S10 (1:38.5-2:02.5, 24.0 s): "Does it work? Every result is labelled."
 
 Storyboard: docs/video/script.md section 3, row S10; claims table section 4, rows S10; section 6
 ("motion_graphic" shot rules, "On-screen text load"); shot list docs/video/shotlist.json (id S10).
@@ -9,7 +9,7 @@ Storyboard: docs/video/script.md section 3, row S10; claims table section 4, row
           The row drops to the strip's height by 1.3 s and slides right into place, so it passes
           behind the first caption box for 1 frame (1.27 s), not about 4 (see DOCK_DROP).
 then      grouped macro-F1 bars, model vs "no change", at 3 decimals, +15 pair highlighted, no gap labels.
-7.5 s-end the one-line accuracy comparison, in a pill one line under the chart (y 810-858: under the
+8.2 s-end the one-line accuracy comparison, in a pill one line under the chart (y 810-858: under the
           chart and cards, above the caption band, clear of the legend strip and the footer).
 then      "91% vs 79% of critical minutes caught (+15 min)".
 then      flagged as uncertain vs the rest (+15 min).
@@ -49,29 +49,29 @@ from PIL import Image, ImageChops, ImageDraw  # noqa: E402
 
 SHOT = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOT if s["id"] == "S10")
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 22.0 s
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 24.0 s
 
 # Seconds from the shot start, keyed to the guide voice video/build/guide/S10.wav (say -v Daniel
-# -r 155, 21.02 s) laid from VOICE_START: word times measured from its pauses (silencedetect) and
-# prefix syntheses, 17 Oct. Guide pauses end at 2.00 / 5.81 / 9.61 / 12.57 / 14.27 / 19.25 /
-# 20.05 s into the file. Re-key to the real voice take.
+# -r 155, 22.50 s) laid from VOICE_START: word times measured from its pauses (silencedetect) and
+# prefix syntheses, 18 Oct. Guide pauses end at 2.40 / 6.42 / 10.21 / 13.17 / 14.85 / 17.26 /
+# 20.53 / 21.53 s into the file. Re-key to the real voice take.
 VOICE_START = 0.8              # script.md section 6 (S10 voice from 0.8 s); assemble.py VOICE_START["S10"]
 BEATS = {
     "legend_in": 0.0,          # five badges appear centre-screen (no voice yet)
     "legend_dock": 0.85,       # they shrink and dock bottom-right, docked by 1.5 s
-    "voice_on": 0.8,           # "On held-out simulated days," (0.80-2.55)
+    "voice_on": 0.8,           # "On simulated days it had never seen," (0.80-3.02)
     "chart_in": 1.3,           # macro-F1 panel fades in; bars grow left to right
-    "fifteen_minute": 2.8,     # "fifteen-minute forecasts" (2.80) -> +15 pair highlighted
-    "f1_model": 5.2,           # "point eight six five" (5.19-6.36)
-    "f1_nochange": 7.2,        # "against point seven nine five" (6.61; "point" 7.20, "five" ends 8.48)
-    "accuracy_line": 7.5,      # storyboard: the accuracy line from about 7.5 s to the end (held 14.5 s)
-    "and_catch": 10.4,         # "and catch" (10.41) -> chart slides left, critical-minutes card in
-    "ninety_one": 11.1,        # "ninety-one percent of critical minutes" (11.09)
-    "seventy_nine": 13.9,      # "against seventy-nine" ("seventy-nine" 13.94-14.79)
-    "flagged": 15.05,          # "Forecasts flagged as uncertain" (15.07)
-    "right_only": 16.95,       # "are right only about" (16.96) -> flagged bar grows, "right 56%" lands
-    "fifty_six": 18.05,        # "fifty-six percent of the time" (18.05)
-    "the_rest": 20.05,         # "the rest, ninety-seven" (20.05; "97" 20.85-21.69; voice ends 21.82)
+    "fifteen_minute": 3.55,    # "our fifteen-minute forecasts" ("fifteen" 3.54) -> +15 pair highlighted
+    "f1_model": 5.85,          # "point eight six five" (5.86-7.06)
+    "f1_nochange": 7.85,       # "against point seven nine five" (7.22; "point" 7.85, "five" ends 9.16)
+    "accuracy_line": 8.2,      # storyboard: the accuracy line from about 8.2 s to the end (held 15.8 s)
+    "and_catch": 11.0,         # "and caught" (11.01) -> chart slides left, critical-minutes card in
+    "ninety_one": 11.7,        # "ninety-one percent of critical minutes" (11.72)
+    "seventy_nine": 14.6,      # "against seventy-nine" ("seventy-nine" 14.60-15.46)
+    "flagged": 16.3,           # "When they flagged themselves as uncertain" ("flagged" 16.29)
+    "right_only": 18.5,        # "they were right only about" ("were" 18.48) -> flagged bar grows, "right 56%" lands
+    "fifty_six": 19.4,         # "fifty-six percent of the time" (19.39)
+    "the_rest": 21.35,         # "otherwise, ninety-seven" ("otherwise" 21.33; "97" 22.33-23.31; voice ends 23.30)
 }
 CHAPTER_END = 2.0              # chapter card shown for about 2 s
 
@@ -101,7 +101,7 @@ ACC_SAFE = 100 * _test["support"]["SAFE"] / _test["n"]           # 84.6
 # guard: the spoken narration must match the data file (fails loudly if metrics.json changes)
 _spoken = SHOT["narration"]
 for v in (f"{F1_MODEL[-1]:.3f}", f"{F1_BASE[-1]:.3f}", f"{CRIT_MODEL} percent", f"against {CRIT_BASE}",
-          f"{ACC_FLAGGED} percent", f"the rest, {ACC_REST}"):
+          f"{ACC_FLAGGED} percent", f"otherwise, {ACC_REST}"):
     assert v in _spoken, f"metrics.json no longer matches the narration: {v!r}"
 
 # ---------- on-screen text (storyboard wording, asserted against the shot list) ----------
@@ -258,9 +258,9 @@ DOCK_START = BEATS["legend_dock"]
 DOCK_ARRIVE = DOCK_START + 0.65       # the pills land in the strip slot at 1.5 s
 # The row drops to the strip's y faster than it travels in x, accelerating (ease-in) and reaching
 # y 1012 at 1.3 s, then slides right along the strip row into its slots. The first caption (from
-# 0.8 s, box y 926-990 at x 344-1576) lies between the centre row and the strip, over the slots of
-# SIMULATED, REAL DATA and MODEL CHECK, so the pills must pass behind it somewhere: on an eased
-# straight path they took about 4 frames (1.25-1.4 s, slowing down); falling fast they take about 1.
+# 0.8 s, box y 926-990 at x 645-1274) lies between the centre row and the strip, just left of the
+# slots (SIMULATED's starts at x 1292), so the pills must pass behind it somewhere: on an eased
+# straight path they took 4 frames (1.27-1.37 s, slowing down); falling fast they take 1 (1.27 s).
 DOCK_DROP = 0.45
 
 
@@ -458,7 +458,7 @@ def card_b(t: float) -> Image.Image:
     return img
 
 
-# ---------- 5. accuracy line: one line under the chart, from about 7.5 s to the end ----------
+# ---------- 5. accuracy line: one line under the chart, from about 8.2 s to the end ----------
 
 ACC_SIZE = 26                      # the footer is 20 px; this line is read, not small print
 ACC_Y0, ACC_Y1 = 810, 858          # under the chart and cards (y 790), above the caption band (y 920)
@@ -524,9 +524,9 @@ def draw_frame(t: float) -> Image.Image:
 STILLS = {
     "legend_centre": 0.6,
     "legend_docking": 1.15,
-    "f1_bars": 9.0,          # both +15 values emphasised, accuracy line in
-    "critical_minutes": 14.6,
-    "flagged_vs_rest": 21.95,
+    "f1_bars": 9.5,          # both +15 values emphasised, accuracy line in
+    "critical_minutes": 15.6,
+    "flagged_vs_rest": 23.95,
 }
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Shot S16 (3:17.0-3:35.0, 18.0 s): "What's next?" - the Melbourne real-data test, announced before its result.
+"""Shot S16 (3:30.5-3:49.0, 18.5 s): "What's next?" - the Melbourne real-data test, announced before its result.
 
 Storyboard: docs/video/script.md section 3, row S16; claims table section 4, rows S16; section 5B (the result
 slot and the rules line); section 6 ("Global look and tools", "motion_graphic": S16 reads minute/*.csv.gz,
@@ -10,9 +10,9 @@ archive's first 24 hours (no basemap; a 1 km scale bar and a north arrow only). 
 that sensor's pedestrians per minute over a centred 15-minute window, played back over those 24 hours (see
 "Counts and zeros" below). Right: the sensor count (counted here, not assumed) with its basis line under it,
 the Melbourne-time playback clock and a calendar strip of hour cells filling from 12 Oct 2026, and the "Not
-Macau" caveat. On "a test announced" the calendar block gives way to the rules line (the commit that fixed
-the test rules, checked against git below); on "...before its result" the map dims and the result panel
-comes in: a grey dashed PENDING stamp and the verbatim result placeholder in an amber dashed box.
+Macau" caveat. On "...and we announced the test" the calendar block gives way to the rules line (the commit
+that fixed the test rules, checked against git below); on "...before its result" the map dims and the result
+panel comes in: a grey dashed PENDING stamp and the verbatim result placeholder in an amber dashed box.
 
 Counts and zeros (experiments/datasets/melbourne/README.md, "Things to know", corrected 16 Oct 2026): 57 of
 the 99 sensors write one row per 5-minute mark, holding about a 5-minute total; the other 42 write per
@@ -63,18 +63,20 @@ from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 SHOTS = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOTS if s["id"] == "S16")
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 18.0 s
-assert DURATION == 18.0, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 18.5 s
+assert DURATION == 18.5, DURATION
 
-# Seconds from the shot start. Keyed to the guide voice video/build/guide/S16.wav (say -v Daniel -r 155,
-# about 148 wpm; "99" is read "ninety-nine"), which assemble.py lays 0.2 s into the shot (VOICE_START):
-# clause starts are the silencedetect pauses (noise -35 dB, d 0.12 s; 2.77-2.98 and 7.70-7.91 s of the wav)
-# + 0.2 s; word onsets inside a clause come from synthesising prefixes of the line with the same voice.
+# Seconds from the shot start. Keyed to the guide voice video/build/guide/S16.wav of 18 Oct (say -v Daniel
+# -r 155; "99" is read "ninety-nine"; 10.37 s of speech), which assemble.py lays 0.2 s into the shot
+# (VOICE_START): clause starts are the silencedetect pauses (noise -35 dB, d 0.08 s; 2.77-2.98 and 7.70-7.91 s
+# of the wav) + 0.2 s; word onsets inside a clause come from synthesising prefixes of the line with the same
+# voice. The first two clauses are unchanged since the 17 Oct guide (same pauses), so their keys stand.
 # Shot times:
 #   "Because our forecasting results are simulated," 0.2-2.97 | "we're testing the same method" 3.18-4.76 |
 #   "on real counts" 4.76-5.81 ("real" 5.01) | "from ninety-nine" 5.81-6.57 ("ninety-nine" 6.10) |
-#   "Melbourne street sensors:" 6.57-7.90 | "a test announced" 8.11-9.22 | "before its result." 9.22-10.23
-#   ("result" 9.79) | the result slot (silent in the guide; at most 15 words in the real take) to 18.0.
+#   "Melbourne street sensors," 6.57-7.90 | "and we announced the test" 8.11-9.53 ("announced" 8.69) |
+#   "before its result." 9.53-10.55 ("its" 9.93, "result" 10.13) | the result slot (silent in the guide; at
+#   most 15 words in the real take) to 18.5.
 # re-key to the real voice take (the team reads at about 140 wpm, so everything moves ~5% later)
 BEATS = {
     "dots": 0.2,          # "Because our forecasting results..." -> sensor dots ripple in from the centre
@@ -82,10 +84,10 @@ BEATS = {
     "real_counts": 5.01,  # "real counts" -> the sensor count ticks up, each dot pinging as it is counted
     "ninety_nine": 6.10,  # "ninety-nine" -> the count lands on the number of ids found; its basis line under it
     "melbourne": 6.57,    # "Melbourne street sensors:" -> the "Not Macau" caveat card
-    "announced": 8.11,    # "a test announced" -> the calendar block gives way to the rules line
-    "result": 9.6,        # "...its result." -> map dims, the result panel comes in
-    "pending": 10.1,      # result slot starts -> the PENDING stamp lands
-    "placeholder": 10.6,  # -> the verbatim result placeholder in its amber dashed box
+    "announced": 8.69,    # "and we announced the test" -> the calendar block gives way to the rules line
+    "result": 9.95,       # "...its result." -> map dims, the result panel comes in
+    "pending": 10.4,      # result slot starts (the guide ends 10.55) -> the PENDING stamp lands
+    "placeholder": 10.9,  # -> the verbatim result placeholder in its amber dashed box
 }
 CHAPTER_END = 2.0                          # chapter card for about 2 s
 PLAYBACK_END = BEATS["announced"] - 0.2    # the 24 hours play from BEATS["playback"] to here, then hold
@@ -754,7 +756,7 @@ def draw_right_column(img: Image.Image, t: float) -> None:
     if a_bas > 0:
         put(img, RX0, BASIS_BASE + (1 - a_bas) * 10, SENSOR_LINE, 24, 500, INK_2, a_bas)
 
-    # playback clock and calendar strip, until "a test announced"
+    # playback clock and calendar strip, until "we announced the test"
     a_cal = progress(t, BEATS["playback"] - 0.3, 0.5) * (1 - progress(t, BEATS["announced"] - 0.1, 0.35))
     if a_cal > 0:
         put(img, RX0, CAL_HEAD, SINCE, 24, 600, INK_2, a_cal)
@@ -784,7 +786,7 @@ def draw_right_column(img: Image.Image, t: float) -> None:
         d.line([(hx - oxl, STRIP_Y0 - 2 - oyl), (hx - oxl, STRIP_Y1 + 3 - oyl)], fill=rgba(INK), width=2)
         paste(img, lay, (oxl, oyl), a_cal)
 
-    # the rules line, in the calendar block's place, from "a test announced" to the end
+    # the rules line, in the calendar block's place, from "we announced the test" to the end
     a_rul = progress(t, BEATS["announced"] + 0.15, 0.45)
     if a_rul > 0:
         paste(img, RULES_CARD, (RULES_XY[0], RULES_XY[1] + (1 - a_rul) * 16), a_rul)
@@ -834,9 +836,9 @@ STILLS = {
     "night": 3.0,
     "count": 5.6,
     "basis": 7.2,
-    "rules": 9.0,
-    "pending": 11.2,
-    "end": 17.9,
+    "rules": 9.5,
+    "pending": 11.5,
+    "end": 18.4,
 }
 
 if __name__ == "__main__":

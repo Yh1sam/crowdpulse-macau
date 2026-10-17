@@ -1,4 +1,4 @@
-"""S20 · End card (4:20.5-4:26.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
+"""S20 · End card (4:38.5-4:44.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
 
 Storyboard: docs/video/script.md section 3, row S20 (visual and on-screen text), section 2 "Team roles" (which
 member carries which STEMB letter or letters), section 5A item 1 (fill names, school, supervisor and the grid before
@@ -21,6 +21,10 @@ Data sources (nothing is retyped):
   - docs/video/script.md, section 2, "Team roles" table: [MEMBER n] -> STEMB letter(s), every **L** in the
     discipline cell (four members; [MEMBER 3] carries E and B). The grid has one column per member, in member
     order, each headed by the full S T E M B strip with that member's letter(s) lit (as in the lower-thirds).
+    Every member's "speaks in" cell lists S05 (checked), where each says what they worked on.
+  - docs/video/shotlist.json, entry S05, narration: under each member's discipline, the phrase from their own S05
+    sentence, "[Mn] I worked on <phrase>." (the app / the forecasts / the server, and how we'd deploy it / health
+    and accessibility), so the card says who did what in words as well as letters.
   - shared/zones.json (via style.project): the 7-zone mark next to the wordmark, as in S05.
 
 Bracketed placeholders ([SCHOOL], [NAME], [TEAM TO FILL], [MEMBER n], [optional: ...]) are drawn in amber dashed
@@ -46,7 +50,8 @@ import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw  # noqa: E402
 
 SHOT = "S20"
-_entry = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
+_shots = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
+_entry = next(s for s in _shots if s["id"] == SHOT)
 DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 6.0 s
 
 # Times in seconds from the shot start. S20 has no voice: the card builds in about 1.3 s after the cut from
@@ -116,31 +121,40 @@ assert "for the full 6 s" in storyboard_cell(SHOT, 6) and "full 6 s" in _entry["
 
 # [MEMBER n] -> STEMB letters (section 2, Team roles): every **L** in the discipline cell, so one member may carry
 # several ("**E** Engineering · **B** Business"). One grid column per member, in member order.
+# Columns: member | discipline | owns in the project | speaks in | written words.
 _team = SCRIPT[SCRIPT.index("### Team roles"):]
 _team = _team[:_team.index("\n## ")]   # the Team roles section only (up to section 3)
-_rows = re.findall(r"^\| (\[MEMBER (\d)\])(?: \(optional\))? \| ([^|]*) \|", _team, re.M)
-assert [int(n) for _, n, _ in _rows] == [1, 2, 3, 4], _rows                     # four members, in order
-COLUMNS = [(tag, re.findall(r"\*\*([STEMB])\*\*", cell)) for tag, _, cell in _rows]  # (member, its letters)
+_rows = re.findall(r"^\| (\[MEMBER (\d)\])(?: \(optional\))? \| ([^|]*) \| [^|]* \| ([^|]*) \|", _team, re.M)
+assert [int(n) for _, n, _, _ in _rows] == [1, 2, 3, 4], _rows                  # four members, in order
+COLUMNS = [(tag, re.findall(r"\*\*([STEMB])\*\*", cell)) for tag, _, cell, _ in _rows]  # (member, its letters)
+assert all("S05" in [x.strip() for x in speaks.split(",")] for *_, speaks in _rows), _rows  # all introduce themselves
 assert all(letters for _, letters in COLUMNS), COLUMNS                         # every member carries a letter
 _all = [l for _, letters in COLUMNS for l in letters]
 assert sorted(_all) == sorted(l for l, _ in STEMB), COLUMNS                   # together: all five, none twice
 WORDS = dict(STEMB)                                                             # letter -> discipline word
+
+# What each member worked on, in their own words: the phrase from their S05 sentence, "[Mn] I worked on <phrase>."
+_s05_narration = next(s for s in _shots if s["id"] == "S05")["narration"]
+_s05 = dict(re.findall(r"\[(M\d|ALL)\]\s*([^\[]+?)\s*(?=\[|$)", _s05_narration))   # speaker -> sentence
+WORKED_ON = {f"[MEMBER {k[1:]}]": re.fullmatch(r"I worked on (.+)\.", line).group(1)
+             for k, line in _s05.items() if k != "ALL"}   # [MEMBER 1] -> "the app", ...
+assert list(WORKED_ON) == [tag for tag, _ in COLUMNS], (WORKED_ON, COLUMNS)    # one phrase per member column
 
 LEGEND_BADGE = {"simulated": "SIMULATED", "real": "REAL DATA", "model check": "MODEL CHECK",
                 "pending": "PENDING", "corrected": "CORRECTED"}
 
 # ---------- layout ----------
 
-LOCK_Y = 120                 # centre line of the mark + wordmark lockup
+LOCK_Y = 114                 # centre line of the mark + wordmark lockup
 WORD_SIZE, MARK_H = 88, 100
-REPO_Y = 226                 # centre line of the repository line (directly under the wordmark)
+REPO_Y = 220                 # centre line of the repository line (directly under the wordmark)
 REPO_LABEL_SIZE, REPO_SIZE = 30, 38   # both larger than the credits (CRED_SIZE)
-ID1_Y, ID2_Y = 294, 342      # centre lines of the two identity lines
-GRID = (60, 372, 1860, 624)  # who-built-what panel
-LEGEND_Y = 662               # centre line of the evidence legend
-CRED_Y = 700                 # top of the credits block
+ID1_Y, ID2_Y = 288, 336      # centre lines of the two identity lines
+GRID = (60, 366, 1860, 640)  # who-built-what panel (with each member's "worked on" line)
+LEGEND_Y = 672               # centre line of the evidence legend
+CRED_Y = 706                 # top of the credits block
 CRED_LABEL_X, CRED_COLS = 60, ((214, 1010), (1066, 1860))
-CRED_SIZE, CRED_PITCH, CRED_GAP = 22, 29, 9
+CRED_SIZE, CRED_PITCH, CRED_GAP = 22, 28, 7
 assert min(REPO_LABEL_SIZE, REPO_SIZE) > CRED_SIZE
 
 
@@ -410,13 +424,14 @@ COL_W = (GRID[2] - GRID[0] - 2 * 32 - (N_COLS - 1) * COL_GAP) / N_COLS
 COL_X = [GRID[0] + 32 + i * (COL_W + COL_GAP) for i in range(N_COLS)]
 TILE = 56                             # height of the column header row
 HEAD_Y = GRID[1] + 40                 # centre line of the grid header
-TILE_Y = GRID[1] + 76                 # top of the column header row
-CHIP_Y = TILE_Y + TILE + 16           # top of the discipline line
-CELL = (CHIP_Y + 48, GRID[3] - 20)    # contribution slot (top, bottom)
+TILE_Y = GRID[1] + 74                 # top of the column header row
+CHIP_Y = TILE_Y + TILE + 10           # top of the discipline line (its centre line is 20 px lower)
+PHRASE_Y = CHIP_Y + 54                # centre line of the "worked on" phrase, under the discipline
+CELL = (PHRASE_Y + 24, GRID[3] - 20)  # contribution slot (top, bottom)
 assert CELL[1] - CELL[0] >= 36, CELL  # room for one line of the team's text
 ST_W, ST_H, ST_PITCH = 36, 48, 42     # strip tiles (about the lower-third's strip)
 STRIP_W = 4 * ST_PITCH + ST_W
-WORD_SIZE_G, MEMBER_SIZE = 30, 24
+WORD_SIZE_G, MEMBER_SIZE, PHRASE_SIZE = 30, 24, 24
 WORD_SEP = "  ·  "
 
 
@@ -430,10 +445,11 @@ def discipline_parts(letters):
     return out
 
 
-# each column's header row and discipline line fit inside the column
+# each column's header row, discipline line and "worked on" phrase (one line) fit inside the column
 for _tag, _letters in COLUMNS:
     assert rich_width(_tag, MEMBER_SIZE, 700, 12) + 16 <= COL_W - STRIP_W, (_tag, COL_W)
     assert sum(text_font(t, WORD_SIZE_G, 600).getlength(t) for t, _ in discipline_parts(_letters)) <= COL_W, _letters
+    assert text_font(WORKED_ON[_tag], PHRASE_SIZE, 500).getlength(WORKED_ON[_tag]) <= COL_W, WORKED_ON[_tag]
 
 
 def _grid_panel(img, d2):
@@ -465,6 +481,7 @@ def _grid_col(i):
         for text, colour in discipline_parts(letters):
             draw_text(img, (wx, CHIP_Y + 20), text, WORD_SIZE_G, 600, colour, anchor="lm")
             wx += text_font(text, WORD_SIZE_G, 600).getlength(text)
+        draw_text(img, (x, PHRASE_Y), WORKED_ON[member], PHRASE_SIZE, 500, INK_2, anchor="lm")  # their S05 words
         cell = (x, CELL[0], x + COL_W, CELL[1])
         dashed_rrect(d2, tuple(S(v) for v in cell), S(10), (*WARNING, 120), S(1.8), S(7), S(6))
     return fn

@@ -1,8 +1,8 @@
-"""Shot S07, "What is new?" (0:58.0-1:11.0, 13.0 s), [MEMBER 4] voice-over. Motion graphic.
+"""Shot S07, "What is new?" (1:08.0-1:21.0, 13.0 s), [MEMBER 4] voice-over. Motion graphic.
 
 Credits the police crowd forecast and early-warning system and its planned expansion, then claims
-only what CrowdPulse proposes: movable phones that send only numbers, 5-15 minute forecasts with a
-confidence score, and a person's approval.
+only what CrowdPulse proposes: movable phones that send only numbers, 5-15 minute forecasts that
+say how sure they are (a confidence score), and a person's approval.
 
 Beats (keyed to the guide voice, see BEATS):
   "Macau's police already run a crowd warning system here"
@@ -16,12 +16,12 @@ Beats (keyed to the guide voice, see BEATS):
         labelled "Macau · schematic" (a box, not a coastline). A few generic grey pins (border posts
         and scenic areas, at made-up schematic spots) pulse once; the "2026 Policy Address" line
         appears under the panel.
-  "We propose movable, numbers-only phones, and forecasts with a confidence score"
+  "We propose movable phones that send only numbers, and forecasts that say how sure they are"
         Back to the 7-zone graph. One phone per sensor in shared/zones.json drops, inside the band
         and on the Tercena route alike (no square is singled out; each phone sits clear of other
         zones' phones); number packets flow to a server, fanning over its racks and fading in;
-        every zone gets +5 / +10 / +15 min chips, then a confidence dot in each chip; the CrowdPulse
-        line builds up item by item.
+        every zone gets +5 / +10 / +15 min chips, then a confidence dot in each chip; the "What
+        we propose" line builds up item by item.
 
 Data sources (nothing below is retyped):
 - docs/video/shotlist.json, S07: duration, narration and every on-screen line (only the timing
@@ -29,7 +29,7 @@ Data sources (nothing below is retyped):
   docs/video/script.md section 3.
 - shared/zones.json: the 7 zones and 7 streets (style.draw_zone_graph) and the 9 sensors (one phone
   each). The band's corridor is the shortest street path from the Ruins to Senado Square.
-- shared/config.json: forecast_horizons_min (the chips), checked against the CrowdPulse line.
+- shared/config.json: forecast_horizons_min (the chips), checked against the "What we propose" line.
 
 Output: video/build/mg/S07.mp4 and video/build/mg/stills/S07_<beat>.png.
 Run:    .venv/bin/python video/mg/S07.py                          full render + stills
@@ -81,7 +81,7 @@ assert f"{HORIZONS[0]}-{HORIZONS[-1]} min forecasts" in TAGLINE, TAGLINE
 
 # The narration, clause by clause as the guide voice pauses (BEATS are keyed to these).
 CLAUSES = ["Macau's police already run a crowd warning system here,", "and plan to expand it.",
-           "We propose movable,", "numbers-only phones,", "and forecasts with a confidence score."]
+           "We propose movable phones that send only numbers,", "and forecasts that say how sure they are."]
 assert " ".join(CLAUSES) == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
 
 # ---------------------------------------------------------------- zone model
@@ -118,14 +118,15 @@ assert "jesus_square" in CORRIDOR
 assert any(s["zone_id"] in CORRIDOR for s in SENSORS) and any(s["zone_id"] == "tercena_corridor" for s in SENSORS)
 
 # ---------------------------------------------------------------- timing
-# Guide voice video/build/guide/S07.wav (say -v Daniel, about 147 wpm), laid at 0.2 s into the shot.
-# Clause boundaries from `ffmpeg -af silencedetect=noise=-35dB:d=0.12` on the wav, plus 0.2 s:
+# Guide voice video/build/guide/S07.wav (say -v Daniel -r 155), laid at 0.2 s into the shot.
+# Clause boundaries from `ffmpeg -af silencedetect=noise=-35dB:d=0.08` on the wav, plus 0.2 s:
 #   0.20-3.50   "Macau's police already run a crowd warning system here,"
 #   3.71-5.11   "and plan to expand it."
-#   5.35-6.50   "We propose movable,"
-#   6.71-8.06   "numbers-only phones,"
-#   8.28-10.49  "and forecasts with a confidence score."
-# Word times inside a clause are read off the wav's 20 ms energy envelope.
+#   5.35-8.14   "We propose movable phones that send only numbers,"
+#   8.36-10.66  "and forecasts that say how sure they are."
+# Word times inside a clause from synthesising prefixes of the line, read off the wav's 20 ms energy
+# envelope: "propose" 5.48, "movable" 5.96, "phones" 6.40, "send" 6.96, "only" 7.28, "numbers" 7.56,
+# "forecasts" 8.50, "how sure" 9.60-10.10.
 # re-key to the real voice take (the team speaks at about 140 wpm)
 BEATS = {
     "card": 0.0,          # chapter card in (out after about 2 s)
@@ -137,14 +138,14 @@ BEATS = {
     "pulse": 4.35,        # "expand": the grey pins pulse once
     "zoom_in": 5.35,      # "We propose": back to the 7-zone graph (settled at 6.2)
     "panel_out": 5.85,    # police lines out (gone by about 6.15)
-    "tag": 6.0,           # "movable": CrowdPulse line, "movable phones"
-    "phones": 6.2,        # "movable", as the zoom-in settles: the phones drop (all down by about 7.25)
-    "server": 6.45,       # the server comes in
-    "numbers": 6.71,      # "numbers-only": "numbers only" on the line
-    "packets": 6.9,       # number packets flow (first wave; more waves follow)
-    "forecasts": 8.4,     # "forecasts": +5 / +10 / +15 min chips, zone by zone, and the line item
-    "confidence": 9.3,    # "confidence": a confidence dot in every chip
-    "approves": 10.5,     # end of speech: "a person approves"
+    "tag": 6.0,           # "movable phones": "What we propose" line, "movable phones", as the police lines go
+    "phones": 6.4,        # "phones": the phones drop (all down by about 7.45)
+    "server": 6.6,        # the server comes in
+    "packets": 6.95,      # "send": number packets flow (first wave; more waves follow)
+    "numbers": 7.3,       # "only numbers": "numbers only" on the line
+    "forecasts": 8.5,     # "forecasts": +5 / +10 / +15 min chips, zone by zone, and the line item
+    "confidence": 9.6,    # "how sure": a confidence dot in every chip
+    "approves": 10.7,     # end of speech: "a person approves"
 }
 CARD_HOLD = 2.0
 ZOOM_DUR = 0.85
@@ -163,7 +164,7 @@ BAND_HW = 64                                        # half-width of the police b
 BAND = tuple(int(c) for c in lerp(BLUE, INK, 0.30))
 CHIP_FILL = tuple(int(c) for c in lerp(NAVY_2, CYAN, 0.28))
 SERVER = (330, 520)
-TAG_Y = 852                                         # CrowdPulse line (caption band starts at y 926)
+TAG_Y = 852                                         # "What we propose" line (caption band starts at y 926)
 TAG_SIZE = 32
 CONTENT_Y1 = 905                                    # shot content stays above this (captions from y 926)
 
@@ -909,9 +910,9 @@ STILLS = {  # beat name -> time (s) for the layout stills
     "here": 3.35,
     "frame": 4.75,
     "back": 6.3,
-    "flow": 7.6,
-    "chips": 9.0,
-    "confidence": 10.2,
+    "flow": 7.7,
+    "chips": 9.4,
+    "confidence": 10.4,
     "end": DURATION - 1 / FPS,
 }
 

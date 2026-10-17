@@ -1,20 +1,21 @@
-"""Shot S11 (1:52.0-2:07.0, 15.0 s): two on-device detectors against a careful hand count.
+"""Shot S11 (2:02.5-2:19.5, 17.0 s): two on-device detectors against a careful hand count.
 
 Storyboard: docs/video/script.md, section 3 row S11, section 4 claims row S11, section 6
 ("Global look and tools", "figure" S11). Shot list: docs/video/shotlist.json (id S11).
 
-0-5.8 s   The same CC0 frame twice: Apple's boxes, then YOLO11n's boxes. The wipe runs 2.8-3.8 s,
-          starting in the pause after "clip," so the YOLO11n panel (and its label) is complete as
-          "Yo-lo" is spoken; it holds in full to 5.35 s, then cross-fades to the bars (to 5.8 s).
+0-7.7 s   The same CC0 frame twice: Apple's boxes (under "Then we tried real footage." and the
+          first clause), then YOLO11n's boxes. The wipe runs 4.7-5.7 s, starting in the pause after
+          "clip," so the YOLO11n panel (and its label) is complete as "Yo-lo" is spoken; it holds in
+          full to 7.25 s, then cross-fades to the bars (to 7.7 s).
           Faces are mosaicked at the figure's own resolution before any scaling, with the
           detection boxes and the dashed far-kerb line kept on top of the mosaic. Each panel is
           cropped, fitted to 16:9 on navy (no stretching) and slowly pushed in (zoom 1.00 -> 1.06).
-5.35-15 s "count vs hand count" bar pairs, Apple -> YOLO11n: within about 20 m (97% lands at about
-          6.5 s, inside "ninety-seven percent"), densest frames (not spoken), whole wide scene (on
+7.25-17 s "count vs hand count" bar pairs, Apple -> YOLO11n: within about 20 m (97% lands at about
+          8.4 s, inside "ninety-seven percent"), densest frames (not spoken), whole wide scene (on
           "across the whole scene", 27% just before "only twenty-seven").
-The storyboard's times (panels to 6.5 s, bars from 6.5 s, "97" at about 7.2 s) are at 140 wpm with
+The storyboard's times (panels to 8.6 s, bars from 8.6 s, "97" at about 9.3 s) are at 140 wpm with
 the voice from 0.3 s; the beats below are keyed to the guide voice, which reads faster and speaks
-"ninety-seven" from 5.5 s, so the panels end (and the bars start) at 5.35 s instead.
+"ninety-seven" from 7.4 s, so the panels end (and the bars start) at 7.25 s instead.
 "Apple's detector, 55" and "In the densest frames, 82" are no longer spoken (round-2 lock): both
 stay on screen in the bars, with no spoken-number emphasis.
 
@@ -49,30 +50,31 @@ from style import *  # noqa: E402,F401,F403
 
 SHOT = "S11"
 _shot = next(s for s in json.loads((ROOT / "docs/video/shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 15.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 17.0 s
 
 # Beat times in seconds from the shot start, keyed to the guide voice video/build/guide/S11.wav
-# (say -v Daniel -r 155, 12.12 s) laid from VOICE_START: word times from its pauses (silencedetect:
-# 2.71-3.00, 9.19-9.39, 10.64-10.86 s into the file) and prefix syntheses, 17 Oct. Shot times:
-# "On eleven frames of a public-domain street clip," 0.2-2.9 (pause 2.91-3.20) | "the open Yo-lo
-# model" 3.2-4.5 ("Yo-lo" 3.7-4.3) | "in our app counted" 4.5-5.5 | "ninety-seven percent" 5.5-6.8 |
-# "as many nearby people" 6.8-7.9 | "as a careful hand count;" 7.9-9.4 | "across the whole scene,"
-# 9.6-10.8 | "only twenty-seven." 11.1-12.2 (the voice ends at 12.3; the bars hold to 15.0).
+# (say -v Daniel -r 155, 14.00 s) laid from VOICE_START: word times from its pauses (silencedetect:
+# 1.64-1.88, 4.58-4.87, 11.06-11.26, 12.51-12.73 s into the file; the 6.55-6.66 gap is the stop in
+# "app", not a pause) and prefix syntheses, 18 Oct. Shot times: "Then we tried real footage." 0.2-1.9 |
+# "On eleven frames of a public-domain street clip," 2.1-4.8 (pause 4.78-5.07) | "the open Yo-lo
+# model" 5.1-6.4 ("Yo-lo" 5.7-6.2) | "in our app counted" 6.4-7.4 | "ninety-seven percent" 7.4-8.7 |
+# "as many nearby people" 8.7-9.9 | "as a careful hand count;" 9.9-11.3 | "across the whole scene,"
+# 11.5-12.8 | "only twenty-seven." 12.9-14.2 (the voice ends at 14.2; the bars hold to 17.0).
 # Re-key to the real voice take.
 VOICE_START = 0.2                 # video/assemble.py default
 BEATS = {
     "label_in": 0.0,     # shot start: Apple panel and its label
-    "wipe": 2.8,         # end of "clip," (2.91; the eased edge has moved about 10 px by then): Apple ->
-                         # YOLO11n, 97% across (label fully in) by 3.6, complete by 3.8, as "Yo-lo" is
-                         # spoken (3.7-4.3)
-    "to_bars": 5.35,     # "counted" (4.9-5.5): picture cross-fades to the bars; the YOLO11n panel held ~1.75 s
-    "near": 5.5,         # "ninety-seven percent" (5.5-6.8): within ~20 m pair grows, 97% lands by 6.5
-    "dense": 7.6,        # not spoken ("as a careful hand count", 7.9-9.4): densest pair, with its tag
-    "whole": 10.25,      # "across the whole scene" ("whole" 10.3): 27% lands by 11.3, before "twenty-seven" (11.5)
+    "wipe": 4.7,         # end of "clip," (4.78; the eased edge has moved about 10 px by then): Apple ->
+                         # YOLO11n, 97% across (label fully in) by 5.5, complete by 5.7, as "Yo-lo" is
+                         # spoken (5.7-6.2)
+    "to_bars": 7.25,     # "counted" (6.9-7.4): picture cross-fades to the bars; the YOLO11n panel held ~1.75 s
+    "near": 7.4,         # "ninety-seven percent" (7.4-8.7): within ~20 m pair grows, 97% lands by 8.4
+    "dense": 9.5,        # not spoken ("as a careful hand count", 9.9-11.3): densest pair, with its tag
+    "whole": 12.1,       # "across the whole scene" ("whole" 12.1): 27% lands by 13.1, before "twenty-seven" (13.4)
 }
 WIPE_DUR = 1.0
-APPLE_LABEL_OUT = 0.32            # after "wipe": the Apple label fades out (0.2 s), gone by 3.32 s, just before
-                                  # the wipe edge reaches the YOLO11n label's right end (x ~850 at 3.32 s), so
+APPLE_LABEL_OUT = 0.32            # after "wipe": the Apple label fades out (0.2 s), gone by 5.22 s, just before
+                                  # the wipe edge reaches the YOLO11n label's right end (x ~850 at 5.22 s), so
                                   # the two labels are never seen spliced into one line
 XFADE_DUR = 0.45
 TITLE_IN, FRAME_IN = 0.1, 0.15    # after to_bars: title and bar tracks fade in (0.5 s) as the bars start
@@ -428,12 +430,12 @@ def draw_frame(t: float) -> Image.Image:
 
 
 STILLS = {  # beat name -> time (s)
-    "apple": 2.0,
-    "wipe": 3.2,
-    "yolo": 4.6,
-    "near": 6.6,
-    "dense": 8.8,
-    "all": 14.9,
+    "apple": 3.5,
+    "wipe": 5.1,
+    "yolo": 6.5,
+    "near": 8.5,
+    "dense": 10.7,
+    "all": 16.9,
 }
 
 

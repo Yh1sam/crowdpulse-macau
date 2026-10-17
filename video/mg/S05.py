@@ -1,13 +1,16 @@
-"""S05 · Team roll call and title card (0:39.5-0:48.0, 8.5 s).
+"""S05 · Team self-introductions and title card (0:39.5-0:53.0, 13.5 s).
 
 Storyboard: docs/video/script.md section 3, row S05; section 2 "Team roles" (four members, [MEMBER 3] carries both
-Engineering and Business); section 5D and section 6 "team_footage" (what to film); docs/video/shotlist.json, entry
-S05. Section 4 has no claims row for S05 (no numbers are spoken or shown).
+Engineering and Business; the "Self-introductions (S05)" bullet); section 5D and section 6 "team_footage" (what to
+film); docs/video/shotlist.json, entry S05. Section 4 has no claims row for S05 (no numbers are spoken or shown).
 
 Data sources:
-  - docs/video/shotlist.json: the shot duration (end_s - start_s) and the narration (asserted below, and checked
-    against the storyboard row): four one-line cuts, M1 T, M2 S, M3 E and B, M4 M, then all four together.
-  - docs/video/script.md, section 2 "Team roles": the STEMB letters each member's tile strip lights (checked).
+  - docs/video/shotlist.json: the shot duration (end_s - start_s); the narration (asserted below, and checked
+    against the storyboard row): four cuts of one sentence each on what that member worked on, M1 T, M2 S, M3 E and
+    B, M4 M, then all four together; and, from its on-screen text ("Slates" item), the discipline word(s) each
+    member's slate shows beside them (T Technology, S Science, E Engineering + B Business, M Medicine).
+  - docs/video/script.md, section 2 "Team roles": the STEMB letters each member's tile strip lights, and the
+    "Self-introductions (S05)" bullet, which pairs each sentence with its discipline (both checked).
   - video/build/guide/S05.wav (video/guide.py): the beats are keyed to its word boundaries.
   - shared/zones.json: the 7 zones and 7 street links that collapse into the wordmark, and the step-free route
     (Senado Square -> St. Dominic's -> Rua de S. Paulo -> Company of Jesus Square, no stairs) drawn on M4's map prop.
@@ -20,8 +23,9 @@ Outputs:
   - video/build/overlays/S05_title.mov: the title build alone (band, question, navy scrim, graph -> wordmark), with
     alpha, full shot length, so it can be laid over the real group footage at assembly.
   - video/build/mg/stills/S05_*.png: layout checks at the key beats.
-Not drawn here (added at assembly): burned-in captions and the speaker lower-thirds. The storyboard gives S05 no
-chapter card, badge or footer.
+Not drawn here (added at assembly): the burned-in captions, which carry each member's sentence, so the slates stay
+above the caption band (y 920-990). S05 has no lower-third (the slates name each speaker's discipline), and the
+storyboard gives it no chapter card, badge or footer.
 
 Run: .venv/bin/python video/mg/S05.py
 """
@@ -42,46 +46,70 @@ from PIL import Image, ImageDraw  # noqa: E402
 
 SHOT = "S05"
 _entry = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 8.5 s
+DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 13.5 s
 
 # The narration, verbatim (shotlist.json and the storyboard row must agree); the slates and BEATS follow it.
-NARRATION = ("[M1] Technology. [M2] Science. [M3] Engineering and business. [M4] Medicine. "
-             "[ALL] We are CrowdPulse Macau.")
+NARRATION = ("[M1] I worked on the app. [M2] I worked on the forecasts. [M3] I worked on the server, and how we'd "
+             "deploy it. [M4] I worked on health and accessibility. [ALL] Together, we are CrowdPulse Macau.")
 assert _entry["narration"] == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
 _script = (ROOT / "docs" / "video" / "script.md").read_text()
 _row = next(l for l in _script.splitlines() if l.startswith(f"| {SHOT} |"))
 assert [c.strip() for c in _row.strip().strip("|").split(" | ")][3] == NARRATION, "storyboard row S05 disagrees"
-ROLL = dict(re.findall(r"\[(M\d|ALL)\]\s*([^\[]+?)\s*(?=\[|$)", NARRATION))  # speaker -> line
+ROLL = dict(re.findall(r"\[(M\d|ALL)\]\s*([^\[]+?)\s*(?=\[|$)", NARRATION))  # speaker -> sentence
 # STEMB letters per member, from the "Team roles" table (section 2): "| [MEMBER 3] | **E** Engineering · **B** ..."
 ROLE_LETTERS = {f"M{n}": "".join(re.findall(r"\*\*([STEMB])\*\*", cell))
                 for n, cell in re.findall(r"^\| \[MEMBER (\d)\] \| ([^|]+) \|", _script, re.M)}
+# The discipline word(s) on each member's slate, from the shotlist's on-screen text ("Slates" item), in member order:
+# "... with the discipline word: T Technology · S Science · E Engineering + B Business · M Medicine, and the ..."
+_slates = next(p for p in _entry["on_screen_text"].split(" | ") if p.startswith("Slates"))
+DISCIPLINE = [[tuple(pair.split(" ", 1)) for pair in item.split(" + ")]          # [[("T", "Technology")], ...]
+              for item in re.search(r"discipline word: (.+?), and the S T E M B strip", _slates).group(1).split(" · ")]
+assert all(word == dict(STEMB)[l] for d in DISCIPLINE for l, word in d), DISCIPLINE
+# The "Self-introductions (S05)" bullet (section 2) pairs each sentence with its discipline, in the same order:
+# "I worked on the app." (T Technology) / ... / "Together, we are CrowdPulse Macau." (its first five quotes)
+_intro = next(l for l in _script.splitlines() if l.startswith("- **Self-introductions (S05):**"))
+assert re.findall(r'"([^"]+)"(?: \(([^)]+)\))?', _intro)[:len(ROLL)] == \
+    [(ROLL[k], " + ".join(f"{l} {w}" for l, w in d)) for k, d in zip(ROLL, DISCIPLINE)] + [(ROLL["ALL"], "")], \
+    "Team roles 'Self-introductions (S05)' bullet disagrees with the narration or the slates"
 
 # Times in seconds from the shot start, keyed to the guide voice (video/build/guide/S05.wav, from video/guide.py),
-# which assemble.py starts 0.2 s into the shot. Word boundaries: its pauses (ffmpeg silencedetect=noise=-35dB:d=0.08)
-# and, inside the last line, its 10 ms energy envelope. Speech, in shot time:
-#   0.20-1.00 "Technology."  1.25-1.96 "Science."  2.19-3.54 "Engineering and business."  3.78-4.41 "Medicine."
-#   4.66-6.23 "We are CrowdPulse Macau." ("are" 4.99, "CrowdPulse" 5.33-5.78, "Macau" 5.83-6.23)
-#   6.23-8.5 silence; the title card is complete for the 2 s hold from 6.5.
-# Each member cut is a hard cut on the first sound of that member's line (the first one is the shot's first frame).
-# The title build (scrim to hold) keeps its timing. re-key to the real voice take
+# which assemble.py starts 0.2 s into the shot. Line and clause boundaries: its pauses (ffmpeg
+# silencedetect=noise=-35dB:d=0.08); inside the last line, its 10 ms energy envelope. Speech, in shot time:
+#   0.20-1.18 "I worked on the app."  1.48-3.18 "I worked on the forecasts."
+#   3.41-6.10 "I worked on the server, and how we'd deploy it." (comma pause 4.65-4.85)
+#   6.33-8.41 "I worked on health and accessibility."
+#   8.67-10.94 "Together, we are CrowdPulse Macau." ("Together," 8.67-9.18, "we" 9.37, "are" 9.69,
+#     "CrowdPulse" 10.07-10.51, "Macau" 10.53-10.94)
+#   10.94-13.5 silence; the title card is complete for the 2 s hold from 11.5.
+# The guide reads the lines with no hand-off gaps, only its 0.2-0.3 s sentence pauses. Each member cut is a hard cut
+# on the end of the previous line, so the new speaker gets that whole pause as air before their first word (a real
+# take needs it), and their caption follows when they start to speak. A cut lands on the first frame after the
+# line ends (1.2, 3.2, 6.13, 8.43 s); the first cut is the shot's first frame.
+# re-key to the real voice take (the real hand-offs will be longer: the slot leaves 0.56 s after the guide's last
+# word before the hold; beyond that, the overrun plan's cut 9 applies, never the hold)
 BEATS = {
-    "m1": 0.0,          # [M1] "Technology."                (from 0.20)
-    "m2": 1.25,         # [M2] "Science."                   (hard cut)
-    "m3": 2.19,         # [M3] "Engineering and business."  (hard cut; E and B lit)
-    "m4": 3.78,         # [M4] "Medicine."                  (hard cut)
-    "group": 4.66,      # [ALL] "We are CrowdPulse Macau."  (hard cut to the group slate, all five letters lit)
-    "question": 4.86,   # "We...": the research question rises on a band under the group (on screen 3.6 s to the end)
-    "scrim": 5.0,       # "are": navy starts to cover the group shot (fully covered ~0.9 s later)
-    "graph_in": 5.1,    # "are": the 7-zone graph draws in
-    "collapse": 5.5,    # "CrowdPulse": the graph shrinks into the mark; the wordmark unrolls on "Macau" (5.86-6.46)
-    "challenge": 6.1,   # "Responsible AI · Challenge 2(c)" settles as "Macau" ends
-    "hold": 6.5,        # silence: title card held to the end of the shot (2 s, never cut, section 6)
+    "m1": 0.0,          # [M1] "I worked on the app."                           (from 0.20; 1.2 s on screen)
+    "m2": 1.18,         # [M2] "I worked on the forecasts."                     (hard cut; 2.0 s on screen)
+    "m3": 3.18,         # [M3] "I worked on the server, and how we'd deploy it." (hard cut; E and B lit; 2.9 s)
+    "m4": 6.11,         # [M4] "I worked on health and accessibility."          (hard cut; 2.3 s on screen)
+    "group": 8.41,      # [ALL] "Together, we are CrowdPulse Macau."  (hard cut to the group slate, all five lit)
+    "question": 9.25,   # after "Together,": the research question rises on a band under the group (on screen 4.25 s
+                        # to the end, at full strength from 9.8)
+    "scrim": 9.7,       # "are": navy starts to cover the group shot (fully covered ~0.9 s later)
+    "graph_in": 9.8,    # "are": the 7-zone graph draws in
+    "collapse": 10.2,   # "CrowdPulse": the graph shrinks into the mark; the wordmark unrolls on "Macau" (10.56-11.16)
+    "challenge": 10.8,  # "Responsible AI · Challenge 2(c)" settles as "Macau" ends
+    "hold": 11.5,       # silence: title card held to the end of the shot (2 s, never cut, section 6)
 }
 assert BEATS["hold"] == round(DURATION - 2.0, 3), "the silent title hold is 2 s"
+assert DURATION - BEATS["question"] >= 4.0 - 1e-9, "the research question is on screen about 4 s"
 
 COL_DUR, COL_STAGGER = 0.6, 0.012   # graph collapse: duration and per-node stagger (s)
 WORD_DELAY, WORD_DUR = 0.36, 0.6    # wordmark wipe: starts this long after "collapse", lasts this long (s)
 WIPE_FEATHER = 220                  # soft leading edge of the wordmark wipe (px), wider than one frame's travel
+# the whole title card (question, mark, wordmark, challenge pill) has settled before the silent hold starts
+assert max(BEATS["question"] + 0.55, BEATS["collapse"] + len(zone_graph()["zones"]) * COL_STAGGER + COL_DUR,
+           BEATS["collapse"] + WORD_DELAY + WORD_DUR, BEATS["challenge"] + 0.45) <= BEATS["hold"], BEATS
 
 SS = 2  # supersampling factor for shapes (drawn at 2x, downsampled with LANCZOS)
 
@@ -123,20 +151,24 @@ def step_free_route(src: str = "senado_square", dst: str = "jesus_square") -> li
 
 ROUTE = {frozenset(p) for p in step_free_route()}
 
-MEMBERS = [  # roll-call order (storyboard): T, S, E + B, M; "word" is the member's line without its full stop
-    dict(beat="m1", tag="[MEMBER 1]", letters="T", word=ROLL["M1"].rstrip("."), prop="phone",
+MEMBERS = [  # speaking order (storyboard): T, S, E + B, M; the sentence is the caption, not drawn on the slate
+    dict(beat="m1", tag="[MEMBER 1]", prop="phone",
          film="head-and-shoulders, holding a phone on a clamp. Screen off, unless the app was really installed "
               "on that phone (then the Setup tab, no street clip). Nothing that suggests a field run."),
-    dict(beat="m2", tag="[MEMBER 2]", letters="S", word=ROLL["M2"].rstrip("."), prop="f1",
+    dict(beat="m2", tag="[MEMBER 2]", prop="f1",
          film="head-and-shoulders, holding the printed F1 chart."),
-    dict(beat="m3", tag="[MEMBER 3]", letters="EB", word=ROLL["M3"].rstrip("."), prop="laptop",
+    dict(beat="m3", tag="[MEMBER 3]", prop="laptop",
          film="head-and-shoulders, with a laptop showing the server log."),
-    dict(beat="m4", tag="[MEMBER 4]", letters="M", word=ROLL["M4"].rstrip("."), prop="map",
+    dict(beat="m4", tag="[MEMBER 4]", prop="map",
          film="head-and-shoulders, holding the printed step-free route map."),
 ]
+for _m, _d in zip(MEMBERS, DISCIPLINE):  # "word": the discipline word(s) beside the speaker ("Engineering + Business")
+    _m.update(letters="".join(l for l, _ in _d), word=" + ".join(w for _, w in _d), line=ROLL[_m["beat"].upper()])
+assert len(DISCIPLINE) == len(MEMBERS), "one discipline item per member slate"
 assert [m["beat"].upper() for m in MEMBERS] == [k for k in ROLL if k != "ALL"], "one slate per member line, in order"
 assert {m["beat"].upper(): m["letters"] for m in MEMBERS} == ROLE_LETTERS, ROLE_LETTERS
 assert {l for m in MEMBERS for l in m["letters"]} == {l for l, _ in STEMB}, "the four members cover all of STEMB"
+assert all(m["line"].startswith("I worked on ") for m in MEMBERS), "each member says what they worked on"
 
 # ---------- text of the title card (storyboard, verbatim) ----------
 
@@ -146,11 +178,11 @@ QUESTION = ("Our question: can ordinary phones, sending only numbers, help forec
 CHALLENGE = "Responsible AI · Challenge 2(c)"
 GROUP_LABEL = "All four"
 assert len(MEMBERS) == 4 and GROUP_LABEL.lower().endswith("four"), "the group label names the team size"
-GROUP_FILM = f"all four: '{ROLL['ALL'].rstrip('.')}'"   # all four: 'We are CrowdPulse Macau'
+GROUP_FILM = f"all four: '{ROLL['ALL'].rstrip('.')}'"   # all four: 'Together, we are CrowdPulse Macau'
 
 # ---------- layout ----------
 
-PANEL = (60, 48, 1860, 780)          # slate panel; ends above the lower-third (y 795) and caption (y 900) slots
+PANEL = (60, 48, 1860, 780)          # slate panel; ends well above the caption band (y 920-990)
 VF = (1000, 176, 1800, 626)          # 16:9 viewfinder inside the slate
 LX = 124                             # left column x
 LOCK_Y = 372                         # vertical centre of the mark + wordmark lockup
@@ -430,14 +462,14 @@ def camera_glyph(d, x, y, colour=WARNING):
 
 # ---------- slates (static, built once) ----------
 
-WORD_SIZE, WORD_TOP, WORD_W = 112, 432, 836   # a member's line on the slate: size, top (one line), left column width
+WORD_SIZE, WORD_TOP, WORD_W = 112, 432, 836   # a member's discipline on the slate: size, top (one line), column width
 WORD_BAND = (432, 568)                        # a two-line word's glyphs: 30 px under the tag pill (402) and over
                                               # the tiles (598)
 
 
 def word_layout(word: str) -> list[tuple[str, int, float]]:
-    """[(text, size, baseline y)] for a member's line: one line at WORD_SIZE, or, when it is too long for the left
-    column (M3's "Engineering and business"), two balanced lines at the largest size whose glyphs fit WORD_BAND,
+    """[(text, size, baseline y)] for a member's discipline: one line at WORD_SIZE, or, when it is too long for the
+    left column (M3's "Engineering + Business"), two balanced lines at the largest size whose glyphs fit WORD_BAND,
     centred in it."""
     f = text_font(word, WORD_SIZE, 700)
     base = WORD_TOP + f.getmetrics()[0]                       # the baseline of a one-line word drawn from WORD_TOP
@@ -647,11 +679,11 @@ def frame(t: float) -> Image.Image:
     return img
 
 
-STILLS = {  # name: time (s)
-    "m1_technology": BEATS["m1"] + 0.4,
-    "m3_engineering_business": BEATS["m3"] + 0.4,
-    "m4_medicine": BEATS["m4"] + 0.4,
-    "group_all_four": BEATS["group"] + 0.1,
+_CUTS = [BEATS[m["beat"]] for m in MEMBERS] + [BEATS["group"]]
+STILLS = {  # name: time (s); each member slate at the middle of its cut, then the group, the title build and the hold
+    **{f"{m['beat']}_{m['word'].replace(' + ', '_').lower()}": round((a + b) / 2, 2)
+       for m, a, b in zip(MEMBERS, _CUTS, _CUTS[1:])},                    # m1_technology ... m4_medicine
+    "group_all_four": BEATS["group"] + 0.4,
     "group_question": BEATS["graph_in"] - 0.1,
     "collapse": BEATS["collapse"] + 0.25,
     "wordmark": BEATS["collapse"] + WORD_DELAY + WORD_DUR * 0.55,

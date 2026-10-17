@@ -1,4 +1,4 @@
-"""S19 · Relay close (4:09.5-4:20.5, 11.0 s): the four team members on camera, one line each, then all together.
+"""S19 · Relay close (4:27.0-4:38.5, 11.5 s): the four team members on camera, one line each, then all together.
 
 Storyboard: docs/video/script.md section 3, row S19 (narration, visual, on-screen text); section 4, the three S19
 claims rows (the "Next" line is a plan, with "which approvals apply: to be confirmed"; "The AI recommends. A person
@@ -38,6 +38,7 @@ Run: .venv/bin/python video/mg/S19.py [--stills-only]
 """
 from __future__ import annotations
 
+import itertools
 import json
 import math
 import re
@@ -52,29 +53,29 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 SHOT = "S19"
 _entry = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 11.0 s
+DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 11.5 s
 
 # Times in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S19.wav, say -v Daniel at
 # about 147 wpm; assemble.py lays it 0.2 s into the shot). Sentence boundaries from
-#   ffmpeg -i video/build/guide/S19.wav -af silencedetect=noise=-35dB:d=0.12 -f null -
-# (speech 0.00-4.03 | 4.27-5.51 | 5.75-7.02 | 7.27-about 9.30, the tail of "phone" fading out), each + 0.2 s;
-# re-measured on the four-member guide (17 Oct): the same boundaries.
+#   ffmpeg -i video/build/guide/S19.wav -af silencedetect=noise=-35dB:d=0.08 -f null -
+# (speech 0.00-4.41 | 4.66-5.90 | 6.14-7.42 | 7.66-about 9.75, the tail of "phone" fading out), each + 0.2 s;
+# re-measured on the team-voice guide (18 Oct; the comma pauses after "Next," and "Macau," stay inside M3's line).
 # The guide has 0.25 s gaps, not the 0.3-0.5 s hand-offs of the real relay; the final second stays at the shot end.
 # re-key to the real voice take
 BEATS = {
-    "m3": 0.20,         # [M3] "Next: a supervised street pilot in Macau, with permission."  -> the "Next" card
-    "m3_end": 4.23,
-    "m4": 4.47,         # [M4] "The AI recommends."
-    "m4_end": 5.71,
-    "m2": 5.95,         # [M2] "A person decides."
-    "m2_end": 7.22,
-    "m1": 7.47,         # [M1] "Nothing identifying leaves the phone."  (the "Next" card has left in the hand-off)
-    "m1_end": 9.50,
-    "together": round(DURATION - 1.0, 3),  # 10.0: everyone together, the final second -> the tagline, only here
+    "m3": 0.20,         # [M3] "Next, we want a supervised street pilot in Macau, with permission."  -> the "Next" card
+    "m3_end": 4.61,
+    "m4": 4.86,         # [M4] "The AI recommends."
+    "m4_end": 6.10,
+    "m2": 6.34,         # [M2] "A person decides."
+    "m2_end": 7.62,
+    "m1": 7.86,         # [M1] "Nothing identifying leaves the phone."  (the "Next" card has left in the hand-off)
+    "m1_end": 9.95,
+    "together": round(DURATION - 1.0, 3),  # 10.5: everyone together, the final second -> the tagline, only here
 }                                          # (overrun plan: drop this second first, never a line)
 HANDOFF = 0.40          # spotlight move from one speaker to the next (s), ends on the next speaker's first word
 TEXT_IN = 0.40          # fade-and-rise of the "Next" card (s)
-NEXT_OUT = 0.35         # the "Next" card leaves during the M2 -> M1 hand-off (on screen ≈6.6 s for its 19 words)
+NEXT_OUT = 0.35         # the "Next" card leaves during the M2 -> M1 hand-off (fully up ≈7.0 s for its 19 words)
 TAG_IN = 0.20           # fade-and-rise of the tagline at the start of the final second (s), both halves at once
 RULE_IN = 0.30          # the cyan rule under "A person decides." draws in just after (s)
 
@@ -499,14 +500,15 @@ def _tile_lit(i: int):
 
 
 def quote_lines(text: str) -> list[str]:
-    """Wrapped at QUOTE_W; a two-line quote is balanced (no one-word last line)."""
+    """Wrapped at QUOTE_W; a two- or three-line quote is balanced (no one-word last line)."""
     lines = wrap(text, QUOTE_SIZE, 500, QUOTE_W)
-    if len(lines) != 2:
+    if len(lines) not in (2, 3):
         return lines
     ws, f = text.split(), text_font(text, QUOTE_SIZE, 500)
-    splits = [(" ".join(ws[:k]), " ".join(ws[k:])) for k in range(1, len(ws))]
-    fits = [s for s in splits if max(f.getlength(s[0]), f.getlength(s[1])) <= QUOTE_W]
-    return list(min(fits, key=lambda s: max(f.getlength(s[0]), f.getlength(s[1]))))
+    splits = [[" ".join(ws[a:b]) for a, b in zip((0, *cut), (*cut, len(ws)))]
+              for cut in itertools.combinations(range(1, len(ws)), len(lines) - 1)]
+    widest = lambda s: max(f.getlength(ln) for ln in s)  # noqa: E731
+    return min((s for s in splits if widest(s) <= QUOTE_W), key=widest)
 
 
 def _quote(i: int, colour):
@@ -673,9 +675,9 @@ def overlay_check(t: float) -> Image.Image:
 
 STILLS = {  # name: time (s)
     "next": 2.2,                 # M3 speaking, the "Next" card up
-    "ai_recommends": 5.1,        # M4 speaking, the "Next" card holds (no tagline yet)
-    "person_decides": 6.6,       # M2 speaking, the "Next" card holds (no tagline yet)
-    "m1_phone": 8.5,             # M1 speaking, top band clear
+    "ai_recommends": 5.5,        # M4 speaking, the "Next" card holds (no tagline yet)
+    "person_decides": 7.0,       # M2 speaking, the "Next" card holds (no tagline yet)
+    "m1_phone": 8.9,             # M1 speaking, top band clear
     "together": DURATION - 1 / FPS,   # the final all-together second, tagline up
 }
 

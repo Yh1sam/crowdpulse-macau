@@ -1,4 +1,4 @@
-"""Shot S17b (3:53.5-4:03.5, 10.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
+"""Shot S17b (4:08.5-4:20.5, 12.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
 
 A navy card in the S07 / S17 style: a title and three rows (who may be more vulnerable, who answers,
 how the public is told), each with a plain shape icon, and a source footer. No badge, no chapter card
@@ -10,17 +10,18 @@ show"; shot list docs/video/shotlist.json (id S17b).
 
 Beats (shot seconds, keyed to the guide voice video/build/guide/S17b.wav, which starts 0.5 s into
 the shot (script.md section 6, "Guide track": S17b 0.5 s); clause starts are the silencedetect
-boundaries (noise -35 dB, d 0.12 s: 0, 1.57, 3.01, 4.66 s into the 7.41 s file of 17 Oct) + 0.5 s;
-the shot list's "about 6.1 s" for row 3 is at 140 wpm, the guide says "Every notice" at 5.16 s):
+boundaries (noise -35 dB, d 0.08 s: 0, 1.30, 2.31, 3.92, 5.06, 6.71 s into the 9.45 s file of 18 Oct)
++ 0.5 s; re-key to the real take):
 0.0         the title, then row 1 ("May be more vulnerable", icon: a figure with a walking stick
-            beside a wheelchair outline); the footer.
-0.5         "The approving operator," -> row 2 builds ("Who answers", icon: a log list); it is
+            beside a wheelchair outline); the footer. The title is fully in by 0.32 s.
+0.5-2.57    "If it fails, who answers?": the voice asks the title question (title and row 1 hold).
+2.81        "The person who approved it," -> row 2 builds ("Who answers", icon: a log list); it is
             outlined while it is spoken.
-2.07        "named in the audit log," -> the name line in the log icon lights up.
-3.51        "and the department running it." (row 2 holds)
-5.16        "Every notice says an AI forecast is involved." -> row 3 builds ("How the public is
+4.42        "named in our log," -> the name line in the log icon lights up.
+5.56        "and the department running it." (row 2 holds)
+7.21        "Every notice says an AI forecast is involved." -> row 3 builds ("How the public is
             told", icon: a sign with a dashed edge, because it is planned) and takes the outline.
-7.91-10.0   the voice ends; the outline fades and the whole card holds for reading.
+9.95-12.0   the voice ends; the outline fades and the whole card holds for reading.
 
 Layout: the title and the rows stay above y 780, clear of the lower-third slot (y 800-890) and the
 caption band (y 920-990) that assemble.py burns in; the footer sits in the footer slot (y 1032-1060).
@@ -54,8 +55,8 @@ from PIL import Image, ImageDraw  # noqa: E402
 
 NAME = "S17b"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == NAME)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 10.0 s
-assert DURATION == 10.0, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 12.0 s
+assert DURATION == 12.0, DURATION
 assert SHOT["visual_type"] == "motion_graphic", SHOT["visual_type"]
 
 # ---------- spec (read, never retyped) ----------
@@ -88,10 +89,14 @@ assert len(_cols) == 7 and _cols[3] == SHOT["narration"], "narration differs bet
 for _s in [TITLE, *ROW_TEXT, FOOTER]:
     assert f'"{_s}"' in _cols[5], f"script.md row {NAME} lacks {_s!r}"
 
-# the beats below are keyed to these clauses (the guide's four speech runs); if the narration changes, re-key
-CLAUSES = ["The approving operator,", "named in the audit log,", "and the department running it.",
-           "Every notice says an AI forecast is involved."]
+# the beats below are keyed to these clauses (the guide's six speech runs); if the narration changes, re-key
+CLAUSES = ["If it fails,", "who answers?", "The person who approved it,", "named in our log,",
+           "and the department running it.", "Every notice says an AI forecast is involved."]
 assert SHOT["narration"] == " ".join(CLAUSES), SHOT["narration"]
+assert " ".join(CLAUSES[:2]) == TITLE, (CLAUSES[:2], TITLE)         # the voice asks the title question aloud
+# row 2 keeps its written form (the approving operator, the audit log) for what the voice says as "the person
+# who approved it, named in our log"
+assert ROW_TEXT[1].startswith("Who answers: the approving operator, named in the audit log"), ROW_TEXT[1]
 
 # section 6, S17b and "Never say or show"
 assert ROWS[0][0].casefold().startswith("may be more vulnerable"), ROWS[0]       # the hedge stays
@@ -101,7 +106,14 @@ assert "to be confirmed with the authorities" in FOOTER and "no partner yet" in 
 BANNED = ["most at risk", "signed in", "logged in", "verified", "authenticated", "legal", "compliant", "approved",
           "in partnership with", "the police support it", "built for the police", "replaces", "better than",
           "prevents crushes", "saves lives", "dangerous"]
-for _s in [TITLE, *ROW_TEXT, FOOTER, SHOT["narration"]]:
+# "approved" is banned about the law; the voice's "the person who approved it" is the operator approving an
+# intervention (the decision engine.py records), so only that phrase is let through, and only in the voice
+NARRATION_OK = ["the person who approved it"]
+_narr = SHOT["narration"].casefold()
+for _ok in NARRATION_OK:
+    assert _narr.count(_ok) == 1, _ok
+    _narr = _narr.replace(_ok, "")
+for _s in [TITLE, *ROW_TEXT, FOOTER, _narr]:
     assert not any(b in _s.casefold() for b in BANNED), _s
 assert text_size(FOOTER, 20, 500)[0] <= 1150, "the footer must stay one line of the 1,150 px footer slot"
 
@@ -131,17 +143,20 @@ if _assembly_start is None:
 else:
     assert _assembly_start == VOICE, (_assembly_start, VOICE)
 
-GUIDE_CLAUSES = [0.0, 1.565, 3.006, 4.657]   # silencedetect boundaries in video/build/guide/S17b.wav
-GUIDE_END = 7.405
+GUIDE_CLAUSES = [0.0, 1.297, 2.307, 3.920, 5.062, 6.712]   # silencedetect boundaries in video/build/guide/S17b.wav
+GUIDE_END = 9.454
+TITLE_IN = 0.35                              # the title's fade-in (it starts a frame before the cut)
 BEATS = {
-    "title": 0.0,                            # title, then row 1 (not spoken)
+    "title": 0.0,                            # title, then row 1 (row 1 is not spoken)
     "row1": 0.1,
-    "row2": VOICE + GUIDE_CLAUSES[0],        # 0.5  "The approving operator,"
-    "named": VOICE + GUIDE_CLAUSES[1],       # 2.07 "named in the audit log," -> the name line lights
-    "department": VOICE + GUIDE_CLAUSES[2],  # 3.51 "and the department running it."
-    "row3": VOICE + GUIDE_CLAUSES[3],        # 5.16 "Every notice ..." -> row 3
-    "voice_end": VOICE + GUIDE_END,          # 7.91; the card holds to 10.0
+    "question": VOICE + GUIDE_CLAUSES[0],    # 0.5  "If it fails, who answers?" (the title, read aloud)
+    "row2": VOICE + GUIDE_CLAUSES[2],        # 2.81 "The person who approved it," -> row 2
+    "named": VOICE + GUIDE_CLAUSES[3],       # 4.42 "named in our log," -> the name line lights
+    "department": VOICE + GUIDE_CLAUSES[4],  # 5.56 "and the department running it."
+    "row3": VOICE + GUIDE_CLAUSES[5],        # 7.21 "Every notice ..." -> row 3
+    "voice_end": VOICE + GUIDE_END,          # 9.95; the card holds to 12.0
 }
+assert BEATS["title"] + TITLE_IN - 1 / FPS <= BEATS["question"], "the title must be fully in when the voice asks it"
 assert BEATS["voice_end"] < DURATION - 1.5, "the card must hold after the voice ends"
 BUILD_T = [BEATS["row1"], BEATS["row2"], BEATS["row3"]]
 ACTIVE = [None, (BEATS["row2"], BEATS["row3"]), (BEATS["row3"], BEATS["voice_end"] + 0.3)]   # outline while spoken
@@ -383,7 +398,7 @@ def seg(t: float, a: float, b: float, edge: float = 0.3) -> float:
 
 def frame(t: float) -> Image.Image:
     img = BG.copy()
-    a = out_ease((t - BEATS["title"] + 1 / FPS) / 0.35)          # already on the first frame after the cut
+    a = out_ease((t - BEATS["title"] + 1 / FPS) / TITLE_IN)      # already on the first frame after the cut
     put(img, TITLE_SPRITE, a, dy=12 * (1 - a))
     for i, sp in enumerate(ROW_SPRITES):
         t0 = BUILD_T[i]
@@ -409,8 +424,8 @@ def frame(t: float) -> Image.Image:
     return img
 
 
-STILLS = {"title": 0.25, "row1": 0.45, "row2": 0.95, "named": 2.25, "department": 3.6, "row3": 5.5,
-          "row3_built": 6.2, "voice_end": 8.3, "end": 9.95}
+STILLS = {"title": 0.25, "row1": 0.45, "question": 1.9, "row2": 3.2, "named": 4.6, "department": 5.7,
+          "row3": 7.5, "row3_built": 8.2, "voice_end": 10.3, "end": 11.95}
 
 if __name__ == "__main__":
     print(f"rows: body {BODY_SIZE} px; widths " +

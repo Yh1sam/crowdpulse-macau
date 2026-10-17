@@ -1,4 +1,4 @@
-"""Shot S17 (3:35.0-3:53.5, 18.5 s): "Can it happen?" Feasibility and the intended user.
+"""Shot S17 (3:49.0-4:08.5, 19.5 s): "Can it happen?" Feasibility and the intended user.
 
 Storyboard: docs/video/script.md section 3, row S17; claims table section 4, rows S17; section 6
 "motion_graphic" (S17: the cost panel appears only after the team approves docs/cost-estimate.md,
@@ -10,17 +10,17 @@ Beats (shot seconds, keyed to the guide voice; re-key to the real voice take):
             clamp kit hops between festival pages of a calendar (hops on "then move" and "the next")
             while a pole-mounted counting camera stays bolted in place (badge ILLUSTRATION, design
             intent, not field-tested).
-4.95-9.12   "The intended user is Macau's police, who run crowd control": the operator card (generic
-            shapes, no emblems) and, on "Macau's police", the separate "No partner yet" chip; footer
-            Law 14/2018, Art. 3. The cost panel would slide in beside the card only if the shot
+4.95-9.84   "We see Macau's police, who run crowd control, as the intended user": the operator card
+            (generic shapes, no emblems) and, on "Macau's police", the separate "No partner yet" chip;
+            footer Law 14/2018, Art. 3. The cost panel would slide in beside the card only if the shot
             list's cost text were filled (labelled TEAM ESTIMATE, and the footer then adds
             "cost: docs/cost-estimate.md"); it is still a bracketed placeholder, so it is not drawn.
-9.12-13.88  "The whole chain runs end to end in simulation": slate for the team's B-roll of a real
+9.84-14.75  "The whole chain runs end to end in simulation": slate for the team's B-roll of a real
             pytest run (hard cuts in and out, so the footage drops straight in; the window is about
-            4.8 s, so the take must run at least 5 s). From 10.7 s the counters 54 · 24 · 33 · 13 tick
-            up over it and the total lands on 124 with "a hundred" (12.1), holding ~1.8 s through
-            "and twenty-four automated" (badge LIVE SOFTWARE).
-13.88-18.5  the roadmap arrow alone, four stations (cut on "tests").
+            4.9 s, so the take must run at least 5 s). From 11.62 s ("in simulation") the counters
+            54 · 24 · 33 · 13 tick up over it and the total lands on 124 with "a hundred" (12.91),
+            holding ~1.8 s through "and twenty-four automated" (badge LIVE SOFTWARE).
+14.75-19.5  the roadmap arrow alone, four stations (cut on "tests").
 
 Data (read, never retyped):
   docs/video/shotlist.json, S17             chapter card, intended-user line, chip, law footer, cost
@@ -55,32 +55,34 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 NAME = "S17"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == NAME)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 18.5 s
-assert DURATION == 18.5, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 19.5 s
+assert DURATION == 19.5, DURATION
 
 # ---------- timing ----------
-# Shot seconds. Keyed to the guide voice video/build/guide/S17.wav of 17 Oct (say -v Daniel -r 155,
-# about 148 wpm; 14.74 s of speech, with 124 spoken "a hundred and twenty-four" as guide.py and
-# script.md 5C say it), which assemble.py lays 0.2 s into the shot: clause starts are the
-# silencedetect boundaries (noise -35 dB, d 0.12 s: 3.25, 4.75, 7.25, 8.92, 11.71 s into the file)
-# + 0.2 s; word onsets inside the last clause come from its 10 ms spectrum (into the file: the /h/ of
-# "hundred" 11.90, the /t/ of "twenty" 12.39, the /f/ of "four" 12.74, the /t/ of "tests" 13.68,
-# the /p/ of "passing" 14.08; speech ends 14.71), cross-checked against `say` prefixes of the
-# clause. Re-key to the real voice take (about 140 wpm, so everything after 0.2 s moves about 5% later).
+# Shot seconds. Keyed to the guide voice video/build/guide/S17.wav of 18 Oct (say -v Daniel -r 155;
+# 15.46 s of speech, with 124 spoken "a hundred and twenty-four" as guide.py and script.md 5C say it),
+# which assemble.py lays 0.2 s into the shot: clause starts are the silencedetect boundaries (noise
+# -35 dB, d 0.08 s: 3.25, 4.75, 6.48, 8.12, 9.64, 12.43 s into the file) + 0.2 s; word onsets inside a
+# clause are the durations of `say` prefixes of the line (into the file: "Macau's" 5.37, "intended"
+# 8.55, "in simulation" 11.42, "hundred" 12.71, "twenty-four" 13.42, "automated" 13.96, "tests" 14.55,
+# "passing" 15.11; speech ends 15.43). The first clause and "then move to the next." are unchanged
+# since the 17 Oct guide (same pause at 3.02-3.25 s), so their keys stand. Re-key to the real voice
+# take (about 140 wpm, so everything after 0.2 s moves later).
 BEATS = {
     "phones": 0.2,         # "Phones on temporary mounts" -> calendar up, kit drops onto page 1
     "kit_down": 0.45,      # kit drop starts (lands ~1.05 s)
     "serve_one": 1.75,     # "can serve one festival" -> page 1 lights, the kit counts
     "then_move": 3.45,     # "then move" (clause 3.45-4.72) -> hop to page 2; "bolted in place" on the pole
     "to_the_next": 4.05,   # "the next" -> hop to page 3 (page 2 holds 3.75-4.05)
-    "user": 4.95,          # "The intended user is Macau's police" (4.95-7.18) -> operator card, law footer
-    "police": 6.27,        # "Macau's police" -> the separate "No partner yet" chip
-    #                        "who run crowd control" (7.45-8.89): the card, chip and footer hold
-    "broll": 9.12,         # "The whole chain runs end to end in simulation" (9.12-11.68) -> hard cut to B-roll
-    "counters": 10.7,      # "in simulation" -> counters over the B-roll (spec: "from about 11.5 s" at 140 wpm)
-    "with_total": 11.91,   # "with a hundred and twenty-four automated tests passing" (11.91-14.91)
-    "total": 12.1,         # "a | hundred" -> the total lands and holds through "... and twenty-four automated"
-    "roadmap": 13.88,      # "tests" (onset 13.88) -> hard cut to the roadmap, alone to the end (4.62 s)
+    "user": 4.95,          # "We see Macau's police," (4.95-6.40) -> operator card, law footer
+    "police": 5.57,        # "Macau's police" -> the separate "No partner yet" chip
+    #                        "who run crowd control," (6.68-8.11) and "as the intended user." (8.32-9.61,
+    #                        "intended" 8.75): the card, chip and footer hold
+    "broll": 9.84,         # "The whole chain runs end to end in simulation" (9.84-12.40) -> hard cut to B-roll
+    "counters": 11.62,     # "in simulation" -> counters over the B-roll
+    "with_total": 12.63,   # "with a hundred and twenty-four automated tests passing" (12.63-15.63)
+    "total": 12.91,        # "a | hundred" -> the total lands and holds through "... and twenty-four automated"
+    "roadmap": 14.75,      # "tests" (onset 14.75) -> hard cut to the roadmap, alone to the end (4.75 s)
 }
 CHAPTER_END = 2.2
 HOP = 0.30                 # seconds per hop
@@ -164,7 +166,7 @@ for _s in (CHAPTER, USER_LINE, CHIP, LAW_FOOTER, COST_TEXT, COUNTERS_LINE, " →
 
 # the beats above are keyed to these clauses; if the narration changes, re-key them
 CLAUSES = ["Phones on temporary mounts can serve one festival,", "then move to the next.",
-           "The intended user is Macau's police,", "who run crowd control.",
+           "We see Macau's police,", "who run crowd control,", "as the intended user.",
            "The whole chain runs end to end in simulation,", f"with {TOTAL} automated tests passing."]
 assert SHOT["narration"] == " ".join(CLAUSES), SHOT["narration"]
 
@@ -612,7 +614,7 @@ def part_calendar(img: Image.Image, t: float) -> None:
             put(img, (ARCS, (kx + KIT_W / 2 - 50, ky + KIT_PHONE_TOP - 50)), act * out * pulse)
 
 
-# ---------- part 2 (4.95-9.12 s): the operator card, the chip and (only if filled) the cost panel ----------
+# ---------- part 2 (4.95-9.84 s): the operator card, the chip and (only if filled) the cost panel ----------
 
 ICON_W, ICON_H = 230, 170
 
@@ -726,7 +728,7 @@ def part_user(img: Image.Image, t: float, sc: dict = USER_SCENE) -> None:
         draw_cost_panel(img, sc, t)
 
 
-# ---------- part 3 (9.12-13.88 s): B-roll slate and the counters over it ----------
+# ---------- part 3 (9.84-14.75 s): B-roll slate and the counters over it ----------
 
 SLATE = (120, 150, 1800, 880)
 
@@ -741,8 +743,8 @@ def slate_static():
     assert all(text_size(ln, 34, 500)[0] <= x1 - x0 - 120 for ln in body_lines), body_lines
     body = layer_sprite(lambda im: [draw_text(im, (x0 + 60, y0 + 124 + i * 42), ln, 34, 500, INK)
                                     for i, ln in enumerate(body_lines)])
-    # these are the guide-voice times this render is keyed to (BEATS); the shot list's "about 9.9-14.9 s" and
-    # "from about 11.5 s" are 140 wpm estimates for the real take, so the slate says which clock it uses
+    # these are the guide-voice times this render is keyed to (BEATS); the real take will run slower and
+    # be re-keyed, so the slate says which clock it uses
     when = (f"{NAME}, guide voice: {BEATS['broll']:.1f}-{BEATS['roadmap']:.1f} s into the shot, hard cuts (film at least 5 s) · "
             f"the counters run over the take from {BEATS['counters']:.1f} s")
     assert text_size(when, 24, 500)[0] <= x1 - x0 - 120, when
@@ -877,7 +879,7 @@ def part_counters(img: Image.Image, t: float) -> None:
         put(img, pulse_ring(ease(kp)), (1 - kp) * 0.9)
 
 
-# ---------- part 4 (13.88-18.5 s): the roadmap arrow, alone ----------
+# ---------- part 4 (14.75-19.5 s): the roadmap arrow, alone ----------
 
 ROAD_Y, ROAD_X0, ROAD_X1 = 520, 150, 1772
 ST_X = [300 + i * (1620 - 300) / 3 for i in range(4)]
@@ -1008,8 +1010,8 @@ def frame_mp4(t: float) -> Image.Image:
 
 
 STILLS = {"chapter": 1.2, "hop": 3.6, "page2": 3.9, "hop2": 4.15, "page3": 4.7, "handover": 4.97,
-          "card": 5.9, "chip": 7.5, "slate": 10.2, "ticking": 11.5, "total": 12.3, "held": 13.8,
-          "roadmap": 16.0, "end": 18.4}
+          "card": 5.4, "chip": 7.0, "intended": 9.0, "slate": 10.9, "ticking": 12.3, "total": 13.1,
+          "held": 14.7, "roadmap": 17.0, "end": 19.4}
 
 if __name__ == "__main__":
     for k_, tt in STILLS.items():
