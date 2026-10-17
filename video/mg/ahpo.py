@@ -1,4 +1,4 @@
-"""Shared map, icons and crowd silhouettes for the Ah Po bookend shots S01 and S18.
+"""Shared map, icons and crowd silhouettes for the Mrs Chan bookend shots S01 and S18.
 
 Data sources (read, never retyped):
 - shared/zones.json: zone lat/lon (linear projection from style.project), the 7 links, has_stairs / steep,
@@ -9,7 +9,7 @@ Data sources (read, never retyped):
 - The approved detour is run A's card (A07_intervention_evidence.png): "Rua dos Ervanarios descent ->
   Rua da Tercena west link -> Rua de S. Paulo (lower)"; its edges are looked up by name in zones.json.
 - backend/app/services/intervention.py: the public-notice wording (zh / en / pt) for that card.
-Everything else (Ah Po, the staff member, the dots, the walkers, the silhouettes) is illustrative
+Everything else (Mrs Chan, the staff member, the dots, the walkers, the silhouettes) is illustrative
 choreography drawn from plain Pillow shapes.
 """
 from __future__ import annotations
@@ -31,6 +31,7 @@ from style import font, text_font, clamp, ease, lerp, project, zone_graph, wheel
 import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
+NAME = "Mrs Chan"                        # the fictional visitor of the bookend shots (her tag; shotlist S01)
 SS = 2                                   # supersampling factor for the map (drawn at 2x, reduced with a box filter)
 MAP_BOX = (610, 150, 1410, 850)          # 1x box the zone graph is fitted into (height-limited; north up)
 PROJ = project(MAP_BOX)
@@ -54,7 +55,7 @@ GRID_DOT = (24, 36, 58)
 
 # labels from the storyboard (zh from zones.json name_zh, en as written in the storyboard)
 LABEL_EN = {"ruins_st_paul": "Ruins of St. Paul's", "senado_square": "Senado Square", "almeida_ribeiro": "Av. de Almeida Ribeiro"}
-# gap between a zone disc and its label (1x px): Senado's clears its crowd ring, Almeida's clears Ah Po's path
+# gap between a zone disc and its label (1x px): Senado's clears its crowd ring, Almeida's clears Mrs Chan's path
 LABEL_DX = {"senado_square": 58, "almeida_ribeiro": 40}
 
 
@@ -161,7 +162,7 @@ def _detour_points(offset: float = 12.0) -> list[tuple[float, float]]:
 
 DETOUR_PATH = Polyline(_detour_points())
 FIRST_LEG = math.dist(POS["almeida_ribeiro"], POS["senado_square"])
-AHPO_S01_END = 0.55 * FIRST_LEG          # where Ah Po stops in S01 (short of Senado's crowd); S18 starts here
+AHPO_S01_END = 0.55 * FIRST_LEG          # where Mrs Chan stops in S01 (short of Senado's crowd); S18 starts here
 
 
 # ---------------------------------------------------------------- Senado's recorded density (run A)
@@ -458,7 +459,7 @@ def marker_sprite(kind: str, r2: int) -> Image.Image:
 
 @lru_cache(maxsize=8)
 def tag_sprite(text: str, colour=WARNING) -> Image.Image:
-    """Small pill tag ("Ah Po") at 2x."""
+    """Small pill tag (her name) at 2x."""
     f = font(22 * SS, 700)
     tw = f.getlength(text)
     pad_x, hgt = 12 * SS, 34 * SS
@@ -712,7 +713,7 @@ class MapScene:
             a = pin_label_alpha * label_fade
             text2x(img, (tip[0] - 50, tip[1] - 46), "view of the Ruins", 22, 500, INK, a, anchor="rs", stroke=3)
             text2x(img, (tip[0] - 50, tip[1] - 20), "from the square below", 22, 500, INK, a, anchor="rs", stroke=3)
-        # Ah Po, her tag, and the staff member
+        # Mrs Chan, her tag, and the staff member
         if staff and staff.get("alpha", 0) > 0:
             self._marker(img, "staff", cam(staff["p"]), 18 * wz * staff.get("scale", 1.0), staff["alpha"])
         if ahpo and ahpo.get("alpha", 0) > 0:
@@ -726,7 +727,7 @@ class MapScene:
             self._marker(img, "ahpo", p, r, ahpo["alpha"])
             ta = ahpo.get("tag", 0.0) * label_fade
             if ta > 0:
-                tg = tag_sprite("Ah Po")
+                tg = tag_sprite(NAME)
                 tx = p[0] * SS - r * SS - 10 * SS - tg.width + (1 - ta) * 10 * SS
                 ty = p[1] * SS - tg.height / 2
                 paste(img, tg, (tx, ty), ta)
@@ -741,7 +742,7 @@ class MapScene:
 # ---------------------------------------------------------------- eye level: a wall of backs, from a wheelchair
 
 class EyeLevel:
-    """Ah Po's seated view: grey silhouettes (rounded rectangles + circles) swaying ahead, armrests in front."""
+    """Mrs Chan's seated view: grey silhouettes (rounded rectangles + circles) swaying ahead, armrests in front."""
     MARGIN = 280
 
     def __init__(self, seed: int = 11):

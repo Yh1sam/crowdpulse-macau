@@ -237,7 +237,7 @@ ICON_W, ICON_H = 150, 120
 
 
 def icon_people(d, q):
-    """Row 1: a figure with a walking stick beside a wheelchair outline (amber, as Ah Po's in S01)."""
+    """Row 1: a figure with a walking stick beside a wheelchair outline (amber, as Mrs Chan's in S01)."""
     c = (*WARNING, 255)
     Q = lambda x, y: (x * q, y * q)  # noqa: E731
     d.ellipse((31 * q, 8 * q, 53 * q, 30 * q), fill=c)                         # head

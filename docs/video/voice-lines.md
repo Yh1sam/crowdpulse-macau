@@ -6,7 +6,7 @@ How to record (script section 5C): a phone voice memo 15-20 cm from the mouth, a
 
 | shot | speaker | line (verbatim) | slot | robot reading | file |
 |---|---|---|---|---|---|
-| S01 | [MEMBER 4] | This is Ah Po, going to see the Ruins of St. Paul's. From her wheelchair, she sees only backs, not the crowd building ahead. | 13.5 s (voice from 3.0 s, after the title) | 8.0 s | `S01.wav` |
+| S01 | [MEMBER 4] | This is Mrs Chan, going to see the Ruins of St. Paul's. From her wheelchair, she sees only backs, not the crowd building ahead. | 13.5 s (voice from 3.0 s, after the title) | 8.3 s | `S01.wav` |
 | S02 | [MEMBER 1] | Our phone app counts people on the device. It never sends a picture, only numbers. | 7.0 s | 5.2 s | `S02.wav` |
 | S03 | [MEMBER 2] | On our dashboard, with a simulated Golden Week crowd, Senado Square's forecast turns critical, with a confidence score and the reasons why. | 10.0 s | 8.7 s | `S03.wav` |
 | S04 | [MEMBER 3] | It recommends a stair-free detour, with notices in Chinese, English and Portuguese. A person decides: approved, and logged. | 9.0 s | 8.3 s | `S04.wav` |
@@ -24,7 +24,7 @@ How to record (script section 5C): a phone voice memo 15-20 cm from the mouth, a
 | S16 | [MEMBER 2] | Because our forecasting results are simulated, we're testing the same method on real counts from 99 Melbourne street sensors: a test announced before its result. [RESULT PENDING - fill after analysis, report honestly whatever it shows] | 18.0 s | 10.1 s | `S16.wav` |
 | S17 | [MEMBER 1] | Phones on temporary mounts can serve one festival, then move to the next. The intended user is Macau's police, who run crowd control. The whole chain runs end to end in simulation, with 124 automated tests passing. | 18.5 s | 14.7 s | `S17.wav` |
 | S17b | [MEMBER 3] | The approving operator, named in the audit log, and the department running it. Every notice says an AI forecast is involved. | 10.0 s (voice from 0.5 s) | 7.4 s | `S17b.wav` |
-| S18 | [MEMBER 4] | Back to Ah Po: her main route stays open, with staff beside her. | 6.0 s | 4.5 s | `S18.wav` |
+| S18 | [MEMBER 4] | Back to Mrs Chan: her main route stays open, with staff beside her. | 6.0 s | 4.8 s | `S18.wav` |
 | S19 | [MEMBER 3], [MEMBER 4], [MEMBER 2], [MEMBER 1] | [M3] Next: a supervised street pilot in Macau, with permission. [M4] The AI recommends. [M2] A person decides. [M1] Nothing identifying leaves the phone. | 11.0 s | 9.4 s | camera audio |
 
 Shots per member (four members): [MEMBER 1] S02, S05, S11, S12, S13, S17, S19 · [MEMBER 2] S03, S05, S10, S12, S16, S19 · [MEMBER 3] S04, S05, S08, S09, S14, S17b, S19 · [MEMBER 4] S01, S05, S06, S07, S15, S18, S19

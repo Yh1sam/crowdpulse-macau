@@ -1,4 +1,4 @@
-"""Shot S18 (4:03.5-4:09.5, 6.0 s): back to Ah Po. "Back to Ah Po: her main route stays open, with staff beside her."
+"""Shot S18 (4:03.5-4:09.5, 6.0 s): back to Mrs Chan. "Back to Mrs Chan: her main route stays open, with staff beside her."
 
 Same map and framing as S01 (ahpo.py). An APPROVED stamp lands; the approved card's step-free detour draws as a
 dashed line and grey walkers take it; a small zh / en / pt notice flashes at Av. de Almeida Ribeiro (where the
@@ -18,7 +18,7 @@ Data sources (read here, never retyped):
     and the AI clause, so the board must not read as a whole notice without it) and the source of the
     on-screen recommendation line.
   - docs/video/script.md section 3 row S18: the two on-screen lines (verbatim).
-Ah Po, the staff member, the walkers and the dots are illustrative choreography (badge ILLUSTRATION).
+Mrs Chan, the staff member, the walkers and the dots are illustrative choreography (badge ILLUSTRATION).
 
 Outputs: video/build/mg/S18.mp4, video/build/mg/stills/S18_*.png
 Run:  .venv/bin/python video/mg/S18.py            (stills and render)
@@ -44,13 +44,13 @@ _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").r
 DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 6.0 s
 
 # Beats in seconds from the shot start, keyed to the narration at about 140 wpm (0.43 s a word), voice from 0.3 s:
-# "Back to Ah Po: | her main route stays open, | with staff beside her."
+# "Back to Mrs Chan: | her main route stays open, | with staff beside her."
 # re-key to the real voice take
 BEATS = {
     "stamp": 0.35,        # "Back": the APPROVED stamp lands
-    "tag_out": 0.7,       # her "Ah Po" tag (carried over from S01's last frame) fades before the detour reaches it:
+    "tag_out": 0.7,       # her "Mrs Chan" tag (carried over from S01's last frame) fades before the detour reaches it:
                           # it sits left of her icon, exactly where the detour leaves Almeida, for the whole shot
-    "detour": 0.75,       # "to Ah Po": the approved card's dashed step-free detour draws
+    "detour": 0.75,       # "to Mrs Chan": the approved card's dashed step-free detour draws
     "notice": 1.05,       # the zh / en / pt notice flashes at Almeida ...
     "walkers": 1.25,      # ... and grey walkers take the detour
     "route": 2.15,        # "her main route": her route north draws, solid
@@ -83,7 +83,7 @@ assert "senado_square" not in ahpo.DETOUR and ahpo.DETOUR[0] == "almeida_ribeiro
 SCENE = MapScene()
 
 
-# ---------- Ah Po and the staff member ----------
+# ---------- Mrs Chan and the staff member ----------
 
 S_END = FIRST_LEG + 64        # she ends just past Senado's centre, on towards St. Dominic's
 

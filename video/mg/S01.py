@@ -1,10 +1,10 @@
-"""Shot S01 (0:00.0-0:13.5, 13.5 s): a sourced fact, then the Ah Po hook. Voice from 3.0 s: "This is Ah Po,
+"""Shot S01 (0:00.0-0:13.5, 13.5 s): a sourced fact, then the Mrs Chan hook. Voice from 3.0 s: "This is Mrs Chan,
 going to see the Ruins of St. Paul's. From her wheelchair, she sees only backs, not the crowd building ahead."
 
 0-3.0 s: a silent fact title on plain navy, no badge and no map (public record, not illustration): "Golden Week
 2025: crowd control lifted, then reimposed 45 minutes later." with its source footer. From 3.0 s the story: the
 ILLUSTRATION badge and the "Illustrative story" line come in, the top-down schematic of the zone model draws in,
-and Ah Po's wheelchair icon with its "Ah Po (阿婆, grandma)" tag sets off north from Av. de Almeida Ribeiro towards
+and Mrs Chan's wheelchair icon with its "Mrs Chan" tag sets off north from Av. de Almeida Ribeiro towards
 the pin at Company of Jesus Square (the square below the Ruins; she is never put on the St. Paul's steps); then
 her seated eye height: an armrest in the foreground, a wall of grey silhouettes swaying ahead; then a crane back
 up to the map as Senado's disc goes amber to red.
@@ -20,7 +20,7 @@ Data sources (read here, never retyped):
   - experiments/results/simulation_run/A_timeline.csv: senado_square true_density, the ONLY data on the map.
     Shot time is mapped onto sim 13:53-14:09 across the two map beats (SIM_KEYS); the colour is the recorded
     value as held, thresholded with shared/config.json congestion_thresholds (the dashboard's).
-Ah Po, the dots and the silhouettes are illustrative choreography (badge ILLUSTRATION, from 3.0 s only).
+Mrs Chan, the dots and the silhouettes are illustrative choreography (badge ILLUSTRATION, from 3.0 s only).
 
 Beats are keyed to the guide voice video/build/guide/S01.wav (say -v Daniel -r 155), laid 3.0 s into the shot
 (ffmpeg silencedetect boundaries, word positions inside a clause from `say` prefix lengths); re-key them to the
@@ -63,7 +63,7 @@ TAG = _ITEMS["Tag on her icon"][1]
 BADGE = _ITEMS["Badge"][1]
 assert BADGE == "ILLUSTRATION" and BADGE in BADGES, BADGE
 assert SMALL.startswith("Illustrative story."), SMALL
-assert TAG == "Ah Po (阿婆, grandma)", TAG
+assert TAG == "Mrs Chan", TAG
 
 # the time windows in the shotlist: title and footer 0-3.0 s, small line and badge from 3.0 s, voice from 3.0 s
 TITLE_END = 3.0
@@ -100,10 +100,10 @@ assert "dangerous" not in (FACT_TITLE + FOOTER).lower()
 # ---------- beats ----------
 
 # Shot seconds. Guide clauses (silencedetect, -35 dB, 0.08 s), + 3.0 s:
-#   "This is Ah Po," 3.00-4.02 ("Ah Po" from 3.64) | "going to see the Ruins of St. Paul's." 4.23-6.54 ("the Ruins"
-#   about 5.15-5.94, "of St. Paul's" 6.02) | "From her wheelchair," 6.80-7.75 | "she sees only backs," 7.97-9.29 |
-#   "not the crowd building ahead." 9.51-10.89 (last voiced 10 ms frame; guide regenerated 17 Oct, 7.99 s file,
-#   boundaries unchanged). The shot ends at 13.5 s.
+#   "This is Mrs Chan," 3.00-4.30 ("Mrs" from 3.64, "Chan" about 4.06) | "going to see the Ruins of St. Paul's."
+#   4.52-6.82 ("the Ruins" about 5.43-6.22, "of St. Paul's" 6.30) | "From her wheelchair," 7.08-8.04 |
+#   "she sees only backs," 8.25-9.58 | "not the crowd building ahead." 9.80-11.18 (guide regenerated 18 Oct for the
+#   new name, 8.28 s file: every clause after the first is 0.28 s later than with the old name). The shot ends at 13.5 s.
 # re-key to the real voice take
 BEATS = {
     "title_in": 0.0,      # fact title: line 1 rises in, line 2 just after (both fully in by 0.27 s)
@@ -113,21 +113,21 @@ BEATS = {
     "map_in": TITLE_END,  # 3.0: streets, steps and zone discs draw in; badge and "Illustrative story" line come in
     "voice": VOICE_START,  # "This is"
     "almeida_label": 3.4,
-    "ahpo_in": 3.62,      # "Ah Po": her icon lands with a ring
-    "tag_in": 3.85,       # "Po": the tag slides in
-    "move": 4.25,         # "going": she sets off north
-    "senado_label": 4.5,
-    "route_hint": 4.7,    # "to see": her dotted step-free route draws towards the pin
-    "pin": 5.2,           # "the Ruins": the pin drops at Company of Jesus Square
-    "ruins_label": 5.35,
-    "pin_label": 5.55,    # "view of the Ruins from the square below" (readable until the push-in at 6.8)
-    "push_in": 6.8,       # "From her wheelchair": the camera pushes in on her ...
-    "move_end": 6.95,
-    "eye": 7.3,           # ... cross-fades and drops to her seated eye height ("wheelchair")
-    "eye_push": 8.0,      # "she sees only backs": the wall closes in a little
-    "crane": 9.45,        # "not the crowd building ahead": crane back up ...
-    "map_back": 9.7,      # ... the map returns, zoomed on her, and pulls out
-    "map_home": 10.65,
+    "ahpo_in": 3.62,      # "Mrs Chan": her icon lands with a ring
+    "tag_in": 4.0,        # "Chan": the tag slides in
+    "move": 4.53,         # "going": she sets off north
+    "senado_label": 4.78,
+    "route_hint": 4.98,   # "to see": her dotted step-free route draws towards the pin
+    "pin": 5.48,          # "the Ruins": the pin drops at Company of Jesus Square
+    "ruins_label": 5.63,
+    "pin_label": 5.83,    # "view of the Ruins from the square below" (readable until the push-in at 7.08)
+    "push_in": 7.08,      # "From her wheelchair": the camera pushes in on her ...
+    "move_end": 7.23,
+    "eye": 7.58,          # ... cross-fades and drops to her seated eye height ("wheelchair")
+    "eye_push": 8.28,     # "she sees only backs": the wall closes in a little
+    "crane": 9.73,        # "not the crowd building ahead": crane back up ...
+    "map_back": 9.98,     # ... the map returns, zoomed on her, and pulls out
+    "map_home": 10.93,
 }
 # Quick title fades (0.15 s) so the 13-word title and its footer are at full strength from 0.30 s to 2.80 s
 # (2.5 s) for sound-off viewers, and the title is gone before the story starts at 3.0 s.
@@ -135,9 +135,9 @@ TITLE_FADE = 0.15
 assert BEATS["title_out"] + TITLE_FADE < BEATS["map_in"]
 # Shot time -> sim time across the two map beats (Senado's colour): beat 1 starts at the first recorded row,
 # the eye-level beat skips ahead off screen, beat 2 ends at 14:09 (storyboard window 13:53-14:09). Senado
-# crosses CRITICAL (14:08:09) at about 11.2 s, on the settled map after the last word, and holds red to the end.
-SIM_KEYS = [(BEATS["map_in"], ahpo.senado_series()[0][0]), (7.5, ahpo.hms("14:02:00")),
-            (BEATS["map_back"], ahpo.hms("14:05:30")), (11.7, ahpo.hms("14:09:00"))]
+# crosses CRITICAL (14:08:09) at about 11.5 s, on the settled map after the last word, and holds red to the end.
+SIM_KEYS = [(BEATS["map_in"], ahpo.senado_series()[0][0]), (7.78, ahpo.hms("14:02:00")),
+            (BEATS["map_back"], ahpo.hms("14:05:30")), (11.98, ahpo.hms("14:09:00"))]
 
 
 def sim_of(t: float) -> float:
@@ -201,40 +201,13 @@ def draw_title(img: Image.Image, t: float) -> None:
     footer(img, FOOTER, progress(t, BEATS["footer_in"], TITLE_FADE) * out)
 
 
-# ---------- Ah Po's tag: "Ah Po (阿婆, grandma)" on two lines ----------
-# ahpo.MapScene draws a one-line "Ah Po" tag in Geist only (no Chinese glyphs), so S01 hides it and draws this
-# one in the same place: left of her icon, sliding in from it. Two lines keep it narrow: as one line its left
-# end would run under the speaker lower-third (x 60-739, y 800-890), which video/assemble.py shows for 3 s from the
-# voice start (3.0 s) while she is beside Almeida.
+# ---------- her tag: "Mrs Chan" ----------
+# The same pill as ahpo.MapScene's tag (which S18 carries on), drawn here so it can slide in on its own beat: left
+# of her icon, sliding in from it. It must clear the speaker lower-third (x 60-739, y 800-890), which
+# video/assemble.py shows for 3 s from the voice start (3.0 s) while she is beside Almeida.
 
-TAG_L1, TAG_L2 = TAG.split(" ", 2)[0] + " " + TAG.split(" ", 2)[1], TAG.split(" ", 2)[2]   # "Ah Po" / "(阿婆, grandma)"
-assert f"{TAG_L1} {TAG_L2}" == TAG and TAG_L1 == "Ah Po", (TAG_L1, TAG_L2)
-SS2 = 2
-
-
-def _runs(text: str) -> list[str]:
-    """Splits text into runs of Chinese and non-Chinese characters (each run gets its own font)."""
-    return [r for r in re.split(r"([\u2e80-\u9fff\uf900-\ufaff]+)", text) if r]
-
-
-def _tag_sprite() -> Image.Image:
-    lines = [(TAG_L1, 22, 700), (TAG_L2, 18, 650)]
-    widths = [sum(text_font(r, s * SS2, wt).getlength(r) for r in _runs(tx)) for tx, s, wt in lines]
-    pad_x, top, pitch, bottom = 10 * SS2, 21 * SS2, 22 * SS2, 10 * SS2       # baselines at top and top + pitch
-    w_, h_ = int(max(widths) + 2 * pad_x), int(top + pitch + bottom)
-    img = Image.new("RGBA", (w_, h_), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.rounded_rectangle((0, 0, w_ - 1, h_ - 1), 15 * SS2, fill=(*WARNING, 255))
-    for i, ((tx, s, wt), wd) in enumerate(zip(lines, widths)):
-        x, y = (w_ - wd) / 2, top + i * pitch
-        for r in _runs(tx):
-            f = text_font(r, s * SS2, wt)
-            d.text((x, y), r, font=f, fill=(*NAVY, 255), anchor="ls")
-            x += f.getlength(r)
-    return img.reduce(SS2)
-
-
-TAG_SPRITE = _tag_sprite()
+assert TAG == ahpo.NAME, (TAG, ahpo.NAME)
+TAG_SPRITE = ahpo.tag_sprite(TAG).reduce(ahpo.SS)
 TAG_GAP = 7          # between the tag and her icon's outline (px)
 
 
@@ -286,7 +259,7 @@ _CAM_SWITCH = (BEATS["eye"] + 0.45 + BEATS["map_back"] - 0.1) / 2   # map hidden
 
 
 def map_cam(t: float) -> Cam:
-    """Home framing, except the push-in on Ah Po before eye level and the pull-out after it."""
+    """Home framing, except the push-in on her before eye level and the pull-out after it."""
     p = MAIN_PATH.at(ahpo_s(t))
     k_in = progress(t, BEATS["push_in"], BEATS["eye"] + 0.45 - BEATS["push_in"])
     k_out = 1 - progress(t, BEATS["map_back"] - 0.1, BEATS["map_home"] - BEATS["map_back"] + 0.1)
@@ -327,7 +300,7 @@ def map_frame(t: float) -> Image.Image:
         pin_label_alpha=progress(t, BEATS["pin_label"], 0.4),
         ahpo={"p": MAIN_PATH.at(s_her), "alpha": ahpo_a, "scale": ahpo_scale,
               "ring": clamp((t - BEATS["ahpo_in"] - 0.05) / 0.9) if t < BEATS["ahpo_in"] + 0.95 else 0.0,
-              "tag": 0.0},                       # S01 draws its own two-line tag (below)
+              "tag": 0.0},                       # S01 draws the tag itself, on its own beat (below)
         route=route,
         label_fade=label_fade,
     ).convert("RGBA")
@@ -404,7 +377,7 @@ def draw_frame(t: float) -> Image.Image:
     return img
 
 
-STILLS = {"title_in": 0.3, "title": 1.6, "title_late": 2.79, "story_in": 3.3, "tag": 4.4, "walk": 5.9, "pin": 6.6, "eye": 8.6, "crane": 10.0,
+STILLS = {"title_in": 0.3, "title": 1.6, "title_late": 2.79, "story_in": 3.3, "tag": 4.6, "walk": 6.2, "pin": 6.9, "eye": 8.9, "crane": 10.3,
           "red": 12.0, "end": DURATION - 1 / FPS}
 
 if __name__ == "__main__":
