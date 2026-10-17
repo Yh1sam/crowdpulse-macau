@@ -1,20 +1,22 @@
-"""Shot S02 OVERLAY (0:11.5-0:18.5, 7.0 s): "Our phone app counts people on the device. It never
-sends a picture, only numbers."
+"""Shot S02 OVERLAY (1:17.0-1:24.0, 7.0 s): "Here's what we built. Our phone app counts people on the
+device, and sends only numbers." It opens the WHAT part of the video.
 
 A transparent overlay composited over the iPhone Simulator recording of the CrowdPulse Sensor app
 (Live tab, Video mode, YOLO11n, CC0 Yonge & Dundas clip) at assembly. The phone screen sits
-centre-left in the footage, so everything here stays on the right third and along the top, on
-semi-opaque panels:
+centre-left in the footage (x 440-937, clear of the chapter card), so everything here stays on the
+right third and along the top, on semi-opaque panels:
+  - the chapter card "What did we build?" (top-left, the first 2 s, as in the other chapters);
   - badge LIVE SOFTWARE · TEST CLIP with the Simulator / clip line split over two small lines;
-  - on "It never sends a picture": the readings peel off the app's counter panel into a payload
-    card (real key names and values) that slides right to a server;
+  - on "counts people on the device": the readings peel off the app's counter panel into a payload
+    card (real key names and values);
+  - on "and sends": the card slides right to a server;
   - on "only numbers": a photo icon tries to follow, bounces off a shield, "image upload → HTTP 403"
     lands and holds to the cut.
 
 Data sources:
   - docs/video/shotlist.json, shot S02: duration (end_s - start_s) and the on-screen text (the
-    badge detail, the Simulator line, the sensor_id line and the shield label are checked against
-    it word for word).
+    chapter card, the badge detail, the Simulator line, the sensor_id line and the shield label are
+    checked against it word for word).
   - experiments/results/simulation_run/ios_app_debug_payload.png, Debug tab, "Last observation
     (exact payload)": the payload keys and values on the card. The PNG is the only place these
     values exist, so they are transcribed from it exactly (no rounding) and the card says
@@ -52,23 +54,30 @@ SHOT = "S02"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
 DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 7.0 s
 
-# Beats in seconds from the shot start, keyed to the narration at about 140 wpm (0.43 s a word),
-# voice from 0.0 s: "Our phone app counts people on the device." (0.0-3.4) "It never sends a
-# picture," (3.4-5.5) "only numbers." (5.5-6.4), then hold to the cut at 7.0.
+# Beats in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S02.wav, laid
+# 0.2 s into the shot by assemble.py). Clause boundaries from
+#   ffmpeg -i video/build/guide/S02.wav -af silencedetect=noise=-35dB:d=0.08 -f null -
+# (speech 0.00-1.17 | 1.41-3.76 | 3.98-5.40), each + 0.2 s; words inside a clause from the length of
+# `say -v Daniel -r 155` on the words before them and the level dips between words:
+# "Here's what we built." (0.25-1.37) "Our phone app counts people (2.75) on the device," (to 3.96)
+# "and sends (4.4) only numbers." (4.75-5.6), then hold to the cut at 7.0.
 # re-key to the real voice take
 BEATS = {
     "badge_in": 0.0,   # cut in: badge and the Simulator / clip lines, held for the whole shot
-    "peel": 3.4,       # "It never sends a picture": readings lift off the app's panel into the card
-    "server_in": 3.6,  # the server appears on the right while the card builds
-    "slide": 4.6,      # "sends a": the card slides right to the server
-    "dock": 5.3,       # "picture": the card reaches the server (link pulse)
-    "shield_in": 5.4,  # just before "only numbers": the shield rises in front of the server
-    "photo": 5.5,      # "only numbers": a photo icon appears and tries to follow
-    "impact": 5.9,     # "numbers": it bounces off the shield; "image upload → HTTP 403" lands
+    "card_in": 0.0,    # chapter card "What did we build?" on "Here's what we built." (2 s, as in S06)
+    "card_out": 2.0,
+    "peel": 2.75,      # "counts people on the device": readings lift off the app's panel into the card
+    "server_in": 3.6,  # the server appears on the right as the card finishes
+    "slide": 4.3,      # "and sends": the card slides right to the server
+    "dock": 5.0,       # the card reaches the server (link pulse)
+    "shield_in": 4.75, # "only": the shield rises in front of the server
+    "photo": 4.85,     # "only numbers": a photo icon appears and tries to follow
+    "impact": 5.25,    # "numbers": it bounces off the shield; "image upload → HTTP 403" lands (holds 1.5 s)
 }
 
 # ---------- text (verbatim from the storyboard / shot list) ----------
 
+CHAPTER = "What did we build?"
 BADGE_KIND, BADGE_DETAIL = "LIVE SOFTWARE", "TEST CLIP"
 SUB_A = "iOS app running in the iPhone Simulator on a Mac · YOLO11n on the device"
 SUB_B = "public-domain (CC0) street clip, Toronto, not Macau"
@@ -78,6 +87,7 @@ SHIELD_TEXT, SHIELD_CODE = "image upload → ", "HTTP 403"
 SERVER_LABEL = "server"
 
 _ost = _shot["on_screen_text"]
+assert _ost.startswith(f"Chapter card (top-left, 2 s): {CHAPTER} | "), _ost
 assert f"{BADGE_KIND} · {BADGE_DETAIL}" in _ost
 assert f"{SUB_A} · {SUB_B}" in _ost
 assert SENSOR_NOTE in _ost
@@ -120,9 +130,11 @@ assert "status_code=403" in (ROOT / "backend" / "app" / "main.py").read_text()
 
 # ---------- layout ----------
 # Where the Simulator screen sits in the assembled 1920x1080 frame (scaled to the frame height,
-# centre-left). The peel starts from the app's counter cells inside it.
+# centre-left; video/recipes.py s02). It starts at x 440, right of the chapter card (x 60-425), and is
+# raised 16 px (its top 16 px, white above the status bar, cropped) so the app's Stop button ends at
+# y 790, above the lower-third (y 800-890, 0.2-3.2 s). The peel starts from the app's counter cells.
 # Re-measure on the real recording (and its push-in) and move these numbers if needed.
-PHONE = (383, 0, 880, 1080)
+PHONE = (440, -16, 937, 1064)
 # Value cells of the Live tab's counter panel, as fractions of the screen (x centre, y centre),
 # measured on simulation_run/ios_app_video_mode_30s.mp4: people in view, density index, flow,
 # speed, vision confidence, stability, upload, buffered.
@@ -404,8 +416,9 @@ def pill_img(w: float, h: float, a_fill: float) -> Image.Image:
 def frame(t: float) -> Image.Image:
     img = transparent()
 
-    # top slot: badge and the two small lines, the whole shot
+    # top slot: badge and the two small lines, the whole shot; the chapter card, the first 2 s
     put(img, TOP, 0, 0, progress(t, BEATS["badge_in"], 0.3))
+    chapter_card(img, CHAPTER, fade(t, BEATS["card_in"], BEATS["card_out"], 0.25))
 
     # server rack (slides in from the right a little)
     ra = progress(t, BEATS["server_in"], 0.45)
@@ -529,7 +542,7 @@ def preview_bg() -> Image.Image:
     return bg
 
 
-STILLS = {"badge": 1.5, "peel": 3.85, "card": 4.5, "dock": 5.42, "bounce": 6.05, "hold": 6.95}
+STILLS = {"badge": 1.0, "peel": 3.2, "card": 4.2, "dock": 5.0, "bounce": 5.4, "hold": 6.95}
 
 if __name__ == "__main__":
     bg = preview_bg()

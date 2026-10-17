@@ -1,8 +1,8 @@
-"""Shot S17b (4:08.5-4:20.5, 12.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
+"""Shot S17b (4:11.5-4:23.5, 12.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
 
 A navy card in the S07 / S17 style: a title and three rows (who may be more vulnerable, who answers,
 how the public is told), each with a plain shape icon, and a source footer. No badge, no chapter card
-(it continues S17's "Can it happen?"), no lower-third ([MEMBER 3]'s is in S04), no emblem or logo.
+(it continues S17's "Can it happen?"), no lower-third ([MEMBER 3]'s is in S08), no emblem or logo.
 
 Storyboard: docs/video/script.md section 3, row S17b; claims table section 4, rows S17b (and the
 on-screen rows under it); section 6 "motion_graphic" (S17b), "On-screen text load" and "Never say or

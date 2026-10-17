@@ -1,4 +1,4 @@
-"""Shot S18 (4:20.5-4:27.0, 6.5 s): back to Mrs Chan. "Back to Mrs Chan. Staff keep her main route open, and stay beside her."
+"""Shot S18 (4:23.5-4:30.0, 6.5 s): back to Mrs Chan. "Back to Mrs Chan. Staff keep her main route open, and stay beside her."
 
 Same map and framing as S01 (ahpo.py). An APPROVED stamp lands; the approved card's step-free detour draws as a
 dashed line and grey walkers take it; a small zh / en / pt notice flashes at Av. de Almeida Ribeiro (where the

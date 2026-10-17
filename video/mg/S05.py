@@ -1,4 +1,4 @@
-"""S05 · Team self-introductions and title card (0:39.5-0:53.0, 13.5 s).
+"""S05 · Team self-introductions and title card (0:28.5-0:42.0, 13.5 s).
 
 Storyboard: docs/video/script.md section 3, row S05; section 2 "Team roles" (four members, [MEMBER 3] carries both
 Engineering and Business; the "Self-introductions (S05)" bullet); section 5D and section 6 "team_footage" (what to

@@ -1,4 +1,4 @@
-"""Shot S17 (3:49.0-4:08.5, 19.5 s): "Can it happen?" Feasibility and the intended user.
+"""Shot S17 (3:52.5-4:11.5, 19.0 s): "Can it happen?" Feasibility and the intended user.
 
 Storyboard: docs/video/script.md section 3, row S17; claims table section 4, rows S17; section 6
 "motion_graphic" (S17: the cost panel appears only after the team approves docs/cost-estimate.md,
@@ -20,7 +20,7 @@ Beats (shot seconds, keyed to the guide voice; re-key to the real voice take):
             4.9 s, so the take must run at least 5 s). From 11.62 s ("in simulation") the counters
             54 · 24 · 33 · 13 tick up over it and the total lands on 124 with "a hundred" (12.91),
             holding ~1.8 s through "and twenty-four automated" (badge LIVE SOFTWARE).
-14.75-19.5  the roadmap arrow alone, four stations (cut on "tests").
+14.75-19.0  the roadmap arrow alone, four stations (cut on "tests").
 
 Data (read, never retyped):
   docs/video/shotlist.json, S17             chapter card, intended-user line, chip, law footer, cost
@@ -55,8 +55,8 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 NAME = "S17"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == NAME)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 19.5 s
-assert DURATION == 19.5, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 19.0 s
+assert DURATION == 19.0, DURATION
 
 # ---------- timing ----------
 # Shot seconds. Keyed to the guide voice video/build/guide/S17.wav of 18 Oct (say -v Daniel -r 155;
@@ -879,7 +879,7 @@ def part_counters(img: Image.Image, t: float) -> None:
         put(img, pulse_ring(ease(kp)), (1 - kp) * 0.9)
 
 
-# ---------- part 4 (14.75-19.5 s): the roadmap arrow, alone ----------
+# ---------- part 4 (14.75-19.0 s): the roadmap arrow, alone ----------
 
 ROAD_Y, ROAD_X0, ROAD_X1 = 520, 150, 1772
 ST_X = [300 + i * (1620 - 300) / 3 for i in range(4)]

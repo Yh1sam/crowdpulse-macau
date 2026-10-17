@@ -1,4 +1,4 @@
-"""Shot S06 (0:53.0-1:08.0, 15.0 s): "Why does it matter?"
+"""Shot S06 (0:13.5-0:28.5, 15.0 s): "Why does it matter?"
 
 [MEMBER 4] on camera for 6.9 s (a placeholder slate until the take is filmed): "Mrs Chan is made up.
 The crowds are not." needs no graphic, and the arrivals tag comes in with "This Golden Week". From

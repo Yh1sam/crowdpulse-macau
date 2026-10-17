@@ -1,9 +1,9 @@
-"""S09 (1:30.0-1:38.5, 8.5 s), motion-graphics part only: the first 4.5 s, before the cut to the real
+"""S09 (1:08.0-1:17.0, 9.0 s), motion-graphics part only: the first 5.0 s, before the cut to the real
 dashboard crops (C2a zone detail, C2b "Decided / expired" list), which are added at assembly
 (video/recipes.py, s09).
 
-Narration ([MEMBER 3], VO): "We lower its confidence when a sensor is unreliable or the data is
-unusual. Below sixty percent, a person must review it."
+Narration ([MEMBER 3], VO): "We lower a forecast's confidence when a sensor is unreliable or the data
+is unusual. Below sixty percent, a person must review it."
 
 What it shows (docs/video/script.md, section 3, S09 row):
 - the equation builds term by term:
@@ -26,7 +26,7 @@ Data sources (read at run time, never retyped):
 The needle positions are an example run of that formula (model probability EXAMPLE_MODEL_PROB,
 sensor reliability EXAMPLE_RELIABILITY, unusual data on); no example value is printed on screen.
 
-Output: video/build/mg/S09_mg.mp4 (1920x1080, 30 fps, 4.5 s) and stills in video/build/mg/stills/.
+Output: video/build/mg/S09_mg.mp4 (1920x1080, 30 fps, 5.0 s) and stills in video/build/mg/stills/.
 Run: .venv/bin/python video/mg/S09.py
 """
 from __future__ import annotations
@@ -43,32 +43,34 @@ from PIL import Image, ImageDraw  # noqa: E402
 
 NAME = "S09_mg"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == "S09")
-SHOT_DURATION = round(_shot["end_s"] - _shot["start_s"], 3)      # 8.5 s
-NARRATION = ("We lower its confidence when a sensor is unreliable or the data is unusual. "
+SHOT_DURATION = round(_shot["end_s"] - _shot["start_s"], 3)      # 9.0 s
+NARRATION = ("We lower a forecast's confidence when a sensor is unreliable or the data is unusual. "
              "Below sixty percent, a person must review it.")
 assert _shot["narration"] == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
-DURATION = 4.5  # the motion-graphics part: recipes.py s09 cuts to the dashboard crops at 4.5 s and keys its overlays to that cut
+DURATION = 5.0  # the motion-graphics part: recipes.py s09 cuts to the dashboard crops at 5.0 s and keys its overlays to that cut
 assert DURATION < SHOT_DURATION
+assert DURATION + 2.5 + 1.5 == SHOT_DURATION      # + recipes.py s09: 2.5 s of C2a rows, 1.5 s of the C2b2 list (no held frame)
 
 # Beats in seconds from the shot start. The narration starts 0.2 s into the shot (assemble.py,
 # VOICE_START). Keyed to the guide voice (video/build/guide/S09.wav, say -v Daniel -r 155):
-# silencedetect pauses at 4.42-4.65 and 6.12-6.32 s of the wav; word starts from synthesising
+# silencedetect pauses at 4.95-5.18 and 6.64-6.85 s of the wav; word starts from synthesising
 # prefixes of the line, read off the wav's 20 ms energy envelope; + 0.2 s gives the shot times below:
-#   "We lower its confidence" 0.20-1.50 ("confidence" 0.86) | "when a sensor" 1.52 ("sensor" 1.78) |
-#   "is unreliable" 2.36-3.18 | "or the data is unusual." 3.22-4.62 ("unusual" 3.80) | pause |
-#   "Below sixty percent," 4.85-6.34 | "a person must review it." 6.52-7.95 (both over the dashboard crops).
-# The cut comes at 4.5 s, as "unusual" ends; the sensor-reliability drop alone takes the needle
+#   "We lower a forecast's confidence" 0.20-2.02 ("forecast's" 0.70, "confidence" 1.40) |
+#   "when a sensor" 2.04 ("sensor" 2.30) | "is unreliable" 2.88-3.70 | "or the data is unusual." 3.76-5.15
+#   ("unusual" 4.32) | pause | "Below sixty percent," 5.38-6.84 | "a person must review it." 7.05-8.47
+#   (both over the dashboard crops).
+# The cut comes at 5.0 s, as "unusual" ends; the sensor-reliability drop alone takes the needle
 # under 0.60 ("...when a sensor is unreliable OR the data is unusual") and the rule and stamp land on
-# "unreliable", up for over a second before the cut; the unusual-data factor then takes it lower still.
+# "unreliable", up for nearly 2 s before the cut; the unusual-data factor then takes it lower still.
 # re-key to the real voice take
 BEATS = {
     "lhs": 0.00,      # first frame: "effective confidence =" and the gauge appear
-    "model": 0.10,    # "We lower its confidence": model probability; the needle swings up to it (by ~0.9 s)
-    "sensor": 1.75,   # "sensor" (1.78): × sensor-reliability factor; the needle drops under 0.60 (1.9-2.45)
-    "rule": 2.45,     # "unreliable", as the needle settles: "Below 0.60 →"
-    "stamp": 2.55,    # LOW CONFIDENCE — HUMAN REVIEW REQUIRED stamps on
-    "monitor": 2.8,   # "only 'increase monitoring' is recommended" (on screen only; held to the cut)
-    "ood": 3.15,      # "or the data is unusual" (3.22): × unusual-data (OOD) factor; the needle drops further
+    "model": 0.60,    # "a forecast's confidence": model probability; the needle swings up to it (by ~1.4 s)
+    "sensor": 2.25,   # "sensor" (2.30): × sensor-reliability factor; the needle drops under 0.60 (2.4-2.95)
+    "rule": 2.95,     # "unreliable", as the needle settles: "Below 0.60 →"
+    "stamp": 3.05,    # LOW CONFIDENCE — HUMAN REVIEW REQUIRED stamps on
+    "monitor": 3.3,   # "only 'increase monitoring' is recommended" (on screen only; held to the cut)
+    "ood": 3.7,       # "or the data is unusual" (3.76): × unusual-data (OOD) factor; the needle drops further
 }
 
 # ---------- data ----------
@@ -376,5 +378,5 @@ def draw_frame(t: float) -> Image.Image:
 if __name__ == "__main__":
     out = render(NAME, DURATION, draw_frame)
     print("wrote", out)
-    for beat, tt in [("lhs", 0.40), ("model", 1.40), ("sensor", 2.20), ("stamp", 2.90), ("ood", 3.50), ("end", DURATION - 1 / FPS)]:
+    for beat, tt in [("lhs", 0.40), ("model", 1.60), ("sensor", 2.65), ("stamp", 3.45), ("ood", 4.20), ("end", DURATION - 1 / FPS)]:
         print("still", still(f"S09_{beat}", draw_frame(tt)))

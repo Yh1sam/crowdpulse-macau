@@ -1,4 +1,4 @@
-"""Shot S16 (3:30.5-3:49.0, 18.5 s): "What's next?" - the Melbourne real-data test, announced before its result.
+"""Shot S16 (3:34.0-3:52.5, 18.5 s): "What's next?" - the Melbourne real-data test, announced before its result.
 
 Storyboard: docs/video/script.md section 3, row S16; claims table section 4, rows S16; section 5B (the result
 slot and the rules line); section 6 ("Global look and tools", "motion_graphic": S16 reads minute/*.csv.gz,

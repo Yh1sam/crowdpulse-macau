@@ -1,4 +1,4 @@
-"""Shot S10 (1:38.5-2:02.5, 24.0 s): "Does it work? Every result is labelled."
+"""Shot S10 (1:43.0-2:07.0, 24.0 s): "Does it work? Every result is labelled."
 
 Storyboard: docs/video/script.md section 3, row S10; claims table section 4, rows S10; section 6
 ("motion_graphic" shot rules, "On-screen text load"); shot list docs/video/shotlist.json (id S10).

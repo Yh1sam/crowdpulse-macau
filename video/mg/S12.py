@@ -1,6 +1,6 @@
-"""Shot S12 (2:19.5-2:29.5), motion-graphics part only: the public frame-timing correction.
+"""Shot S12 (2:24.0-2:33.0), motion-graphics part only: the public frame-timing correction.
 
-0-7.0 s of the shot. The last 3.0 s (the README.md "Correction" paragraph, rendered with pandoc and
+0-7.0 s of the shot. The last 2.0 s (the README.md "Correction" paragraph, rendered with pandoc and
 recorded with video/capture.py) are a capture added at assembly, so they are not drawn here.
 
 Left half:  a [TEAM FOOTAGE] slate standing in for [MEMBER 1] and [MEMBER 2] at a laptop that
@@ -46,7 +46,7 @@ NAME = "S12_mg"
 
 # ---------- timing ----------
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-README_INSERT = 3.0                                    # 7.0-10 s: README capture, added at assembly
+README_INSERT = 2.0                                    # 7.0-9 s: README capture, added at assembly
 DURATION = round((_shot["end_s"] - _shot["start_s"]) - README_INSERT, 3)   # 7.0 s
 
 # Times in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S12.wav, laid 0.2 s

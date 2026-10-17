@@ -102,13 +102,15 @@ def stamp(img, x: int, y: int, text: str, colour) -> None:
 
 
 def s02(dur: float):
-    # Simulator screen scaled to full height at x 383-880, where the S02 overlay expects it. The source is
-    # S02_sim.mp4 from 5.0 s with every head in the app's camera picture mosaicked (video/mask_s02.py).
+    # Simulator screen scaled to full height at x 440-937 and raised 16 px (the white strip above its status
+    # bar cropped), where the S02 overlay expects it (video/mg/S02.py PHONE): right of the chapter card
+    # (x 60-425), and with the app's Stop button ending at y 790, above the lower-third (y 800-890). The
+    # source is S02_sim.mp4 from 5.0 s with every head in the app's camera picture mosaicked (video/mask_s02.py).
     masked = CLIPS / "S02_sim_masked.mp4"
     if not masked.exists():
         raise SystemExit("S02 needs video/build/clips/S02_sim_masked.mp4: run video/mask_s02.py (faces must be masked)")
     return (["-i", str(masked)], [], [(OVL / "S02.mov", 0.0)],
-            "scale=-2:1080,pad=1920:1080:383:0:color=0x0B1220")
+            "scale=-2:1080,crop=iw:ih-16:0:16,pad=1920:1080:440:0:color=0x0B1220")
 
 
 def s08(dur: float):
@@ -119,7 +121,9 @@ def s08(dur: float):
     the commands is cut or repeated. Nothing else changes: every command keeps its response and its latency as
     recorded, and each splice joins two frames of the same screen, so the only difference is the blinking
     cursor's rhythm at the three splices (on 0.7 s once, on or off 0.3 s three times, instead of 0.5 s). The codes
-    show at 2.83 / 4.80 / 7.43 s, 0.10-0.12 s before their stamps."""
+    show at 2.83 / 4.80 / 7.43 s, 0.10-0.12 s before their stamps.
+    The take is raised 30 px (its top 30 px are empty navy), so the terminal window (y 170-775) ends 25 px above
+    [MEMBER 3]'s lower-third (y 800-890, 0.2-3.2 s; S08 is that member's first voice-over shot)."""
     take = segments("S08", CLIPS / "S08.mp4", [
         (0.0, 1.4, FULL, FULL),     # 0.0-1.4: the prompt (cursor on 1.0-1.5 s)
         (0.2, 2.3, FULL, FULL),     # 1.4-3.5: the prompt again from 0.2 s (cursor on 0.7 s once); command 1 and 202 at 2.83
@@ -130,11 +134,11 @@ def s08(dur: float):
         (png("S08_card", lambda img: chapter_card(img, "Can it be trusted?")), 0.0, 2.0),
         (png("S08_badge", lambda img: badge(img, "LIVE SOFTWARE", "recorded live")), 0.0, dur),
         (png("S08_footer", lambda img: footer(img, "same checks in backend/tests/test_api.py · real requests to a fresh backend on localhost:8001")), 0.0, dur),
-        (png("S08_s1", lambda img: stamp(img, 300, 341, "202 accepted · numbers only", SAFE)), 2.95, dur),      # "accepts"
-        (png("S08_s2", lambda img: stamp(img, 300, 446, "422 rejected · extra field face_id (closed schema)", WARNING)), 4.9, dur),  # "rejects"
-        (png("S08_s3", lambda img: stamp(img, 300, 586, "403 refused · image upload (PRIVACY_MODE on by default)", CRITICAL)), 7.55, dur),  # "refuses"
+        (png("S08_s1", lambda img: stamp(img, 300, 311, "202 accepted · numbers only", SAFE)), 2.95, dur),      # "accepts"
+        (png("S08_s2", lambda img: stamp(img, 300, 416, "422 rejected · extra field face_id (closed schema)", WARNING)), 4.9, dur),  # "rejects"
+        (png("S08_s3", lambda img: stamp(img, 300, 556, "403 refused · image upload (PRIVACY_MODE on by default)", CRITICAL)), 7.55, dur),  # "refuses"
     ]
-    return ["-i", str(take)], ov, [], ""
+    return ["-i", str(take)], ov, [], "crop=1920:1050:0:30,pad=1920:1080:0:0:color=0x0B1220"
 
 
 def placeholder(shot: str, what: str, dur: float):
@@ -300,15 +304,15 @@ def s09(dur: float):
     # tail2: only the C2b2 'Decided / expired' list (approved #6, then the superseded 'Increase monitoring …',
     # 'Deploy staff …' rows; source y 0-330, above the 'Audit log' heading at y 345), as a strip on navy, so
     # S09 does not repeat S04's closing picture of the same list over the audit log.
-    rows = (300, 470, 1080)
-    tail = segments("S09_tail", CLIPS / "C2a.mp4", [(107.0, 109.5, rows, rows)])
+    rows = (300, 554, 1080)  # raised so the +10 min row and its LOW CONFIDENCE badge sit above the caption band
+    tail = segments("S09_tail", CLIPS / "C2a.mp4", [(107.0, 109.5, rows, rows, 1080)])  # navy below the recording
     tail2 = strip("S09_tail2", CLIPS / "C2b2.mp4", 137.6, 139.1, (316, 0, 1576, 330), 190)
     base = concat_clips("S09", [MG / "S09_mg.mp4", tail, tail2])
     spec("S09", "Stronger recommendations replace weaker pending ones")
     ov = [
-        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 4.5, dur),   # from the cut (S09.py DURATION)
-        (png("S09_rows", lambda img: callout(img, 980, 160, "LOW CONFIDENCE — HUMAN REVIEW REQUIRED", (245, 166, 35))), 4.7, 7.0),
-        (png("S09_dec", lambda img: callout(img, 541, 650, "Stronger recommendations replace weaker pending ones")), 7.0, dur),
+        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 5.0, dur),   # from the cut (S09.py DURATION)
+        (png("S09_rows", lambda img: callout(img, 980, 160, "LOW CONFIDENCE — HUMAN REVIEW REQUIRED", (245, 166, 35))), 5.2, 7.5),
+        (png("S09_dec", lambda img: callout(img, 541, 650, "Stronger recommendations replace weaker pending ones")), 7.5, dur),
     ]
     return ["-i", str(base)], ov, [], ""
 
@@ -323,7 +327,7 @@ def s12(dur: float):
     spec("S12", "Badge (top-right): CORRECTED", "Footer: README.md · Correction")
     mg = MG / "S12_mg.mp4"
     assert abs(probe_duration(mg) - S12_CUT) < 0.02, f"{mg} is {probe_duration(mg)} s, not {S12_CUT} s: re-render video/mg/S12.py"
-    readme = segments("S12_readme", CLIPS / "README_insert.mp4", [(3.6, round(3.6 + dur - S12_CUT, 3), FULL, FULL)])  # 3.0 s
+    readme = segments("S12_readme", CLIPS / "README_insert.mp4", [(3.6, round(3.6 + dur - S12_CUT, 3), FULL, FULL)])  # 2.0 s
     base = concat_clips("S12", [mg, readme])
     # The README page is white, so from the cut the footer and the docked evidence legend (S10-S16) sit on a
     # navy band from y 977, in the gap between two text lines (y 950-970 and 985-1007) of the Limitations

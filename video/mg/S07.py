@@ -1,23 +1,24 @@
-"""Shot S07, "What is new?" (1:08.0-1:21.0, 13.0 s), [MEMBER 4] voice-over. Motion graphic.
+"""Shot S07, "How is ours different?" (0:42.0-0:59.0, 17.0 s), [MEMBER 4] voice-over. Motion graphic.
 
-Credits the police crowd forecast and early-warning system and its planned expansion, then claims
-only what CrowdPulse proposes: movable phones that send only numbers, 5-15 minute forecasts that
-say how sure they are (a confidence score), and a person's approval.
+The WHY -> HOW hinge. Credits the police crowd forecast and early-warning system and its planned
+expansion (on screen), states the team's two aims (privacy, no one left behind), then claims only
+what CrowdPulse proposes: movable phones that send only numbers, 5-15 minute forecasts that say how
+sure they are (a confidence score), and a person's approval.
 
 Beats (keyed to the guide voice, see BEATS):
-  "Macau's police already run a crowd warning system here"
+  "Macau's police already run a crowd warning system here."
         The 7-zone graph. A soft shaded band lights up over the zone model's whole corridor
         (Ruins -> Company of Jesus Square -> Rua de S. Paulo -> St. Dominic's -> Senado); the police
-        panel (system name + the "Officially: ..." line) labels it with a leader line. The band is
-        an area only: no camera positions are drawn. It ends flat just past Senado's disc, short of
-        Av. de Almeida Ribeiro ("Ruins to Senado"). Zone tags ride the camera while they fade.
-  "and plan to expand it"
-        The camera zooms out until the graph is a small cluster inside an abstract rounded frame
-        labelled "Macau · schematic" (a box, not a coastline). A few generic grey pins (border posts
-        and scenic areas, at made-up schematic spots) pulse once; the "2026 Policy Address" line
-        appears under the panel.
-  "We propose movable phones that send only numbers, and forecasts that say how sure they are"
-        Back to the 7-zone graph. One phone per sensor in shared/zones.json drops, inside the band
+        panel (system name + the "Officially: ..." line) labels it with a leader line, and the
+        "2026 Policy Address" line comes in under it. The band is an area only: no camera positions
+        are drawn. It ends flat just past Senado's disc, short of Av. de Almeida Ribeiro ("Ruins to
+        Senado").
+  "We believe crowd safety shouldn't cost anyone their privacy, or leave anyone behind."
+        The map stays as it is. The police lines leave at 6 s; two principle chips build in their
+        place, "Privacy" (a crossed-out picture) on "privacy" and "No one left behind" (a wheelchair)
+        on "leave anyone behind". No numbers, no claims: the team's aims, as the voice says.
+  "So we propose movable phones that send only numbers, and forecasts that say how sure they are."
+        The chips leave. One phone per sensor in shared/zones.json drops, inside the band
         and on the Tercena route alike (no square is singled out; each phone sits clear of other
         zones' phones); number packets flow to a server, fanning over its racks and fading in;
         every zone gets +5 / +10 / +15 min chips, then a confidence dot in each chip; the "What
@@ -30,6 +31,9 @@ Data sources (nothing below is retyped):
 - shared/zones.json: the 7 zones and 7 streets (style.draw_zone_graph) and the 9 sensors (one phone
   each). The band's corridor is the shortest street path from the Ruins to Senado Square.
 - shared/config.json: forecast_horizons_min (the chips), checked against the "What we propose" line.
+
+The zoom out to a Macau schematic (grey pins for border posts and scenic areas), keyed to the old
+", and plan to expand it", went when those words left the voice (18 Oct restructure).
 
 Output: video/build/mg/S07.mp4 and video/build/mg/stills/S07_<beat>.png.
 Run:    .venv/bin/python video/mg/S07.py                          full render + stills
@@ -49,30 +53,34 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # video/mg, for style.py
 from style import *  # noqa: E402,F401,F403
-from PIL import Image, ImageChops, ImageDraw, ImageFilter  # noqa: E402
+from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 SHOT = "S07"
 
 # ---------------------------------------------------------------- spec (read, never retyped)
 
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 13.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 17.0 s
 NARRATION = _shot["narration"]
 
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} |"))
 _cols = [c.strip() for c in _row.strip().strip("|").split(" | ")]
 assert len(_cols) == 7 and _cols[3] == NARRATION, "storyboard row S07 and shotlist.json disagree on the narration"
 
-_PREFIX = re.compile(r"^(?:Chapter card \(top-left\)|From 0 s, held to 6 s|From 4 s|6-13 s|Footer): ")
+_PREFIX = re.compile(r"^(?:Chapter card \(top-left\)|From 0 s, held to 6 s|From 2 s, held to 6 s|"
+                     r"6\.4-9\.5 s, two principle chips|9\.8-17 s|Footer): ")
 _lines = []
 for _part in _shot["on_screen_text"].split(" | "):
     _m = _PREFIX.match(_part.strip())
     assert _m, f"unexpected on-screen part: {_part!r}"
     _lines.append(_part.strip()[_m.end():])
-CARD, _police, POLICY, TAGLINE, FOOTER = _lines
+CARD, _police, POLICY, _principles, TAGLINE, FOOTER = _lines
 POLICE_NAME, POLICE_STATUS = _police.split(" · ")
-for _txt in (CARD, POLICE_NAME, POLICE_STATUS, POLICY, TAGLINE, FOOTER):
+PRINCIPLES = _principles.split(" · ")                              # ["Privacy", "No one left behind"]
+assert len(PRINCIPLES) == 2, PRINCIPLES
+for _txt in (CARD, POLICE_NAME, POLICE_STATUS, POLICY, *PRINCIPLES, TAGLINE, FOOTER):
     assert f'"{_txt}"' in _cols[5], f"not in the storyboard row: {_txt!r}"
+assert not any(c.isdigit() for c in _principles), "the principle chips carry no numbers"
 assert "horizon and accuracy not published" in POLICE_STATUS      # section 6: kept next to the system's name
 assert text_size(FOOTER, 20, 500)[0] <= 1150, "footer must fit one line of the footer slot"
 
@@ -80,8 +88,9 @@ HORIZONS = json.loads((ROOT / "shared" / "config.json").read_text())["forecast_h
 assert f"{HORIZONS[0]}-{HORIZONS[-1]} min forecasts" in TAGLINE, TAGLINE
 
 # The narration, clause by clause as the guide voice pauses (BEATS are keyed to these).
-CLAUSES = ["Macau's police already run a crowd warning system here,", "and plan to expand it.",
-           "We propose movable phones that send only numbers,", "and forecasts that say how sure they are."]
+CLAUSES = ["Macau's police already run a crowd warning system here.",
+           "We believe crowd safety shouldn't cost anyone their privacy,", "or leave anyone behind.",
+           "So we propose movable phones that send only numbers,", "and forecasts that say how sure they are."]
 assert " ".join(CLAUSES) == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
 
 # ---------------------------------------------------------------- zone model
@@ -120,38 +129,37 @@ assert any(s["zone_id"] in CORRIDOR for s in SENSORS) and any(s["zone_id"] == "t
 # ---------------------------------------------------------------- timing
 # Guide voice video/build/guide/S07.wav (say -v Daniel -r 155), laid at 0.2 s into the shot.
 # Clause boundaries from `ffmpeg -af silencedetect=noise=-35dB:d=0.08` on the wav, plus 0.2 s:
-#   0.20-3.50   "Macau's police already run a crowd warning system here,"
-#   3.71-5.11   "and plan to expand it."
-#   5.35-8.14   "We propose movable phones that send only numbers,"
-#   8.36-10.66  "and forecasts that say how sure they are."
+#   0.20-3.49   "Macau's police already run a crowd warning system here."
+#   3.73-7.04   "We believe crowd safety shouldn't cost anyone their privacy,"
+#   7.25-8.68   "or leave anyone behind."
+#   8.94-11.99  "So we propose movable phones that send only numbers,"
+#   12.21-14.52 "and forecasts that say how sure they are."   (then 2.5 s without voice)
 # Word times inside a clause from synthesising prefixes of the line, read off the wav's 20 ms energy
-# envelope: "propose" 5.48, "movable" 5.96, "phones" 6.40, "send" 6.96, "only" 7.28, "numbers" 7.56,
-# "forecasts" 8.50, "how sure" 9.60-10.10.
+# envelope: "privacy" 6.40, "leave" 7.38, "behind" 8.18, "propose" 9.32, "movable" 9.80,
+# "phones" 10.24, "send" 10.80, "only" 11.10, "numbers" 11.40, "forecasts" 12.36, "how sure" 13.46.
 # re-key to the real voice take (the team speaks at about 140 wpm)
 BEATS = {
     "card": 0.0,          # chapter card in (out after about 2 s)
     "panel": 0.0,         # police name + "Officially: ..." lines, held to about 6 s
     "band": 0.15,         # "Macau's police": the band sweeps Ruins -> Senado
+    "policy": 2.0,        # the "2026 Policy Address" line, as the card goes (on screen only; held to about 6 s)
     "here": 3.0,          # "here": the band brightens once
-    "zoom_out": 3.71,     # "and plan to expand it": zoom out to the schematic frame
-    "policy": 3.71,       # the "2026 Policy Address" line
-    "pulse": 4.35,        # "expand": the grey pins pulse once
-    "zoom_in": 5.35,      # "We propose": back to the 7-zone graph (settled at 6.2)
-    "panel_out": 5.85,    # police lines out (gone by about 6.15)
-    "tag": 6.0,           # "movable phones": "What we propose" line, "movable phones", as the police lines go
-    "phones": 6.4,        # "phones": the phones drop (all down by about 7.45)
-    "server": 6.6,        # the server comes in
-    "packets": 6.95,      # "send": number packets flow (first wave; more waves follow)
-    "numbers": 7.3,       # "only numbers": "numbers only" on the line
-    "forecasts": 8.5,     # "forecasts": +5 / +10 / +15 min chips, zone by zone, and the line item
-    "confidence": 9.6,    # "how sure": a confidence dot in every chip
-    "approves": 10.7,     # end of speech: "a person approves"
+    "panel_out": 5.85,    # police lines out (gone by about 6.15), during "...cost anyone their"
+    "privacy": 6.35,      # "privacy": first principle chip, in the panel's place
+    "behind": 7.35,       # "leave anyone behind": second principle chip
+    "propose": 8.94,      # "So we propose": the band quietens
+    "chips_out": 9.45,    # principle chips out (gone by about 9.75), before the server comes in
+    "tag": 9.8,           # "movable phones": "What we propose" line, "movable phones"
+    "phones": 10.2,       # "phones": the phones drop (all down by about 11.25)
+    "server": 10.4,       # the server comes in
+    "packets": 10.8,      # "send": number packets flow (first wave; more waves follow)
+    "numbers": 11.1,      # "only numbers": "numbers only" on the line
+    "forecasts": 12.35,   # "forecasts": +5 / +10 / +15 min chips, zone by zone, and the line item
+    "confidence": 13.45,  # "how sure": a confidence dot in every chip
+    "approves": 14.6,     # end of speech: "a person approves" (reads for 2.4 s to the end)
 }
 CARD_HOLD = 2.0
-ZOOM_DUR = 0.85
-# the phones (and the rest of the dynamic layer) draw only once the zoom-in has settled
-assert BEATS["phones"] >= BEATS["zoom_in"] + ZOOM_DUR - 1e-6, "phones would pop in mid-drop"
-PACKET_WAVES = [BEATS["packets"], 8.5, 9.95, 11.4]    # numbers keep flowing while the shot holds
+PACKET_WAVES = [BEATS["packets"], 12.4, 13.9, 15.4]   # numbers keep flowing while the shot holds
 PANEL_FADE = 0.3
 
 # ---------------------------------------------------------------- layout and colours
@@ -166,31 +174,16 @@ CHIP_FILL = tuple(int(c) for c in lerp(NAVY_2, CYAN, 0.28))
 SERVER = (330, 520)
 TAG_Y = 852                                         # "What we propose" line (caption band starts at y 926)
 TAG_SIZE = 32
-CONTENT_Y1 = 905                                    # shot content stays above this (captions from y 926)
 
 PANEL_X0, PANEL_X1, PANEL_Y0 = 60, 820, 150         # police panel (screen-fixed)
 PANEL_PAD = 26
-
-# zoomed-out view: the graph shrinks to S_OUT and its centre F lands at C2, inside FRAME
-F = ((GRAPH_BOX[0] + GRAPH_BOX[2]) / 2, (GRAPH_BOX[1] + GRAPH_BOX[3]) / 2)
-FRAME = (900, 150, 1800, 880)
-C2 = (1335, 540)
-S_OUT = 0.24
-# generic schematic spots for the grey pins (frame coordinates at full zoom-out); not real places
-PINS = [(1030, 455), (1235, 250), (1625, 305), (1680, 560), (1545, 765), (1150, 725)]
-FRAME_LABEL = "Macau · schematic"
-PIN_LEGEND = "border posts and scenic areas"
+PRINCIPLE_H, PRINCIPLE_GAP, PRINCIPLE_SIZE = 84, 16, 36   # principle chips, stacked in the panel's place
 GRAPH_TAG = "zone model · schematic"
 
 SHORT = {"tercena_corridor": "Rua da Tercena", "rua_sao_paulo": "Rua de S. Paulo", "almeida_ribeiro": "Av. de Almeida Ribeiro"}
 LABEL_DY = {"tercena_corridor": -9}                 # lift this tag clear of St. Dominic's circle below it
 LABEL_SIZE = 22
 CHIP_GAP = 8
-
-
-def ease_out(t: float) -> float:
-    t = clamp(t)
-    return 1 - (1 - t) ** 3
 
 
 def ease_out_back(t: float, k: float = 1.25) -> float:
@@ -265,27 +258,6 @@ def glow_spr(colour, r: int, blur: int) -> Image.Image:
     ImageDraw.Draw(a).ellipse((size / 2 - r, size / 2 - r, size / 2 + r, size / 2 + r), fill=255)
     im.putalpha(a.filter(ImageFilter.GaussianBlur(blur)))
     return im
-
-
-@lru_cache(maxsize=None)
-def pin_spr(colour, scale: float = 1.0) -> Image.Image:
-    w, h = int(round(28 * scale)), int(round(40 * scale))
-    im = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    s = SS * scale
-    d.ellipse((2 * s, 1 * s, 26 * s, 25 * s), fill=(*colour, 255))
-    d.polygon([(4.2 * s, 18 * s), (23.8 * s, 18 * s), (14 * s, 39 * s)], fill=(*colour, 255))
-    d.ellipse((9 * s, 8 * s, 19 * s, 18 * s), fill=(*NAVY, 255))
-    return _down(im, w, h)
-
-
-@lru_cache(maxsize=None)
-def ring_spr(colour, r: int, width: int) -> Image.Image:
-    size = 2 * r + 2 * width + 4
-    im = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
-    c = size * SS / 2
-    ImageDraw.Draw(im).ellipse((c - r * SS, c - r * SS, c + r * SS, c + r * SS), outline=(*colour, 255), width=width * SS)
-    return _down(im, size, size)
 
 
 @lru_cache(maxsize=None)
@@ -647,113 +619,80 @@ def policy_spr():
     return lay
 
 
-# ---------------------------------------------------------------- camera (zoom out to the frame and back)
-
-def cam_p(t: float) -> float:
-    """0 = the 7-zone graph at full size, 1 = zoomed out to the schematic frame."""
-    return progress(t, BEATS["zoom_out"], ZOOM_DUR) * (1 - progress(t, BEATS["zoom_in"], ZOOM_DUR))
-
-
-def world(x: float, y: float, p: float) -> tuple[float, float]:
-    z = S_OUT ** p
-    cx, cy = lerp(F[0], C2[0], p), lerp(F[1], C2[1], p)
-    return cx + (x - F[0]) * z, cy + (y - F[1]) * z
-
-
-def frame_pt(x: float, y: float, p: float) -> tuple[float, float]:
-    """A point given in zoomed-out screen coordinates (FRAME, PINS), at camera state p."""
-    k = S_OUT ** p / S_OUT
-    cx, cy = lerp(F[0], C2[0], p), lerp(F[1], C2[1], p)
-    return cx + (x - C2[0]) * k, cy + (y - C2[1]) * k
+def no_image_icon(d: ImageDraw.ImageDraw, cx: float, cy: float, s: float) -> None:
+    """A picture (frame, hills, sun) struck through: no images. The strike cuts a clear gap."""
+    w, h = 52 * s, 40 * s
+    d.rounded_rectangle((cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2), int(7 * s), outline=(*INK, 255), width=int(4 * s))
+    d.polygon([(cx - w / 2 + 7 * s, cy + h / 2 - 7 * s), (cx - 7 * s, cy - 3 * s), (cx + 3 * s, cy + 7 * s),
+               (cx + 10 * s, cy + 1 * s), (cx + w / 2 - 7 * s, cy + h / 2 - 7 * s)], fill=(*INK, 255))
+    d.ellipse((cx + 8 * s, cy - h / 2 + 8 * s, cx + 17 * s, cy - h / 2 + 17 * s), fill=(*INK, 255))
+    a, b = (cx - w / 2 - 4 * s, cy - h / 2 - 7 * s), (cx + w / 2 + 4 * s, cy + h / 2 + 7 * s)
+    d.line([a, b], fill=(0, 0, 0, 0), width=int(13 * s))         # ImageDraw replaces pixels: a transparent gap
+    d.line([a, b], fill=(*INK, 255), width=int(4 * s))
 
 
-def paste_world(img: Image.Image, spr_xy, p: float, alpha: float = 1.0) -> None:
-    """Pastes a world-space sprite (sprite, x0, y0) through the camera."""
-    spr, x0, y0 = spr_xy
-    if p <= 1e-4:
-        paste(img, spr, x0, y0, alpha)
-        return
-    z = S_OUT ** p
-    sx, sy = world(x0, y0, p)
-    w, h = max(1, round(spr.width * z)), max(1, round(spr.height * z))
-    small = spr.resize((w, h), Image.Resampling.LANCZOS)
-    paste(img, small, sx, sy, alpha)
+@lru_cache(maxsize=None)
+def principle_spr(i: int) -> Image.Image:
+    """Principle chip i: icon + label on the panel's navy, with a CrowdPulse-cyan bar at left."""
+    label = PRINCIPLES[i]
+    icon_w = 64
+    tx = PANEL_PAD + 10 + icon_w + 16
+    w, h = int(tx + text_w(label, PRINCIPLE_SIZE, 700) + PANEL_PAD + 4), PRINCIPLE_H
+    lay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    rounded(lay, (0, 0, w - 1, h - 1), 16, fill=NAVY_2, alpha=0.94)
+    rounded(lay, (0, 0, 7, h - 1), 3, fill=CYAN)
+    big = Image.new("RGBA", (icon_w * SS, h * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(big)
+    c = (icon_w * SS / 2, h * SS / 2)
+    if i == 0:
+        no_image_icon(d, c[0], c[1], SS)
+    else:                                   # style.wheelchair_icon is drawn about (-4, -3) off its centre
+        wheelchair_icon(d, c[0] + 4 * 1.25 * SS, c[1] + 3 * 1.25 * SS, 1.25 * SS, colour=(*INK, 255), width=4)
+    lay.alpha_composite(_down(big, icon_w, h), dest=(PANEL_PAD + 10, 0))
+    l, t_, r, b = text_font(label, PRINCIPLE_SIZE, 700).getbbox(label, anchor="la")
+    put_text(lay, tx, h / 2 - (t_ + b) / 2, label, PRINCIPLE_SIZE, 700, INK)
+    return lay
+
+
+PRINCIPLE_W = max(principle_spr(i).width for i in range(2))
+assert PANEL_X0 + PRINCIPLE_W <= GRAPH_BOX[0] - 40, "a principle chip runs into the zone graph"
 
 
 # ---------------------------------------------------------------- drawing
 
-def band_alpha(t: float, p: float) -> float:
+def band_alpha(t: float) -> float:
     base = 0.34 * progress(t, BEATS["band"], 0.5)
     here = 0.22 * math.sin(math.pi * clamp((t - BEATS["here"]) / 0.7))
-    dim = 0.14 * progress(t, BEATS["zoom_in"] + 0.4, 0.6)        # quieter while the phones work
-    return clamp(base + here + 0.35 * p - dim)
+    dim = 0.14 * progress(t, BEATS["propose"] + 0.4, 0.6)        # quieter while the phones work
+    return clamp(base + here - dim)
 
 
-def draw_band(img: Image.Image, t: float, p: float) -> None:
+def draw_band(img: Image.Image, t: float) -> None:
     k = progress(t, BEATS["band"], 0.9)
     if k <= 0:
         return
     spr = band_spr(max(1, int(round(k * 60))))
-    paste_world(img, (spr, BAND_BOX[0], BAND_BOX[1]), p, band_alpha(t, p))
+    paste(img, spr, BAND_BOX[0], BAND_BOX[1], band_alpha(t))
 
 
-FRAME_CLIP_Y0 = CONTENT_Y1 - 20          # the frame layer fades out over y 885-905 (its final bottom edge is y 880)
-FRAME_CLIP_X0 = PANEL_X1 + 10            # ... and over x 830-870, so it never shows behind the panel (final left edge x 900)
-FRAME_CLIP_X1 = PANEL_X1 + 50
-assert FRAME[3] + 2 <= FRAME_CLIP_Y0 and FRAME[0] - 2 >= FRAME_CLIP_X1, "the settled frame must sit clear of its soft clip"
+def draw_principles(img: Image.Image, t: float) -> None:
+    """The two principle chips, stacked where the police panel was; they leave before the server comes."""
+    out = 1 - progress(t, BEATS["chips_out"], PANEL_FADE)
+    for i, key in enumerate(("privacy", "behind")):
+        k = progress(t, BEATS[key], 0.35)
+        a = k * out
+        if a > 0:
+            paste(img, principle_spr(i), PANEL_X0 - 24 * (1 - k), PANEL_Y0 + i * (PRINCIPLE_H + PRINCIPLE_GAP), a)
 
 
-@lru_cache(maxsize=1)
-def frame_clip_mask() -> Image.Image:
-    col = Image.new("L", (1, H), 0)
-    for y in range(H):
-        col.putpixel((0, y), int(round(255 * clamp((CONTENT_Y1 - y) / (CONTENT_Y1 - FRAME_CLIP_Y0)))))
-    row = Image.new("L", (W, 1), 0)
-    for x in range(W):
-        row.putpixel((x, 0), int(round(255 * clamp((x - FRAME_CLIP_X0) / (FRAME_CLIP_X1 - FRAME_CLIP_X0)))))
-    return ImageChops.multiply(col.resize((W, H)), row.resize((W, H)))
-
-
-def draw_frame_view(img: Image.Image, t: float, p: float) -> None:
-    """The abstract schematic frame and its generic grey pins (only while zoomed out)."""
-    a_frame = clamp((p - 0.45) / 0.45)
-    if a_frame <= 0:
-        return
-    out = img
-    img = transparent()                  # drawn on its own layer, clipped above the caption band (below)
-    (x0, y0), (x1, y1) = frame_pt(FRAME[0], FRAME[1], p), frame_pt(FRAME[2], FRAME[3], p)
-    k = S_OUT ** p / S_OUT
-    rounded(img, (x0, y0, x1, y1), int(28 * k), fill=NAVY_2, alpha=0.55 * a_frame)
-    rounded(img, (x0, y0, x1, y1), int(28 * k), outline=INK_3, width=2, alpha=0.9 * a_frame)
-    a_txt = clamp((p - 0.75) / 0.25)
-    # the frame's text shows only where it is fully clear of the panel (left) and of the soft clip (bottom)
-    a_lbl = a_txt * clamp((x0 + 26 - (FRAME_CLIP_X1 + 4)) / 8)
-    put_text(img, x0 + 26, y0 + 22, FRAME_LABEL, 24, 600, INK_2, a_lbl)
-    a_leg = a_lbl * clamp((FRAME_CLIP_Y0 - 2 - (y1 - 22)) / 8)
-    paste(img, pin_spr(GREY, 0.75), x0 + 40, y1 - 26, a_leg, anchor="mb")
-    put_text(img, x0 + 62, y1 - 52, PIN_LEGEND, 22, 500, INK_2, a_leg)
-    a_pin = clamp((p - 0.5) / 0.4)
-    for i, (qx, qy) in enumerate(PINS):
-        x, y = frame_pt(qx, qy, p)
-        k_pulse = clamp((t - (BEATS["pulse"] + 0.07 * i)) / 0.75)
-        if 0 < k_pulse < 1:
-            r = int(round(lerp(10, 50, ease_out(k_pulse))))
-            paste(img, ring_spr(INK_2, r, 3), x, y - 26, 0.8 * (1 - k_pulse) * a_pin, anchor="mm")
-        bump = 1 + 0.22 * math.sin(math.pi * k_pulse)
-        paste(img, pin_spr(GREY), x, y, a_pin, scale=bump, anchor="mb")
-    # soft clip: fades out above the caption band and left of the panel column, never a hard cut
-    img.putalpha(ImageChops.multiply(img.getchannel("A"), frame_clip_mask()))
-    out.alpha_composite(img)
-
-
-def draw_panel(img: Image.Image, t: float, p: float) -> None:
+def draw_panel(img: Image.Image, t: float) -> None:
     out = 1 - progress(t, BEATS["panel_out"], PANEL_FADE)
     a = progress(t, BEATS["panel"], 0.3) * out
     if a <= 0:
         return
     spr = panel_spr()
-    # leader line from the panel to the band (it follows the band through the zoom)
-    ax, ay = world(*BAND_ANCHOR, p)
+    # leader line from the panel to the band
+    ax, ay = BAND_ANCHOR
     sx, sy = PANEL_X1, PANEL_Y0 + 44
     lay = transparent()
     d = ImageDraw.Draw(lay)
@@ -882,21 +821,15 @@ BASE = canvas()
 
 def draw_frame(t: float) -> Image.Image:
     img = BASE.copy()
-    p = cam_p(t)
-    a_lab = clamp(1 - p / 0.15)                      # labels only at full size
-
-    draw_frame_view(img, t, p)
-    draw_band(img, t, p)
-    paste_world(img, streets_layer(), p)
-    if p <= 1e-4:
-        draw_links(img, t)
-    paste_world(img, discs_layer(), p)
-    if a_lab > 0:
-        paste_world(img, labels_layer(), p, a_lab)    # tags ride the camera with their discs while they fade
-        put_text(img, 1860, 128, GRAPH_TAG, 22, 500, INK_3, a_lab, align="r")
-    if p <= 1e-4:
-        draw_dynamic(img, t)
-    draw_panel(img, t, p)
+    draw_band(img, t)
+    paste(img, *streets_layer())
+    draw_links(img, t)
+    paste(img, *discs_layer())
+    paste(img, *labels_layer())
+    put_text(img, 1860, 128, GRAPH_TAG, 22, 500, INK_3, align="r")
+    draw_dynamic(img, t)
+    draw_panel(img, t)
+    draw_principles(img, t)
     draw_tagline(img, t)
 
     # fixed slots
@@ -908,11 +841,14 @@ def draw_frame(t: float) -> Image.Image:
 STILLS = {  # beat name -> time (s) for the layout stills
     "band": 1.6,
     "here": 3.35,
-    "frame": 4.75,
-    "back": 6.3,
-    "flow": 7.7,
-    "chips": 9.4,
-    "confidence": 10.4,
+    "panel_out": 6.0,
+    "privacy": 6.9,
+    "principles": 8.5,
+    "propose": 9.6,
+    "phones": 10.6,
+    "flow": 11.6,
+    "chips": 13.0,
+    "confidence": 14.0,
     "end": DURATION - 1 / FPS,
 }
 

@@ -1,4 +1,4 @@
-"""S20 · End card (4:38.5-4:44.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
+"""S20 · End card (4:41.5-4:47.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
 
 Storyboard: docs/video/script.md section 3, row S20 (visual and on-screen text), section 2 "Team roles" (which
 member carries which STEMB letter or letters), section 5A item 1 (fill names, school, supervisor and the grid before
