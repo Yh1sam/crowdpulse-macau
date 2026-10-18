@@ -1,8 +1,10 @@
-"""Shot S17b (4:11.5-4:23.5, 12.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
+"""Shot S17b (4:04.0-4:16.0, 12.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
 
-A navy card in the S07 / S17 style: a title and three rows (who may be more vulnerable, who answers,
-how the public is told), each with a plain shape icon, and a source footer. No badge, no chapter card
-(it continues S17's "Can it happen?"), no lower-third ([MEMBER 3]'s is in S08), no emblem or logo.
+A navy card in the S07 / S17 style: a title and three short rows (who may be more vulnerable, who answers,
+how the public is told), each with a plain shape icon, and a short footer ("To be confirmed with the
+authorities"). No badge, no chapter card (it continues S17's "Can it happen?"), no lower-third ([MEMBER 3]'s
+is in S08), no emblem or logo. Declutter (19 Oct): each row at most 10 words, the footer at most 7; the laws
+and "no partner yet" left the footer (S17's chip says it 10 s earlier; script.md section 4 keeps the laws).
 
 Storyboard: docs/video/script.md section 3, row S17b; claims table section 4, rows S17b (and the
 on-screen rows under it); section 6 "motion_graphic" (S17b), "On-screen text load" and "Never say or
@@ -10,8 +12,8 @@ show"; shot list docs/video/shotlist.json (id S17b).
 
 Beats (shot seconds, keyed to the guide voice video/build/guide/S17b.wav, which starts 0.5 s into
 the shot (script.md section 6, "Guide track": S17b 0.5 s); clause starts are the silencedetect
-boundaries (noise -35 dB, d 0.08 s: 0, 1.30, 2.31, 3.92, 5.06, 6.71 s into the 9.45 s file of 18 Oct)
-+ 0.5 s; re-key to the real take):
+boundaries (noise -35 dB, d 0.08 s: 0, 1.30, 2.31, 3.92, 5.06, 6.71 s into the 9.45 s file of 19 Oct,
+unchanged since 18 Oct) + 0.5 s; re-key to the real take):
 0.0         the title, then row 1 ("May be more vulnerable", icon: a figure with a walking stick
             beside a wheelchair outline); the footer. The title is fully in by 0.32 s.
 0.5-2.57    "If it fails, who answers?": the voice asks the title question (title and row 1 hold).
@@ -19,8 +21,8 @@ boundaries (noise -35 dB, d 0.08 s: 0, 1.30, 2.31, 3.92, 5.06, 6.71 s into the 9
             outlined while it is spoken.
 4.42        "named in our log," -> the name line in the log icon lights up.
 5.56        "and the department running it." (row 2 holds)
-7.21        "Every notice says an AI forecast is involved." -> row 3 builds ("How the public is
-            told", icon: a sign with a dashed edge, because it is planned) and takes the outline.
+7.21        "Every notice says an AI forecast is involved." -> row 3 builds ("Telling the public",
+            icon: a sign with a dashed edge, because it is planned) and takes the outline.
 9.95-12.0   the voice ends; the outline fades and the whole card holds for reading.
 
 Layout: the title and the rows stay above y 780, clear of the lower-third slot (y 800-890) and the
@@ -94,15 +96,20 @@ CLAUSES = ["If it fails,", "who answers?", "The person who approved it,", "named
            "and the department running it.", "Every notice says an AI forecast is involved."]
 assert SHOT["narration"] == " ".join(CLAUSES), SHOT["narration"]
 assert " ".join(CLAUSES[:2]) == TITLE, (CLAUSES[:2], TITLE)         # the voice asks the title question aloud
-# row 2 keeps its written form (the approving operator, the audit log) for what the voice says as "the person
-# who approved it, named in our log"
-assert ROW_TEXT[1].startswith("Who answers: the approving operator, named in the audit log"), ROW_TEXT[1]
+# row 2's short written form ("the named approver") is what the voice says as "the person who approved it,
+# named in our log"
+assert ROW_TEXT[1].startswith("Who answers: the named approver"), ROW_TEXT[1]
+# declutter (19 Oct): every row at most 10 words (head and items; the " · " separator is not a word), the
+# footer at most 7
+for _r in ROW_TEXT:
+    assert len(_r.replace(" · ", " ").split()) <= 10, _r
+assert len(FOOTER.split()) <= 7, FOOTER
 
 # section 6, S17b and "Never say or show"
 assert ROWS[0][0].casefold().startswith("may be more vulnerable"), ROWS[0]       # the hedge stays
 assert "named" in ROW_TEXT[1], ROW_TEXT[1]                                       # "named", never a checked identity
 assert "(planned)" in ROW_TEXT[2] and "sign" in ROW_TEXT[2], ROW_TEXT[2]         # the sign is a plan
-assert "to be confirmed with the authorities" in FOOTER and "no partner yet" in FOOTER, FOOTER
+assert "to be confirmed with the authorities" in FOOTER.casefold(), FOOTER   # "no partner yet": S17's chip
 BANNED = ["most at risk", "signed in", "logged in", "verified", "authenticated", "legal", "compliant", "approved",
           "in partnership with", "the police support it", "built for the police", "replaces", "better than",
           "prevents crushes", "saves lives", "dangerous"]

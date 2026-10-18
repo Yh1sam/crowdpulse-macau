@@ -1,28 +1,30 @@
-"""S09 (1:08.0-1:17.0, 9.0 s), motion-graphics part only: the first 5.0 s, before the cut to the real
-dashboard crops (C2a zone detail, C2b "Decided / expired" list), which are added at assembly
-(video/recipes.py, s09).
+"""S09 (1:09.0-1:18.0, 9.0 s), motion-graphics part only: the first 5.0 s, before the cut to the real
+dashboard crop (C2a Zone detail, its Prediction panel with the dashboard's own LOW CONFIDENCE badge), which
+is added at assembly (video/recipes.py, s09).
 
-Narration ([MEMBER 3], VO): "We lower a forecast's confidence when a sensor is unreliable or the data
+Narration ([MEMBER 2], VO): "We lower a forecast's confidence when a sensor is unreliable or the data
 is unusual. Below sixty percent, a person must review it."
 
 What it shows (docs/video/script.md, section 3, S09 row):
 - the equation builds term by term:
-  effective confidence = model probability × sensor-reliability factor × unusual-data (OOD) factor;
-- a gauge of effective confidence whose needle drops as each factor is applied: under a marked
-  0.60 line with the sensor-reliability factor, and lower still with the unusual-data factor;
-- the stamp "LOW CONFIDENCE — HUMAN REVIEW REQUIRED" (styled like the dashboard's ConfidenceBadge,
-  dashboard/src/components/Badges.tsx) and the line "Below 0.60 → … only 'increase monitoring' is
-  recommended";
-- footer: "sensor-reliability factor = 0.4 + 0.6 × reliability (backend/app/services/prediction.py)
-  · threshold in shared/config.json".
-No chapter card (S08 shows "Can it be trusted?"). No status badge: the S09 storyboard row defines none.
+  effective confidence = model probability × sensor-reliability factor × unusual-data factor;
+- a gauge (0 to 1) whose needle drops as each factor is applied: under a marked 0.60 line with the
+  sensor-reliability factor, and lower still with the unusual-data factor;
+- "Below 0.60 →" and the stamp "LOW CONFIDENCE — HUMAN REVIEW REQUIRED" (styled like the dashboard's
+  ConfidenceBadge, dashboard/src/components/Badges.tsx).
+19 Oct declutter: no "only 'increase monitoring' is recommended" line, no footer (the factor's formula and
+the threshold's file are in script.md section 4), no "effective confidence" label under the gauge (the
+equation's left side names it), "(OOD)" dropped from the third term.
+No chapter card (S08 shows "Can it be trusted?"). No status badge: the S09 storyboard row defines none
+before the cut. [MEMBER 2]'s lower-third (assemble.py, 0.2-3.2 s, x 60-560, y 800-890) sits under
+everything here: the lowest element, "Below 0.60 → [stamp]", ends at y 727 and appears at 2.95 s.
 
 Data sources (read at run time, never retyped):
 - docs/video/shotlist.json, S09: the narration (checked; the beats are keyed to it) and the shot length;
 - shared/config.json: confidence.low_confidence_threshold (the 0.60 line) and
   confidence.ood_confidence_multiplier (used only to place the needle's last drop);
 - backend/app/services/prediction.py: the sensor-reliability factor 0.4 + 0.6 × reliability
-  (the `rel_factor = ...` line, line 146 when written).
+  (the `rel_factor = ...` line, line 146 when written), used only to place the needle's first drop.
 The needle positions are an example run of that formula (model probability EXAMPLE_MODEL_PROB,
 sensor reliability EXAMPLE_RELIABILITY, unusual data on); no example value is printed on screen.
 
@@ -47,9 +49,9 @@ SHOT_DURATION = round(_shot["end_s"] - _shot["start_s"], 3)      # 9.0 s
 NARRATION = ("We lower a forecast's confidence when a sensor is unreliable or the data is unusual. "
              "Below sixty percent, a person must review it.")
 assert _shot["narration"] == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
-DURATION = 5.0  # the motion-graphics part: recipes.py s09 cuts to the dashboard crops at 5.0 s and keys its overlays to that cut
+DURATION = 5.0  # the motion-graphics part: recipes.py s09 cuts to the dashboard crop at 5.0 s and keys its overlays to that cut
 assert DURATION < SHOT_DURATION
-assert DURATION + 2.5 + 1.5 == SHOT_DURATION      # + recipes.py s09: 2.5 s of C2a rows, 1.5 s of the C2b2 list (no held frame)
+assert DURATION + 4.0 == SHOT_DURATION      # + recipes.py s09: 4.0 s of the C2a Prediction panel (no held frame)
 
 # Beats in seconds from the shot start. The narration starts 0.2 s into the shot (assemble.py,
 # VOICE_START). Keyed to the guide voice (video/build/guide/S09.wav, say -v Daniel -r 155):
@@ -58,10 +60,12 @@ assert DURATION + 2.5 + 1.5 == SHOT_DURATION      # + recipes.py s09: 2.5 s of C
 #   "We lower a forecast's confidence" 0.20-2.02 ("forecast's" 0.70, "confidence" 1.40) |
 #   "when a sensor" 2.04 ("sensor" 2.30) | "is unreliable" 2.88-3.70 | "or the data is unusual." 3.76-5.15
 #   ("unusual" 4.32) | pause | "Below sixty percent," 5.38-6.84 | "a person must review it." 7.05-8.47
-#   (both over the dashboard crops).
+#   (both over the dashboard crop).
 # The cut comes at 5.0 s, as "unusual" ends; the sensor-reliability drop alone takes the needle
 # under 0.60 ("...when a sensor is unreliable OR the data is unusual") and the rule and stamp land on
-# "unreliable", up for nearly 2 s before the cut; the unusual-data factor then takes it lower still.
+# "unreliable", up for 2.05 s before the cut (rule and stamp are 7 words, which the 0.3 s a word + 0.5 s
+# rule would hold 2.6 s: the dashboard's own badge carries the same words for the 4.0 s after the cut);
+# the unusual-data factor then takes it lower still.
 # re-key to the real voice take
 BEATS = {
     "lhs": 0.00,      # first frame: "effective confidence =" and the gauge appear
@@ -69,8 +73,7 @@ BEATS = {
     "sensor": 2.25,   # "sensor" (2.30): × sensor-reliability factor; the needle drops under 0.60 (2.4-2.95)
     "rule": 2.95,     # "unreliable", as the needle settles: "Below 0.60 →"
     "stamp": 3.05,    # LOW CONFIDENCE — HUMAN REVIEW REQUIRED stamps on
-    "monitor": 3.3,   # "only 'increase monitoring' is recommended" (on screen only; held to the cut)
-    "ood": 3.7,       # "or the data is unusual" (3.76): × unusual-data (OOD) factor; the needle drops further
+    "ood": 3.7,       # "or the data is unusual" (3.76): × unusual-data factor; the needle drops further
 }
 
 # ---------- data ----------
@@ -90,8 +93,6 @@ V1 = V0 * min(1.0, REL_A + REL_B * EXAMPLE_RELIABILITY)
 V2 = V1 * OOD_MULT
 assert V0 > THRESHOLD > V1 > V2, (V0, V1, V2)   # the sensor drop crosses the line (see BEATS); OOD lowers it further
 
-FOOTER = (f"sensor-reliability factor = {REL_A:g} + {REL_B:g} × reliability (backend/app/services/prediction.py)"
-          " · threshold in shared/config.json")
 THRESHOLD_TXT = f"{THRESHOLD:.2f}"
 
 # ---------- colours ----------
@@ -120,7 +121,6 @@ G_PAD = 110
 G_BOX = (GX - R - G_PAD, GY - R - G_PAD, GX + R + G_PAD, GY + 40)   # region drawn at SS×
 
 RULE_CY = 690               # centre line of "Below 0.60 → [stamp]"
-MON_Y = 746                 # top of the "only 'increase monitoring' …" line
 
 
 def ease_out_back(t: float, s: float = 1.6) -> float:
@@ -292,8 +292,9 @@ S_LHS_AMBER = text_sprite(LHS_LABEL, (EQ_X, LHS_Y), 56, 700, AMBER_TXT)
 TERMS = [
     ("model", "model probability", C_MODEL, None),
     ("sensor", "sensor-reliability factor", C_SENSOR, "×"),
-    ("ood", "unusual-data (OOD) factor", C_OOD, "×"),
+    ("ood", "unusual-data factor", C_OOD, "×"),
 ]
+EQUATION = LHS_LABEL + " " + " × ".join(label for _, label, _, _ in TERMS)
 S_CHIPS = {k: chip_sprite(label, ROW_Y[k], col) for k, label, col, _ in TERMS}
 S_OPS = {k: text_sprite(op, (OP_X, ROW_Y[k]), 52, 500, INK_2, anchor="mm") for k, _, _, op in TERMS if op}
 
@@ -305,7 +306,6 @@ _p0, _p1 = polar(0, R), polar(1, R)
 _scale = transparent()
 draw_text(_scale, (_p0[0], GY + 62), "0", 28, 600, INK_2, anchor="ms")
 draw_text(_scale, (_p1[0], GY + 62), "1", 28, 600, INK_2, anchor="ms")
-draw_text(_scale, (GX, GY + 62), "effective confidence", 26, 600, INK_2, anchor="ms")
 S_SCALE = Sprite(_scale)
 
 STAMP = stamp_image()
@@ -316,24 +316,17 @@ _row_w = _rule_w + 30 + STAMP_W
 RULE_X = (W - _row_w) // 2
 STAMP_X = RULE_X + _rule_w + 30
 S_RULE = text_sprite(RULE_LABEL, (RULE_X, RULE_CY + 2), 44, 700, INK, anchor="lm")
+assert RULE_CY + STAMP_H // 2 < 800, "the rule row must end above the lower-third (y 800-890)"
 
-_mon = transparent()
-_parts = [("only ", 36, 500, INK_2), ("‘increase monitoring’", 36, 700, INK), (" is recommended", 36, 500, INK_2)]
-_mon_w = sum(text_font(p, s, w_).getlength(p) for p, s, w_, _ in _parts)   # advance widths keep the spaces
-_x = (W - _mon_w) / 2
-for p, s, w_, col in _parts:
-    draw_text(_mon, (_x, MON_Y), p, s, w_, col)
-    _x += text_font(p, s, w_).getlength(p)
-S_MON = Sprite(_mon)
-
-_foot = transparent()
-footer(_foot, FOOTER)
-S_FOOT = Sprite(_foot)
+# the shot list's on-screen text names these strings word for word
+_ost = _shot["on_screen_text"]
+assert _ost.startswith(EQUATION + " | "), (EQUATION, _ost)
+assert f"{RULE_LABEL} LOW CONFIDENCE — HUMAN REVIEW REQUIRED" in _ost
+assert "increase monitoring" not in _ost and "prediction.py" not in _ost
 
 
 def draw_frame(t: float) -> Image.Image:
     img = BG.copy()
-    S_FOOT.put(img, progress(t, 0.0, 0.35))
 
     # equation, term by term
     k = progress(t, BEATS["lhs"], 0.4)
@@ -370,8 +363,6 @@ def draw_frame(t: float) -> Image.Image:
             st.putalpha(st.getchannel("A").point(lambda p: int(p * a)))
         # scale about the stamp's left edge: centred, the oversized first frames covered "Below 0.60 →"
         img.alpha_composite(st, (STAMP_X, int(round(RULE_CY - h_ / 2))))
-    k = progress(t, BEATS["monitor"], 0.35)
-    S_MON.put(img, k, dy=14 * (1 - k))
     return img
 
 

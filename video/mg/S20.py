@@ -1,4 +1,4 @@
-"""S20 · End card (4:41.5-4:47.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
+"""S20 · End card (4:34.5-4:40.5, 6.0 s, no voice). Never shorten below 6 s (section 6, never-cut list).
 
 Storyboard: docs/video/script.md section 3, row S20 (visual and on-screen text), section 2 "Team roles" (which
 member carries which STEMB letter or letters), section 5A item 1 (fill names, school, supervisor and the grid before
@@ -15,7 +15,8 @@ Data sources (nothing is retyped):
          its address is checked against this checkout's origin remote (git remote get-url origin);
       3. "Who built what: [TEAM TO FILL]" -> the grid header;
       4. the evidence legend line, each "Term = meaning" item with a swatch in its badge colour;
-      5. the credits line, one item per " · ", set in two columns;
+      5. the credits line, one item per " · ", set in two columns: since 19 Oct only what the licences ask for, in
+         short form (checked against THIRD_PARTY_NOTICES.md below);
       6. "[optional: AI-assistance line per the organisers' reply]".
     When the team fills a bracketed placeholder in the storyboard, re-running this script picks it up.
   - docs/video/script.md, section 2, "Team roles" table: [MEMBER n] -> STEMB letter(s), every **L** in the
@@ -106,7 +107,16 @@ GRID_HEAD = ON_SCREEN[2]                     # Who built what: [TEAM TO FILL]
 LEGEND = [p.strip() for p in ON_SCREEN[3].split(" · ")]
 assert ON_SCREEN[4].startswith("Credits: "), ON_SCREEN[4]
 CREDITS = [p.strip() for p in ON_SCREEN[4][len("Credits: "):].split(" · ")]
-assert CREDITS[-1] == "fonts: Geist, Noto Sans TC (SIL OFL)", CREDITS[-1]
+assert CREDITS[-1] == "Fonts: Geist, Noto Sans TC (SIL OFL)", CREDITS[-1]
+# every third-party item the video uses keeps its credit (THIRD_PARTY_NOTICES.md): the CC0 clip, OpenStreetMap (ODbL),
+# the City of Melbourne counts (CC BY), the Mall dataset citation, YOLO11 (AGPL-3.0) and the fonts (OFL)
+_NOTICES = (ROOT / "THIRD_PARTY_NOTICES.md").read_text()
+for _on_card, _in_notices in (("Raysonho", "Raysonho"), ("Wikimedia Commons, CC0", "CC0 1.0"),
+                              ("© OpenStreetMap contributors, ODbL", "Open Database License"),
+                              ("© City of Melbourne, CC BY", "City of Melbourne open data, CC BY"),
+                              ("Mall dataset: Chen et al., BMVC 2012", "K. Chen, C. C. Loy, S. Gong, T. Xiang, BMVC 2012"),
+                              ("YOLO11 © Ultralytics, AGPL-3.0", "Ultralytics YOLO11"), ("Geist, Noto Sans TC (SIL OFL)", "SIL Open Font License")):
+    assert any(_on_card in c for c in CREDITS) and _in_notices in _NOTICES, (_on_card, _in_notices)
 AI_LINE = ON_SCREEN[5]
 
 # the repository line: the same words in the shotlist, and the address is this checkout's origin remote
@@ -145,14 +155,15 @@ LEGEND_BADGE = {"simulated": "SIMULATED", "real": "REAL DATA", "model check": "M
 
 # ---------- layout ----------
 
-LOCK_Y = 114                 # centre line of the mark + wordmark lockup
+DY = 36                      # the whole card sits this much lower since the credits were cut to their short form
+LOCK_Y = 114 + DY            # centre line of the mark + wordmark lockup
 WORD_SIZE, MARK_H = 88, 100
-REPO_Y = 220                 # centre line of the repository line (directly under the wordmark)
+REPO_Y = 220 + DY            # centre line of the repository line (directly under the wordmark)
 REPO_LABEL_SIZE, REPO_SIZE = 30, 38   # both larger than the credits (CRED_SIZE)
-ID1_Y, ID2_Y = 288, 336      # centre lines of the two identity lines
-GRID = (60, 366, 1860, 640)  # who-built-what panel (with each member's "worked on" line)
-LEGEND_Y = 672               # centre line of the evidence legend
-CRED_Y = 706                 # top of the credits block
+ID1_Y, ID2_Y = 288 + DY, 336 + DY     # centre lines of the two identity lines
+GRID = (60, 366 + DY, 1860, 640 + DY)  # who-built-what panel (with each member's "worked on" line)
+LEGEND_Y = 672 + DY          # centre line of the evidence legend
+CRED_Y = 706 + DY            # top of the credits block
 CRED_LABEL_X, CRED_COLS = 60, ((214, 1010), (1066, 1860))
 CRED_SIZE, CRED_PITCH, CRED_GAP = 22, 28, 7
 assert min(REPO_LABEL_SIZE, REPO_SIZE) > CRED_SIZE

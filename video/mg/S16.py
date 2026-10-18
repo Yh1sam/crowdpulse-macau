@@ -1,18 +1,21 @@
-"""Shot S16 (3:34.0-3:52.5, 18.5 s): "What's next?" - the Melbourne real-data test, announced before its result.
+"""Shot S16 (3:26.5-3:45.0, 18.5 s): "What's next?" - the Melbourne real-data test, announced before its result.
 
 Storyboard: docs/video/script.md section 3, row S16; claims table section 4, rows S16; section 5B (the result
-slot and the rules line); section 6 ("Global look and tools", "motion_graphic": S16 reads minute/*.csv.gz,
-filtering sensors.csv to the ids present, and the S16 shot rule on where each line goes); shot list
-docs/video/shotlist.json (id S16).
+slot and the pre-registration); section 6 ("Global look and tools", "motion_graphic": S16 reads
+minute/*.csv.gz, filtering sensors.csv to the ids present, and the S16 shot rule on where each line goes);
+shot list docs/video/shotlist.json (id S16).
 
 Left: one dot per sensor at its real latitude / longitude, only for the location_ids that occur in the
 archive's first 24 hours (no basemap; a 1 km scale bar and a north arrow only). Each dot's area follows
 that sensor's pedestrians per minute over a centred 15-minute window, played back over those 24 hours (see
-"Counts and zeros" below). Right: the sensor count (counted here, not assumed) with its basis line under it,
-the Melbourne-time playback clock and a calendar strip of hour cells filling from 12 Oct 2026, and the "Not
-Macau" caveat. On "...and we announced the test" the calendar block gives way to the rules line (the commit
-that fixed the test rules, checked against git below); on "...before its result" the map dims and the result
-panel comes in: a grey dashed PENDING stamp and the verbatim result placeholder in an amber dashed box.
+"Counts and zeros" below). Right: the sensor count (counted here, not assumed) with its short basis line
+under it, the Melbourne-time playback clock and a calendar strip of hour cells filling from 12 Oct 2026, and
+the short "Not Macau" caveat. On "...and we announced the test" the calendar block leaves (the archive has
+played); on "...before its result" the map dims and the result panel comes in: a grey dashed PENDING stamp
+and the verbatim result placeholder in an amber dashed box. Declutter (19 Oct): the three-line rules line
+(commit hash and README path), the badge sub-line and the long caveat left the picture; the commit that
+fixed the test rules is still checked against git below, because the voice's "we announced the test before
+its result" rests on it (script.md 5B and section 4 keep the commit, dates and path for Q&A).
 
 Counts and zeros (experiments/datasets/melbourne/README.md, "Things to know", corrected 16 Oct 2026): 57 of
 the 99 sensors write one row per 5-minute mark, holding about a 5-minute total; the other 42 write per
@@ -34,8 +37,8 @@ Data (read, never retyped):
   experiments/datasets/melbourne/sensors.csv        latitude / longitude of the ids present
   experiments/datasets/melbourne/archive_log*.jsonl the download window that covered those 24 hours
   experiments/datasets/melbourne/README.md (+ git)  its "Pre-registered analysis" section must be unchanged
-                                                    since the commit the rules line cites (script.md 5B)
-  docs/video/shotlist.json                          duration and the on-screen wording (checked below)
+                                                    since the commit the shot list's notes cite (script.md 5B)
+  docs/video/shotlist.json                          duration, the on-screen wording and that commit (checked below)
 
 Run: .venv/bin/python video/mg/S16.py [--stills]  -> video/build/mg/S16.mp4, stills in video/build/mg/stills/
 """
@@ -66,11 +69,11 @@ SHOT = next(s for s in SHOTS if s["id"] == "S16")
 DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 18.5 s
 assert DURATION == 18.5, DURATION
 
-# Seconds from the shot start. Keyed to the guide voice video/build/guide/S16.wav of 18 Oct (say -v Daniel
+# Seconds from the shot start. Keyed to the guide voice video/build/guide/S16.wav of 19 Oct (say -v Daniel
 # -r 155; "99" is read "ninety-nine"; 10.37 s of speech), which assemble.py lays 0.2 s into the shot
 # (VOICE_START): clause starts are the silencedetect pauses (noise -35 dB, d 0.08 s; 2.77-2.98 and 7.70-7.91 s
 # of the wav) + 0.2 s; word onsets inside a clause come from synthesising prefixes of the line with the same
-# voice. The first two clauses are unchanged since the 17 Oct guide (same pauses), so their keys stand.
+# voice. The line and its pauses are unchanged since the 17 Oct guide, so the keys stand.
 # Shot times:
 #   "Because our forecasting results are simulated," 0.2-2.97 | "we're testing the same method" 3.18-4.76 |
 #   "on real counts" 4.76-5.81 ("real" 5.01) | "from ninety-nine" 5.81-6.57 ("ninety-nine" 6.10) |
@@ -84,7 +87,7 @@ BEATS = {
     "real_counts": 5.01,  # "real counts" -> the sensor count ticks up, each dot pinging as it is counted
     "ninety_nine": 6.10,  # "ninety-nine" -> the count lands on the number of ids found; its basis line under it
     "melbourne": 6.57,    # "Melbourne street sensors:" -> the "Not Macau" caveat card
-    "announced": 8.69,    # "and we announced the test" -> the calendar block gives way to the rules line
+    "announced": 8.69,    # "and we announced the test" -> the calendar block leaves (the archive has played)
     "result": 9.95,       # "...its result." -> map dims, the result panel comes in
     "pending": 10.4,      # result slot starts (the guide ends 10.55) -> the PENDING stamp lands
     "placeholder": 10.9,  # -> the verbatim result placeholder in its amber dashed box
@@ -95,30 +98,26 @@ PLAYBACK_END = BEATS["announced"] - 0.2    # the 24 hours play from BEATS["playb
 # ---------- on-screen text (storyboard wording, checked against the shot list) ----------
 
 CHAPTER = "What's next?"
-CREDIT = "City of Melbourne pedestrian counts · per minute or per 5 minutes · CC BY"
+CREDIT = "City of Melbourne · CC BY"                 # the dataset's licence, the only footer (outside fact)
 SINCE = "archived hourly since 12 Oct 2026"
 CAVEAT_LEAD = "Not Macau:"
-CAVEAT_REST = "counts people crossing a line, not camera density. Tests the method, not accuracy in Macau."
+CAVEAT_REST = "tests the method"                     # at most 5 words with the lead (declutter, 19 Oct)
 PLACEHOLDER = "[RESULT PENDING - fill after analysis, report honestly whatever it shows]"
-BADGE_SUB = "Real data, analysis pending"            # section 4 claims table, status of the S16 row
 SENSORS_LABEL = "Melbourne street sensors"           # narration: "...from 99 Melbourne street sensors"
-BASIS_TAIL = "sensors with counts in the archive's first 24 hours"   # the line reads f"{N} {BASIS_TAIL}"
-RULES = (                                            # three lines, in the picture area (section 6, S16 rule)
-    "Test rules and count → SAFE / WARNING / CRITICAL mapping",
-    "committed 16 Oct 2026, before the test days (18-22 Oct):",
-    "experiments/datasets/melbourne/README.md (commit 95057e2)",
-)
+BASIS_TAIL = "in the archive's first 24 hours"       # under "<N> Melbourne street sensors"
 RESULT_HEAD = "Melbourne test · result"
 
 _ost = SHOT["on_screen_text"]
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith("| S16 | 3:"))
 for s_ in (f"Chapter card (top-left): {CHAPTER}", "Badge (top-right): PENDING", f"Footer: {CREDIT}",
-           f"Calendar strip header: {SINCE}", f"{CAVEAT_LEAD} {CAVEAT_REST}", " / ".join(RULES), PLACEHOLDER):
+           f"Calendar strip header: {SINCE}", f"Caveat card: {CAVEAT_LEAD} {CAVEAT_REST}", PLACEHOLDER):
     assert s_ in _ost, f"not in the storyboard's on-screen text: {s_!r}"
-for s_ in (CREDIT, SINCE, *RULES):
+for s_ in (CREDIT, SINCE, f"{CAVEAT_LEAD} {CAVEAT_REST}"):
     assert f'"{s_}"' in _row, f"not in script.md's S16 row: {s_!r}"
 assert SENSORS_LABEL in SHOT["narration"]
-assert BADGE_SUB in (ROOT / "docs" / "video" / "script.md").read_text()
+assert len(f"{CAVEAT_LEAD} {CAVEAT_REST}".split()) <= 5 and len(CREDIT.replace("·", "").split()) <= 7
+assert not re.search(r"[\w-]+/[\w./-]+|\b[0-9a-f]{7,40}\b", " ".join([CREDIT, SINCE, CAVEAT_REST, BASIS_TAIL])), \
+    "no repo paths or commit hashes in the picture (declutter, 19 Oct)"
 
 # ---------- data ----------
 
@@ -174,8 +173,9 @@ assert not missing, f"location_ids with no row in sensors.csv: {missing}"
 N = len(IDS)
 LAT = np.array([float(SENSORS[i]["latitude"]) for i in IDS])
 LON = np.array([float(SENSORS[i]["longitude"]) for i in IDS])
-SENSOR_LINE = f"{N} {BASIS_TAIL}"
-assert f"Under the sensor count beside the dots: {SENSOR_LINE}" in _ost and f'"{SENSOR_LINE}"' in _row, \
+SENSOR_LINE = BASIS_TAIL                                         # drawn under the count and its label
+assert f"Sensor count beside the dots: {N} {SENSORS_LABEL} / {BASIS_TAIL}" in _ost and \
+    f'"{N} {SENSORS_LABEL} / {BASIS_TAIL}"' in _row, \
     f"{N} location_ids in the archive's first 24 hours: update the storyboard's sensor line"
 assert f"from {N} Melbourne" in SHOT["narration"], f"{N} location_ids: update the voice line"
 
@@ -202,10 +202,15 @@ DAY0 = datetime(LOC0.year, LOC0.month, LOC0.day)                 # first archive
 DAYS = (datetime(LOC1.year, LOC1.month, LOC1.day) - DAY0).days + 1
 assert SINCE.endswith(f"{DAY0.day} {DAY0:%b %Y}"), f"archive starts on {DAY0:%d %b %Y}, not as the storyboard says"
 
-# ---------- the rules line: only while the cited commit fixes the rules (script.md 5B) ----------
+# ---------- the pre-registration behind "we announced the test before its result" (script.md 5B) ----------
+# The rules line left the picture on 19 Oct, but the voice still claims the announcement, so the commit the
+# shot list's notes cite must still fix the rules, predate the test window and be on origin/main.
 
 README_REL = "experiments/datasets/melbourne/README.md"
-RULES_COMMIT = re.search(r"\(commit ([0-9a-f]{7,40})\)", RULES[2]).group(1)
+_rm = re.search(r"committed in ([0-9a-f]{7,40}) \((\d{1,2} [A-Z][a-z]{2} \d{4}),", SHOT["notes"])
+assert _rm, "the shot list's notes no longer name the commit that fixed the test rules"
+RULES_COMMIT, RULES_DATE = _rm.group(1), _rm.group(2)
+assert "announced the test before its result" in SHOT["narration"]
 WINDOW_OPENS = datetime(2026, 10, 17, 13, 0, tzinfo=timezone.utc)   # 18 Oct 00:00 AEDT (README, point 2)
 
 
@@ -233,21 +238,21 @@ def git(*args: str) -> str | None:
 
 
 def check_rules_line() -> str:
-    """Fails loudly if the rules line would no longer be true; returns a one-line status."""
+    """Fails loudly if the announcement the voice claims would no longer be true; returns a one-line status."""
     now = prereg_section((MEL / "README.md").read_text())
-    assert now is not None, f"{README_REL} has no 'Pre-registered analysis' section: delete the rules line (5B)"
-    assert "18, 19, 20, 21 and 22 Oct 2026" in now and "(18-22 Oct)" in RULES[1]
+    assert now is not None, f"{README_REL} has no 'Pre-registered analysis' section: revisit the voice line (5B)"
+    assert "18, 19, 20, 21 and 22 Oct 2026" in now and "test days 18-22 Oct" in SHOT["notes"]
     then = prereg_section(git("show", f"{RULES_COMMIT}:{README_REL}"))
     if then is None:
-        return f"WARNING: git cannot show {RULES_COMMIT}; the rules line is drawn unchecked"
+        return f"WARNING: git cannot show {RULES_COMMIT}; the announcement is unchecked"
     assert now == then, (f"the pre-registered section has changed since {RULES_COMMIT}: cite the amending commit "
-                         "and its date if it was pushed before the window opened, otherwise delete the rules line (5B)")
+                         "and its date if it was pushed before the window opened, otherwise revisit the voice line (5B)")
     when = datetime.fromisoformat(git("show", "-s", "--format=%cI", RULES_COMMIT).strip())
     assert when < WINDOW_OPENS, f"{RULES_COMMIT} is dated {when}, after the test window opened"
-    assert RULES[1].startswith(f"committed {when.day} {when:%b %Y},"), f"{RULES_COMMIT} is dated {when}"
+    assert RULES_DATE == f"{when.day} {when:%b %Y}", f"{RULES_COMMIT} is dated {when}, the notes say {RULES_DATE}"
     remotes = [b.strip() for b in (git("branch", "-r", "--contains", RULES_COMMIT) or "").splitlines()]
     pushed = "origin/main" in remotes
-    return (f"rules line: {RULES_COMMIT} ({when.isoformat()}), section unchanged since, "
+    return (f"pre-registration: {RULES_COMMIT} ({when.isoformat()}), section unchanged since, "
             + ("on origin/main" if pushed else "WARNING: not on origin/main"))
 
 
@@ -495,8 +500,8 @@ def map_key() -> Image.Image:
     for v, cx, lx in KEY_POS:
         put(lay, lx - ox, KEY_BASE - float(radius(v)) + 8 - oy, str(v), 21, 600, INK_2)
     tx = KEY_POS[-1][2] + 60
-    put(lay, tx - ox, KEY_BASE - 30 - oy, "dot size: people per minute", 22, 600, INK_2)
-    put(lay, tx - ox, KEY_BASE - 3 - oy, f"{SMOOTH_MIN}-minute average, both directions", 20, 500, INK_3)
+    # one short key label (19 Oct); the 15-minute window and "both directions" are in the docstring above
+    put(lay, tx - ox, KEY_BASE - 14 - oy, "people per minute", 22, 600, INK_2)
     return lay
 
 
@@ -514,7 +519,7 @@ def base_static(with_badge: bool) -> Image.Image:
     legend_strip(img)
     footer(img, CREDIT)
     if with_badge:
-        badge(img, "PENDING", sub=BADGE_SUB)
+        badge(img, "PENDING")             # no sub-line (19 Oct): the result panel's stamp says it again
     return img
 
 
@@ -558,55 +563,25 @@ STRIP_XY = (RX0 - 10, DAYLAB_BASE - 30)
 
 
 def caveat_sprite() -> Image.Image:
-    """The "Not Macau" card: info glyph, bold lead, the rest wrapped; height fitted to the text."""
+    """The "Not Macau" card: info glyph, bold lead and the short rest on one line; height fitted to it."""
     w_ = RX1 - RX0
-    size, lh, tx, top = 27, 38, 84, 58
+    size, tx, top = 34, 92, 64
     lead_w = font(size, 700).getlength(CAVEAT_LEAD) + font(size, 500).getlength(" ")
-    lines, line, avail = [], "", w_ - tx - 36 - lead_w
-    for w__ in CAVEAT_REST.split():
-        trial = f"{line} {w__}".strip()
-        if font(size, 500).getlength(trial) <= avail or not line:
-            line = trial
-        else:
-            lines.append(line)
-            line, avail = w__, w_ - tx - 36
-    lines.append(line)
-    h_ = top + (len(lines) - 1) * lh + 34
+    assert tx + lead_w + font(size, 600).getlength(CAVEAT_REST) <= w_ - 36, "the caveat must stay on one line"
+    h_ = top + 36
     spr = hires((w_, h_), lambda d, k: d.rounded_rectangle((0, 0, w_ * k - 1, h_ * k - 1), 18 * k, fill=rgba(NAVY_2)))
-    gi = hires((34, 34), lambda d, k: d.ellipse((1 * k, 1 * k, 33 * k, 33 * k), outline=rgba(INK_2), width=3 * k))
-    spr.alpha_composite(gi, (32, top - 27))
-    put(spr, 49, top - 2, "i", 22, 700, INK_2, align="m")
+    gi = hires((38, 38), lambda d, k: d.ellipse((1 * k, 1 * k, 37 * k, 37 * k), outline=rgba(INK_2), width=3 * k))
+    spr.alpha_composite(gi, (34, top - 31))
+    put(spr, 53, top - 3, "i", 24, 700, INK_2, align="m")
     put(spr, tx, top, CAVEAT_LEAD, size, 700, INK)
-    for i, ln in enumerate(lines):
-        put(spr, tx + (lead_w if i == 0 else 0), top + i * lh, ln, size, 500, INK_2)
+    put(spr, tx + lead_w, top, CAVEAT_REST, size, 600, INK_2)
     return spr
 
 
 CAVEAT = caveat_sprite()
 CAVEAT_XY = (RX0, CAVEAT_Y1 - CAVEAT.height)
-
-
-def rules_sprite() -> Image.Image:
-    """The rules line on a card like the caveat's: a commit glyph (a ring on a line) and three lines of text."""
-    w_ = RX1 - RX0
-    size, lh, tx, top = 24, 36, 84, 56
-    h_ = top + 2 * lh + 32
-    spr = hires((w_, h_), lambda d, k: d.rounded_rectangle((0, 0, w_ * k - 1, h_ * k - 1), 18 * k, fill=rgba(NAVY_2)))
-
-    def glyph(d, k):
-        d.line([(0, 17 * k), (34 * k, 17 * k)], fill=rgba(INK_2), width=3 * k)
-        d.ellipse((8 * k, 8 * k, 26 * k, 26 * k), fill=rgba(NAVY_2), outline=rgba(INK_2), width=3 * k)
-    spr.alpha_composite(hires((34, 34), glyph), (32, top - 27))
-    for i, (ln, wt, col) in enumerate(zip(RULES, (600, 500, 500), (INK, INK, INK_2))):
-        assert font(size, wt).getlength(ln) <= w_ - tx - 36, f"rules line too wide: {ln!r}"
-        put(spr, tx, top + i * lh, ln, size, wt, col)
-    return spr
-
-
-RULES_CARD = rules_sprite()
-# centred in the calendar block's place, between the basis line and the caveat card
-RULES_XY = (RX0, round((BASIS_BASE + 8 + CAVEAT_XY[1]) / 2 - RULES_CARD.height / 2))
-assert RULES_XY[1] > BASIS_BASE + 40 and RULES_XY[1] + RULES_CARD.height < CAVEAT_XY[1] - 40
+CAVEAT_UP_Y = CAL_HEAD - 40          # once the calendar block has left, the caveat rises into its place
+assert CAVEAT_UP_Y > BASIS_BASE + 40
 
 
 def stamp_sprite() -> Image.Image:
@@ -754,7 +729,7 @@ def draw_right_column(img: Image.Image, t: float) -> None:
     # the count's basis, under it, once the count has landed
     a_bas = progress(t, BEATS["ninety_nine"], 0.45)
     if a_bas > 0:
-        put(img, RX0, BASIS_BASE + (1 - a_bas) * 10, SENSOR_LINE, 24, 500, INK_2, a_bas)
+        put(img, RX0, BASIS_BASE + (1 - a_bas) * 10, SENSOR_LINE, 28, 500, INK_2, a_bas)
 
     # playback clock and calendar strip, until "we announced the test"
     a_cal = progress(t, BEATS["playback"] - 0.3, 0.5) * (1 - progress(t, BEATS["announced"] - 0.1, 0.35))
@@ -786,15 +761,11 @@ def draw_right_column(img: Image.Image, t: float) -> None:
         d.line([(hx - oxl, STRIP_Y0 - 2 - oyl), (hx - oxl, STRIP_Y1 + 3 - oyl)], fill=rgba(INK), width=2)
         paste(img, lay, (oxl, oyl), a_cal)
 
-    # the rules line, in the calendar block's place, from "we announced the test" to the end
-    a_rul = progress(t, BEATS["announced"] + 0.15, 0.45)
-    if a_rul > 0:
-        paste(img, RULES_CARD, (RULES_XY[0], RULES_XY[1] + (1 - a_rul) * 16), a_rul)
-
     # "Not Macau" caveat
     a_cav = progress(t, BEATS["melbourne"], 0.5)
     if a_cav > 0:
-        paste(img, CAVEAT, (CAVEAT_XY[0], CAVEAT_XY[1] + (1 - a_cav) * 20), a_cav)
+        up = progress(t, BEATS["announced"] + 0.15, 0.6)     # under the count, beside the result panel
+        paste(img, CAVEAT, (CAVEAT_XY[0], lerp(CAVEAT_XY[1], CAVEAT_UP_Y, up) + (1 - a_cav) * 20), a_cav)
 
 
 def draw_result(img: Image.Image, t: float) -> None:
@@ -825,7 +796,7 @@ def draw_frame(t: float) -> Image.Image:
     draw_right_column(img, t)
     draw_result(img, t)
     if t < 0.6:
-        badge(img, "PENDING", sub=BADGE_SUB, alpha=progress(t, 0.1, 0.4))
+        badge(img, "PENDING", alpha=progress(t, 0.1, 0.4))
     if t <= CHAPTER_END:
         chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
     return img
@@ -836,7 +807,7 @@ STILLS = {
     "night": 3.0,
     "count": 5.6,
     "basis": 7.2,
-    "rules": 9.5,
+    "announced": 9.5,
     "pending": 11.5,
     "end": 18.4,
 }

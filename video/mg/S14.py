@@ -1,4 +1,4 @@
-"""Shot S14 (2:51.5-3:13.0, 21.5 s): "Does acting help?" - the recorded simulation, approve vs no action.
+"""Shot S14 (2:42.0-3:05.5, 23.5 s): "Does acting help?" - the recorded simulation, approve vs no action.
 
 Storyboard: docs/video/script.md section 3, row S14; claims table section 4, row S14; section 6
 ("Global look and tools", "motion_graphic"); shot list docs/video/shotlist.json (id S14).
@@ -8,10 +8,14 @@ blue = approved (run A), orange = no action (run B), dotted CRITICAL line at the
 Run A markers (each tagged "run A"): first CRITICAL forecast, redirect recommended,
 "approval (scripted operator), 14:14". End labels: this pair (from the CSVs) and, faint, the earlier
 pair (README only). The under-chart line and the axis note follow the storyboard verbatim. As the
-assumed effect is spoken, a light band marks the effect window (14:14-14:34) and the limit chip slides
-in. From "Our failure case:" the chart slides left and a clock panel comes in beside it, under the
-header "Our failure case" (source: simulation_run/README.md, "No early warning in this scenario"):
-crowd build-up ~3 min vs the 5-15 min forecast horizon, with its label. Senado is never drawn green.
+assumed effect is spoken, a light band marks the effect window (14:14-14:34) and the short "Assumed
+diversion, not measured" chip slides in on it. From "Our failure case:" the chart slides left and a
+clock panel comes in beside it, under the header "Our failure case" (source: simulation_run/README.md,
+"No early warning in this scenario"): crowd build-up ~3 min vs the 5-15 min forecast horizon. On "So
+staff on the ground stay in charge." a staff mark ("Staff decide", the hi-vis staff figure of S01 /
+S18) lands under the dial. Senado is never drawn green. Declutter (19 Oct): no footer (the sources are
+in script.md section 4), a 2-word badge qualifier, the under-chart line at 8 words, the clock panel at
+10 words; the minutes above CRITICAL, the effect's size and the window label are kept for Q&A.
 
 Data (read, never retyped):
   experiments/results/simulation_run/A_timeline.csv, B_timeline.csv  (zone == senado_square)
@@ -46,20 +50,23 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 SHOTS = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOTS if s["id"] == "S14")
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 21.5 s
-assert DURATION == 21.5, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 23.5 s
+assert DURATION == 23.5, DURATION
 
-# Seconds from the shot start. Keyed to the guide voice video/build/guide/S14.wav (say -v Daniel -r 155,
-# about 148 wpm), which assemble.py lays 0.2 s into the shot (VOICE_START): clause starts are the
-# silencedetect pauses (noise -35 dB, d 0.12 s) + 0.2 s; word onsets inside a clause come from
-# synthesising prefixes of the line with the same voice. Pauses in the wav: 1.57-1.79, 6.15-6.38,
-# 7.49-7.71, 8.80-9.04, 11.60-11.81, 12.52-12.76, 13.95-14.18 and 16.77-16.98 s; speech ends at 17.83 s.
+# Seconds from the shot start. Keyed to the guide voice video/build/guide/S14.wav of 19 Oct (say -v Daniel
+# -r 155, about 148 wpm; "Senado" read "Se-nah-doo"; 20.47 s of speech), which assemble.py lays 0.2 s into
+# the shot (VOICE_START): clause starts are the silencedetect pauses (noise -35 dB, d 0.08 s) + 0.2 s; word
+# onsets inside a clause come from synthesising prefixes of the line with the same voice. Pauses in the wav:
+# 1.57-1.79, 6.15-6.38, 7.49-7.71, 8.80-9.04, 11.60-11.81, 12.52-12.76, 13.95-14.18, 16.77-16.98 and
+# 17.84-18.08 s; speech ends at 20.47 s. Everything up to "not before." is unchanged since the 18 Oct guide
+# (same pauses), so those keys stand; the new last sentence follows it.
 # Shot times:
 #   "In a recorded simulation," 0.2-1.77 | "approving the redirect" 1.99-3.37 | "left Senado less crowded" 3.37-4.89 |
 #   "by the end" 4.89-5.48 | "than doing nothing," 5.48-6.35 | "but only modestly:" 6.58-7.69 |
 #   "it stayed critical." 7.91-9.00 | "The effect rests on a diversion we assumed," 9.24-11.80 |
 #   "not measured." 12.01-12.72 | "Our failure case:" 12.96-14.15 | "the crowd built so fast" 14.38-15.96 |
-#   "the alert came with it," 15.96-16.97 | "not before." 17.18-18.03 | the clock panel holds to 21.5.
+#   "the alert came with it," 15.96-16.97 | "not before." 17.18-18.04 |
+#   "So staff on the ground stay in charge." 18.28-20.67 ("staff" 18.69, "stay" 19.72) | the panel holds to 23.5.
 # re-key to the real voice take (the team reads at about 140 wpm, so everything moves ~5% later)
 BEATS = {
     "draw": 0.5,               # "In a recorded simulation," -> both lines start drawing left to right
@@ -71,8 +78,10 @@ BEATS = {
     "effect": 9.24,            # "The effect rests on a diversion we assumed, not measured." -> band + chip
     "failure": 12.96,          # "Our failure case:" -> chart slides left, clock panel in under its header
     "crowd_built": 14.38,      # "the crowd built so fast" -> red wedge 0 -> 3 min, then the 5-15 min ring
-    "alert": 15.96,            # "the alert came with it," -> run A's first-forecast marker lifted, clock label
-    "not_before": 17.18,       # "not before." (speech ends 18.03; the panel holds to the end)
+    "alert": 15.96,            # "the alert came with it," -> run A's first-forecast marker lifted
+    "not_before": 17.18,       # "not before."
+    "staff": 18.69,            # "So staff on the ground stay in charge." -> the staff mark (speech ends 20.67;
+                               # the panel holds to the end)
 }
 CHAPTER_END = 2.0              # chapter card for about 2 s
 DRAW_END = BEATS["by_the_end"] + 0.5
@@ -133,36 +142,41 @@ EARLIER_A, EARLIER_B = "0.73", "0.87"              # earlier pair: README text o
 # ---------- on-screen text (storyboard wording) ----------
 
 CHAPTER = "Does acting help?"
-BADGE_DETAIL = "recorded end-to-end run, 29 Sep 2026"
-UNDER = ("At 14:40 · approved 0.75 vs no action 0.82 (earlier pair 0.73 vs 0.87) · "
-         "this pair: 32 vs 31 min above CRITICAL")
-AXIS = "relative density index, not people per m²"
-CHIP = "Assumed: routes into Senado made 30% less attractive for 20 min (prototype setting, not measured)"
+BADGE_DETAIL = "recorded run"           # a 2-word qualifier in the pill (the run's date is kept for Q&A)
+UNDER = "At 14:40: approved 0.75 vs no action 0.82"
+AXIS = "relative index, not people per m²"
+CHIP = "Assumed diversion, not measured"
 CLOCK_HEADER = "Our failure case"       # header above the clock panel (round-2 lock)
 CLOCK_BUILD = "crowd build-up ≈3 min"
 CLOCK_HORIZON = "forecast horizon 5-15 min"
-CLOCK_LABEL = ("First CRITICAL forecast within ~1 min of the crossing: no early warning · "
-               "5-15 min skill shown offline, on simulated days only")
-FOOTER = "experiments/results/simulation_run/README.md"
-TITLE_EN = "Senado Square · true crowd density in the simulation"
+STAFF_MARK = "Staff decide"             # with the staff figure, on "So staff on the ground stay in charge."
+TITLE_EN = "Senado Square · crowd density"
 LEG_A, LEG_B = "approved (run A)", "no action (run B)"
 MARK_FORECAST = f"first CRITICAL forecast {FORECAST_T}"
 MARK_FORECAST_SUB = f"{LEAD_S} s after the true crossing ({CROSS_T})"
 MARK_REDIRECT = f"redirect recommended {REDIRECT_T}"
 MARK_APPROVE = f"approval (scripted operator), {APPROVE_T}"
-BAND_LABEL = f"assumed effect window {APPROVE_T}–{EFFECT_END_T}"
 
 # guards: the storyboard text must still match the data files (fails loudly if a run is re-recorded)
 _ost = SHOT["on_screen_text"]
-for s_ in (CHAPTER, BADGE_DETAIL, UNDER, AXIS, CHIP, CLOCK_BUILD, CLOCK_HORIZON, CLOCK_LABEL, FOOTER):
+for s_ in (CHAPTER, f"SIMULATED · {BADGE_DETAIL}", f"Under the chart: {UNDER}", f"Axis: {AXIS}", f"Chip: {CHIP}",
+           f"Clock panel: {CLOCK_BUILD} / {CLOCK_HORIZON}", STAFF_MARK):
     assert s_ in _ost, f"not in the storyboard's on-screen text: {s_!r}"
 assert f"Header above the clock panel: {CLOCK_HEADER}" in _ost
+assert "Footer" not in _ost, "S14 has no footer since 19 Oct (internal sources stay in script.md section 4)"
 assert f"{CLOCK_HEADER}:" in SHOT["narration"], "the clock panel enters on the spoken 'Our failure case:'"
+assert "So staff on the ground stay in charge." in SHOT["narration"], "the staff mark is keyed to this sentence"
 assert "No early warning in this scenario" in README, "source of 'Our failure case' (simulation_run/README.md)"
+# declutter (19 Oct): the under-chart line at most 8 words, the clock panel (rows + staff mark) at most 10
+assert len(UNDER.split()) <= 8 and len(f"{CLOCK_BUILD} {CLOCK_HORIZON} {STAFF_MARK}".split()) <= 10
 assert f"approved {END_A:.2f} vs no action {END_B:.2f}" in UNDER
-assert f"{MIN_A} vs {MIN_B} min above CRITICAL" in UNDER
-assert f"earlier pair {EARLIER_A} vs {EARLIER_B}" in UNDER and f"{EARLIER_A} vs {EARLIER_B}" in README
-assert f"{round(100 * REDUCTION)}% less attractive for {EFFECT_MIN} min" in CHIP
+# off screen since 19 Oct but still true of the data (kept for Q&A; script.md section 4 and the shot list notes)
+assert f"{MIN_A} vs {MIN_B} minutes" in SHOT["notes"], "minutes above CRITICAL no longer match the notes"
+assert f"earlier pair {EARLIER_A} vs {EARLIER_B}" in SHOT["visual"] and f"{EARLIER_A} vs {EARLIER_B}" in README
+# the chip says the effect is assumed and unmeasured; its size stays with the config and the notes, and is
+# never phrased as a share of the flow diverting
+assert CHIP.startswith("Assumed") and "not measured" in CHIP and "divert" not in CHIP.replace("diversion", "")
+assert f"{round(100 * REDUCTION)}% less attractive for {EFFECT_MIN} minutes" in SHOT["notes"]
 assert f"{APPROVE_T}–{EFFECT_END_T}" in README
 assert f"CRITICAL line at {CRIT:.2f}" in SHOT["visual"]
 for v in (FORECAST_T, CROSS_T, REDIRECT_T, f"approval (scripted operator), {APPROVE_T}", f"{LEAD_S} s after"):
@@ -365,33 +379,17 @@ _bd = ImageDraw.Draw(_be)
 dashed_v(_bd, 0, 0, BAND.height, rgba(INK_2, 1.0), width=2)
 dashed_v(_bd, BAND.width - 2, 0, BAND.height, rgba(INK_2, 1.0), width=2)
 BAND_EDGES = _be
-BAND_LABEL_S = T(BAND_LABEL, 20, 600, INK_2)
+# the band's own "assumed effect window 14:14-14:34" label left on 19 Oct: the chip on the band says it
 
 
 def chip_sprite() -> Image.Image:
+    """One line: "Assumed" in amber, the rest in ink, on an amber-edged pill at the band's top."""
     head, rest = CHIP.split(" ", 1)
-    max_w = 600                        # two lines: "... 30% less attractive" / "for 20 min (...)"
-    lines, first = [], True
-    words, line = rest.split(), head
-    for w_ in words:
-        trial = f"{line} {w_}"
-        if text_size(trial, 22, 500)[0] <= max_w:
-            line = trial
-        else:
-            lines.append(line)
-            line = w_
-    lines.append(line)
-    pad_x, pad_y, lh = 18, 14, 30
-    widest = max(text_size(l_, 22, 500)[0] for l_ in lines) + 8
-    img = Image.new("RGBA", (int(widest + 2 * pad_x), pad_y * 2 + lh * len(lines) - 4), (0, 0, 0, 0))
+    size, pad_x, pad_y = 26, 20, 14
+    spr = Sprite([(head, WARNING, 700), (" " + rest, INK, 600)], size)
+    img = Image.new("RGBA", (int(spr.w + 2 * pad_x), pad_y * 2 + spr.asc + spr.desc - 6), (0, 0, 0, 0))
     rounded(img, (0, 0, img.width - 1, img.height - 1), 12, fill=NAVY_3, outline=WARNING, width=2)
-    for i, l_ in enumerate(lines):
-        yb = pad_y + 20 + i * lh
-        if first and l_.startswith(head):
-            Sprite([(head, WARNING, 700), (l_[len(head):], INK, 500)], 22).draw(img, pad_x, yb)
-            first = False
-        else:
-            T(l_, 22, 500, INK).draw(img, pad_x, yb)
+    spr.draw(img, pad_x, pad_y + spr.asc - 3)
     return img
 
 
@@ -413,15 +411,12 @@ END_VAL = {"A": T(f"{END_A:.2f}", 30, 700, BLUE_T), "B": T(f"{END_B:.2f}", 30, 7
 END_EARLIER = T("earlier pair", 20, 500, INK_3)
 END_EARLIER_V = Sprite([(EARLIER_A, lerp(BLUE_T, INK_3, 0.45), 600), (" vs ", INK_3, 500), (EARLIER_B, lerp(ORANGE_T, INK_3, 0.45), 600)], 20)
 
-# under-chart line (below the panel)
-_u1, _u2 = UNDER.split(" · this pair: ")
-_pre, _rest = _u1.split("approved ", 1)
-_va, _rest = _rest.split(" vs no action ", 1)
-_vb, _earl = _rest.split(" ", 1)
-UNDER_S = Sprite([(_pre, INK_2, 500), ("approved ", INK, 500), (_va, BLUE_T, 700), (" vs no action ", INK, 500),
-                  (_vb, ORANGE_T, 700), (" " + _earl, INK_3, 500), (" · this pair: ", INK_2, 500), (_u2, INK, 600)], 22)
-assert "".join(s for s, _, _ in [(_pre, 0, 0), ("approved ", 0, 0), (_va, 0, 0), (" vs no action ", 0, 0), (_vb, 0, 0),
-                                  (" " + _earl, 0, 0), (" · this pair: ", 0, 0), (_u2, 0, 0)]) == UNDER
+# under-chart line (below the panel): "At 14:40: approved 0.75 vs no action 0.82", the values in the line colours
+_pre, _rest = UNDER.split("approved ", 1)
+_va, _vb = _rest.split(" vs no action ", 1)
+_UNDER_RUNS = [(_pre, INK_2, 500), ("approved ", INK, 500), (_va, BLUE_T, 700), (" vs no action ", INK, 500), (_vb, ORANGE_T, 700)]
+UNDER_S = Sprite(_UNDER_RUNS, 26)
+assert "".join(s for s, _, _ in _UNDER_RUNS) == UNDER
 
 
 # sweep timing: when the drawing reaches a given time on the x axis
@@ -517,10 +512,9 @@ def chart_frame(t: float) -> Image.Image:
         END_EARLIER.draw(img, END_X, ya + 48, e2)
         END_EARLIER_V.draw(img, END_X, ya + 74, e2)
 
-    # band label and the limit chip
+    # the limit chip, on the band's top
     c = progress(t, ef + 0.15, 0.5)
     if c > 0:
-        BAND_LABEL_S.draw(img, BAND_X0 + 12, BAND_Y0 + 24, c)
         paste(img, CHIP_IMG, (BAND_X0 + 4, CHIP_Y - (1 - c) * 16), c)
     return img
 
@@ -561,14 +555,18 @@ def clock_static() -> Image.Image:
 
 CLOCK_BG = clock_static()
 ROW_Y = (330, 374)
-DIVIDER_Y, LABEL_Y0 = 406, 442
+DIVIDER_Y = 412
 ROW_S = (T(CLOCK_BUILD, 28, 700, INK), T(CLOCK_HORIZON, 28, 700, INK))
-_lab1, _lab2 = CLOCK_LABEL.split(" · ")
-LABEL_LINES = [(l_, INK, 600) for l_ in wrap(_lab1, 22, 600, CK_W - 80)] + [(l_, INK_2, 500) for l_ in wrap(_lab2, 22, 500, CK_W - 80)]
-LABEL_S = [T(l_, 22, w_, c_) for l_, c_, w_ in LABEL_LINES]
 HEADER_S = T(CLOCK_HEADER, 34, 700, INK)
-assert len(LABEL_LINES) == 4 and LABEL_Y0 + 3 * 30 + 10 + 8 <= CK_H - 24, "clock label runs into the panel's bottom edge"
-N_LAB1 = len(wrap(_lab1, 22, 600, CK_W - 80))
+# the staff mark under the divider: two hi-vis staff figures (style.staff_icon, as in S01 / S18) and the words
+STAFF_ICON_W, STAFF_ICON_H = 116, 92
+STAFF_ICON = ss_layer((STAFF_ICON_W, STAFF_ICON_H),
+                      lambda d, k: [staff_icon(d, cx * k, 54 * k, 1.45 * k) for cx in (28, 88)], 3)
+STAFF_S = T(STAFF_MARK, 36, 700, INK)
+STAFF_ICON_XY = (40, DIVIDER_Y + 34)
+STAFF_BASE = STAFF_ICON_XY[1] + 62                      # the words' baseline, level with the figures' middle
+assert STAFF_ICON_XY[1] + STAFF_ICON_H <= CK_H - 24, "the staff mark runs into the panel's bottom edge"
+assert STAFF_ICON_XY[0] + STAFF_ICON_W + 20 + STAFF_S.w <= CK_W - 40, "the staff mark is wider than the panel"
 
 
 def clock_frame(t: float) -> Image.Image:
@@ -608,18 +606,15 @@ def clock_frame(t: float) -> Image.Image:
             continue
         rounded(img, (40, yb - 22, 62, yb), 5, fill=col, alpha=a)
         spr.draw(img, 76 + (1 - a) * 10, yb, a)
-    # divider and label
-    la = progress(t, BEATS["alert"] - 0.3, 0.55)   # label lands with "the alert came with it"
-    if la > 0:
+    # divider and the staff mark: they come in on "staff" in "So staff on the ground stay in charge."
+    sa = progress(t, BEATS["staff"] - 0.3, 0.45)
+    if sa > 0:
         lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
-        ImageDraw.Draw(lay).line([(40, DIVIDER_Y), (CK_W - 40, DIVIDER_Y)], fill=rgba(INK_3, 0.5 * la), width=2)
+        ImageDraw.Draw(lay).line([(40, DIVIDER_Y), (CK_W - 40, DIVIDER_Y)], fill=rgba(INK_3, 0.5 * sa), width=2)
         img.alpha_composite(lay)
-        y = LABEL_Y0
-        for i, spr in enumerate(LABEL_S):
-            if i == N_LAB1:
-                y += 10
-            spr.draw(img, 40, y + (1 - la) * 8, la)
-            y += 30
+        dy = (1 - sa) * 12
+        paste(img, STAFF_ICON, (STAFF_ICON_XY[0], STAFF_ICON_XY[1] + dy), sa)
+        STAFF_S.draw(img, STAFF_ICON_XY[0] + STAFF_ICON_W + 20, STAFF_BASE + dy, sa)
     return img
 
 
@@ -673,7 +668,6 @@ def draw_frame(t: float) -> Image.Image:
     chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
     badge(img, "SIMULATED", BADGE_DETAIL, alpha=progress(t, 0.1, 0.4))
     legend_strip(img)
-    footer(img, FOOTER)
     return img
 
 
@@ -684,7 +678,8 @@ STILLS = {
     "chip": 11.0,
     "header": 14.0,
     "clock": 16.7,
-    "end": 21.4,
+    "staff": 19.2,
+    "end": 23.4,
 }
 
 if __name__ == "__main__":

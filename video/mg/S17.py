@@ -1,4 +1,4 @@
-"""Shot S17 (3:52.5-4:11.5, 19.0 s): "Can it happen?" Feasibility and the intended user.
+"""Shot S17 (3:46.0-4:05.0, 19.0 s): "Can it happen?" Feasibility and the intended user.
 
 Storyboard: docs/video/script.md section 3, row S17; claims table section 4, rows S17; section 6
 "motion_graphic" (S17: the cost panel appears only after the team approves docs/cost-estimate.md,
@@ -8,36 +8,39 @@ yet" chip is readable on its own) and "Never say or show"; shot list docs/video/
 Beats (shot seconds, keyed to the guide voice; re-key to the real voice take):
 0-4.95      "Phones on temporary mounts can serve one festival, then move to the next": a phone-on-
             clamp kit hops between festival pages of a calendar (hops on "then move" and "the next")
-            while a pole-mounted counting camera stays bolted in place (badge ILLUSTRATION, design
-            intent, not field-tested).
-4.95-9.84   "We see Macau's police, who run crowd control, as the intended user": the operator card
-            (generic shapes, no emblems) and, on "Macau's police", the separate "No partner yet" chip;
-            footer Law 14/2018, Art. 3. The cost panel would slide in beside the card only if the shot
-            list's cost text were filled (labelled TEAM ESTIMATE, and the footer then adds
-            "cost: docs/cost-estimate.md"); it is still a bracketed placeholder, so it is not drawn.
+            while a pole-mounted counting camera stays bolted in place (badge ILLUSTRATION).
+4.95-9.84   "We see Macau's police, who run crowd control, as the intended user": the short operator
+            card (generic shapes, no emblems) and, on "Macau's police", the separate "No partner yet"
+            chip. The card names the department officially, "Public Security Police Force" (19 Oct;
+            one line on the lone card). The cost panel would slide in beside the card only if the shot
+            list's cost text were filled (labelled TEAM ESTIMATE, and the footer then names the sheet);
+            the team lead decided on 19 Oct to keep the cost off screen, so the text stays a bracketed
+            note and nothing is drawn.
 9.84-14.75  "The whole chain runs end to end in simulation": slate for the team's B-roll of a real
             pytest run (hard cuts in and out, so the footage drops straight in; the window is about
-            4.9 s, so the take must run at least 5 s). From 11.62 s ("in simulation") the counters
-            54 · 24 · 33 · 13 tick up over it and the total lands on 124 with "a hundred" (12.91),
-            holding ~1.8 s through "and twenty-four automated" (badge LIVE SOFTWARE).
+            4.9 s, so the take must run at least 5 s). From 11.62 s ("in simulation") the four suite
+            counters 54 · 24 · 33 · 13 come in over it, each with its final value (no count-up: a
+            paused frame never shows a partial sum); only when all four are fully in does "= 124"
+            come in, landing just before "a hundred" (12.91) and holding ~1.8 s through "and
+            twenty-four automated" (badge LIVE SOFTWARE).
 14.75-19.0  the roadmap arrow alone, four stations (cut on "tests").
+Declutter (19 Oct): no file-path or law footers, no badge sub-lines, no "peak periods" / "bolted in
+place" labels; the slate names the take, not the command.
 
 Data (read, never retyped):
-  docs/video/shotlist.json, S17             chapter card, intended-user line, chip, law footer, cost
-                                            text, the counters line (the four suite counts and their
-                                            sum: 54 / 24 / 33 / 13 = 124, recounted 16-17 Oct) and
-                                            roadmap stations, split verbatim from on_screen_text; the
-                                            slate wording from "visual"
+  docs/video/shotlist.json, S17             chapter card, intended-user line, chip, cost text, the
+                                            counters line (the four suite counts and their sum:
+                                            54 / 24 / 33 / 13 = 124, recounted 16-17 Oct, re-run
+                                            19 Oct) and roadmap stations, split verbatim from
+                                            on_screen_text; the slate's '54 passed' from "visual"
   docs/testing.md, section 1 table          cross-check of the four counts (iOS must agree; the other
                                             three are reported if the table still has older counts)
   docs/deployment.md, "Operational model"   the peak periods on the calendar pages (not its cost table)
   docs/video/script.md, row S17             cross-check: the narration and every quoted line
-Footer sources: docs/deployment.md, Law 14/2018 (claims table), experiments/results/simulation_run/,
-docs/testing.md, experiments/datasets/melbourne/, docs/experiment-protocol.md, brief-evidence.md s. 6.
 
 Run: .venv/bin/python video/mg/S17.py [--stills-only]
-  -> video/build/mg/S17.mp4, video/build/overlays/S17.mov (chapter card, badge, footer and, over the
-     B-roll, the counters, to lay over the team's footage) and stills in video/build/mg/stills/.
+  -> video/build/mg/S17.mp4, video/build/overlays/S17.mov (chapter card, badge and, over the B-roll,
+     the counters, to lay over the team's footage) and stills in video/build/mg/stills/.
 """
 from __future__ import annotations
 
@@ -79,11 +82,16 @@ BEATS = {
     #                        "who run crowd control," (6.68-8.11) and "as the intended user." (8.32-9.61,
     #                        "intended" 8.75): the card, chip and footer hold
     "broll": 9.84,         # "The whole chain runs end to end in simulation" (9.84-12.40) -> hard cut to B-roll
-    "counters": 11.62,     # "in simulation" -> counters over the B-roll
+    "counters": 11.62,     # "in simulation" -> the four suite counters come in, at their final values
     "with_total": 12.63,   # "with a hundred and twenty-four automated tests passing" (12.63-15.63)
-    "total": 12.91,        # "a | hundred" -> the total lands and holds through "... and twenty-four automated"
+    "total": 12.91,        # "a | hundred" -> the "= 124" total has landed; it holds through "... automated"
     "roadmap": 14.75,      # "tests" (onset 14.75) -> hard cut to the roadmap, alone to the end (4.75 s)
 }
+TILE_STAGGER, TILE_IN = 0.06, 0.35       # suite tile i fades in from counters + i * stagger over TILE_IN
+TOTAL_IN = 0.28                          # the "=" and the total fade in over this, ending on BEATS["total"]
+TOTAL_START = BEATS["total"] - TOTAL_IN  # 12.63: on "with", after the four tiles are fully in (12.15)
+assert BEATS["counters"] + 3 * TILE_STAGGER + TILE_IN <= TOTAL_START, "the total must come in after all four suites"
+assert BEATS["with_total"] - 0.05 <= TOTAL_START, "the total must not come in before the spoken total's clause"
 CHAPTER_END = 2.2
 HOP = 0.30                 # seconds per hop
 HOP_LIFT = 90              # px; the kit stays below the event names in the page header
@@ -100,7 +108,7 @@ EVENTS = [(p, ZH[p]) for p in ("Golden Week", "Grand Prix", "Chinese New Year") 
 assert len(EVENTS) == 3, PEAKS
 
 OST = [p.strip() for p in SHOT["on_screen_text"].split(" | ")]
-assert len(OST) == 7, OST   # chapter card + the six parts below; a new part needs a new drawing
+assert len(OST) == 6, OST   # chapter card + the five parts below; a new part needs a new drawing
 
 
 def ost_part(label: str) -> str:
@@ -116,9 +124,8 @@ CHAPTER = ost_part("Chapter card")                                      # Can it
 USER_LINE = "Intended user: " + ost_part("Intended user")               # shown whole, as written
 USER_HEAD, USER_BODY = USER_LINE.split(": ", 1)
 USER_HEAD += ":"
-USER_NAME, USER_ROLE = USER_BODY.split(" · ")                           # Public Security Police Force / gets counts, never images
+USER_NAME, USER_ROLE = USER_BODY.split(" · ")                           # Public Security Police Force / counts only, never images
 CHIP = ost_part("Chip")                                                 # No partner yet
-LAW_FOOTER = ost_part("Footer")                                         # Law 14/2018, Art. 3: ...
 COST_TEXT = ost_part("Cost panel")
 COUNTERS_LINE = ost_part("Counters")                                    # Python 54 · dashboard 24 · ... = 124 automated tests
 ROAD = ost_part("Roadmap").split(" → ")
@@ -127,9 +134,14 @@ for s_ in ROAD:
     m = re.match(r"^(.*?)(?: (\([^)]*\)))?$", s_)
     STATIONS.append((m.group(1), m.group(2) or ""))
 assert len(STATIONS) == 4, ROAD
+# declutter (19 Oct): at most 4 words per station name (a hyphenated word counts once, as in script.md)
+assert all(len(name.replace(",", "").split()) <= 4 for name, _ in STATIONS), STATIONS
+# at most 10 words, separators not counted (the official name, 19 Oct: "Public Security Police Force")
+assert len([w for w in USER_LINE.split() if w != "·"]) <= 10, USER_LINE
 
 # the four suite counts and their sum, from the shot list's counters line (recounted 16-17 Oct:
-# pytest --collect-only 54, dashboard vitest 24, SketchFuture vitest 33; iOS 13 from docs/testing.md)
+# pytest --collect-only 54, dashboard vitest 24, SketchFuture vitest 33; the same on 19 Oct: pytest
+# 54 passed, vitest 24 and 33; iOS 13 from docs/testing.md)
 TOTAL_LABEL = "automated tests"
 _cm = re.fullmatch(rf"(.+) = (\d+) {TOTAL_LABEL}", COUNTERS_LINE)
 assert _cm, COUNTERS_LINE
@@ -161,7 +173,7 @@ if TESTING_STALE:
 # the storyboard row must carry the same narration and lines (script.md section 3)
 _ROW = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {NAME} |"))
 assert f"| {SHOT['narration']} |" in _ROW, "narration differs between shotlist.json and script.md"
-for _s in (CHAPTER, USER_LINE, CHIP, LAW_FOOTER, COST_TEXT, COUNTERS_LINE, " → ".join(ROAD)):
+for _s in (CHAPTER, USER_LINE, CHIP, COST_TEXT, COUNTERS_LINE, " → ".join(ROAD)):
     assert f'"{_s}"' in _ROW, f"script.md row S17 lacks {_s!r}"
 
 # the beats above are keyed to these clauses; if the narration changes, re-key them
@@ -175,11 +187,13 @@ _expect = " · ".join(f"{label} {n}" for label, n in SUITES) + f" = {TOTAL} {TOT
 assert COUNTERS_LINE == _expect, (COUNTERS_LINE, _expect)
 assert f"with {TOTAL} automated tests passing" in SHOT["narration"], SHOT["narration"]
 assert " · ".join(str(n) for _, n in SUITES) in SHOT["visual"] and f"lands on {TOTAL}" in SHOT["visual"], SHOT["visual"]
+assert "no count-up" in SHOT["visual"], "the visual column must say the counters do not count up"
 assert f"'{SUITES[0][1]} passed'" in SHOT["visual"], SHOT["visual"]
-# filmed without -q (pyproject.toml already adds one; a second hides the "N passed" line)
+# filmed without -q (pyproject.toml already adds one; a second hides the "N passed" line); the command
+# stays in the visual column for the team, the slate itself shows no path (declutter, 19 Oct)
 _m = re.search(r"(B-roll filmed by the team) \([^)]*\), (a member runs \S+ -m pytest and the screen shows '(\d+) passed')", SHOT["visual"])
 assert _m and int(_m.group(3)) == SUITES[0][1], SHOT["visual"]
-SLATE_TEXT = f"{_m.group(1)}: {_m.group(2)}"
+SLATE_TEXT = f"a real test run: '{_m.group(3)} passed'"
 
 # the cost panel: drawn only when the team has filled it (no brackets) and labelled it TEAM ESTIMATE
 COST_BRACKETED = COST_TEXT.startswith("[") and COST_TEXT.endswith("]")
@@ -189,22 +203,16 @@ if SHOW_COST:
 assert not (COST_BRACKETED and SHOW_COST), "the cost panel must stay out while its text is bracketed"
 COST_DRAWS = 0             # counted by draw_cost_panel(); checked after rendering
 
-BADGE_SEGMENTS = [  # (start, end, kind, detail, sub-line); no badge on the card or the roadmap
-    (0.0, BEATS["user"], "ILLUSTRATION", "", "design intent, not field-tested"),
-    (BEATS["broll"], BEATS["roadmap"], "LIVE SOFTWARE", "", "real test runs"),
+BADGE_SEGMENTS = [  # (start, end, kind, detail, sub-line); no badge on the card or the roadmap, no sub-lines
+    (0.0, BEATS["user"], "ILLUSTRATION", "", ""),
+    (BEATS["broll"], BEATS["roadmap"], "LIVE SOFTWARE", "", ""),
 ]
 # section 6: a filled cost panel is "labelled TEAM ESTIMATE with that sheet in the footer", so the
-# sheet joins the law footer for as long as the panel can be on screen (the width assert below holds)
+# sheet gets the footer for as long as the panel can be on screen; otherwise no footer at all (the
+# repo paths and the law footer left the picture on 19 Oct; the sources stay in script.md section 4)
 COST_SHEET = "docs/cost-estimate.md"
-USER_FOOTER = LAW_FOOTER + (f" · cost: {COST_SHEET}" if SHOW_COST else "")
 assert (ROOT / COST_SHEET).is_file(), COST_SHEET
-FOOTER_SEGMENTS = [
-    (0.0, BEATS["user"], "Operational model: docs/deployment.md"),
-    (BEATS["user"], BEATS["broll"], USER_FOOTER),
-    (BEATS["broll"], BEATS["roadmap"], "Simulation run: experiments/results/simulation_run/ · test counts: docs/testing.md"),
-    (BEATS["roadmap"], DURATION, "experiments/datasets/melbourne/ · docs/experiment-protocol.md · "
-                                 "docs/research/brief-evidence.md, section 6"),
-]
+FOOTER_SEGMENTS = [(BEATS["user"], BEATS["broll"], f"Cost: {COST_SHEET}")] if SHOW_COST else []
 
 # section 6, "Never say or show": none of these may appear in anything this shot draws
 BANNED = ["in partnership with", "the police support it", "built for the police", "replaces", "better than",
@@ -533,9 +541,8 @@ HEAD_L = [text_sprite((PAGE_X0, 156), "Phone on a temporary mount", 30, 700, INK
 HEAD_R_X = 1540
 HEAD_R = [text_sprite((HEAD_R_X, 156), "Fixed counting camera", 30, 700, INK, anchor="ma"),
           text_sprite((HEAD_R_X, 198), "固定計數鏡頭", 26, 500, INK_2, anchor="ma")]
-# the three pages are deployment.md's peak periods: said once, above the calendar's right edge
-PEAK_LABEL = mixed_sprite((PAGE_XS[2] + PAGE_W, 200), "peak periods · 高峰期", 26, 600, INK_2, anchor="ra")
-BOLTED = mixed_sprite((HEAD_R_X, FLOOR_Y + 24), "bolted in place · 固定安裝", 26, 600, INK_2, anchor="ma")
+# the three pages are deployment.md's peak periods; the "peak periods" and "bolted in place" labels left
+# on 19 Oct (the page names and the bolted pole say it; two headers are this part's only labels)
 # the kit, at rest or at the top of a hop or drop, stays below the page header band (event names)
 assert KIT_LAND_Y + KIT_PHONE_TOP - max(HOP_LIFT, DROP_LIFT) > PAGE_Y0 + BAND_H + 4
 
@@ -589,15 +596,12 @@ def part_calendar(img: Image.Image, t: float) -> None:
     put(img, SCENE, out * progress(t, 0.0, 0.5))
     for j, sp in enumerate(HEAD_L + HEAD_R):
         put(img, sp, out * progress(t, 0.05 * j, 0.4), dy=10 * (1 - progress(t, 0.05 * j, 0.4)))
-    kp = progress(t, 0.4, 0.4)
-    put(img, PEAK_LABEL, out * kp, dy=10 * (1 - kp))
     for i, (base, rings) in enumerate(PAGES):
         k = progress(t, 0.08 + 0.12 * i, 0.5)
         dy = 24 * (1 - k)
         put(img, base, out * k, dy=dy)
         put(img, rings, out * k, dy=dy)
         put(img, GLOW[i], out * k * page_active(i, t), dy=dy)
-    put(img, BOLTED, out * progress(t, BEATS["then_move"], 0.4), dy=8 * (1 - progress(t, BEATS["then_move"], 0.4)))
     put(img, (POLE, POLE_ORIGIN), out * progress(t, 0.15, 0.5))       # bolted in place: it never moves
 
     (kx, ky), lift, on_page, k_drop = kit_state(t)
@@ -738,17 +742,10 @@ def slate_static():
     frame_ = dashed_panel(SLATE, 22, WARNING, fill=NAVY_2, width=3)
     glyph = (hires((70, 50), lambda d, q: camera_glyph(d, 4 * q, 3 * q, 1.1 * q, (*WARNING, 255))), (x0 + 60, y0 + 46))
     title = text_sprite((x0 + 150, y0 + 50), "[TEAM FOOTAGE]", 40, 700, WARNING)
-    head_, _, rest_ = SLATE_TEXT.partition(": ")                      # the command and '54 passed' stay whole
-    body_lines = [head_ + ":", rest_]
-    assert all(text_size(ln, 34, 500)[0] <= x1 - x0 - 120 for ln in body_lines), body_lines
-    body = layer_sprite(lambda im: [draw_text(im, (x0 + 60, y0 + 124 + i * 42), ln, 34, 500, INK)
-                                    for i, ln in enumerate(body_lines)])
-    # these are the guide-voice times this render is keyed to (BEATS); the real take will run slower and
-    # be re-keyed, so the slate says which clock it uses
-    when = (f"{NAME}, guide voice: {BEATS['broll']:.1f}-{BEATS['roadmap']:.1f} s into the shot, hard cuts (film at least 5 s) · "
-            f"the counters run over the take from {BEATS['counters']:.1f} s")
-    assert text_size(when, 24, 500)[0] <= x1 - x0 - 120, when
-    sub = text_sprite((x0 + 60, y0 + 222), when, 24, 500, INK_2)
+    # one short line (19 Oct): the command and the guide-voice window are filming notes, kept in the shot
+    # list's visual column and script.md section 5D, not in the picture
+    assert text_size(SLATE_TEXT, 34, 500)[0] <= x1 - x0 - 120, SLATE_TEXT
+    body = text_sprite((x0 + 60, y0 + 124), SLATE_TEXT, 34, 500, INK)
 
     def laptop(d, q):
         Q = lambda *v: tuple(x * q for x in v)  # noqa: E731
@@ -759,7 +756,7 @@ def slate_static():
         d.rounded_rectangle(Q(70, 190, 230, 206), 4 * q, fill=(*SAFE, 255))
         d.rounded_rectangle(Q(0, 252, 480, 272), 8 * q, fill=(*INK_3, 255))
     lap = (scaled(hires((480, 274), laptop), 0.8), ((x0 + x1) / 2 - 192, y0 + 276))
-    return [frame_, glyph, title, body, sub, lap]
+    return [frame_, glyph, title, body, lap]
 
 
 SLATE_SPRITES = slate_static()
@@ -840,11 +837,31 @@ def pulse_ring(k: float):
     return im, (box[0] - 4, box[1] - 4)
 
 
-def tick_window(i: int) -> tuple[float, float]:
-    """Suite i counts up from start to end (ends 0.2 s apart); the last one lands with the total
-    on "a hundred", so the finished row holds about 1.8 s before the roadmap cut."""
+def counter_state(t: float) -> tuple[list[tuple[float, int]], float, int]:
+    """What the counters show at shot time t: [(alpha, value)] per suite tile and (alpha, value) of the
+    "= total". No count-up (19 Oct review: a paused mid-count frame read "54 + 23 + 30 + 9 = 116" under
+    a caption saying 124): every number is drawn at its final value from its first visible frame, and
+    the total only once all four suites are fully in."""
     t0 = BEATS["counters"]
-    return t0 + 0.25 + 0.1 * i, BEATS["total"] - 0.2 * (3 - i)
+    tiles = [(progress(t, t0 + TILE_STAGGER * i, TILE_IN), n) for i, (_, n) in enumerate(SUITES)]
+    return tiles, progress(t, TOTAL_START, TOTAL_IN), TOTAL
+
+
+def check_counter_state(t: float) -> None:
+    """The rule every counter frame must keep: final values only, and the total never beside a partial set."""
+    tiles, a_tot, tot = counter_state(t)
+    assert [v for _, v in tiles] == [n for _, n in SUITES], (t, tiles)
+    assert tot == TOTAL == sum(n for _, n in SUITES), (t, tot)
+    if a_tot > 0:
+        assert all(a >= 0.999 for a, _ in tiles), f"{t:.3f} s: the total shows beside a suite still coming in"
+
+
+# every frame the render can draw inside the B-roll window, checked before anything is drawn
+_COUNTER_TS = [f / FPS for f in range(int(round(DURATION * FPS))) if BEATS["broll"] <= f / FPS < BEATS["roadmap"]]
+for _t in _COUNTER_TS:
+    check_counter_state(_t)
+assert counter_state(BEATS["total"] - 1e-6)[1] > 0.99, "the total must have landed by 'a hundred'"
+COUNTER_FRAMES = 0                       # counter frames drawn (each re-checked as it is drawn)
 
 
 def part_slate(img: Image.Image, t: float) -> None:
@@ -855,25 +872,25 @@ def part_slate(img: Image.Image, t: float) -> None:
 
 
 def part_counters(img: Image.Image, t: float) -> None:
+    global COUNTER_FRAMES
     t0 = BEATS["counters"]
     if t < t0:
         return
-    kb = progress(t, t0, 0.35)
+    check_counter_state(t)
+    COUNTER_FRAMES += 1
+    tiles, a_tot, tot = counter_state(t)
+    kb = progress(t, t0, TILE_IN)
     put(img, C_BACKING, kb, dy=16 * (1 - kb))
-    shown = []
-    for i, ((x0, x1), (_, n)) in enumerate(zip(TILES, SUITES)):
-        a = progress(t, t0 + 0.06 * i, 0.35)
+    for i, ((x0, x1), (a, v)) in enumerate(zip(TILES, tiles)):
         put(img, TILE_SPRITES[i], a, dy=16 * (1 - a))
-        start, end = tick_window(i)
-        kt = clamp((t - start) / (end - start))
-        v = n if kt >= 1 else int(n * (1 - (1 - kt) ** 2.2))   # ease-out, floored: each lands exactly at its end
-        shown.append(v)
         number(img, v, (x0 + x1) / 2, NUM_Y + 16 * (1 - a), alpha=a)
     for i, sp in enumerate(OP_SPRITES):
-        put(img, sp, progress(t, t0 + 0.1 + 0.06 * i, 0.35))
-    a_tot = progress(t, t0 + 0.24, 0.35)
+        if i < 3:                         # the "·" between suites come in with the suites
+            put(img, sp, progress(t, t0 + 0.1 + TILE_STAGGER * i, TILE_IN))
+        else:                             # the "=" only with the total
+            put(img, sp, a_tot)
     put(img, TOTAL_SPRITE, a_tot, dy=16 * (1 - a_tot))
-    number(img, sum(shown), TOT_NUM_CX, NUM_Y + 16 * (1 - a_tot), big=True, alpha=a_tot)
+    number(img, tot, TOT_NUM_CX, NUM_Y + 16 * (1 - a_tot), big=True, alpha=a_tot)
     if BEATS["total"] <= t <= BEATS["total"] + 0.6:
         kp = (t - BEATS["total"]) / 0.6
         put(img, pulse_ring(ease(kp)), (1 - kp) * 0.9)
@@ -902,8 +919,11 @@ def station_sprites(i: int):
     lines = balanced_lines(name, ST_SIZE, 700, ST_MAXW)
     for j, ln in enumerate(lines):
         out.append(text_sprite((cx, ROAD_Y + 48 + j * ST_LH), ln, ST_SIZE, 700, CYAN if done else INK, anchor="ma"))
-    if aside:
-        out.append(text_sprite((cx, ROAD_Y + 48 + len(lines) * ST_LH + 4), aside, 30, 600, CYAN, anchor="ma"))
+    if aside:   # "(done)" in cyan; a limit note on a later station in amber, like "(planned)" in S17b
+        a_lines = balanced_lines(aside, 28, 600, ST_MAXW + 70)   # one line if it clears the neighbours (assert below)
+        for j, ln in enumerate(a_lines):
+            out.append(text_sprite((cx, ROAD_Y + 48 + len(lines) * ST_LH + 4 + j * 38), ln, 28, 600,
+                                   CYAN if done else WARNING, anchor="ma"))
     return out
 
 
@@ -1010,8 +1030,8 @@ def frame_mp4(t: float) -> Image.Image:
 
 
 STILLS = {"chapter": 1.2, "hop": 3.6, "page2": 3.9, "hop2": 4.15, "page3": 4.7, "handover": 4.97,
-          "card": 5.4, "chip": 7.0, "intended": 9.0, "slate": 10.9, "ticking": 12.3, "total": 13.1,
-          "held": 14.7, "roadmap": 17.0, "end": 19.4}
+          "card": 5.4, "chip": 7.0, "intended": 9.0, "slate": 10.9, "tiles_in": 11.75, "tiles": 12.3,
+          "total_in": 12.75, "total": 13.1, "held": 14.7, "roadmap": 17.0, "end": 18.95}
 
 if __name__ == "__main__":
     for k_, tt in STILLS.items():
@@ -1019,5 +1039,10 @@ if __name__ == "__main__":
     if "--stills-only" not in sys.argv:
         print(render(NAME, DURATION, frame_mp4))
         print(render_overlay(NAME, DURATION, foreground))
+        # both renders drew the counters on every frame of the B-roll window from "in simulation" on
+        n_win = sum(1 for _t in _COUNTER_TS if _t >= BEATS["counters"])
+        assert COUNTER_FRAMES >= 2 * n_win, (COUNTER_FRAMES, n_win)
     assert COST_DRAWS == 0 or SHOW_COST, "the cost panel was drawn while its text is still bracketed"
     print(f"cost panel: {'drawn (TEAM ESTIMATE filled)' if SHOW_COST else 'skipped (text still bracketed)'}; draws {COST_DRAWS}")
+    print(f"counters: {COUNTER_FRAMES} frames drawn, each at final values ({' · '.join(str(n) for _, n in SUITES)}); "
+          f"total {TOTAL} from {TOTAL_START:.2f} s, landed {BEATS['total']:.2f} s")

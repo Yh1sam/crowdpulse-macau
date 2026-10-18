@@ -1,7 +1,7 @@
-"""S19 · Relay close (4:30.0-4:41.5, 11.5 s): the four team members on camera, one line each, then all together.
+"""S19 · Relay close (4:23.0-4:34.5, 11.5 s): the four team members on camera, one line each, then all together.
 
 Storyboard: docs/video/script.md section 3, row S19 (narration, visual, on-screen text); section 4, the three S19
-claims rows (the "Next" line is a plan, with "which approvals apply: to be confirmed"; "The AI recommends. A person
+claims rows (the "Next" line is a plan; which approvals apply is to be confirmed, kept for Q&A; "The AI recommends. A person
 decides." and "Nothing identifying leaves the phone" are real code); section 2 "Team roles" (who carries which STEMB
 letters); section 5D and section 6 "team_footage" (wide shot, same set as S05); the S19 row of the overrun plan (drop
 the separate all-together second first, never cut a line). docs/video/shotlist.json, entry S19.
@@ -22,8 +22,8 @@ Data sources (nothing is retyped):
 The team has not filmed yet, so the picture is an amber "[TEAM FOOTAGE]" slate: four silhouettes in a wide shot,
 the speaker lit in turn (M3, M4, M2, M1; all four speak, nobody is in frame without a line), then everyone together.
 Each member's chip shows their STEMB tiles (two for M3). The two on-screen lines take turns in
-the top band (y 44-about 175: the "Next" card from M3's first word to the hand-off to M1, the tagline in the last
-second), so they stay above the faces in the real wide shot; the slate keeps the lower-third slot (x 60-780,
+the top band (y 44-about 175: the "Next" card from M3's first word to the hand-off to M4, the tagline in the last
+second; during M4's, M2's and M1's lines the captions carry the words alone), so they stay above the faces in the real wide shot; the slate keeps the lower-third slot (x 60-780,
 y 795-895) and the caption band (y 900-995) clear for the whole shot, because a new speaker starts four times.
 No chapter card, badge or footer: the storyboard gives S19 none. Captions and lower-thirds are added at assembly.
 
@@ -65,17 +65,17 @@ DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 11.5 s
 BEATS = {
     "m3": 0.20,         # [M3] "Next, we want a supervised street pilot in Macau, with permission."  -> the "Next" card
     "m3_end": 4.61,
-    "m4": 4.86,         # [M4] "The AI recommends."
+    "m4": 4.86,         # [M4] "The AI recommends."  (the "Next" card has left in the hand-off)
     "m4_end": 6.10,
     "m2": 6.34,         # [M2] "A person decides."
     "m2_end": 7.62,
-    "m1": 7.86,         # [M1] "Nothing identifying leaves the phone."  (the "Next" card has left in the hand-off)
+    "m1": 7.86,         # [M1] "Nothing identifying leaves the phone."
     "m1_end": 9.95,
     "together": round(DURATION - 1.0, 3),  # 10.5: everyone together, the final second -> the tagline, only here
 }                                          # (overrun plan: drop this second first, never a line)
 HANDOFF = 0.40          # spotlight move from one speaker to the next (s), ends on the next speaker's first word
 TEXT_IN = 0.40          # fade-and-rise of the "Next" card (s)
-NEXT_OUT = 0.35         # the "Next" card leaves during the M2 -> M1 hand-off (fully up ≈7.0 s for its 19 words)
+NEXT_OUT = 0.35         # the "Next" card leaves during the M3 -> M4 hand-off (fully up ≈3.9 s for its 10 words)
 TAG_IN = 0.20           # fade-and-rise of the tagline at the start of the final second (s), both halves at once
 RULE_IN = 0.30          # the cyan rule under "A person decides." draws in just after (s)
 
@@ -111,6 +111,7 @@ assert ON_SCREEN[1].startswith(FINAL_LABEL), ON_SCREEN[1]
 NEXT_LINE = ON_SCREEN[0].strip('"')
 TAGLINE = ON_SCREEN[1][len(FINAL_LABEL):].strip().strip('"')
 assert NEXT_LINE.startswith("Next:") and '"' not in NEXT_LINE, NEXT_LINE
+assert len(NEXT_LINE.split()) <= 10, NEXT_LINE        # declutter (19 Oct): a short card, the captions carry the rest
 TAG_A, TAG_B = (s if s.endswith(".") else s + "." for s in TAGLINE.split(". ", 1))
 assert (TAG_A, TAG_B) == ("The AI recommends.", "A person decides."), (TAG_A, TAG_B)
 # the shot list says the same (its two lines joined by " | ", without the quotes)
@@ -379,18 +380,18 @@ def _scrim() -> Sprite:
 
 
 SCRIM = _scrim()
-NEXT_OUT_T = BEATS["m2_end"]     # the "Next" card starts to leave as M2 finishes (the hand-off to M1)
+NEXT_OUT_T = BEATS["m3_end"]     # the "Next" card starts to leave as M3 finishes (the hand-off to M4): it belongs to M3's line
 TAG_T = BEATS["together"]        # the tagline starts with the final all-together second, not earlier
 assert TAG_T >= DURATION - 1.0 - 1e-6 and TAG_T > BEATS["m1_end"], (TAG_T, BEATS)
-assert NEXT_OUT_T + NEXT_OUT <= TAG_T and NEXT_OUT_T - (BEATS["m3"] + 0.05 + TEXT_IN) >= 6.0  # ≥6 s fully readable
+# fully up for at least 0.3 s per word + 0.5 s (declutter rule 5), and gone before the tagline
+assert NEXT_OUT_T + NEXT_OUT <= TAG_T and NEXT_OUT_T - (BEATS["m3"] + 0.05 + TEXT_IN) >= 0.3 * len(NEXT_LINE.split()) + 0.5
 
 
 def overlay_at(t: float, img: Image.Image | None = None) -> Image.Image:
     """The top band at time t, drawn onto img (a transparent frame by default)."""
     img = img if img is not None else transparent()
     put(img, SCRIM, progress(t, 0.0, 0.3))
-    # the "Next" card: in on M3's first word, holds through M4 and M2 so its 19 words can be read, out in the
-    # hand-off to M1
+    # the "Next" card: in on M3's first word, holds through M3's line, out in the hand-off to M4
     k_in = progress(t, BEATS["m3"] + 0.05, TEXT_IN)
     k_out = progress(t, NEXT_OUT_T, NEXT_OUT)
     put(img, NEXT_CARD, k_in * (1 - k_out), dy=(1 - k_in) * 12 - k_out * 10)
@@ -675,8 +676,8 @@ def overlay_check(t: float) -> Image.Image:
 
 STILLS = {  # name: time (s)
     "next": 2.2,                 # M3 speaking, the "Next" card up
-    "ai_recommends": 5.5,        # M4 speaking, the "Next" card holds (no tagline yet)
-    "person_decides": 7.0,       # M2 speaking, the "Next" card holds (no tagline yet)
+    "ai_recommends": 5.5,        # M4 speaking, top band clear (the "Next" card has left; no tagline yet)
+    "person_decides": 7.0,       # M2 speaking, top band clear
     "m1_phone": 8.9,             # M1 speaking, top band clear
     "together": DURATION - 1 / FPS,   # the final all-together second, tagline up
 }

@@ -1,4 +1,4 @@
-"""S05 · Team self-introductions and title card (0:28.5-0:42.0, 13.5 s).
+"""S05 · Team self-introductions and title card (0:26.0-0:39.5, 13.5 s).
 
 Storyboard: docs/video/script.md section 3, row S05; section 2 "Team roles" (four members, [MEMBER 3] carries both
 Engineering and Business; the "Self-introductions (S05)" bullet); section 5D and section 6 "team_footage" (what to
@@ -93,8 +93,11 @@ BEATS = {
     "m3": 3.18,         # [M3] "I worked on the server, and how we'd deploy it." (hard cut; E and B lit; 2.9 s)
     "m4": 6.11,         # [M4] "I worked on health and accessibility."          (hard cut; 2.3 s on screen)
     "group": 8.41,      # [ALL] "Together, we are CrowdPulse Macau."  (hard cut to the group slate, all five lit)
-    "question": 9.25,   # after "Together,": the research question rises on a band under the group (on screen 4.25 s
-                        # to the end, at full strength from 9.8)
+    "question": 8.45,   # with the group cut (one frame after it, before "Together,"): the research question rises
+                        # on a band under the group, clear of the slate's text above it (y 184-384) and of the
+                        # caption band; on screen 5.05 s to the end (5.0 s from its first text frame, 8.5), at
+                        # full strength from 9.0. 19 Oct: brought in 0.8 s earlier (was 9.25: 4.25 s on screen)
+                        # so it reads for at least 5.0 s, never over a member's slate (assert after QUESTION)
     "scrim": 9.7,       # "are": navy starts to cover the group shot (fully covered ~0.9 s later)
     "graph_in": 9.8,    # "are": the 7-zone graph draws in
     "collapse": 10.2,   # "CrowdPulse": the graph shrinks into the mark; the wordmark unrolls on "Macau" (10.56-11.16)
@@ -102,7 +105,6 @@ BEATS = {
     "hold": 11.5,       # silence: title card held to the end of the shot (2 s, never cut, section 6)
 }
 assert BEATS["hold"] == round(DURATION - 2.0, 3), "the silent title hold is 2 s"
-assert DURATION - BEATS["question"] >= 4.0 - 1e-9, "the research question is on screen about 4 s"
 
 COL_DUR, COL_STAGGER = 0.6, 0.012   # graph collapse: duration and per-node stagger (s)
 WORD_DELAY, WORD_DUR = 0.36, 0.6    # wordmark wipe: starts this long after "collapse", lasts this long (s)
@@ -176,6 +178,11 @@ TITLE_A, TITLE_B = "CrowdPulse", "Macau"
 QUESTION = ("Our question: can ordinary phones, sending only numbers, help forecast crowds "
             "without identifying anyone?")
 CHALLENGE = "Responsible AI · Challenge 2(c)"
+# the question reads for at least 5.0 s from its first text frame (BEATS["question"] + 0.05), and at least the
+# declutter rule's 0.3 s a word + 0.5 s (14 words: 4.7 s); it comes in only after the cut to the group shot
+assert BEATS["question"] > BEATS["group"], "the research question never lies over a member's slate"
+assert DURATION - (BEATS["question"] + 0.05) >= max(5.0, 0.3 * len(QUESTION.split()) + 0.5) - 1e-9, \
+    "the research question must be on screen at least 5.0 s"
 GROUP_LABEL = "All four"
 assert len(MEMBERS) == 4 and GROUP_LABEL.lower().endswith("four"), "the group label names the team size"
 GROUP_FILM = f"all four: '{ROLL['ALL'].rstrip('.')}'"   # all four: 'Together, we are CrowdPulse Macau'

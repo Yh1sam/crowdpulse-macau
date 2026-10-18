@@ -1,26 +1,26 @@
-"""Shot S06 (0:13.5-0:28.5, 15.0 s): "Why does it matter?"
+"""Shot S06 (0:11.0-0:26.0, 15.0 s): "Why does it matter?"
 
-[MEMBER 4] on camera for 6.9 s (a placeholder slate until the take is filmed): "Mrs Chan is made up.
-The crowds are not." needs no graphic, and the arrivals tag comes in with "This Golden Week". From
-"...the Ruins", voice-over over the zone schematic: illustrative dots pile up on Rua de S. Paulo below
-the Ruins while three date chips (the police crowd-control afternoons) stack beside the Ruins. On the
-medical sentence the map fades out completely; on a plain navy background a side-view body outline
-drawn from shapes appears, two arrows press on the chest from front and back, and the only
-annotation is the sourced mechanism, with its citation in the footer slot.
+[MEMBER 4] on camera for 6.9 s (a placeholder slate until the take is filmed): the chapter card for 2 s,
+then nothing over the take (the 210,000-arrivals tag and its footer left on 19 Oct: the voice never says
+the number). From "...the Ruins", voice-over over the zone schematic: illustrative dots pile up on Rua de
+S. Paulo below the Ruins while three date chips (the police crowd-control afternoons) stack beside the
+Ruins, the only labelled place. On the medical sentence the map fades out completely; on a plain navy
+background a side-view body outline drawn from shapes appears, two arrows press on the chest from front
+and back, and the only annotation is the sourced mechanism, with its short citation in the footer slot.
 
 Data sources:
   - docs/video/shotlist.json, shot S06: duration (end_s - start_s), the camera timecode, the
-    narration and every on-screen line (card, tag, footers, date chips, body label, citation, badge).
+    narration and every on-screen line (card, map label, date chips, footer, body label, citation, badge).
   - docs/video/script.md, section 3, row S06: the same narration and lines (checked verbatim).
   - shared/zones.json (through style.zone_graph / draw_zone_graph): zone positions, names and the
     street links the illustrative dots walk along (uphill to Rua de S. Paulo, below the Ruins).
 The dots and the pile are an illustration (badge ILLUSTRATION), not data; the date chips are the
-real dates from the police release and Macao Daily News (footer). The body diagram is shapes only,
-off the Macau map, and carries no text but the sourced mechanism (Gill & Landi 2004).
+real dates from the police release (footer). The body diagram is shapes only, off the Macau map, and
+carries no text but the sourced mechanism (Gill & Landi 2004).
 
 Outputs:
   video/build/mg/S06.mp4                    the full shot (camera slate 0-6.9 s)
-  video/build/overlays/S06_cam_overlay.mov  0-6.9 s card + tag + footer with alpha, for the real camera take
+  video/build/overlays/S06_cam_overlay.mov  0-6.9 s chapter card with alpha, for the real camera take
   video/build/mg/stills/S06_*.png           layout checks
 
 Run:  .venv/bin/python video/mg/S06.py            (stills, overlay and render)
@@ -56,8 +56,7 @@ _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().split
 #   "three" 7.38 | "afternoons." 7.78-8.62 | pause | "In a crush," 8.85-9.59 ("crush" 9.04) |
 #   "victims" 9.80 | "typically" 10.34 | "suffocate" 10.82 | "standing up," 11.46-12.09 |
 #   "from chest compression." 12.39-13.71 ("chest" 12.60) | silence to 15.0.
-# [MEMBER 4] stays on camera through the first two sentences (no graphic: the card, then nothing);
-# the arrivals tag comes in with "This Golden Week" and reads for 3.9 s before the cut on "Ruins".
+# [MEMBER 4] stays on camera to the cut on "Ruins" (no graphic: the card, then nothing).
 # The date chips come in fast (0.25 s fades, all three up by "three", ~7.65 s) so the full stack reads
 # for over a second before the map leaves on "In a crush" (8.85 s); the map cannot stay longer, since
 # assemble.py's medical-sentence caption arrives at 8.85 s.
@@ -65,9 +64,8 @@ _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().split
 BEATS = {
     "card_in": 0.0,       # chapter card over the camera take (2 s), on "Mrs Chan is made up."
     "card_out": 2.0,
-    "tag_in": 3.0,        # "This Golden Week": arrivals tag and its footer over the camera (spec: 3-6.9 s)
     "schematic": 6.9,     # cut from camera to the zone schematic, on "...the Ruins"; badge on
-    "chip_0": 6.9,        # "Crowd control:" and the first chip, with the cut, as "Ruins" lands
+    "chip_0": 6.9,        # the first chip, with the cut, as "Ruins" lands
     "chip_1": 7.22,       # "on": second chip
     "chip_2": 7.38,       # "three": third chip (all three fully up by ~7.65 s)
     "pile_full": 8.6,     # end of "afternoons": the pile on Rua de S. Paulo is complete
@@ -85,31 +83,31 @@ NARRATION = ("Mrs Chan is made up. The crowds are not. "
              "This Golden Week, police briefly imposed crowd control at the Ruins on three afternoons. "
              "In a crush, victims typically suffocate standing up, from chest compression.")
 CARD = "Why does it matter?"
-TAG = "Macau, 4 Oct: 210,000 visitor arrivals, a National Day holiday record (preliminary)"
-FOOTER_CAM = "Macao Government Tourism Office via gov.mo, 8 Oct 2026"
-CHIPS_TEXT = "Crowd control: 2 Oct pm · 3 Oct pm · 4 Oct 13:50-15:10"
-FOOTER_MAP = "Public Security Police Force via gcs.gov.mo, 8 Oct 2026 · Macao Daily News, 5 Oct 2026"
+MAP_LABEL = "大三巴牌坊 Ruins of St. Paul's"
+CHIPS_TEXT = "2 Oct · 3 Oct · 4 Oct"
+FOOTER_MAP = "Police, 8 Oct 2026"
 BODY_LABEL = "front-to-back pressure → chest can't fully expand → asphyxia"
-CITATION = "Gill & Landi, Am J Forensic Med Pathol, 2004 · case report, New York, 1991"
+CITATION = "Gill & Landi, 2004"
 BADGE = "ILLUSTRATION"
 _ost = dict(item.split(": ", 1) for item in _shot["on_screen_text"].split(" | "))
 assert _shot["narration"] == NARRATION, _shot["narration"]
 assert NARRATION in _row
-for _key, _txt in (("Chapter card (top-left, 2 s)", CARD), ("Tag (3-6.9 s, over the camera)", TAG),
-                   ("Footer (3-6.9 s)", FOOTER_CAM), ("Date chips (6.9-9 s, beside the Ruins)", CHIPS_TEXT),
-                   ("Footer (6.9-9 s)", FOOTER_MAP), ("Body label (9-15 s)", BODY_LABEL),
-                   ("Citation (9-15 s, footer slot)", CITATION),
-                   ("Badge (top-right, from 6.9 s, over the schematic and the body diagram)", BADGE)):
+_SPEC = (("Chapter card (top-left, 2 s)", CARD), ("Map label (6.9-9 s)", MAP_LABEL),
+         ("Date chips (6.9-9 s, beside the Ruins)", CHIPS_TEXT), ("Footer (6.9-9 s)", FOOTER_MAP),
+         ("Body label (9-15 s)", BODY_LABEL), ("Citation (9-15 s, footer slot)", CITATION),
+         ("Badge (top-right, from 6.9 s, over the schematic and the body diagram)", BADGE))
+assert list(_ost) == [k for k, _ in _SPEC], list(_ost)      # 19 Oct declutter: nothing else on screen
+for _key, _txt in _SPEC:
     assert _ost.get(_key) == _txt, (_key, _ost.get(_key))
     assert _txt in _row, _txt
 assert BADGE in BADGES
+# 19 Oct declutter (rules 3 and 5): source footers of at most ~7 words, labels of at most 6 words per line
+assert all(len(f.split()) <= 7 for f in (FOOTER_MAP, CITATION))
 # Layout splits (the same words, broken into lines / chips; checked to rejoin exactly).
-TAG_LINES = ["Macau, 4 Oct: 210,000 visitor arrivals,", "a National Day holiday record (preliminary)"]
-CHIP_HEAD, CHIPS = "Crowd control:", ["2 Oct pm", "3 Oct pm", "4 Oct 13:50-15:10"]
+CHIPS = ["2 Oct", "3 Oct", "4 Oct"]
 LABEL_LINES = ["front-to-back pressure", "→ chest can't fully expand", "→ asphyxia"]
-assert " ".join(TAG_LINES) == TAG
-assert f"{CHIP_HEAD} {' · '.join(CHIPS)}" == CHIPS_TEXT
-assert " ".join(LABEL_LINES) == BODY_LABEL
+assert " · ".join(CHIPS) == CHIPS_TEXT
+assert " ".join(LABEL_LINES) == BODY_LABEL and all(len(l.split()) <= 6 for l in LABEL_LINES)
 SLATE_TAG = "[TEAM FOOTAGE]"
 SLATE_WHAT = "[MEMBER 4], medium shot, eye level"
 
@@ -432,16 +430,15 @@ def build_map():
     draw_zone_graph(g, PROJ, labels=False, radius=NODE_R)
     S["graph"] = Sprite(g)
 
+    # one label: the Ruins, the place the voice names (19 Oct declutter: the other six zones go unlabelled)
     lab = transparent()
-    offset = {JESUS: PILE_J_R + 14, RSP: PILE_R_R + 14}
-    for zid, z in ZONES.items():
-        x, y = POS[zid]
-        text = f'{z["name_zh"]} {short_name(zid)}'
-        wt = 700 if zid == RSP else 600
-        tx = x + offset.get(zid, NODE_R + 12)
-        tw, _ = text_size(text, 22, wt)
-        rounded(lab, (tx - 8, y - 19, tx + tw + 8, y + 17), 10, fill=NAVY, alpha=0.82)
-        draw_text(lab, (tx, y - 1), text, 22, wt, INK, anchor="lm")
+    x, y = POS[RUINS]
+    text = f'{ZONES[RUINS]["name_zh"]} {short_name(RUINS)}'
+    assert text == MAP_LABEL, text
+    tx = x + NODE_R + 12
+    tw, _ = text_size(text, 22, 600)
+    rounded(lab, (tx - 8, y - 19, tx + tw + 8, y + 17), 10, fill=NAVY, alpha=0.82)
+    draw_text(lab, (tx, y - 1), text, 22, 600, INK, anchor="lm")
     S["labels"] = Sprite(lab)
 
     # soft neutral glow under the pile (illustrative emphasis, grows with the pile; no state colour)
@@ -454,7 +451,7 @@ def build_map():
     gim.putalpha(gl.point(lambda v: int(v * 0.22)))
     S["glow"] = Sprite(gim)
 
-    # date chips beside the Ruins: "Crowd control:" then three chips stacked, joined to the Ruins
+    # date chips beside the Ruins: three chips stacked, joined to the Ruins
     ruins_x, ruins_y = POS[RUINS]
     chip_h, chip_gap, fs = 50, 10, 30
     widths = [text_size(c, fs, 600)[0] + 40 for c in CHIPS]
@@ -468,10 +465,6 @@ def build_map():
         draw_text(im, (col_l + 20, y0 + chip_h / 2 + 1), c, fs, 600, INK, anchor="lm")
         chips.append(Sprite(im))
     S["chips"] = chips
-    hd = transparent()
-    hw_, _ = text_size(CHIP_HEAD, fs, 700)
-    draw_text(hd, (col_l - 16, ruins_y + 1), CHIP_HEAD, fs, 700, INK_2, anchor="rm")
-    S["chip_head"] = Sprite(hd)
 
     def conn(d, s):
         x0 = col_l + widths[0] + 8
@@ -482,7 +475,7 @@ def build_map():
     S["conn_x1"] = ruins_x - NODE_R - 3
 
     # centre the whole group (graph, labels, dots, chips) horizontally
-    boxes = [S["graph"].box, S["labels"].box, (DX0, DY0, DX1, DY1), S["chip_head"].box] + [c.box for c in chips]
+    boxes = [S["graph"].box, S["labels"].box, (DX0, DY0, DX1, DY1)] + [c.box for c in chips]
     gx0, gx1 = min(b[0] for b in boxes), max(b[2] for b in boxes)
     S["dx"] = round(W / 2 - (gx0 + gx1) / 2)
     S["extent"] = (gx0 + S["dx"], min(b[1] for b in boxes), gx1 + S["dx"], max(b[3] for b in boxes))
@@ -512,19 +505,6 @@ def build_slate():
     sub = f"{SHOT} · {int(t_in // 60)}:{t_in % 60:04.1f}-{int(t_out // 60)}:{t_out % 60:04.1f} · on camera, then voice-over · replace this slate with the take"
     draw_text(sl, (W / 2, 580), sub, 26, 500, INK_2, anchor="mm")
     return sl
-
-
-def build_tag() -> Sprite:
-    """The small scale tag over the camera (lower-left, in the lower-third slot, y 800-890)."""
-    im = transparent()
-    w1, _ = text_size(TAG_LINES[0], 32, 700)
-    w2, _ = text_size(TAG_LINES[1], 28, 500)
-    x0, y0, y1 = 60, 798, 892
-    rounded(im, (x0, y0, x0 + 28 + max(w1, w2) + 28, y1), 14, fill=NAVY_2, alpha=0.92)
-    rounded(im, (x0, y0, x0 + 6, y1), 3, fill=CYAN)
-    draw_text(im, (x0 + 28, y0 + 28), TAG_LINES[0], 32, 700, INK, anchor="lm")
-    draw_text(im, (x0 + 28, y0 + 67), TAG_LINES[1], 28, 500, INK_2, anchor="lm")
-    return Sprite(im)
 
 
 def build_body():
@@ -614,7 +594,6 @@ def build_body():
 
 STATIC = build_map()
 SLATE = build_slate()
-TAG_SPRITE = build_tag()
 BODY = build_body()
 WIPE = Image.linear_gradient("L").resize((1, 90))  # 0 at top -> 255 at bottom: soft wipe edge
 
@@ -633,21 +612,9 @@ def wipe_mask(h: int, k: float) -> Image.Image:
 
 # ---------- frame ----------
 
-_fl, _ft, _fr, _fb = text_font(FOOTER_CAM, 20, 500).getbbox(FOOTER_CAM)
-FOOTER_CAM_SCRIM = (60 + _fl - 12, 1034 + _ft - 5, 60 + _fr + 12, 1034 + _fb + 5)   # where style.footer draws it
-
-
 def camera_chrome(img: Image.Image, t: float) -> None:
-    """0-6.9 s, over the camera: card (2 s), then from "This Golden Week" (3 s) the arrivals tag and
-    its source footer. The footer gets a dark scrim (as in S17's camera overlay) so it stays legible
-    over the real take."""
+    """0-6.9 s, over the camera: the chapter card (2 s), then the take alone."""
     chapter_card(img, CARD, fade(t, BEATS["card_in"], BEATS["card_out"], 0.25))
-    k_tag = progress(t, BEATS["tag_in"], 0.15)      # quick fade-in: the 12-word tag gets the whole 3-6.9 s window
-    put_sprite(img, TAG_SPRITE, k_tag, 0, (1 - k_tag) * 14)
-    a_f = progress(t, BEATS["tag_in"], 0.3)        # the footer sources the tag, so it comes with it
-    if a_f > 0:
-        rounded(img, FOOTER_CAM_SCRIM, 8, fill=NAVY, alpha=0.92 * a_f)
-        footer(img, FOOTER_CAM, a_f)
 
 
 def draw_frame(t: float) -> Image.Image:
@@ -666,8 +633,6 @@ def draw_frame(t: float) -> Image.Image:
         put_sprite(img, STATIC["glow"], a_map * ease(arrived_fraction(t)), dx)
         put(img, dots_layer(t), DX0 + dx, DY0, a_map)
         put_sprite(img, STATIC["labels"], a_map, dx)
-        k_head = progress(t, BEATS["chip_0"], CHIP_FADE)
-        put_sprite(img, STATIC["chip_head"], a_map * k_head, dx)
         # connector to the Ruins grows from the chips
         k_conn = progress(t, BEATS["chip_0"] + 0.05, 0.3)
         if k_conn > 0:
@@ -710,13 +675,13 @@ def draw_frame(t: float) -> Image.Image:
 
 
 def cam_overlay(t: float) -> Image.Image:
-    """0-6.9 s overlay (card + tag + footer) to lay over the real camera take."""
+    """0-6.9 s overlay (the chapter card) to lay over the real camera take."""
     img = transparent()
     camera_chrome(img, t)
     return img
 
 
-STILLS = {"card": 1.0, "gap": 2.6, "tag_in": 3.1, "tag": 6.0, "cut": 7.0, "chips": 7.3, "chips_full": 7.7, "pile": 8.4,
+STILLS = {"card": 1.0, "gap": 2.6, "camera": 5.0, "cut": 7.0, "chips": 7.3, "chips_full": 7.7, "pile": 8.4,
           "map_full": 8.8, "fade": 9.0, "body": 9.4,
           "arrows": 10.5, "label": 11.4, "press": 12.9, "end": DURATION - 1 / FPS}
 

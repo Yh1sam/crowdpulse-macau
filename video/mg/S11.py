@@ -1,4 +1,4 @@
-"""Shot S11 (2:07.0-2:24.0, 17.0 s): two on-device detectors against a careful hand count.
+"""Shot S11 (2:03.5-2:20.5, 17.0 s): two on-device detectors against a careful hand count.
 
 Storyboard: docs/video/script.md, section 3 row S11, section 4 claims row S11, section 6
 ("Global look and tools", "figure" S11). Shot list: docs/video/shotlist.json (id S11).
@@ -10,34 +10,35 @@ Storyboard: docs/video/script.md, section 3 row S11, section 4 claims row S11, s
           Faces are mosaicked at the figure's own resolution before any scaling, with the
           detection boxes and the dashed far-kerb line kept on top of the mosaic. Each panel is
           cropped, fitted to 16:9 on navy (no stretching) and slowly pushed in (zoom 1.00 -> 1.06).
-7.25-17 s "count vs hand count" bar pairs, Apple -> YOLO11n: within about 20 m (97% lands at about
-          8.4 s, inside "ninety-seven percent"), densest frames (not spoken), whole wide scene (on
-          "across the whole scene", 27% just before "only twenty-seven").
+7.25-17 s "count ÷ hand count" bar pairs, Apple -> YOLO11n: within about 20 m (97% lands at about
+          8.4 s, inside "ninety-seven percent") and the whole wide scene (on "across the whole scene",
+          27% just before "only twenty-seven").
 The storyboard's times (panels to 8.6 s, bars from 8.6 s, "97" at about 9.3 s) are at 140 wpm with
 the voice from 0.3 s; the beats below are keyed to the guide voice, which reads faster and speaks
 "ninety-seven" from 7.4 s, so the panels end (and the bars start) at 7.25 s instead.
-"Apple's detector, 55" and "In the densest frames, 82" are no longer spoken (round-2 lock): both
-stay on screen in the bars, with no spoken-number emphasis.
+"Apple's detector, 55" is no longer spoken (round-2 lock): it stays on screen as the grey bar, with
+no spoken-number emphasis. Declutter (19 Oct): besides the badge and the caption, at most two text
+elements at once (the panel label; then the bar title and the bars). The densest-frames pair (61% ->
+82%, 2 frames, never spoken), its tag, the "nearby = ... · error 1.5 people per frame" line, the
+title's definition line, the CC0 credit (credited on the S20 end card) and the file-path footer left the
+picture; the badge qualifier is "11 frames · indicative". They stay in script.md (section 4, 5F).
 
 Data sources (read at render time, never retyped):
 - experiments/results/video/detector_overlay.png  the two-panel figure (picture only)
 - experiments/results/video/summary.json         near-field and whole-frame "found" %, frames
-                                                  per group (n), YOLO11n near-field MAE
-- experiments/results/video/summary.md           densest-frame "found" % (second table)
-- experiments/datasets/video/ground_truth.csv    how many frames have >= 10 nearby people
-- docs/video/shotlist.json                       duration (end_s - start_s)
+                                                  per group (n)
+- docs/video/shotlist.json                       duration (end_s - start_s) and the on-screen lines
 
 Outputs: video/build/mg/S11.mp4, video/build/mg/stills/S11_*.png, and the mosaicked panel crops
-video/build/S11_apple.png / video/build/S11_yolo.png (for the S12 laptop screen).
+video/build/S11_apple.png / video/build/S11_yolo.png (for the S12 laptop screen; S12 was dropped
+from the cut on 19 Oct and is kept for reference).
 
 Run: .venv/bin/python video/mg/S11.py            (render + stills)
      .venv/bin/python video/mg/S11.py --stills   (stills only, for checking the layout)
 """
 from __future__ import annotations
 
-import csv
 import json
-import re
 import sys
 from functools import lru_cache
 
@@ -55,7 +56,7 @@ DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 17.0 s
 # Beat times in seconds from the shot start, keyed to the guide voice video/build/guide/S11.wav
 # (say -v Daniel -r 155, 14.00 s) laid from VOICE_START: word times from its pauses (silencedetect:
 # 1.64-1.88, 4.58-4.87, 11.06-11.26, 12.51-12.73 s into the file; the 6.55-6.66 gap is the stop in
-# "app", not a pause) and prefix syntheses, 18 Oct. Shot times: "Then we tried real footage." 0.2-1.9 |
+# "app", not a pause) and prefix syntheses, 18 Oct (the 19 Oct guide is the same audio). Shot times: "Then we tried real footage." 0.2-1.9 |
 # "On eleven frames of a public-domain street clip," 2.1-4.8 (pause 4.78-5.07) | "the open Yo-lo
 # model" 5.1-6.4 ("Yo-lo" 5.7-6.2) | "in our app counted" 6.4-7.4 | "ninety-seven percent" 7.4-8.7 |
 # "as many nearby people" 8.7-9.9 | "as a careful hand count;" 9.9-11.3 | "across the whole scene,"
@@ -69,12 +70,11 @@ BEATS = {
                          # spoken (5.7-6.2)
     "to_bars": 7.25,     # "counted" (6.9-7.4): picture cross-fades to the bars; the YOLO11n panel held ~1.75 s
     "near": 7.4,         # "ninety-seven percent" (7.4-8.7): within ~20 m pair grows, 97% lands by 8.4
-    "dense": 9.5,        # not spoken ("as a careful hand count", 9.9-11.3): densest pair, with its tag
     "whole": 12.1,       # "across the whole scene" ("whole" 12.1): 27% lands by 13.1, before "twenty-seven" (13.4)
 }
 WIPE_DUR = 1.0
 APPLE_LABEL_OUT = 0.32            # after "wipe": the Apple label fades out (0.2 s), gone by 5.22 s, just before
-                                  # the wipe edge reaches the YOLO11n label's right end (x ~850 at 5.22 s), so
+                                  # the wipe edge reaches the YOLO11n label's right end (x 654 at 5.27 s), so
                                   # the two labels are never seen spliced into one line
 XFADE_DUR = 0.45
 TITLE_IN, FRAME_IN = 0.1, 0.15    # after to_bars: title and bar tracks fade in (0.5 s) as the bars start
@@ -87,52 +87,31 @@ SUMMARY = json.loads((RES / "summary.json").read_text())["variants"]
 APPLE_KEY = next(k for k in SUMMARY if k.startswith("Apple built-in, upper body"))
 YOLO_KEY = next(k for k in SUMMARY if k.startswith("YOLO11n CoreML, conf 0.25"))
 
-
-def dense_found(md: str, prefix: str) -> float:
-    """'near found, dense frames' from the second table of summary.md."""
-    section = md.split("## Where the errors come from", 1)[1].split("\n## ", 1)[0]
-    for line in section.splitlines():
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if cells and cells[0].startswith(prefix):
-            return float(re.match(r"([\d.]+)%", cells[-1]).group(1))
-    raise KeyError(prefix)
-
-
-_md = (RES / "summary.md").read_text()
-with open(ROOT / "experiments/datasets/video/ground_truth.csv", newline="") as fh:
-    _truth = list(csv.DictReader(fh))
 N_FRAMES = SUMMARY[YOLO_KEY]["near_field"]["n"]                               # 11
-N_DENSE = sum(int(r["near_count"]) >= 10 for r in _truth)                     # 2 (video_eval.py: near_count >= 10)
-YOLO_NEAR_MAE = SUMMARY[YOLO_KEY]["near_field"]["mae"]                        # 1.45 -> "1.5"
+assert SUMMARY[YOLO_KEY]["whole_frame"]["n"] == N_FRAMES                       # both pairs sum all 11 frames
 
-GROUPS = [  # (label, Apple %, YOLO11n %, note under the pair, beat)
-    ("within ≈20 m", SUMMARY[APPLE_KEY]["near_field"]["found_pct"], SUMMARY[YOLO_KEY]["near_field"]["found_pct"],
-     f"nearby = within ~20 m · YOLO11n error {YOLO_NEAR_MAE:.1f} people per frame", "near"),
-    ("densest frames", dense_found(_md, "Apple built-in, upper body"), dense_found(_md, "YOLO11n CoreML, conf 0.25"),
-     f"{N_DENSE} frames with ≥10 nearby people", "dense"),
+GROUPS = [  # (label, Apple %, YOLO11n %, beat): only the two spoken comparisons
+    ("within ≈20 m", SUMMARY[APPLE_KEY]["near_field"]["found_pct"], SUMMARY[YOLO_KEY]["near_field"]["found_pct"], "near"),
     ("whole wide scene", SUMMARY[APPLE_KEY]["whole_frame"]["found_pct"], SUMMARY[YOLO_KEY]["whole_frame"]["found_pct"],
-     None, "whole"),
+     "whole"),
 ]
 
-BADGE_DETAIL = f"{N_FRAMES} hand-counted frames · indicative, not a benchmark"
+BADGE_DETAIL = f"{N_FRAMES} frames · indicative"              # at most a 3-word qualifier in the pill
 LABEL_APPLE = "Apple's built-in detector"
-LABEL_YOLO = "YOLO11n (Ultralytics), open model on the device"
-CREDIT = "'Diagonal crosswalk at Yonge & Dundas in Toronto', Raysonho, Wikimedia Commons, CC0 · faces pixelated by us"
-FOOTER = "experiments/results/video/summary.md"
-TITLE = "count vs hand count"
-DEFINITION = ("= detector count ÷ hand count, summed over the frames in each group "
-              "(not the share of individuals detected)")
+LABEL_YOLO = "YOLO11n, open model on the device"           # Ultralytics is credited on the S20 end card
+TITLE = "count ÷ hand count"                               # a count ratio, not the share of people detected
+assert all(len(x.split()) <= 6 for x in (LABEL_APPLE, LABEL_YOLO, TITLE)) and len(TITLE.split()) <= 5
 
 # guards: the shot list's wording must match what is drawn, and the spoken numbers the data
 _ost = _shot["on_screen_text"]
-for v in (f"Badge (top-right): REAL DATA · {BADGE_DETAIL}", f"Panel labels: {LABEL_APPLE} / {LABEL_YOLO}",
-          f"Bar title: {TITLE} {DEFINITION}", f"Small, under the densest pair: {GROUPS[1][3]}", GROUPS[0][3],
-          f"Credit: {CREDIT}", f"Footer: {FOOTER}"):
+for v in (f"Badge (top-right): REAL DATA · {BADGE_DETAIL} |", f"Panel labels: {LABEL_APPLE} / {LABEL_YOLO} |",
+          f"Bar title: {TITLE} |", f"Bar pairs (Apple → YOLO11n): {' · '.join(g[0] for g in GROUPS)}"):
     assert v in _ost, f"shotlist.json on_screen_text no longer matches: {v!r}"
+assert not any(k in _ost for k in ("Credit:", "Footer:", "densest")), "S11 dropped its credit, footer and densest pair"
 _vis = _shot["visual"]
-for label, apple, yolo, _note, _beat in GROUPS:
+for label, apple, yolo, _beat in GROUPS:
     assert f"{apple:.0f}% → {yolo:.0f}%" in _vis, (label, apple, yolo)
-for v in ("on eleven frames", f"counted {GROUPS[0][2]:.0f} percent as many nearby people", f"only {GROUPS[2][2]:.0f}."):
+for v in ("on eleven frames", f"counted {GROUPS[0][2]:.0f} percent as many nearby people", f"only {GROUPS[1][2]:.0f}."):
     assert v in _shot["narration"].lower(), f"narration no longer matches the data: {v!r}"
 assert N_FRAMES == 11  # "eleven frames" is spoken as a word
 
@@ -289,7 +268,7 @@ LABEL_YOLO_L = panel_label(LABEL_YOLO)
 
 
 def scrims() -> Image.Image:
-    """Navy gradients behind the top-right badge and the bottom credit / footer / legend rows."""
+    """Navy gradients behind the top-right badge and the bottom rows (caption band, legend strip)."""
     a = np.zeros((H, W), np.float32)
     top = np.clip(1 - np.arange(170) / 170, 0, 1) ** 1.6 * 0.55
     a[:170] = top[:, None]
@@ -304,12 +283,11 @@ SCRIMS = scrims()
 
 
 def persistent() -> Image.Image:
-    """Badge, CC0 credit, evidence legend and footer: on for the whole shot."""
+    """Badge and evidence legend: on for the whole shot (no credit or footer line: the CC0 clip is
+    credited on the S20 end card, and the source file is in script.md section 4)."""
     lay = transparent()
     badge(lay, "REAL DATA", BADGE_DETAIL)
-    put(lay, (60, 1001), CREDIT, 20, 500, INK_2)
     legend_strip(lay)
-    footer(lay, FOOTER)
     return lay
 
 
@@ -317,13 +295,13 @@ PERSIST = persistent()
 
 # bar chart geometry
 NAME_X, BAR_X0, BAR_X100 = 160, 380, 1630           # bar-name column, 0 % and 100 % (the hand count)
-BAR_H, BAR_GAP = 40, 10
-ROW_Y = [300, 500, 700]                              # top of each group label
+BAR_H, BAR_GAP = 52, 12
+ROW_Y = [330, 590]                                   # top of each group label
 APPLE_COL, YOLO_COL = GREY, CYAN
 
 
 def bar_y(g: int, k: int) -> int:
-    return ROW_Y[g] + 46 + k * (BAR_H + BAR_GAP)
+    return ROW_Y[g] + 50 + k * (BAR_H + BAR_GAP)
 
 
 def bar_x(pct: float) -> float:
@@ -333,8 +311,6 @@ def bar_x(pct: float) -> float:
 def chart_title_layer() -> Image.Image:
     lay = transparent()
     put(lay, (140, 136), TITLE, 56, 700, INK)
-    for i, ln in enumerate(wrap(DEFINITION, 26, 500, 1640)):
-        put(lay, (140, 214 + i * 34), ln, 26, 500, INK_2)
     return lay
 
 
@@ -346,10 +322,10 @@ def chart_frame_layer() -> Image.Image:
         for k, (name, col) in enumerate((("Apple", INK_2), ("YOLO11n", CYAN))):
             y = bar_y(g, k)
             d.rounded_rectangle((BAR_X0, y, BAR_X100, y + BAR_H), 8, fill=(*NAVY_2, 255))
-            put(lay, (NAME_X, y + BAR_H / 2), name, 24, 600, col, anchor="lm")
-    # 100 % reference (detector count = hand count). Only a bare tick: the storyboard's required
-    # lines for S11 hold the one-line definition in the title, so no extra wording here.
-    y0, y1 = ROW_Y[0] + 30, bar_y(2, 1) + BAR_H + 8
+            put(lay, (NAME_X, y + BAR_H / 2), name, 26, 600, col, anchor="lm")
+    # 100 % reference (detector count = hand count). Only a bare tick: the title "count ÷ hand
+    # count" says what 100% means, so no extra wording here.
+    y0, y1 = ROW_Y[0] + 30, bar_y(len(GROUPS) - 1, 1) + BAR_H + 8
     for y in range(y0, y1, 14):
         d.line([(BAR_X100, y), (BAR_X100, min(y + 7, y1))], fill=(*INK_2, 255), width=2)
     put(lay, (BAR_X100, ROW_Y[0] + 16), "100%", 22, 600, INK_2, anchor="ms")
@@ -389,7 +365,7 @@ def draw_bars(img: Image.Image, t: float) -> None:
     lay = transparent()
     d = ImageDraw.Draw(lay)
     labels = []
-    for g, (_label, apple_pct, yolo_pct, note, beat) in enumerate(GROUPS):
+    for g, (_label, apple_pct, yolo_pct, beat) in enumerate(GROUPS):
         start = BEATS[beat]
         for k, (pct, col) in enumerate(((apple_pct, APPLE_COL), (yolo_pct, YOLO_COL))):
             p = progress(t, start + 0.12 * k, GROW_DUR)
@@ -400,16 +376,11 @@ def draw_bars(img: Image.Image, t: float) -> None:
             r = int(min(8, (x1 - BAR_X0) / 2))
             if x1 - BAR_X0 >= 1:
                 d.rounded_rectangle((BAR_X0, y, x1, y + BAR_H), r, fill=(*col, 255))
-            labels.append((f"{pct:.0f}%", bar_x(pct) - 14, y + BAR_H / 2,
+            labels.append((f"{pct:.0f}%", bar_x(pct) - 16, y + BAR_H / 2,
                            progress(t, start + 0.12 * k + GROW_DUR * 0.6, 0.35)))
-        if note:
-            labels.append((note, None, bar_y(g, 1) + BAR_H + 12, progress(t, start + GROW_DUR, 0.4)))
     img.alpha_composite(lay)
     for text, x, y, a in labels:
-        if x is None:
-            put(img, (BAR_X0, y), text, 22, 500, INK_2, a)
-        else:
-            put(img, (x, y), text, 28, 700, NAVY, a, anchor="rm")
+        put(img, (x, y), text, 30, 700, NAVY, a, anchor="rm")
 
 
 def draw_frame(t: float) -> Image.Image:
@@ -434,7 +405,7 @@ STILLS = {  # beat name -> time (s)
     "wipe": 5.1,
     "yolo": 6.5,
     "near": 8.5,
-    "dense": 10.7,
+    "whole": 13.2,       # "only twenty-seven": the whole-scene pair landed
     "all": 16.9,
 }
 

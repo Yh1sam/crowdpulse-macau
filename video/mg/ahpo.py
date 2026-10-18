@@ -650,7 +650,7 @@ class MapScene:
     def render(self, t: float, cam: Cam = HOME, *, draw_in: dict | None = None, senado_col=WARNING, senado_dens=0.5,
                senado_alpha=1.0, dots_alpha=1.0, labels: dict | None = None, pin: tuple | None = None,
                pin_label_alpha=0.0, ahpo: dict | None = None, staff: dict | None = None,
-               route: dict | None = None, detour: dict | None = None, walkers=(), lane_k: float = 0.0, lane_w: float = 17.0, lane=None,
+               route: dict | list | None = None, detour: dict | None = None, walkers=(), lane_k: float = 0.0, lane_w: float = 17.0, lane=None,
                label_fade: float = 1.0) -> Image.Image:
         img = self.base(cam, draw_in)
         d = ImageDraw.Draw(img, "RGBA")
@@ -662,17 +662,22 @@ class MapScene:
             if s1 > 1:
                 path_c = Polyline([cam(p) for p in DETOUR_PATH.pts])
                 dashed(d, path_c, 0, s1 * z, SAFE, 6 * wz, phase=-detour.get("phase", 0.0), alpha=detour.get("alpha", 1.0))
-        # her main route: dotted while it is only her plan (S01), solid when it is kept open (S18)
-        if route:
-            s0, s1 = route["s0"], route["s1"]
+        # her main route: dotted while it is only her plan (S01); in S18 dashed in the vest colour while staff check
+        # it (the dashes run along it); solid otherwise. `route` is one dict or a list of them (S18 draws both).
+        for rt in ([route] if isinstance(route, dict) else route or []):
+            s0, s1 = rt["s0"], rt["s1"]
             if s1 > s0 + 1:
-                if route.get("style") == "dotted":
+                if rt.get("style") in ("dotted", "dashed"):
                     path_c = Polyline([cam(p) for p in MAIN_PATH.points(s0, s1)])
-                    dashed(d, path_c, 0, path_c.length, INK, 4.5 * wz, dash=0.01, gap=13.0 * wz,
-                           phase=-route.get("phase", 0.0), alpha=route.get("alpha", 1.0))
+                    if rt["style"] == "dotted":
+                        dashed(d, path_c, 0, path_c.length, INK, 4.5 * wz, dash=0.01, gap=13.0 * wz,
+                               phase=-rt.get("phase", 0.0), alpha=rt.get("alpha", 1.0))
+                    else:
+                        dashed(d, path_c, 0, path_c.length, rt.get("colour", INK), 5 * wz, dash=16.0 * wz, gap=10.0 * wz,
+                               phase=-rt.get("phase", 0.0), alpha=rt.get("alpha", 1.0))
                 else:
                     pts = [cam(p) for p in MAIN_PATH.points(s0, s1)]
-                    poly_line(d, pts, INK, 5 * wz, route.get("alpha", 1.0) * 0.9)
+                    poly_line(d, pts, INK, 5 * wz, rt.get("alpha", 1.0) * 0.9)
         # people dots
         r_dot = 4.6 * wz
         if dots_alpha > 0:

@@ -1,39 +1,39 @@
-"""Shot S07, "How is ours different?" (0:42.0-0:59.0, 17.0 s), [MEMBER 4] voice-over. Motion graphic.
+"""Shot S07, "How is ours different?" (0:39.5-1:00.0, 20.5 s), [MEMBER 4] voice-over. Motion graphic.
 
-The WHY -> HOW hinge. Credits the police crowd forecast and early-warning system and its planned
-expansion (on screen), states the team's two aims (privacy, no one left behind), then claims only
-what CrowdPulse proposes: movable phones that send only numbers, 5-15 minute forecasts that say how
-sure they are (a confidence score), and a person's approval.
+The WHY -> HOW hinge. Credits the police crowd warning system and its planned expansion (on screen),
+states the team's two aims (privacy, no one left behind), then claims only what CrowdPulse proposes, as
+one loop: movable phones that send only numbers, forecasts that say how sure they are, and detours
+checked for stairs that a person must approve. Since 19 Oct the shot ends on ONE clean two-column
+comparison (a judge asked for the difference from the existing system to be explained more directly):
+"Police system (public information)" on the left, "What we propose" on the right. It replaces the dense
+police panel and the "What we propose" keyword line, and the phones / packets / forecast chips on the map.
 
 Beats (keyed to the guide voice, see BEATS):
   "Macau's police already run a crowd warning system here."
-        The 7-zone graph. A soft shaded band lights up over the zone model's whole corridor
-        (Ruins -> Company of Jesus Square -> Rua de S. Paulo -> St. Dominic's -> Senado); the police
-        panel (system name + the "Officially: ..." line) labels it with a leader line, and the
-        "2026 Policy Address" line comes in under it. The band is an area only: no camera positions
-        are drawn. It ends flat just past Senado's disc, short of Av. de Almeida Ribeiro ("Ruins to
-        Senado").
+        The 7-zone graph on the right. A soft shaded band lights up over the zone model's whole corridor
+        (Ruins -> Company of Jesus Square -> Rua de S. Paulo -> St. Dominic's -> Senado), labelled
+        "Ruins to Senado", and brightens once on "here". The band is an area only: no camera positions
+        are drawn. It ends flat just past Senado's disc, short of Av. de Almeida Ribeiro. On the left the
+        police column builds on the voice (header, its two items, then the Policy Address line under it)
+        and stays to the end of the shot.
   "We believe crowd safety shouldn't cost anyone their privacy, or leave anyone behind."
-        The map stays as it is. The police lines leave at 6 s; two principle chips build in their
-        place, "Privacy" (a crossed-out picture) on "privacy" and "No one left behind" (a wheelchair)
-        on "leave anyone behind". No numbers, no claims: the team's aims, as the voice says.
-  "So we propose movable phones that send only numbers, and forecasts that say how sure they are."
-        The chips leave. One phone per sensor in shared/zones.json drops, inside the band
-        and on the Tercena route alike (no square is singled out; each phone sits clear of other
-        zones' phones); number packets flow to a server, fanning over its racks and fading in;
-        every zone gets +5 / +10 / +15 min chips, then a confidence dot in each chip; the "What
-        we propose" line builds up item by item.
+        The map fades out; two principle chips build on the right, "Privacy" (a crossed-out picture) on
+        "privacy" and "No one left behind" (a wheelchair) on "leave anyone behind". No numbers, no claims:
+        the team's aims, as the voice says.
+  "So we propose one loop: movable phones that send only numbers, forecasts that say how sure they are,
+   and detours checked for stairs that a person must approve."
+        The chips' words fade and their two icons move into the right column, onto its first and third
+        stations; "What we propose" comes in on "propose"; the loop draws on "one loop" (four stations
+        linked downwards, a return arrow back to the top); the items arrive on "movable", "forecasts"
+        (a gauge whose needle settles on "how sure"), "detours" and "a person"; the return arrow lights on
+        "approve" and both columns hold for the last 2.1 s. The two columns are never aligned row by row
+        and carry no ticks or crosses, so nothing reads as a feature the police system lacks.
 
 Data sources (nothing below is retyped):
-- docs/video/shotlist.json, S07: duration, narration and every on-screen line (only the timing
-  prefixes are stripped), each checked word for word against the S07 storyboard row in
-  docs/video/script.md section 3.
-- shared/zones.json: the 7 zones and 7 streets (style.draw_zone_graph) and the 9 sensors (one phone
-  each). The band's corridor is the shortest street path from the Ruins to Senado Square.
-- shared/config.json: forecast_horizons_min (the chips), checked against the "What we propose" line.
-
-The zoom out to a Macau schematic (grey pins for border posts and scenic areas), keyed to the old
-", and plan to expand it", went when those words left the voice (18 Oct restructure).
+- docs/video/shotlist.json, S07: duration, narration and every on-screen line (only the timing labels are
+  stripped), each checked word for word against the S07 storyboard row in docs/video/script.md section 3.
+- shared/zones.json: the 7 zones and 7 streets (style.draw_zone_graph). The band's corridor is the
+  shortest street path from the Ruins to Senado Square.
 
 Output: video/build/mg/S07.mp4 and video/build/mg/stills/S07_<beat>.png.
 Run:    .venv/bin/python video/mg/S07.py                          full render + stills
@@ -60,44 +60,51 @@ SHOT = "S07"
 # ---------------------------------------------------------------- spec (read, never retyped)
 
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 17.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 20.5 s
 NARRATION = _shot["narration"]
 
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} |"))
 _cols = [c.strip() for c in _row.strip().strip("|").split(" | ")]
 assert len(_cols) == 7 and _cols[3] == NARRATION, "storyboard row S07 and shotlist.json disagree on the narration"
 
-_PREFIX = re.compile(r"^(?:Chapter card \(top-left\)|From 0 s, held to 6 s|From 2 s, held to 6 s|"
-                     r"6\.4-9\.5 s, two principle chips|9\.8-17 s|Footer): ")
-_lines = []
+_KEYS = ["Chapter card", "Left column", "Under it", "Band label", "Two principle chips", "Right column", "Footer"]
+_spec = {}
 for _part in _shot["on_screen_text"].split(" | "):
-    _m = _PREFIX.match(_part.strip())
-    assert _m, f"unexpected on-screen part: {_part!r}"
-    _lines.append(_part.strip()[_m.end():])
-CARD, _police, POLICY, _principles, TAGLINE, FOOTER = _lines
-POLICE_NAME, POLICE_STATUS = _police.split(" · ")
-PRINCIPLES = _principles.split(" · ")                              # ["Privacy", "No one left behind"]
-assert len(PRINCIPLES) == 2, PRINCIPLES
-for _txt in (CARD, POLICE_NAME, POLICE_STATUS, POLICY, *PRINCIPLES, TAGLINE, FOOTER):
+    _m = re.match(r"^([A-Z][a-z ]+?)(?: \(([^)]*)\))?: (.*)$", _part.strip())
+    assert _m and _m.group(1) in _KEYS, f"unexpected on-screen part: {_part!r}"
+    _spec[_m.group(1)] = _m.group(3)
+assert list(_spec) == _KEYS, list(_spec)                          # 19 Oct declutter: nothing else on screen
+CARD, POLICY, BAND_LABEL, FOOTER = _spec["Chapter card"], _spec["Under it"], _spec["Band label"], _spec["Footer"]
+LEFT_HEAD, *LEFT_ITEMS = _spec["Left column"].split(" · ")
+PRINCIPLES = _spec["Two principle chips"].split(" · ")            # ["Privacy", "No one left behind"]
+RIGHT_HEAD, *RIGHT_ITEMS = _spec["Right column"].split(" · ")
+assert LEFT_HEAD == "Police system (public information)" and RIGHT_HEAD == "What we propose", (LEFT_HEAD, RIGHT_HEAD)
+assert len(LEFT_ITEMS) == 2 and len(RIGHT_ITEMS) == 4 and len(PRINCIPLES) == 2
+for _txt in (CARD, LEFT_HEAD, *LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, RIGHT_HEAD, *RIGHT_ITEMS, FOOTER):
     assert f'"{_txt}"' in _cols[5], f"not in the storyboard row: {_txt!r}"
-assert not any(c.isdigit() for c in _principles), "the principle chips carry no numbers"
-assert "horizon and accuracy not published" in POLICE_STATUS      # section 6: kept next to the system's name
-assert text_size(FOOTER, 20, 500)[0] <= 1150, "footer must fit one line of the footer slot"
-
-HORIZONS = json.loads((ROOT / "shared" / "config.json").read_text())["forecast_horizons_min"]   # [5, 10, 15]
-assert f"{HORIZONS[0]}-{HORIZONS[-1]} min forecasts" in TAGLINE, TAGLINE
+assert not any(c.isdigit() for c in "".join(PRINCIPLES + RIGHT_ITEMS)), "the team's aims and proposal carry no numbers"
+# never set the two systems against each other in words (script.md section 6, "Never say or show")
+_all = " ".join([LEFT_HEAD, *LEFT_ITEMS, POLICY, RIGHT_HEAD, *RIGHT_ITEMS]).lower()
+assert not any(w in _all for w in ("better", "replace", "lack", "we'd add", "instead")), _all
+# 19 Oct declutter: labels of at most 6 words, a short source footer that fits one line of the footer slot
+assert all(len(t.split()) <= 6 for t in (*LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, *RIGHT_ITEMS)), "a label is too long"
+assert len(FOOTER.replace(" · ", " ").split()) <= 7 and text_size(FOOTER, 20, 500)[0] <= 1150, FOOTER
 
 # The narration, clause by clause as the guide voice pauses (BEATS are keyed to these).
 CLAUSES = ["Macau's police already run a crowd warning system here.",
            "We believe crowd safety shouldn't cost anyone their privacy,", "or leave anyone behind.",
-           "So we propose movable phones that send only numbers,", "and forecasts that say how sure they are."]
+           "So we propose one loop:", "movable phones that send only numbers,", "forecasts that say how sure they are,",
+           "and detours checked for stairs that a person must approve."]
 assert " ".join(CLAUSES) == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
+# each right-column item arrives on the voice's own words for it
+_LOOP_WORDS = [("movable phones", "only numbers"), ("forecasts", "how sure"), ("detours", "stairs"), ("a person", "approve")]
+assert all(a in NARRATION and b in NARRATION for a, b in _LOOP_WORDS)
+assert [it.split()[0].lower() for it in RIGHT_ITEMS] == ["movable", "forecasts", "detours", "a"], RIGHT_ITEMS
 
 # ---------------------------------------------------------------- zone model
 
 ZONES = zone_graph()["zones"]
 EDGES = zone_graph()["edges"]
-SENSORS = zone_graph()["sensors"]
 
 
 def street_path(a: str, b: str) -> list[str]:
@@ -124,7 +131,7 @@ CORRIDOR = street_path("ruins_st_paul", "senado_square")
 # the storyboard's corridor, in order (Company of Jesus Square sits on it, between the Ruins and Rua de S. Paulo)
 assert [z for z in CORRIDOR if z != "jesus_square"] == ["ruins_st_paul", "rua_sao_paulo", "st_dominic", "senado_square"], CORRIDOR
 assert "jesus_square" in CORRIDOR
-assert any(s["zone_id"] in CORRIDOR for s in SENSORS) and any(s["zone_id"] == "tercena_corridor" for s in SENSORS)
+assert BAND_LABEL == "Ruins to Senado"                             # the band's two ends, as the corridor runs
 
 # ---------------------------------------------------------------- timing
 # Guide voice video/build/guide/S07.wav (say -v Daniel -r 155), laid at 0.2 s into the shot.
@@ -132,58 +139,76 @@ assert any(s["zone_id"] in CORRIDOR for s in SENSORS) and any(s["zone_id"] == "t
 #   0.20-3.49   "Macau's police already run a crowd warning system here."
 #   3.73-7.04   "We believe crowd safety shouldn't cost anyone their privacy,"
 #   7.25-8.68   "or leave anyone behind."
-#   8.94-11.99  "So we propose movable phones that send only numbers,"
-#   12.21-14.52 "and forecasts that say how sure they are."   (then 2.5 s without voice)
-# Word times inside a clause from synthesising prefixes of the line, read off the wav's 20 ms energy
-# envelope: "privacy" 6.40, "leave" 7.38, "behind" 8.18, "propose" 9.32, "movable" 9.80,
-# "phones" 10.24, "send" 10.80, "only" 11.10, "numbers" 11.40, "forecasts" 12.36, "how sure" 13.46.
+#   8.94-10.32  "So we propose one loop:"
+#   10.59-12.80 "movable phones that send only numbers,"
+#   13.03-15.16 "forecasts that say how sure they are,"
+#   15.36-18.41 "and detours checked for stairs that a person must approve."   (then 2.1 s without voice)
+# Word times inside a clause from the speech end of `say` on the words before them (guide.spoken_text
+# applied), plus 0.2 s: "police" 0.85, "crowd warning system" 1.88, "here" 3.13, "privacy" 6.63,
+# "leave" 7.59, "behind" 8.16, "propose" 9.56, "one loop" 10.0, "movable" 10.59, "phones" 11.13,
+# "only numbers" 12.07, "forecasts" 13.03, "how sure" 14.29, "detours" 15.71, "stairs" 16.82,
+# "a person" 17.32, "approve" 18.04.
 # re-key to the real voice take (the team speaks at about 140 wpm)
 BEATS = {
     "card": 0.0,          # chapter card in (out after about 2 s)
-    "panel": 0.0,         # police name + "Officially: ..." lines, held to about 6 s
+    "map": 0.0,           # the zone graph, on the right
     "band": 0.15,         # "Macau's police": the band sweeps Ruins -> Senado
-    "policy": 2.0,        # the "2026 Policy Address" line, as the card goes (on screen only; held to about 6 s)
-    "here": 3.0,          # "here": the band brightens once
-    "panel_out": 5.85,    # police lines out (gone by about 6.15), during "...cost anyone their"
-    "privacy": 6.35,      # "privacy": first principle chip, in the panel's place
-    "behind": 7.35,       # "leave anyone behind": second principle chip
-    "propose": 8.94,      # "So we propose": the band quietens
-    "chips_out": 9.45,    # principle chips out (gone by about 9.75), before the server comes in
-    "tag": 9.8,           # "movable phones": "What we propose" line, "movable phones"
-    "phones": 10.2,       # "phones": the phones drop (all down by about 11.25)
-    "server": 10.4,       # the server comes in
-    "packets": 10.8,      # "send": number packets flow (first wave; more waves follow)
-    "numbers": 11.1,      # "only numbers": "numbers only" on the line
-    "forecasts": 12.35,   # "forecasts": +5 / +10 / +15 min chips, zone by zone, and the line item
-    "confidence": 13.45,  # "how sure": a confidence dot in every chip
-    "approves": 14.6,     # end of speech: "a person approves" (reads for 2.4 s to the end)
+    "left": 0.85,         # "police": the police column and its header
+    "band_label": 1.4,    # "Ruins to Senado", as the band reaches St. Dominic's
+    "left_1": 1.88,       # "crowd warning system": "Real-time monitoring and alerts"
+    "left_2": 2.6,        # "system here": "Zone forecasts planned"
+    "here": 3.13,         # "here": the band brightens once
+    "policy": 3.75,       # sentence ends: the 2026 Policy Address line under the column (on screen only)
+    "map_out": 4.6,       # "crowd safety": the map and its label fade (gone by 5.1); the column reads alone
+    "privacy": 6.63,      # "privacy": first principle chip
+    "behind": 7.59,       # "leave anyone behind": second principle chip
+    "fold": 9.1,          # "So we propose": the chips' words fade, their icons move into the right column
+    "right": 9.3,         # the right column's card and its four empty stations
+    "right_head": 9.56,   # "propose": "What we propose"
+    "loop": 10.0,         # "one loop": the loop draws (links down, return arrow up)
+    "item_0": 10.65,      # "movable phones": "Movable phones, numbers only"
+    "item_1": 13.05,      # "forecasts": "Forecasts that state their confidence" (gauge icon)
+    "needle": 14.3,       # "how sure": the gauge's needle settles
+    "item_2": 15.75,      # "detours": "Detours checked for stairs"
+    "item_3": 17.35,      # "a person": "A person must approve" (person icon)
+    "close": 18.05,       # "approve": the return arrow lights; the loop is closed
 }
 CARD_HOLD = 2.0
-PACKET_WAVES = [BEATS["packets"], 12.4, 13.9, 15.4]   # numbers keep flowing while the shot holds
-PANEL_FADE = 0.3
+FADE = 0.35
+# every right-column item reads for at least 0.3 s per word + 0.5 s (19 Oct declutter, rule 5)
+for _i, _it in enumerate(RIGHT_ITEMS):
+    assert DURATION - BEATS[f"item_{_i}"] >= 0.3 * len(_it.split()) + 0.5, _it
+assert BEATS["map_out"] - BEATS["band_label"] >= 0.3 * len(BAND_LABEL.split()) + 0.5
+assert DURATION - (18.41) >= 2.0, "the finished comparison holds for 2 s after the voice"
 
 # ---------------------------------------------------------------- layout and colours
 
-GRAPH_BOX = (600, 190, 1100, 800)
+GRAPH_BOX = (1200, 200, 1700, 820)                  # the map, on the right (where the right column comes later)
 PROJ = project(GRAPH_BOX)
 ZPOS = {z["id"]: PROJ(z["lat"], z["lon"]) for z in ZONES}
 R = 26
 BAND_HW = 64                                        # half-width of the police band (px)
 BAND = tuple(int(c) for c in lerp(BLUE, INK, 0.30))
-CHIP_FILL = tuple(int(c) for c in lerp(NAVY_2, CYAN, 0.28))
-SERVER = (330, 520)
-TAG_Y = 852                                         # "What we propose" line (caption band starts at y 926)
-TAG_SIZE = 32
 
-PANEL_X0, PANEL_X1, PANEL_Y0 = 60, 820, 150         # police panel (screen-fixed)
-PANEL_PAD = 26
-PRINCIPLE_H, PRINCIPLE_GAP, PRINCIPLE_SIZE = 84, 16, 36   # principle chips, stacked in the panel's place
-GRAPH_TAG = "zone model · schematic"
-
-SHORT = {"tercena_corridor": "Rua da Tercena", "rua_sao_paulo": "Rua de S. Paulo", "almeida_ribeiro": "Av. de Almeida Ribeiro"}
-LABEL_DY = {"tercena_corridor": -9}                 # lift this tag clear of St. Dominic's circle below it
-LABEL_SIZE = 22
-CHIP_GAP = 8
+COL_Y0 = 200                                        # both column cards start here (chapter card: y 48-112)
+L_BOX = (60, COL_Y0, 900)                           # left card x0, y0, x1
+R_BOX = (1020, COL_Y0, 1860)                        # right card x0, y0, x1
+PAD = 36
+HEAD_SIZE, ITEM_SIZE, POLICY_SIZE = 34, 31, 27
+L_ITEM_Y = [COL_Y0 + 108, COL_Y0 + 166]             # left items: top of the text line
+L_RULE_Y = COL_Y0 + 230                             # thin rule above the Policy Address line
+L_POLICY_Y = COL_Y0 + 252
+L_Y1 = COL_Y0 + 318
+ST_X = R_BOX[0] + 112                               # right column: station centres
+ST_Y = [COL_Y0 + 150 + 100 * i for i in range(4)]   # 350, 450, 550, 650
+ST_R = 34
+LOOP_X = R_BOX[0] + 50                              # the return arrow runs up this x, left of the stations
+R_TEXT_X = ST_X + ST_R + 28
+R_Y1 = ST_Y[-1] + ST_R + 44
+assert R_Y1 <= 800, "the right column must stay clear of the lower area and the caption band (y 920-990)"
+PRINCIPLE_H, PRINCIPLE_GAP, PRINCIPLE_SIZE = 84, 16, 36   # principle chips, stacked on the right
+PRINCIPLE_CX = (R_BOX[0] + R_BOX[2]) / 2
+PRINCIPLE_Y0 = 400
 
 
 def ease_out_back(t: float, k: float = 1.25) -> float:
@@ -250,71 +275,11 @@ def put_text(img: Image.Image, x: float, y: float, text: str, size: int, weight:
     paste(img, spr, x0 + dx, y + dy, alpha)
 
 
-@lru_cache(maxsize=None)
-def glow_spr(colour, r: int, blur: int) -> Image.Image:
-    size = 2 * (r + 3 * blur)
-    im = Image.new("RGBA", (size, size), (*colour, 0))
-    a = Image.new("L", (size, size), 0)
-    ImageDraw.Draw(a).ellipse((size / 2 - r, size / 2 - r, size / 2 + r, size / 2 + r), fill=255)
-    im.putalpha(a.filter(ImageFilter.GaussianBlur(blur)))
-    return im
-
-
-@lru_cache(maxsize=None)
-def phone_spr() -> Image.Image:
-    s = 0.42
-    w, h = int(44 * s) + 4, int(80 * s) + 4
-    im = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0))
-    phone_icon(ImageDraw.Draw(im), w * SS / 2, h * SS / 2, s * SS, fill=INK, screen=tuple(int(c) for c in lerp(NAVY_3, CYAN, 0.45)))
-    return _down(im, w, h)
-
-
-@lru_cache(maxsize=None)
-def server_spr() -> Image.Image:
-    s = 1.15
-    w, h = int(110 * s), int(100 * s)
-    im = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0))
-    server_icon(ImageDraw.Draw(im), w * SS / 2, h * SS / 2 + 4 * SS, s * SS, fill=INK_2)
-    return _down(im, w, h)
-
-
-@lru_cache(maxsize=None)
-def pill_spr(text: str, size: int, fill, text_fill, outline=None, h: int = 30, pad: int = 12, extra: int = 0) -> Image.Image:
-    """A pill with its text; `extra` px of room at the right (for the confidence dot)."""
-    tw = text_w(text, size, 700)
-    w = int(tw + 2 * pad + extra)
-    im = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    d.rounded_rectangle((SS, SS, w * SS - SS, h * SS - SS), (h * SS) // 2 - SS, fill=(*fill, 255),
-                        outline=(*outline, 255) if outline else None, width=2 * SS)
-    im = _down(im, w, h)
-    spr, dx, dy = text_spr(text, size, 700, text_fill)
-    x = pad - 2 if extra else (w - spr.width) / 2           # with a dot: text left, dot at the right
-    im.alpha_composite(spr, dest=(int(round(x)), int(round((h - spr.height) / 2))))
-    return im
-
-
-DOT_D, DOT_GAP = 10, 7
-
-
-def chip_text(h_min: int) -> str:
-    return f"+{h_min} min" if h_min == HORIZONS[-1] else f"+{h_min}"
-
-
-def chip_spr(h_min: int) -> Image.Image:
-    return pill_spr(chip_text(h_min), 20, CHIP_FILL, INK, CYAN, h=30, pad=11, extra=DOT_D + DOT_GAP)
-
-
-@lru_cache(maxsize=None)
-def dot_spr() -> Image.Image:
-    d_ = DOT_D + 2
-    im = Image.new("RGBA", (d_ * SS, d_ * SS), (0, 0, 0, 0))
-    ImageDraw.Draw(im).ellipse((SS, SS, (d_ - 1) * SS, (d_ - 1) * SS), fill=(*INK, 255))
-    return _down(im, d_, d_)
-
-
-def packet_spr() -> Image.Image:
-    return pill_spr("123", 20, CYAN, NAVY, None, h=30, pad=10)
+def put_text_mid(img: Image.Image, x: float, cy: float, text: str, size: int, weight: int = 400, fill=INK,
+                 alpha: float = 1.0) -> None:
+    """Left-aligned text whose ink is centred vertically on cy."""
+    _, t_, _, b = text_font(text, size, weight).getbbox(text, anchor="la")
+    put_text(img, x, cy - (t_ + b) / 2, text, size, weight, fill, alpha)
 
 
 # ---------------------------------------------------------------- the police band
@@ -328,15 +293,6 @@ def _seg_dist(p, a, b) -> float:
     dx, dy = bx - ax, by - ay
     k = clamp(((p[0] - ax) * dx + (p[1] - ay) * dy) / (dx * dx + dy * dy or 1))
     return math.hypot(p[0] - ax - k * dx, p[1] - ay - k * dy)
-
-
-def band_dist(p) -> float:
-    """Distance from the band's centre line; a point past the band's flat end at Senado counts as
-    outside the band (at least BAND_HW away)."""
-    d = min(_seg_dist(p, a, b) for a, b in zip(BAND_PTS, BAND_PTS[1:]))
-    (ax, ay), (bx, by) = BAND_PTS[-2], BAND_PTS[-1]
-    over = ((p[0] - bx) * (bx - ax) + (p[1] - by) * (by - ay)) / math.hypot(bx - ax, by - ay)
-    return max(d, BAND_HW + over) if over > 0 else d
 
 
 def _partial(pts, k: float):
@@ -401,129 +357,10 @@ def _band_clear_of(zid: str, pad: int = 6, max_a: int = 40) -> bool:
 
 assert all(_band_clear_of(z["id"]) for z in ZONES if z["id"] not in CORRIDOR), "the band reaches a zone off the corridor"
 
-# band anchor for the panel's leader line: left edge of the band beside Company of Jesus Square
-_a, _b = ZPOS[CORRIDOR[0]], ZPOS[CORRIDOR[1]]
-BAND_ANCHOR = (lerp(_a[0], _b[0], 0.55) - BAND_HW * 0.72, lerp(_a[1], _b[1], 0.55))
-
-# ---------------------------------------------------------------- zone labels, chips, phones
-
-
-def zone_label(z: dict) -> str:
-    return f'{z["name_zh"]} {SHORT.get(z["id"], z["name"])}'
-
-
-def label_box(z: dict):
-    """Label tag to the right of the zone: (x0, y0, x1, y1) and the text origin."""
-    x, y = ZPOS[z["id"]]
-    y += LABEL_DY.get(z["id"], 0)
-    tw = text_w(zone_label(z), LABEL_SIZE, 600)
-    x0 = x + R + 12
-    return (x0, y - 18, x0 + tw + 20, y + 18), (x0 + 10, y - 15)
-
-
-def chips_origin(z: dict) -> tuple[float, float]:
-    (x0, y0, x1, y1), _ = label_box(z)
-    return x1 + 10, (y0 + y1) / 2
-
-
-def row_box(z: dict):
-    """Label tag plus its three chips."""
-    (x0, y0, x1, y1), _ = label_box(z)
-    cx, _ = chips_origin(z)
-    return (x0, y0, cx + sum(chip_spr(h).width for h in HORIZONS) + CHIP_GAP * (len(HORIZONS) - 1), y1)
-
-
-assert max(row_box(z)[2] for z in ZONES) <= 1860, "a chip row runs past the right margin"
-
-
-def _rect_pts(cx, cy, hw, hh, n=4):
-    return [(cx + hw * (2 * i / n - 1), cy + hh * (2 * j / n - 1)) for i in range(n + 1) for j in range(n + 1)]
-
-
-def _rect_gap(r1, r2) -> float:
-    dx = max(r2[0] - r1[2], r1[0] - r2[2], 0)
-    dy = max(r2[1] - r1[3], r1[1] - r2[3], 0)
-    return math.hypot(dx, dy) if dx or dy else -min(r1[2] - r2[0], r2[2] - r1[0], r1[3] - r2[1], r2[3] - r1[1])
-
-
-PHONE_HW, PHONE_HH = 11, 18             # phone half-size plus a small margin
-OWN_GAP = 90                             # a phone keeps this far (centre to centre) from other zones' phones
-BAND_IN = BAND_HW - 6                    # a corridor zone's phone stays this close to the band's centre line
-PHONE_DISTS = (R + 18, R + 22, R + 30)    # phone centre to zone centre
-
-
-def _place_phone(s: dict, others: list[tuple[str, tuple[float, float]]]):
-    """Best free spot beside the sensor's zone, given the other phones placed so far."""
-    hw, hh = PHONE_HW, PHONE_HH
-    rows = [row_box(z) for z in ZONES]
-    zid = s["zone_id"]
-    z = next(z for z in ZONES if z["id"] == zid)
-    x, y = ZPOS[zid]
-    bearing = math.degrees(math.atan2(s["lat"] - z["lat"], (s["lon"] - z["lon"]) * math.cos(math.radians(z["lat"]))))
-    best = None
-    for ang in range(0, 360, 10):
-        for dist in PHONE_DISTS:
-            cx, cy = x + dist * math.cos(math.radians(ang)), y - dist * math.sin(math.radians(ang))
-            rect = (cx - hw, cy - hh, cx + hw, cy + hh)
-            pts = _rect_pts(cx, cy, hw, hh)
-            clear = min(_seg_dist(pt, ZPOS[e["from"]], ZPOS[e["to"]]) for pt in pts for e in EDGES) - 4
-            clear = min(clear, min(math.hypot(pt[0] - zx, pt[1] - zy) for pt in pts for zx, zy in ZPOS.values()) - R)
-            clear = min([clear] + [_rect_gap(rect, rb) for rb in rows]
-                        + [_rect_gap(rect, (ox - hw, oy - hh, ox + hw, oy + hh)) for _, (ox, oy) in others])
-            clear = min(clear, cy - hh - 130, TAG_Y - 10 - (cy + hh))
-            db = max(band_dist(pt) for pt in pts) if zid in CORRIDOR else min(band_dist(pt) for pt in pts)
-            band_pen = max(0.0, db - BAND_IN) if zid in CORRIDOR else max(0.0, BAND_HW + 6 - db)
-            # a phone must read as its own zone's: keep it away from other zones' phones
-            own_pen = sum(max(0.0, OWN_GAP - math.hypot(cx - ox, cy - oy)) for oz, (ox, oy) in others if oz != zid)
-            to_server = math.degrees(math.atan2(-(SERVER[1] - y), SERVER[0] - x))
-            diff = abs((ang - bearing + 180) % 360 - 180)
-            diff_s = abs((ang - to_server + 180) % 360 - 180)
-            score = (min(clear, 14) - 10.0 * max(0.0, 3 - clear)        # never on a street, disc, tag or phone
-                     - 2.0 * band_pen - 0.5 * own_pen
-                     - 0.03 * diff_s - 0.01 * diff - 0.05 * (dist - R - 22))
-            if best is None or score > best[0]:
-                best = (score, (cx, cy))
-    return best[1]
-
-
-def phone_positions() -> list[tuple[str, tuple[float, float]]]:
-    """One phone per sensor in shared/zones.json, beside its zone: a free spot (clear of streets,
-    zones, labels and other phones, and well away from other zones' phones), inside the band for
-    corridor zones and outside it elsewhere, preferring the side facing the server, then the
-    sensor's real bearing from the zone centre. A first pass places them in order; a second pass
-    re-places each one knowing where all the others are."""
-    out: list[tuple[str, tuple[float, float]]] = []
-    for s in SENSORS:
-        out.append((s["zone_id"], _place_phone(s, out)))
-    for _ in range(2):
-        for i, s in enumerate(SENSORS):
-            out[i] = (s["zone_id"], _place_phone(s, out[:i] + out[i + 1:]))
-    return out
-
-
-PHONES = phone_positions()
-ZONES_TB = sorted(ZONES, key=lambda z: ZPOS[z["id"]][1])   # chips arrive top to bottom
-SERVER_EDGE = SERVER[0] + 58                             # right edge of the server icon (style.server_icon, s 1.15)
-# packets end a little short of the server (a pill never sits on the icon) and fade out on the way in
-SERVER_IN = (SERVER_EDGE + 8 + packet_spr().width / 2, SERVER[1] - 6)
-PACKET_DUR, PACKET_FADE_AT, PACKET_FADE = 0.75, 0.45, 0.22
-SERVER_FAN = 32                                          # packet ends spread over +-32 px of the racks
-
-
-def bez(p0, c, p1, k):
-    return ((1 - k) ** 2 * p0[0] + 2 * (1 - k) * k * c[0] + k ** 2 * p1[0],
-            (1 - k) ** 2 * p0[1] + 2 * (1 - k) * k * c[1] + k ** 2 * p1[1])
-
-
-_PY0, _PY1 = min(y for _, (_, y) in PHONES), max(y for _, (_, y) in PHONES)
-
-
-def packet_path(p0):
-    """Leaves the phone heading left (away from the zone graph), then bends into the server. The ends
-    fan out over the server's racks in the phones' top-to-bottom order, so packets never pile up."""
-    p1 = (SERVER_IN[0], SERVER_IN[1] + lerp(-SERVER_FAN, SERVER_FAN, (p0[1] - _PY0) / (_PY1 - _PY0)))
-    c = (lerp(p0[0], p1[0], 0.55), lerp(p0[1], p1[1], 0.2) - 30)
-    return p0, c, p1
+# "Ruins to Senado": a small label right of the band, level with Rua de S. Paulo (clear of every disc)
+_rsp = ZPOS["rua_sao_paulo"]
+BAND_LABEL_XY = (_rsp[0] + BAND_HW + 24, _rsp[1] - 16)
+assert BAND_LABEL_XY[0] + text_w(BAND_LABEL, 26, 600) <= 1860
 
 
 # ---------------------------------------------------------------- static layers (cropped sprites)
@@ -550,74 +387,12 @@ def discs_layer():
     return _crop(lay)
 
 
-@lru_cache(maxsize=1)
-def labels_layer():
-    lay = transparent()
-    for z in ZONES:                      # label tags (navy backing so street lines never run through text)
-        box, org = label_box(z)
-        rounded(lay, box, 10, fill=NAVY_2, alpha=0.94)
-        put_text(lay, org[0], org[1], zone_label(z), LABEL_SIZE, 600, INK)
-    return _crop(lay)
+def card_bg(img: Image.Image, box, bar, alpha: float) -> None:
+    rounded(img, box, 18, fill=NAVY_2, alpha=0.94 * alpha)
+    rounded(img, (box[0], box[1], box[0] + 7, box[3]), 3, fill=bar, alpha=alpha)
 
 
-@lru_cache(maxsize=1)
-def server_layer():
-    lay = transparent()
-    paste(lay, server_spr(), SERVER[0], SERVER[1], anchor="mm")
-    put_text(lay, SERVER[0], SERVER[1] + 64, "server", 22, 600, INK_2, align="m")
-    return _crop(lay)
-
-
-def name_lines() -> list[str]:
-    head, rest = POLICE_NAME.split(" (", 1)
-    return [head, "(" + rest]
-
-
-def status_lines() -> list[str]:
-    parts = POLICE_STATUS.split("; ")
-    return [p + (";" if i < len(parts) - 1 else "") for i, p in enumerate(parts)]
-
-
-NAME_SIZE, STATUS_SIZE, POLICY_SIZE = 30, 27, 30
-
-
-@lru_cache(maxsize=1)
-def panel_spr():
-    """The police panel: system name, then the "Officially: ..." lines; a band-coloured bar at left."""
-    names, stats = name_lines(), status_lines()
-    w = PANEL_X1 - PANEL_X0
-    tx = PANEL_PAD + 10
-    assert all(text_w(l, NAME_SIZE, 700) <= w - tx - PANEL_PAD for l in names), names
-    assert all(text_w(l, STATUS_SIZE, 500) <= w - tx - PANEL_PAD for l in stats), stats
-    h = PANEL_PAD + len(names) * 42 + 14 + len(stats) * 36 + PANEL_PAD - 6
-    lay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    rounded(lay, (0, 0, w - 1, h - 1), 16, fill=NAVY_2, alpha=0.94)
-    rounded(lay, (0, 0, 7, h - 1), 3, fill=BAND)
-    y = PANEL_PAD - 4
-    for l in names:
-        put_text(lay, tx, y, l, NAME_SIZE, 700, INK)
-        y += 42
-    y += 14
-    for i, l in enumerate(stats):
-        if i == 0 and l.startswith("Officially:"):
-            put_text(lay, tx, y, "Officially:", STATUS_SIZE, 700, INK)
-            put_text(lay, tx + text_w("Officially: ", STATUS_SIZE, 700), y, l[len("Officially: "):], STATUS_SIZE, 500, INK)
-        else:
-            put_text(lay, tx, y, l, STATUS_SIZE, 500, INK)
-        y += 36
-    return lay
-
-
-@lru_cache(maxsize=1)
-def policy_spr():
-    w = int(text_w(POLICY, POLICY_SIZE, 700) + 2 * PANEL_PAD + 10)
-    h = 66
-    lay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    rounded(lay, (0, 0, w - 1, h - 1), 16, fill=NAVY_2, alpha=0.94)
-    rounded(lay, (0, 0, 7, h - 1), 3, fill=BAND)
-    put_text(lay, PANEL_PAD + 10, 17, POLICY, POLICY_SIZE, 700, INK)
-    return lay
-
+# ---------------------------------------------------------------- icons (drawn at SS scale)
 
 def no_image_icon(d: ImageDraw.ImageDraw, cx: float, cy: float, s: float) -> None:
     """A picture (frame, hills, sun) struck through: no images. The strike cuts a clear gap."""
@@ -631,31 +406,80 @@ def no_image_icon(d: ImageDraw.ImageDraw, cx: float, cy: float, s: float) -> Non
     d.line([a, b], fill=(*INK, 255), width=int(4 * s))
 
 
+def gauge_icon(d: ImageDraw.ImageDraw, cx: float, cy: float, s: float, needle: float) -> None:
+    """A dial (three arc segments) with a needle at `needle` (0 = left, 1 = right): how sure a forecast is."""
+    r = 22 * s
+    box = (cx - r, cy - r + 8 * s, cx + r, cy + r + 8 * s)
+    for a0, a1 in ((182, 236), (242, 298), (304, 358)):
+        d.arc(box, a0, a1, fill=(*INK, 255), width=int(5 * s))
+    ang = math.radians(180 + 180 * needle)
+    ox, oy = cx, cy + 8 * s
+    d.line([(ox, oy), (ox + 17 * s * math.cos(ang), oy + 17 * s * math.sin(ang))], fill=(*CYAN, 255), width=int(4 * s))
+    d.ellipse((ox - 5 * s, oy - 5 * s, ox + 5 * s, oy + 5 * s), fill=(*INK, 255))
+
+
+def person_glyph(d: ImageDraw.ImageDraw, cx: float, cy: float, s: float) -> None:
+    """A person (head and shoulders): the one who approves."""
+    d.ellipse((cx - 9 * s, cy - 22 * s, cx + 9 * s, cy - 4 * s), fill=(*INK, 255))
+    d.rounded_rectangle((cx - 17 * s, cy + 1 * s, cx + 17 * s, cy + 24 * s), int(11 * s), fill=(*INK, 255))
+
+
+ICON_BOX = 64                                       # icon sprites are ICON_BOX x ICON_BOX (1x px), centred
+
+
+@lru_cache(maxsize=None)
+def icon_spr(kind: str, needle_q: int = 0) -> Image.Image:
+    big = Image.new("RGBA", (ICON_BOX * SS, ICON_BOX * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(big)
+    c = ICON_BOX * SS / 2
+    if kind == "privacy":
+        no_image_icon(d, c, c, 0.85 * SS)
+    elif kind == "wheelchair":                     # style.wheelchair_icon is drawn about (-4, -3) off its centre
+        wheelchair_icon(d, c + 4 * 1.05 * SS, c + 3 * 1.05 * SS, 1.05 * SS, colour=(*INK, 255), width=4)
+    elif kind == "gauge":
+        gauge_icon(d, c, c, SS, needle_q / 20)
+    else:
+        person_glyph(d, c, c, SS)
+    return _down(big, ICON_BOX, ICON_BOX)
+
+
+STATION_ICONS = ["privacy", "gauge", "wheelchair", "person"]   # station i's icon; 0 and 2 come from the chips
+CHIP_ICON = {0: "privacy", 1: "wheelchair"}                     # principle chip -> its icon
+CHIP_STATION = {0: 0, 1: 2}                                     # ... and the station it folds onto
+CHIP_ICON_SCALE = 1.2
+
+
 @lru_cache(maxsize=None)
 def principle_spr(i: int) -> Image.Image:
-    """Principle chip i: icon + label on the panel's navy, with a CrowdPulse-cyan bar at left."""
+    """Principle chip i without its icon: label on the panel's navy, with a CrowdPulse-cyan bar at left;
+    the icon is pasted separately (it moves into the right column at the fold)."""
     label = PRINCIPLES[i]
-    icon_w = 64
-    tx = PANEL_PAD + 10 + icon_w + 16
-    w, h = int(tx + text_w(label, PRINCIPLE_SIZE, 700) + PANEL_PAD + 4), PRINCIPLE_H
+    tx = PAD + 10 + ICON_BOX + 16
+    w, h = int(tx + text_w(label, PRINCIPLE_SIZE, 700) + PAD + 4), PRINCIPLE_H
     lay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     rounded(lay, (0, 0, w - 1, h - 1), 16, fill=NAVY_2, alpha=0.94)
     rounded(lay, (0, 0, 7, h - 1), 3, fill=CYAN)
-    big = Image.new("RGBA", (icon_w * SS, h * SS), (0, 0, 0, 0))
-    d = ImageDraw.Draw(big)
-    c = (icon_w * SS / 2, h * SS / 2)
-    if i == 0:
-        no_image_icon(d, c[0], c[1], SS)
-    else:                                   # style.wheelchair_icon is drawn about (-4, -3) off its centre
-        wheelchair_icon(d, c[0] + 4 * 1.25 * SS, c[1] + 3 * 1.25 * SS, 1.25 * SS, colour=(*INK, 255), width=4)
-    lay.alpha_composite(_down(big, icon_w, h), dest=(PANEL_PAD + 10, 0))
     l, t_, r, b = text_font(label, PRINCIPLE_SIZE, 700).getbbox(label, anchor="la")
     put_text(lay, tx, h / 2 - (t_ + b) / 2, label, PRINCIPLE_SIZE, 700, INK)
     return lay
 
 
-PRINCIPLE_W = max(principle_spr(i).width for i in range(2))
-assert PANEL_X0 + PRINCIPLE_W <= GRAPH_BOX[0] - 40, "a principle chip runs into the zone graph"
+def principle_box(i: int) -> tuple[float, float]:
+    """Top-left of principle chip i (stacked and left-aligned, the pair centred on the right column)."""
+    return PRINCIPLE_CX - max(principle_spr(j).width for j in range(2)) / 2, PRINCIPLE_Y0 + i * (PRINCIPLE_H + PRINCIPLE_GAP)
+
+
+def chip_icon_centre(i: int) -> tuple[float, float]:
+    x, y = principle_box(i)
+    return x + PAD + 10 + ICON_BOX / 2, y + PRINCIPLE_H / 2
+
+
+# layout checks: every line fits its card, and the right column's items are left-aligned past the stations
+assert PAD + 10 + text_w(LEFT_HEAD, HEAD_SIZE, 700) <= L_BOX[2] - L_BOX[0] - PAD, LEFT_HEAD
+assert all(PAD + 40 + text_w(t, ITEM_SIZE, 500) <= L_BOX[2] - L_BOX[0] - PAD for t in LEFT_ITEMS), LEFT_ITEMS
+assert PAD + 10 + text_w(POLICY, POLICY_SIZE, 600) <= L_BOX[2] - L_BOX[0] - PAD, POLICY
+assert all(R_TEXT_X + text_w(t, ITEM_SIZE, 600) <= R_BOX[2] - PAD for t in RIGHT_ITEMS), RIGHT_ITEMS
+assert all(PRINCIPLE_CX + principle_spr(i).width / 2 <= 1860 for i in range(2))
 
 
 # ---------------------------------------------------------------- drawing
@@ -663,155 +487,141 @@ assert PANEL_X0 + PRINCIPLE_W <= GRAPH_BOX[0] - 40, "a principle chip runs into 
 def band_alpha(t: float) -> float:
     base = 0.34 * progress(t, BEATS["band"], 0.5)
     here = 0.22 * math.sin(math.pi * clamp((t - BEATS["here"]) / 0.7))
-    dim = 0.14 * progress(t, BEATS["propose"] + 0.4, 0.6)        # quieter while the phones work
-    return clamp(base + here - dim)
+    return clamp(base + here)
 
 
-def draw_band(img: Image.Image, t: float) -> None:
-    k = progress(t, BEATS["band"], 0.9)
-    if k <= 0:
+def draw_map(img: Image.Image, t: float) -> None:
+    a = progress(t, BEATS["map"], 0.3) * (1 - progress(t, BEATS["map_out"], 0.5))
+    if a <= 0:
         return
-    spr = band_spr(max(1, int(round(k * 60))))
-    paste(img, spr, BAND_BOX[0], BAND_BOX[1], band_alpha(t))
+    k = progress(t, BEATS["band"], 0.9)
+    if k > 0:
+        spr = band_spr(max(1, int(round(k * 60))))
+        paste(img, spr, BAND_BOX[0], BAND_BOX[1], band_alpha(t) * a)
+    for spr, x0, y0 in (streets_layer(), discs_layer()):
+        paste(img, spr, x0, y0, a)
+    kl = progress(t, BEATS["band_label"], 0.4)
+    put_text(img, BAND_LABEL_XY[0] - (1 - kl) * 12, BAND_LABEL_XY[1], BAND_LABEL, 26, 600, INK_2, kl * a)
+
+
+def draw_left(img: Image.Image, t: float) -> None:
+    """The police column: header, its two items, then the Policy Address line under a thin rule."""
+    a = progress(t, BEATS["left"], FADE)
+    if a <= 0:
+        return
+    x0, y0, x1 = L_BOX
+    k_pol = progress(t, BEATS["policy"], 0.4)
+    y1 = lerp(L_RULE_Y - 8, L_Y1, k_pol)               # the card grows to take the Policy Address line
+    card_bg(img, (x0 - (1 - a) * 18, y0, x1 - (1 - a) * 18, y1), BAND, a)
+    put_text(img, x0 + PAD + 10, y0 + 30, LEFT_HEAD, HEAD_SIZE, 700, INK, a)
+    for i, txt in enumerate(LEFT_ITEMS):
+        k = progress(t, BEATS[f"left_{i + 1}"], 0.4)
+        if k <= 0:
+            continue
+        y = L_ITEM_Y[i] + (1 - k) * 10
+        rounded(img, (x0 + PAD + 12, y + 12, x0 + PAD + 24, y + 24), 3, fill=BAND, alpha=k)
+        put_text(img, x0 + PAD + 40, y, txt, ITEM_SIZE, 500, INK, k)
+    if k_pol > 0:
+        rounded(img, (x0 + PAD + 10, L_RULE_Y, x1 - PAD, L_RULE_Y + 2), 1, fill=NAVY_3, alpha=k_pol)
+        put_text(img, x0 + PAD + 10, L_POLICY_Y + (1 - k_pol) * 10, POLICY, POLICY_SIZE, 600, INK_2, k_pol)
 
 
 def draw_principles(img: Image.Image, t: float) -> None:
-    """The two principle chips, stacked where the police panel was; they leave before the server comes."""
-    out = 1 - progress(t, BEATS["chips_out"], PANEL_FADE)
+    """The two principle chips; at the fold their words fade while their icons fly to stations 1 and 3."""
+    words_out = 1 - progress(t, BEATS["fold"], 0.3)
+    fly = progress(t, BEATS["fold"], 0.65)
     for i, key in enumerate(("privacy", "behind")):
         k = progress(t, BEATS[key], 0.35)
-        a = k * out
-        if a > 0:
-            paste(img, principle_spr(i), PANEL_X0 - 24 * (1 - k), PANEL_Y0 + i * (PRINCIPLE_H + PRINCIPLE_GAP), a)
+        if k <= 0:
+            continue
+        x, y = principle_box(i)
+        paste(img, principle_spr(i), x - 24 * (1 - k), y, k * words_out)
+        cx, cy = chip_icon_centre(i)
+        sx, sy = ST_X, ST_Y[CHIP_STATION[i]]
+        px, py = lerp(cx - 24 * (1 - k), sx, fly), lerp(cy, sy, fly) - 40 * math.sin(math.pi * fly)
+        paste(img, icon_spr(CHIP_ICON[i]), px, py, k, scale=lerp(CHIP_ICON_SCALE, 1.0, fly), anchor="mm")
 
 
-def draw_panel(img: Image.Image, t: float) -> None:
-    out = 1 - progress(t, BEATS["panel_out"], PANEL_FADE)
-    a = progress(t, BEATS["panel"], 0.3) * out
+def _arrow_head(d: ImageDraw.ImageDraw, tip, direction, colour, size=9.0) -> None:
+    dx, dy = direction
+    n = math.hypot(dx, dy) or 1
+    ux, uy = dx / n, dy / n
+    px, py = -uy, ux
+    d.polygon([tip, (tip[0] - ux * size * 1.5 + px * size, tip[1] - uy * size * 1.5 + py * size),
+               (tip[0] - ux * size * 1.5 - px * size, tip[1] - uy * size * 1.5 - py * size)], fill=colour)
+
+
+def draw_loop(img: Image.Image, t: float) -> None:
+    """The loop: a link down between each pair of stations, and a return arrow up the left back to the top.
+    Drawn on "one loop"; the return arrow turns cyan on "approve" (the loop is closed)."""
+    k = progress(t, BEATS["loop"], 0.6)
+    if k <= 0:
+        return
+    lay = transparent()
+    d = ImageDraw.Draw(lay)
+    base = (*INK_3, int(255 * k))
+    for i in range(3):                                # links grow top to bottom
+        kk = clamp(k * 3 - i)
+        if kk <= 0:
+            continue
+        ya, yb = ST_Y[i] + ST_R + 6, ST_Y[i + 1] - ST_R - 6
+        yy = lerp(ya, yb, kk)
+        d.line([(ST_X, ya), (ST_X, yy)], fill=base, width=3)
+        if kk >= 1:
+            _arrow_head(d, (ST_X, yb + 1), (0, 1), base, 7)
+    kr = clamp(k * 1.6 - 0.6)                         # then the return arrow, up the left
+    c = tuple(int(v) for v in lerp(INK_3, CYAN, progress(t, BEATS["close"], 0.5)))
+    if kr > 0:
+        ra = (*c, int(255 * kr))
+        xs, xr = ST_X - ST_R - 6, LOOP_X
+        y_bot, y_top = ST_Y[-1], ST_Y[0]
+        pts = [(xs, y_bot), (xr + 14, y_bot), (xr, y_bot - 14), (xr, y_top + 14), (xr + 14, y_top), (xs - 2, y_top)]
+        segs = [math.dist(a_, b_) for a_, b_ in zip(pts, pts[1:])]
+        goal, path = kr * sum(segs), [pts[0]]
+        for (a_, b_), L in zip(zip(pts, pts[1:]), segs):
+            if goal >= L:
+                path.append(b_)
+                goal -= L
+            else:
+                path.append(lerp(a_, b_, goal / L))
+                break
+        w_ = 3 + int(round(progress(t, BEATS["close"], 0.5)))
+        d.line(path, fill=ra, width=w_, joint="curve")
+        if kr >= 1:
+            _arrow_head(d, (xs, y_top), (1, 0), ra, 8)
+    img.alpha_composite(lay)
+
+
+def draw_right(img: Image.Image, t: float) -> None:
+    """The right column: card, header, four stations on the loop, the items as the voice names them."""
+    a = progress(t, BEATS["right"], FADE)
     if a <= 0:
         return
-    spr = panel_spr()
-    # leader line from the panel to the band
-    ax, ay = BAND_ANCHOR
-    sx, sy = PANEL_X1, PANEL_Y0 + 44
+    x0, y0, x1 = R_BOX
+    card_bg(img, (x0 + (1 - a) * 18, y0, x1 + (1 - a) * 18, R_Y1), CYAN, a)
+    kh = progress(t, BEATS["right_head"], 0.4)
+    put_text(img, x0 + PAD + 10, y0 + 30 + (1 - kh) * 10, RIGHT_HEAD, HEAD_SIZE, 700, CYAN, kh)
+    draw_loop(img, t)
     lay = transparent()
     d = ImageDraw.Draw(lay)
-    a_lead = a * progress(t, BEATS["band"] + 0.3, 0.5)
-    d.line([(sx, sy), (sx + 22, sy), (ax, ay)], fill=(*BAND, int(255 * 0.9 * a_lead)), width=3, joint="curve")
-    d.ellipse((ax - 6, ay - 6, ax + 6, ay + 6), fill=(*BAND, int(255 * a_lead)))
+    for i in range(4):                                # station discs: grey while waiting, cyan rim once named
+        lit = progress(t, BEATS[f"item_{i}"], 0.4)
+        rim = tuple(int(v) for v in lerp(INK_3, CYAN, lit))
+        d.ellipse((ST_X - ST_R, ST_Y[i] - ST_R, ST_X + ST_R, ST_Y[i] + ST_R), fill=(*NAVY_3, int(255 * a)),
+                  outline=(*rim, int(255 * a)), width=3)
     img.alpha_composite(lay)
-    paste(img, spr, PANEL_X0, PANEL_Y0, a)
-    a_pol = progress(t, BEATS["policy"], 0.4) * out
-    paste(img, policy_spr(), PANEL_X0, PANEL_Y0 + spr.height + 16 + (1 - a_pol) * 12, a_pol)
-
-
-def phone_drop(t: float, i: int) -> float:
-    return clamp((t - (BEATS["phones"] + 0.07 * i)) / 0.5)
-
-
-def draw_links(img: Image.Image, t: float) -> None:
-    """Thin packet links from each phone to the server; they stay, dimmed, once the first packet
-    arrives. Drawn under the zone discs and label tags, so a link never runs over a zone or its text."""
-    link = transparent()
-    ld = ImageDraw.Draw(link)
-    for i, (zid, ph) in enumerate(PHONES):
-        start = PACKET_WAVES[0] + 0.06 * i
-        k = progress(t, start, PACKET_DUR)
-        if k <= 0:
-            continue
-        p0, c, p1 = packet_path(ph)
-        n = max(2, int(28 * k))
-        pts = [bez(p0, c, p1, k * j / n) for j in range(n + 1)]
-        if k >= 1:
-            pts.append((SERVER_EDGE + 2, p1[1]))            # the link itself reaches the server
-        a_link = 0.34 - 0.18 * progress(t, start + PACKET_DUR, 0.5)
-        ld.line(pts, fill=(*CYAN, int(255 * a_link)), width=2)
-    img.alpha_composite(link)
-
-
-def draw_dynamic(img: Image.Image, t: float) -> None:
-    # zone rings once the chips arrive (every zone alike)
-    lay = transparent()
-    d = ImageDraw.Draw(lay)
-    for j, z in enumerate(ZONES_TB):
-        k = progress(t, BEATS["forecasts"] + 0.07 * j, 0.3)
+    fly_done = t >= BEATS["fold"] + 0.65
+    for i, txt in enumerate(RIGHT_ITEMS):
+        k = progress(t, BEATS[f"item_{i}"], 0.4)
+        kind = STATION_ICONS[i]
+        if i in CHIP_STATION.values():                # chip icons: drawn here once they have landed
+            if fly_done:
+                paste(img, icon_spr(kind), ST_X, ST_Y[i], 1.0, anchor="mm")
+        elif k > 0:
+            needle_q = 4 + round(10 * progress(t, BEATS["needle"], 0.6)) if kind == "gauge" else 0
+            paste(img, icon_spr(kind, needle_q), ST_X, ST_Y[i], clamp(k / 0.5), scale=lerp(0.6, 1.0, ease_out_back(k)), anchor="mm")
         if k > 0:
-            x, y = ZPOS[z["id"]]
-            d.ellipse((x - R - 1, y - R - 1, x + R + 1, y + R + 1), outline=(*CYAN, int(255 * k)), width=3)
-    img.alpha_composite(lay)
-
-    # server, glowing as packets arrive
-    a_srv = progress(t, BEATS["server"], 0.4)
-    if a_srv > 0:
-        glow = 0.0
-        for w0 in PACKET_WAVES:
-            glow = max(glow, math.sin(math.pi * clamp((t - (w0 + 0.55)) / 0.9)))
-        if glow > 0:
-            paste(img, glow_spr(CYAN, 60, 22), SERVER[0], SERVER[1], 0.32 * glow, anchor="mm")
-        spr, x0, y0 = server_layer()
-        paste(img, spr, x0, y0, a_srv)
-
-    # phones drop onto the zones
-    for i, (zid, (x, y)) in enumerate(PHONES):
-        k = phone_drop(t, i)
-        if k <= 0:
-            continue
-        yy = y - (1 - ease_out_back(k, 1.1)) * 70
-        a = clamp(k / 0.35)
-        paste(img, glow_spr(INK, 10, 6), x, y + 18, 0.22 * a, anchor="mm")
-        paste(img, phone_spr(), x, yy, a, anchor="mm")
-
-    # number packets (waves)
-    for w_i, w0 in enumerate(PACKET_WAVES):
-        for i, (zid, ph) in enumerate(PHONES):
-            start = w0 + 0.06 * i + (0.05 * ((i * 7 + w_i * 3) % 5) if w_i else 0)
-            k = progress(t, start, PACKET_DUR)
-            if 0 < k < 1:
-                p0, c, p1 = packet_path(ph)
-                k_out = progress(t, start + PACKET_FADE_AT, PACKET_FADE)     # fades and shrinks into the server
-                a = min(1, (t - start) / 0.12) * (1 - k_out)
-                sc = lerp(0.45, 1.0, clamp((t - start) / 0.25)) * (1 - 0.35 * k_out)
-                paste(img, packet_spr(), *bez(p0, c, p1, k), a, scale=sc, anchor="mm")
-
-    # three forecast chips per zone, then a confidence dot in each
-    for j, z in enumerate(ZONES_TB):
-        cx, cy = chips_origin(z)
-        for h_i, h in enumerate(HORIZONS):
-            spr = chip_spr(h)
-            start = BEATS["forecasts"] + 0.07 * j + 0.06 * h_i
-            k = clamp((t - start) / 0.32)
-            if k > 0:
-                paste(img, spr, cx + spr.width / 2, cy, clamp(k / 0.4), scale=lerp(0.5, 1.0, ease_out_back(k)), anchor="mm")
-            kd = clamp((t - (BEATS["confidence"] + 0.06 * j + 0.04 * h_i)) / 0.3)
-            if kd > 0 and k >= 1:
-                paste(img, dot_spr(), cx + spr.width - 11 - DOT_D / 2 + 0.5, cy, clamp(kd / 0.4), scale=lerp(0.3, 1.0, ease_out_back(kd, 2.0)), anchor="mm")
-            cx += spr.width + CHIP_GAP
-
-
-def tag_pieces():
-    head, rest = TAGLINE.split(": ", 1)
-    items = rest.split(" · ")
-    assert len(items) == 4, items
-    beats = [BEATS["tag"], BEATS["numbers"], BEATS["forecasts"], BEATS["approves"]]
-    pieces = [(head + ": ", 700, CYAN, beats[0])]
-    for i, it in enumerate(items):
-        if i:
-            pieces.append((" · ", 500, INK_3, beats[i]))
-        pieces.append((it, 600, INK, beats[i]))
-    return pieces
-
-
-TAG_PIECES = tag_pieces()
-TAG_W = sum(text_w(s, TAG_SIZE, w_) for s, w_, _, _ in TAG_PIECES)
-assert TAG_W <= 1800, TAG_W
-
-
-def draw_tagline(img: Image.Image, t: float) -> None:
-    x = W / 2 - TAG_W / 2
-    for s, w_, col, b in TAG_PIECES:
-        a = progress(t, b, 0.4)
-        put_text(img, x, TAG_Y + (1 - a) * 10, s, TAG_SIZE, w_, col, a)
-        x += text_w(s, TAG_SIZE, w_)
+            put_text_mid(img, R_TEXT_X + (1 - k) * 14, ST_Y[i], txt, ITEM_SIZE, 600, INK, k)
 
 
 # ---------------------------------------------------------------- frame
@@ -821,17 +631,11 @@ BASE = canvas()
 
 def draw_frame(t: float) -> Image.Image:
     img = BASE.copy()
-    draw_band(img, t)
-    paste(img, *streets_layer())
-    draw_links(img, t)
-    paste(img, *discs_layer())
-    paste(img, *labels_layer())
-    put_text(img, 1860, 128, GRAPH_TAG, 22, 500, INK_3, align="r")
-    draw_dynamic(img, t)
-    draw_panel(img, t)
-    draw_principles(img, t)
-    draw_tagline(img, t)
-
+    draw_map(img, t)
+    draw_left(img, t)
+    draw_right(img, t)
+    if t < BEATS["fold"] + 0.65:
+        draw_principles(img, t)
     # fixed slots
     chapter_card(img, CARD, fade(t, BEATS["card"] - 0.3, BEATS["card"] + CARD_HOLD + 0.3, 0.3))
     footer(img, FOOTER)
@@ -841,14 +645,16 @@ def draw_frame(t: float) -> Image.Image:
 STILLS = {  # beat name -> time (s) for the layout stills
     "band": 1.6,
     "here": 3.35,
-    "panel_out": 6.0,
-    "privacy": 6.9,
-    "principles": 8.5,
-    "propose": 9.6,
-    "phones": 10.6,
-    "flow": 11.6,
-    "chips": 13.0,
-    "confidence": 14.0,
+    "policy": 4.4,
+    "belief": 5.8,
+    "privacy": 7.1,
+    "principles": 8.7,
+    "fold": 9.45,
+    "loop": 10.5,
+    "phones": 12.4,
+    "forecasts": 14.8,
+    "detours": 16.9,
+    "approve": 18.5,
     "end": DURATION - 1 / FPS,
 }
 

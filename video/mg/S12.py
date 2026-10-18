@@ -1,4 +1,6 @@
-"""Shot S12 (2:24.0-2:33.0), motion-graphics part only: the public frame-timing correction.
+"""Dropped from the cut on 19 Oct; kept for reference (shotlist.json has no S12 now, so it no longer runs).
+
+Shot S12 (2:24.0-2:33.0), motion-graphics part only: the public frame-timing correction.
 
 0-7.0 s of the shot. The last 2.0 s (the README.md "Correction" paragraph, rendered with pandoc and
 recorded with video/capture.py) are a capture added at assembly, so they are not drawn here.

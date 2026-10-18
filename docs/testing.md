@@ -1,6 +1,6 @@
 # Testing CrowdPulse
 
-The Python, dashboard and SketchFuture test suites in section 1 were last re-run on 2026-10-17 (54, 24 and 33 passed). The iOS tests, the two production builds and the Python install in section 0 (on a fresh `git archive` export) were last run on 2026-10-11; the iOS test files have not changed since 2026-09-30. The other sections were run when they were written, between 2026-09-29 and 2026-10-09, except the "Deciding as" step in section 4 and the unnamed-decision check in section 5, both added on 2026-10-17 for the change of 2026-10-16. Expected results are what those runs produced.
+All four test suites in section 1 were last re-run on 2026-10-19: Python 54 passed, dashboard 24, SketchFuture 33 and iOS 13 (0 failures, iPhone 17 Pro simulator), 124 in all. The two production builds and the Python install in section 0 (on a fresh `git archive` export) were last run on 2026-10-11; the iOS test files have not changed since 2026-09-30. The other sections were run when they were written, between 2026-09-29 and 2026-10-09, except the "Deciding as" step in section 4 and the unnamed-decision check in section 5, both added on 2026-10-17 for the change of 2026-10-16. Expected results are what those runs produced.
 Run commands from the repository root unless a step says otherwise.
 
 ## 0. Prerequisites

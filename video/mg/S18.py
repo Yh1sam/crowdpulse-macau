@@ -1,24 +1,25 @@
-"""Shot S18 (4:23.5-4:30.0, 6.5 s): back to Mrs Chan. "Back to Mrs Chan. Staff keep her main route open, and stay beside her."
+"""Shot S18 (4:16.0-4:23.0, 7.0 s): back to Mrs Chan. "Back to Mrs Chan. The system flags the risk; staff check her
+route and stay beside her."
 
-Same map and framing as S01 (ahpo.py). An APPROVED stamp lands; the approved card's step-free detour draws as a
-dashed line and grey walkers take it; a small zh / en / pt notice flashes at Av. de Almeida Ribeiro (where the
-card displays it); her main route north to Company of Jesus Square is drawn open through Senado's crowd and a
-staff icon (hi-vis vest) joins her on it. Senado stays red (CRITICAL) throughout.
+The system flags, people act. The shot opens on S01's last frame (same map and framing, ahpo.py: her icon stopped
+short of Senado on her main route, Senado red, her dotted route to the pin, the place labels and her tag); the place
+labels fade and an amber ring pulses on her; a red ring pulses from Senado and a short "Risk flagged" marker takes
+Senado's label's place; a staff icon (hi-vis vest) walks up from Av. de Almeida Ribeiro to her side while her route
+north turns into marching dashes in the vest colour, labelled "staff check" (being checked, never shown as cleared);
+the staff member stays beside her to the end. No approval stamp, no detour, no notice board: the video says that 24
+of 40 simulated wheelchair users had no step-free route (S15), so the ending must not read as the accessibility
+problem solved. Senado stays red (CRITICAL) throughout, and she does not move on through its crowd.
 
 Data sources (read here, never retyped):
-  - docs/video/shotlist.json, shot S18: DURATION (end_s - start_s).
-  - shared/zones.json (via ahpo.py): projection, links, her step-free main route, and the detour, built by
-    following the approved card's links by name (run A card #5, A07_intervention_evidence.png:
-    Rua dos Ervanarios descent -> Rua da Tercena west link -> Rua de S. Paulo (lower), to St. Dominic's Square).
-  - experiments/results/simulation_run/A_events.json + A_timeline.csv: shot time is mapped onto run A from the
-    approval (14:14) to the end of the run (14:40); Senado's colour is its recorded true_density, thresholded with
-    shared/config.json, and the script asserts it is CRITICAL for the whole window (it ended at 0.75).
-  - backend/app/services/intervention.py: the notice (public_messages for that card, first sentence of each
-    language, ending in "…" as on S04's gloss panel: the full notice goes on to the route, the staff sentence
-    and the AI clause, so the board must not read as a whole notice without it) and the source of the
-    on-screen recommendation line.
-  - docs/video/script.md section 3 row S18: the two on-screen lines (verbatim).
-Mrs Chan, the staff member, the walkers and the dots are illustrative choreography (badge ILLUSTRATION).
+  - docs/video/shotlist.json, shot S18: DURATION (end_s - start_s) and the on-screen items (the marker, the label,
+    the badge), asserted against the storyboard row in docs/video/script.md section 3.
+  - shared/zones.json (via ahpo.py): projection, links, her step-free main route (as in S01).
+  - experiments/results/simulation_run/A_timeline.csv + A_events.json: shot time is mapped onto run A from the sim
+    time S01 ends on (the last of S01.py's SIM_KEYS, read from its source: 14:09:00) to the end of the run (14:40);
+    Senado's colour is its recorded true_density, thresholded with shared/config.json, and the script asserts it is
+    CRITICAL for the whole window (it ended at 0.75) and that run A had flagged Senado (its CRITICAL forecast, 14:08)
+    before the window starts.
+Mrs Chan, the staff member, the check line and the dots are illustrative choreography (badge ILLUSTRATION).
 
 Outputs: video/build/mg/S18.mp4, video/build/mg/stills/S18_*.png
 Run:  .venv/bin/python video/mg/S18.py            (stills and render)
@@ -28,271 +29,270 @@ from __future__ import annotations
 
 import json
 import math
-import random
+import re
 import sys
 
 from pathlib import Path  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # video/mg, for style.py
 from style import *  # noqa: E402,F401,F403
 import ahpo  # noqa: E402
-from ahpo import MapScene, HOME, MAIN_PATH, DETOUR_PATH, POS, AHPO_S01_END, FIRST_LEG, paste, text_sprite  # noqa: E402
+from ahpo import MapScene, HOME, MAIN_PATH, POS, AHPO_S01_END, VEST, paste  # noqa: E402
 
 from PIL import Image, ImageDraw  # noqa: E402
 
 SHOT = "S18"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 6.5 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 7.0 s
 
-# Beats in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S18.wav, laid 0.2 s into
-# the shot by assemble.py). Clause boundaries from
+# ---------- text: the shotlist's on-screen items, checked against the storyboard ----------
+
+_ITEMS = {}
+for _it in _shot["on_screen_text"].split(" | "):
+    _m = re.match(r"^([^:(]+?)(?: \(([^)]*)\))?: (.*)$", _it)
+    assert _m, _it
+    _ITEMS[_m.group(1)] = (_m.group(2) or "", _m.group(3))
+MARKER = _ITEMS["Marker at Senado"][1]                 # "Risk flagged"
+LABEL = _ITEMS["Label beside her route"][1]           # "staff check"
+BADGE = _ITEMS["Badge"][1]
+assert BADGE == "ILLUSTRATION" and BADGE in BADGES, BADGE
+assert len(_ITEMS) == 3, _ITEMS                        # the badge plus at most two short labels (declutter rule 1)
+for _txt in (MARKER, LABEL):
+    assert len(_txt.split()) <= 6, _txt
+# the ending must not read as "solved": no approval, all-clear or open-route wording on screen
+assert not re.search(r"approv|safe|clear|open|solved", f"{MARKER} {LABEL}".lower()), (MARKER, LABEL)
+# each label comes in on the words its item names, and those words are in the narration
+_CUES = {k: re.fullmatch(r"from '([^']+)'", _ITEMS[k][0]).group(1) for k in ("Marker at Senado", "Label beside her route")}
+assert all(c in _shot["narration"] for c in _CUES.values()), (_CUES, _shot["narration"])
+# the same lines, verbatim, in the storyboard row (script.md section 3)
+_row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} |"))
+for _txt in (MARKER, LABEL):
+    assert f'"{_txt}"' in _row, _txt
+assert ahpo.NAME == "Mrs Chan" and ahpo.NAME in _shot["narration"]
+
+# ---------- beats ----------
+
+# Beats in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S18.wav, laid 0.2 s into the
+# shot by assemble.py). Clause boundaries from
 #   ffmpeg -i video/build/guide/S18.wav -af silencedetect=noise=-35dB:d=0.08 -f null -
-# (speech 0.00-1.30 | 1.54-3.38 | 3.59-4.99), each + 0.2 s; words inside a clause from the length of
+# (speech 0.00-1.30 | 1.54-3.09 | 3.33-5.84), each + 0.2 s; words inside a clause from the length of
 # `say -v Daniel -r 155` on the words before them and the level dips between words:
-# "Back to Mrs Chan." 0.2-1.5 | "Staff keep (1.75-2.4) her main route (2.45-3.25) open," (3.3-3.58) | "and stay beside her." 3.8-5.2
-# (the staff member joins on "stay beside her", once she has rolled clear of Almeida's label: on "Staff" it would stand on it)
+# "Back to Mrs (0.95) Chan." 0.2-1.5 | "The system (1.74-2.36) flags (2.36-2.68) the risk;" (-3.29) |
+# "staff (3.53) check (3.92) her route (4.2-4.85) and stay (5.1) beside her." (-6.04)
 # re-key to the real voice take
 BEATS = {
-    "stamp": 0.25,        # "Back": the APPROVED stamp lands
-    "tag_out": 0.6,       # her "Mrs Chan" tag (carried over from S01's last frame) fades before the detour reaches it:
-                          # it sits left of her icon, exactly where the detour leaves Almeida, for the whole shot
-    "detour": 0.65,       # "to Mrs Chan": the approved card's dashed step-free detour draws
-    "notice": 0.95,       # the zh / en / pt notice flashes at Almeida ...
-    "walkers": 1.15,      # ... and grey walkers take the detour
-    "route": 2.45,        # "her main route": her route north draws, solid
-    "statement": 2.65,    # the recommendation line appears (read through to the end: 3.85 s)
-    "lane": 3.1,          # "open": a lane opens through Senado's crowd
-    "move": 3.1,          # she rolls on north
-    "staff": 4.15,        # "and stay beside her": the staff member joins her (settled by 4.75 s, beside her to the end)
-    "notice_out": 4.4,    # the notice fades (up 3.8 s)
+    "labels_out": 0.35,   # the place labels carried over from S01's last frame fade (gone by 0.85)
+    "ring": 0.95,         # "Mrs Chan": an amber ring pulses out from her icon
+    "tag_out": 1.6,       # her "Mrs Chan" tag (from S01) fades once her name has been said (gone by 1.9)
+    "flag": 2.36,         # "flags": a red ring pulses from Senado; its label gives way to the "Risk flagged" marker
+    "staff": 3.53,        # "staff": the staff member steps out at Av. de Almeida Ribeiro and walks up to her side ...
+    "staff_at": 4.6,      # ... reaching her on "her route"
+    "check": 3.92,        # "check her route": her route north turns into marching vest-colour dashes (drawn by 4.85)
+    "check_label": 4.0,   # ... and the "staff check" label comes in beside it
+    "stay": 5.1,          # "stay beside her": a vest ring pulses around the staff member, who stays at her side to the end
 }
-SIM_KEYS = [(0.0, ahpo.approve_sim()), (DURATION, ahpo.end_sim())]    # run A: approval (14:14) -> end (14:40)
+assert BEATS["check"] + 0.93 <= 4.85 + 1e-9 and BEATS["staff_at"] <= 4.85
 
-# Text, verbatim from the storyboard (script.md section 3, S18).
-SMALL = "Illustrative story"
-STATEMENT = "Every redirect recommendation includes keeping the main route open, with staff, for reduced-mobility visitors"
-SOURCE = "Detour from run A's approved card · recommendation and notice wording: backend/app/services/intervention.py"
-BADGE = "ILLUSTRATION"
-STAMP = "APPROVED"
-NOTICE = ahpo.notice_excerpts()                       # {"en", "zh", "pt"} from intervention.py, each ending "…"
-CHIP = "CRITICAL"
+# Shot time -> run A sim time: from where S01 ends (the last of its SIM_KEYS, so the cut has no jump in Senado's
+# crowd) to the end of the run.
+_s01_keys = re.search(r"^SIM_KEYS = \[(.*?)\]\n", (Path(__file__).resolve().parent / "S01.py").read_text(), re.S | re.M)
+assert _s01_keys, "S01.py has no SIM_KEYS"
+S01_END_SIM = ahpo.hms(re.findall(r'ahpo\.hms\("([\d:]+)"\)', _s01_keys.group(1))[-1])     # 14:09:00
+SIM_KEYS = [(0.0, S01_END_SIM), (DURATION, ahpo.end_sim())]                                  # 14:09 -> 14:40
 
 
 def sim_of(t: float) -> float:
     return ahpo.sim_clock(t, SIM_KEYS)
 
 
-# Senado never turns green or amber here: the recorded true_density stays above CRITICAL from approval to the end
+# Senado never turns green or amber here: the recorded true_density stays above CRITICAL to the end of the run
 assert ahpo.window_states(SIM_KEYS[0][1], SIM_KEYS[-1][1]) == {"CRITICAL"}, ahpo.window_states(SIM_KEYS[0][1], SIM_KEYS[-1][1])
-assert "senado_square" not in ahpo.DETOUR and ahpo.DETOUR[0] == "almeida_ribeiro"
+# "The system flags the risk": run A's CRITICAL forecast for Senado came before the window this shot shows
+_FLAG_SIM = ahpo.hms(next(e for e in ahpo.run_a_events() if e.get("event") == "senado_critical_forecast")["sim_time"])
+assert _FLAG_SIM <= SIM_KEYS[0][1], (ahpo.clock(_FLAG_SIM), ahpo.clock(SIM_KEYS[0][1]))
 
 SCENE = MapScene()
+# the scene's own clock (drifting dots, Senado's pulse) runs on from S01's last frame, so nothing jumps at the cut
+_s01 = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == "S01")
+SCENE_T0 = round(_s01["end_s"] - _s01["start_s"], 3)                                         # 11.0 s
+
+# ---------- Mrs Chan (stopped where S01 left her) and the staff member ----------
+
+P_HER = MAIN_PATH.at(AHPO_S01_END)
+R_MARK = 21                                    # marker radius (1x), hers and the staff member's
+_dx, _dy = MAIN_PATH.direction(AHPO_S01_END)
+STAFF_AT = (P_HER[0] - _dy * 46, P_HER[1] + _dx * 46)   # on her right-hand side on screen, 46 px from her centre
+STAFF_FROM = POS["almeida_ribeiro"]
+STAFF_VIA = (1000.0, 880.0)                     # the walk bows south-east, clear of her icon
 
 
-# ---------- Mrs Chan and the staff member ----------
-
-S_END = FIRST_LEG + 64        # she ends just past Senado's centre, on towards St. Dominic's
-
-
-def ahpo_s(t: float) -> float:
-    """Distance along her main route: eases in, then rolls on at constant speed (she is still moving at the cut)."""
-    t0, ramp = BEATS["move"], 0.7
-    T = DURATION - t0
-    v = (S_END - AHPO_S01_END) / (T - ramp / 2)
-    u = t - t0
-    if u <= 0:
-        return AHPO_S01_END
-    if u < ramp:
-        return AHPO_S01_END + v * u * u / (2 * ramp)
-    return AHPO_S01_END + v * (ramp / 2 + (u - ramp))
+def staff_state(t: float) -> dict | None:
+    a = progress(t, BEATS["staff"], 0.35)
+    if a <= 0:
+        return None
+    k = progress(t, BEATS["staff"] + 0.07, BEATS["staff_at"] - BEATS["staff"] - 0.07)
+    p = tuple((1 - k) ** 2 * f + 2 * (1 - k) * k * v + k * k * e for f, v, e in zip(STAFF_FROM, STAFF_VIA, STAFF_AT))
+    return {"p": p, "alpha": a, "scale": lerp(0.7, 1.0, a) * R_MARK / 18}
 
 
-def staff_state(t: float, s: float) -> dict:
-    """The staff member walks in from ahead-right and settles on her right, 46 px from her centre (marker as large as hers)."""
-    k = progress(t, BEATS["staff"], 0.6)
-    dx, dy = MAIN_PATH.direction(s)
-    side = (-dy, dx)                                        # her right-hand side on screen
-    p = MAIN_PATH.at(s)
-    off = 46
-    target = (p[0] + side[0] * off, p[1] + side[1] * off)
-    start = (target[0] + dx * 40 + side[0] * 18, target[1] + dy * 40 + side[1] * 18)
-    return {"p": lerp(start, target, k), "alpha": k, "scale": lerp(0.7, 1.0, k) * 21 / 18}
+# the walk never covers her icon (both markers about 21 px, plus their glow)
+assert min(math.dist(P_HER, staff_state(BEATS["staff"] + i / 50)["p"]) for i in range(1, 80)) >= 2 * R_MARK + 2
+
+TAG_SPRITE = ahpo.tag_sprite(ahpo.NAME).reduce(ahpo.SS)
+TAG_GAP = 7          # between the tag and her icon's outline (px), as S01 draws it
 
 
-# ---------- walkers on the detour ----------
-
-_rng = random.Random(18)
-WALKERS = [(BEATS["walkers"] + 0.11 * i + _rng.uniform(-0.03, 0.03), _rng.uniform(-4.0, 4.0), _rng.uniform(150, 175))
-           for i in range(48)]
+def tag_alpha(t: float) -> float:
+    return 1 - progress(t, BEATS["tag_out"], 0.3)
 
 
-def walkers(t: float) -> list[tuple[tuple[float, float], float]]:
+# ---------- her route, as staff check it ----------
+
+ROUTE_S0 = AHPO_S01_END + 26                     # S01's dotted route starts 26 px ahead of her
+DOTTED_ALPHA = 0.55                              # as S01 draws it at its end
+
+
+def routes(t: float) -> list[dict]:
+    """S01's dotted route ahead of the check line's head; behind it, marching dashes in the vest colour."""
+    k = progress(t, BEATS["check"], 0.93)
+    head = ROUTE_S0 + (MAIN_PATH.length - ROUTE_S0) * k
     out = []
-    L = DETOUR_PATH.length
-    for t0, off, v in WALKERS:
-        s = (t - t0) * v
-        if s <= 0 or s >= L:
-            continue
-        p = DETOUR_PATH.at(s)
-        dx, dy = DETOUR_PATH.direction(s)
-        p = (p[0] - dy * off, p[1] + dx * off)
-        a = clamp(s / 30) * clamp((L - s) / 30)
-        out.append((p, a))
+    if head < MAIN_PATH.length - 1:
+        s0 = ROUTE_S0 if k <= 0 else max(ROUTE_S0, head + 8)
+        # phase: the dots stay where S01 put them while the head eats into them
+        out.append({"s0": s0, "s1": MAIN_PATH.length, "style": "dotted", "alpha": DOTTED_ALPHA, "phase": ROUTE_S0 - s0})
+    if k > 0:
+        out.append({"s0": ROUTE_S0, "s1": head, "style": "dashed", "colour": VEST, "alpha": 0.95, "phase": 30.0 * t})
     return out
 
 
-# ---------- stamp, notice, statement, chip ----------
+# the "staff check" label sits right of the route's St. Dominic's -> Rua de S. Paulo leg, at y 500
+_a, _b = POS["st_dominic"], POS["rua_sao_paulo"]
+LABEL_Y = 500
+LABEL_X = _a[0] + (_b[0] - _a[0]) * (_a[1] - LABEL_Y) / (_a[1] - _b[1]) + 30
+LABEL_SIZE = 28
 
-def _stamp_sprite(ring: bool = False) -> Image.Image:
-    """The stamp (or, with ring=True, just its outer frame, for the landing ring), tilted 8 degrees."""
+
+def label_alpha(t: float) -> float:
+    return progress(t, BEATS["check_label"], 0.35)
+
+
+# ---------- the "Risk flagged" marker and the rings ----------
+
+SENADO = POS["senado_square"]
+MARK_X = SENADO[0] + ahpo.SENADO_R + ahpo.LABEL_DX["senado_square"]   # where Senado's label starts
+MARK_SIZE, MARK_H, MARK_PAD = 26, 42, 18
+MARK_W = text_size(MARKER, MARK_SIZE, 700)[0] + 2 * MARK_PAD
+
+
+def senado_label_alpha(t: float) -> float:
+    return 1 - progress(t, BEATS["flag"] - 0.05, 0.2)
+
+
+def marker_alpha(t: float) -> float:
+    return progress(t, BEATS["flag"] + 0.1, 0.3)
+
+
+def draw_marker(img: Image.Image, t: float) -> None:
+    k = marker_alpha(t)
+    if k <= 0:
+        return
+    x0 = MARK_X - 14 * (1 - k)
+    y0 = SENADO[1] - MARK_H / 2
+    rounded(img, (x0, y0, x0 + MARK_W, y0 + MARK_H), MARK_H // 2, fill=CRITICAL, alpha=k)
+    draw_text(img, (x0 + MARK_W / 2, y0 + MARK_H / 2 + 1), MARKER, MARK_SIZE, 700, NAVY, k, anchor="mm")
+
+
+def rings(img: Image.Image, t: float) -> None:
+    """Expanding outline rings, drawn at 2x and reduced: red from Senado on "flags", vest around the staff on "stay"."""
     q = 2
-    f = font(52 * q, 800)
-    tw = f.getlength(STAMP)
-    pad_x, pad_y = 30 * q, 18 * q
-    asc, desc = f.getmetrics()
-    w_, h_ = int(tw + 2 * pad_x), int(asc + 2 * pad_y - 6 * q)
-    img = Image.new("RGBA", (w_ + 40 * q, h_ + 40 * q), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    x0, y0 = 20 * q, 20 * q
-    if ring:
-        d.rounded_rectangle((x0, y0, x0 + w_, y0 + h_), 12 * q, outline=(*SAFE, 255), width=3 * q)
-    else:
-        d.rounded_rectangle((x0, y0, x0 + w_, y0 + h_), 12 * q, fill=(*NAVY, 200), outline=(*SAFE, 255), width=5 * q)
-        d.rounded_rectangle((x0 + 10 * q, y0 + 10 * q, x0 + w_ - 10 * q, y0 + h_ - 10 * q), 6 * q, outline=(*SAFE, 255), width=2 * q)
-        d.text((x0 + w_ / 2, y0 + h_ / 2 + 2 * q), STAMP, font=f, fill=(*SAFE, 255), anchor="mm")
-    img = img.rotate(8, resample=Image.BICUBIC, expand=True)
-    return img.resize((img.width // q, img.height // q), Image.LANCZOS)
-
-
-STAMP_SPR = _stamp_sprite()
-STAMP_RING = _stamp_sprite(ring=True)
-STAMP_C = (585, 430)                                    # left of the map, beside the detour
-
-
-def draw_stamp(img: Image.Image, t: float) -> None:
-    k = clamp((t - BEATS["stamp"]) / 0.26)
-    if k <= 0:
+    todo = []
+    for t0 in (BEATS["flag"], BEATS["flag"] + 0.4):
+        k = clamp((t - t0) / 0.8)
+        if 0 < k < 1:
+            todo.append((SENADO, ahpo.SENADO_R + 6 + 70 * ease(k), CRITICAL, 0.9 * (1 - k)))
+    st = staff_state(t)
+    k = clamp((t - BEATS["stay"]) / 0.8)
+    if st and 0 < k < 1:
+        todo.append((st["p"], R_MARK + 4 + 34 * ease(k), VEST, 0.8 * (1 - k)))
+    if not todo:
         return
-    s = lerp(1.7, 1.0, k * k)                              # accelerates onto the page
-    spr = STAMP_SPR if s == 1.0 else STAMP_SPR.resize((round(STAMP_SPR.width * s), round(STAMP_SPR.height * s)), Image.LANCZOS)
-    paste(img, spr, (STAMP_C[0] - spr.width / 2, STAMP_C[1] - spr.height / 2), clamp(k * 1.6))
-    r = clamp((t - BEATS["stamp"] - 0.26) / 0.45)              # landing ring, tilted like the stamp
-    if 0 < r < 1:
-        g = 1.0 + 0.22 * ease(r)
-        ring = STAMP_RING.resize((round(STAMP_RING.width * g), round(STAMP_RING.height * g)), Image.LANCZOS)
-        paste(img, ring, (STAMP_C[0] - ring.width / 2, STAMP_C[1] - ring.height / 2), 0.6 * (1 - r))
-
-
-def _notice_sprite() -> tuple[Image.Image, tuple[int, int]]:
-    rows = [("ZH", NOTICE["zh"]), ("EN", NOTICE["en"]), ("PT", NOTICE["pt"])]
-    tag_w = 44
-    text_w = max(text_size(txt, 22, 500)[0] for _, txt in rows)
-    w_, line = 24 + tag_w + text_w + 26, 38
-    h_ = 18 + line * len(rows) + 10
-    img = Image.new("RGBA", (w_, h_), (0, 0, 0, 0))
-    rounded(img, (0, 0, w_ - 1, h_ - 1), 14, fill=NAVY_2, outline=INK_3, width=2)
-    for i, (tag, txt) in enumerate(rows):
-        y = 16 + i * line
-        draw_text(img, (24, y + 3), tag, 20, 700, INK_3)
-        draw_text(img, (24 + tag_w, y), txt, 22, 500, INK)
-    return img, (w_, h_)
-
-
-NOTICE_SPR, NOTICE_WH = _notice_sprite()
-NOTICE_XY = (812 - NOTICE_WH[0], 640)                    # right edge at x 812, bottom above y 790
-ELBOW_X = 792                                            # leader drops at x 792 (right of the lower-third area)
-
-
-def draw_notice(img: Image.Image, t: float) -> None:
-    a = progress(t, BEATS["notice"], 0.25) * (1 - progress(t, BEATS["notice_out"], 0.35))
-    if a <= 0:
-        return
-    x0, y0 = NOTICE_XY
-    w_, h_ = NOTICE_WH
-    # two soft flashes of the frame (no hard on/off)
-    flash = 0.0
-    for c in (BEATS["notice"] + 0.3, BEATS["notice"] + 0.75):
-        flash = max(flash, math.exp(-((t - c) / 0.11) ** 2))
-    if flash > 0.01:
-        for g, ga in ((10, 0.18), (5, 0.35)):
-            rounded(img, (x0 - g, y0 - g, x0 + w_ + g, y0 + h_ + g), 14 + g, outline=INK, width=3, alpha=a * ga * flash)
-    paste(img, NOTICE_SPR, (x0, y0), a)
-    if flash > 0.01:
-        rounded(img, (x0, y0, x0 + w_ - 1, y0 + h_ - 1), 14, outline=INK, width=2, alpha=a * flash)
-    # leader to Av. de Almeida Ribeiro, where the card displays the notice
-    ax, ay = POS["almeida_ribeiro"]
-    lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    xs = [c[0] for c, *_ in todo]
+    ys = [c[1] for c, *_ in todo]
+    pad = 120
+    ox, oy = int(min(xs) - pad), int(min(ys) - pad)
+    lay = Image.new("RGBA", (int(max(xs) - min(xs) + 2 * pad) * q, int(max(ys) - min(ys) + 2 * pad) * q), (0, 0, 0, 0))
     d = ImageDraw.Draw(lay)
-    col = (*INK_3, int(255 * a))
-    d.line([(ELBOW_X, y0 + h_), (ELBOW_X, ay), (ax - ahpo.DISC_R - 4, ay)], fill=col, width=2, joint="curve")
-    d.ellipse((ax - ahpo.DISC_R - 9, ay - 5, ax - ahpo.DISC_R + 1, ay + 5), fill=col)
-    img.alpha_composite(lay)
+    for (cx, cy), r, col, a in todo:
+        x, y = (cx - ox) * q, (cy - oy) * q
+        d.ellipse((x - r * q, y - r * q, x + r * q, y + r * q), outline=(*col, int(255 * a)), width=3 * q)
+    lay = lay.resize((lay.width // q, lay.height // q), Image.LANCZOS)
+    img.alpha_composite(lay, (ox, oy))
 
 
-STATEMENT_X, STATEMENT_Y, STATEMENT_W = 1450, 380, 410
-STATEMENT_LINES = wrap(STATEMENT, 32, 600, STATEMENT_W)
+# ---------- what is on screen, and for how long ----------
+
+def texts_on(t: float) -> list[str]:
+    """Text elements on screen at t besides the badge (and the captions, added at assembly)."""
+    on = []
+    if 1 - progress(t, BEATS["labels_out"], 0.5) > 0.01:
+        on += ["Almeida label", "Ruins label"]
+    if senado_label_alpha(t) > 0.01:
+        on.append("Senado label")
+    if tag_alpha(t) > 0.01:
+        on.append("tag")
+    if marker_alpha(t) > 0.01:
+        on.append(MARKER)
+    if label_alpha(t) > 0.01:
+        on.append(LABEL)
+    return on
 
 
-def draw_statement(img: Image.Image, t: float) -> None:
-    k = progress(t, BEATS["statement"], 0.5)
-    if k <= 0:
-        return
-    hgt = len(STATEMENT_LINES) * 42
-    rounded(img, (STATEMENT_X - 26, STATEMENT_Y + 4, STATEMENT_X - 21, STATEMENT_Y + 4 + hgt * k), 2, fill=WARNING, alpha=k)
-    for i, ln in enumerate(STATEMENT_LINES):
-        ki = progress(t, BEATS["statement"] + 0.05 * i, 0.45)
-        draw_text(img, (STATEMENT_X, STATEMENT_Y + i * 42 + 12 * (1 - ki)), ln, 32, 600, INK, ki)
-
-
-def draw_chip(img: Image.Image) -> None:
-    """State chip beside Senado's English label (it stays CRITICAL for the whole shot)."""
-    x, y = POS["senado_square"]
-    lx = x + ahpo.SENADO_R + ahpo.LABEL_DX["senado_square"]
-    en_w = text_size(ahpo.LABEL_EN["senado_square"], 22, 500)[0]
-    cw = text_size(CHIP, 20, 700)[0] + 20
-    x0, y0 = lx + en_w + 14, y + 3
-    rounded(img, (x0, y0, x0 + cw, y0 + 28), 14, fill=CRITICAL)
-    draw_text(img, (x0 + cw / 2, y0 + 14), CHIP, 20, 700, NAVY, anchor="mm")
+# Declutter rule 1: once S01's labels have faded, at most two text elements at a time; rule 5: each label stays at
+# least 0.3 s per word + 0.5 s
+_T_CLEAR = BEATS["labels_out"] + 0.5
+assert all(len(texts_on(i / FPS)) <= 2 for i in range(int(_T_CLEAR * FPS) + 1, int(DURATION * FPS))), \
+    [(i / FPS, texts_on(i / FPS)) for i in range(int(DURATION * FPS)) if len(texts_on(i / FPS)) > 2][:3]
+for _txt, _t0 in ((MARKER, BEATS["flag"] + 0.4), (LABEL, BEATS["check_label"] + 0.35)):
+    assert DURATION - _t0 >= 0.3 * len(_txt.split()) + 0.5, (_txt, DURATION - _t0)
+# both labels clear the caption band (y 920-990) and the badge
+assert SENADO[1] + MARK_H / 2 < 900 and LABEL_Y + LABEL_SIZE < 900 and MARK_X + MARK_W < 1600
 
 
 # ---------- frame ----------
 
 def draw_frame(t: float) -> Image.Image:
     sim = sim_of(t)
-    s_her = ahpo_s(t)
-    route_k = progress(t, BEATS["route"], 1.2)
-    route = None
-    if route_k > 0:
-        s0 = s_her + 26
-        route = {"s0": s0, "s1": s0 + (MAIN_PATH.length - s0) * route_k, "alpha": 1.0}
+    la = 1 - progress(t, BEATS["labels_out"], 0.5)
     img = SCENE.render(
-        t, HOME,
+        SCENE_T0 + t, HOME,
         senado_col=ahpo.senado_colour(t, sim_of),
         senado_dens=ahpo.senado_density_smooth(sim),
-        dots_alpha=0.45,                       # background drift dimmed so the walkers on the detour read
-        labels={"almeida_ribeiro": 1.0, "senado_square": 1.0, "ruins_st_paul": 1.0},
-        pin=(1.0, 0.0),
-        ahpo={"p": MAIN_PATH.at(s_her), "alpha": 1.0, "tag": 1 - progress(t, BEATS["tag_out"], 0.3)},
-        staff=staff_state(t, s_her),
-        route=route,
-        detour={"k": progress(t, BEATS["detour"], 0.9), "phase": 38 * t, "alpha": 0.95},
-        walkers=walkers(t),
-        lane_k=progress(t, BEATS["lane"], 0.9),
-        lane_w=30.0,
+        dots_alpha=1.0 - 0.25 * progress(t, BEATS["check"], 0.9),      # a little quieter while her route is checked
+        labels={"almeida_ribeiro": la, "ruins_st_paul": la, "senado_square": senado_label_alpha(t)},
+        pin=(1.0, 0.0),                                                  # no pin label, as in S01 (19 Oct)
+        ahpo={"p": P_HER, "alpha": 1.0, "tag": 0.0,                     # the tag is drawn below, where S01 draws it
+              "ring": clamp((t - BEATS["ring"]) / 0.9) if BEATS["ring"] < t < BEATS["ring"] + 0.9 else 0.0},
+        staff=staff_state(t),
+        route=routes(t),
     ).convert("RGBA")
-    draw_chip(img)
-    draw_stamp(img, t)
-    draw_notice(img, t)
-    draw_statement(img, t)
+    ta = tag_alpha(t)
+    if ta > 0:
+        paste(img, TAG_SPRITE, (P_HER[0] - R_MARK - TAG_GAP - TAG_SPRITE.width, P_HER[1] - TAG_SPRITE.height / 2), ta)
+    rings(img, t)
+    draw_marker(img, t)
+    k = label_alpha(t)
+    if k > 0:
+        draw_text(img, (LABEL_X + 10 * (1 - k), LABEL_Y), LABEL, LABEL_SIZE, 600, VEST, k, anchor="lm")
     badge(img, BADGE)
-    draw_text(img, (60, 1006), SMALL, 20, 600, INK_2)
-    draw_text(img, (60, 1034), SOURCE, 20, 500, INK_3, max_width=1150)
     return img
 
 
-STILLS = {"stamp": 0.6, "notice": 1.5, "route_open": 4.0, "staff": 4.85, "end": 6.45}
+STILLS = {"start": 0.0, "tag": 1.3, "flag": 2.9, "check": 4.5, "stay": 5.4, "end": DURATION - 1 / FPS}
 
 if __name__ == "__main__":
     for name, ts in STILLS.items():
         still(f"{SHOT}_{name}", draw_frame(ts))
+    print("text elements on screen:", {n: texts_on(ts) for n, ts in STILLS.items()})
+    print(f"sim {ahpo.clock(SIM_KEYS[0][1])} -> {ahpo.clock(SIM_KEYS[-1][1])}; Senado flagged {ahpo.clock(_FLAG_SIM)}")
     if "--stills" not in sys.argv:
         print(render(SHOT, DURATION, draw_frame))

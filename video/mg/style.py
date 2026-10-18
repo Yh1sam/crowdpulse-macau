@@ -219,7 +219,7 @@ def legend_strip(img: Image.Image, alpha: float = 1.0) -> None:
     """Evidence legend docked bottom-right (y 1000-1024, at most 620 px wide), S10-S16."""
     if alpha <= 0:
         return
-    items = ["SIMULATED", "REAL DATA", "MODEL CHECK", "PENDING", "CORRECTED"]
+    items = ["SIMULATED", "REAL DATA", "MODEL CHECK", "PENDING"]  # CORRECTED left the legend with S12 (19 Oct)
     x = 1860
     for kind in reversed(items):
         tw, _ = text_size(kind, 15, 700)
@@ -227,9 +227,6 @@ def legend_strip(img: Image.Image, alpha: float = 1.0) -> None:
         if kind == "PENDING":
             rounded(img, (x0, 1000, x, 1024), 12, fill=NAVY_2, outline=GREY, width=2, alpha=alpha, dash=True)
             draw_text(img, (x0 + 9, 1004), kind, 15, 700, INK_2, alpha)
-        elif kind == "CORRECTED":
-            rounded(img, (x0, 1000, x, 1024), 12, fill=NAVY, outline=INK, width=2, alpha=alpha)
-            draw_text(img, (x0 + 9, 1004), kind, 15, 700, INK, alpha)
         else:
             rounded(img, (x0, 1000, x, 1024), 12, fill=BADGES[kind], alpha=alpha)
             draw_text(img, (x0 + 9, 1004), kind, 15, 700, NAVY, alpha)

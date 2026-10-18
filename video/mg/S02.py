@@ -1,4 +1,4 @@
-"""Shot S02 OVERLAY (1:17.0-1:24.0, 7.0 s): "Here's what we built. Our phone app counts people on the
+"""Shot S02 OVERLAY (1:18.0-1:25.0, 7.0 s): "Here's what we built. Our phone app counts people on the
 device, and sends only numbers." It opens the WHAT part of the video.
 
 A transparent overlay composited over the iPhone Simulator recording of the CrowdPulse Sensor app
@@ -6,27 +6,29 @@ A transparent overlay composited over the iPhone Simulator recording of the Crow
 centre-left in the footage (x 440-937, clear of the chapter card), so everything here stays on the
 right third and along the top, on semi-opaque panels:
   - the chapter card "What did we build?" (top-left, the first 2 s, as in the other chapters);
-  - badge LIVE SOFTWARE · TEST CLIP with the Simulator / clip line split over two small lines;
-  - on "counts people on the device": the readings peel off the app's counter panel into a payload
-    card (real key names and values);
-  - on "and sends": the card slides right to a server;
+  - badge LIVE SOFTWARE · TEST CLIP with one short note under it, "iPhone Simulator · Toronto, not
+    Macau" (never show the app without it: no physical-phone run is documented);
+  - on "counts people on the device": four readings peel off the app's counter panel into a payload
+    card (real key names; values rounded as in the shot list), "…" marking the keys not shown;
+  - on "and sends": the card slides right to a server icon;
   - on "only numbers": a photo icon tries to follow, bounces off a shield, "image upload → HTTP 403"
     lands and holds to the cut.
 
 Data sources:
   - docs/video/shotlist.json, shot S02: duration (end_s - start_s) and the on-screen text (the
-    chapter card, the badge detail, the Simulator line, the sensor_id line and the shield label are
-    checked against it word for word).
+    chapter card, the badge detail, the note, the card's rows and the shield label are checked
+    against it word for word).
   - experiments/results/simulation_run/ios_app_debug_payload.png, Debug tab, "Last observation
     (exact payload)": the payload keys and values on the card. The PNG is the only place these
-    values exist, so they are transcribed from it exactly (no rounding) and the card says
-    "example payload · test run, 29 Sep 2026" (the payload's own timestamp is 2026-09-29).
+    values exist, so they are transcribed from it exactly below; the card shows them rounded to the
+    shot list's figures (checked), and says "example payload · test run, 29 Sep 2026" (the payload's
+    own timestamp is 2026-09-29).
   - ios/CrowdPulseSensor/Sources/Models/SensorObservation.swift: every key on the card is checked
     against the app's CodingKeys.
-  - experiments/simulation_harness/run_sim.py: the phone's node label (sensor_id) is checked
-    against the harness default.
   - backend/app/main.py: media uploads get status 403 (PRIVACY_MODE); the 403 is checked there.
-The card shows 8 of the payload's 15 keys (the storyboard's list plus sensor_id); "…" marks the rest.
+The card shows 4 of the payload's 15 keys, all plain numbers; "…" marks the rest.
+19 Oct declutter: the two-line Simulator / clip caption became one short note, and the sensor_id line,
+the location, heading and sensor_id rows and the "server" label left the picture.
 
 Outputs:
   video/build/overlays/S02.mov          transparent overlay (QuickTime Animation, alpha)
@@ -63,7 +65,7 @@ DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 7.0 s
 # "and sends (4.4) only numbers." (4.75-5.6), then hold to the cut at 7.0.
 # re-key to the real voice take
 BEATS = {
-    "badge_in": 0.0,   # cut in: badge and the Simulator / clip lines, held for the whole shot
+    "badge_in": 0.0,   # cut in: badge and the Simulator note, held for the whole shot
     "card_in": 0.0,    # chapter card "What did we build?" on "Here's what we built." (2 s, as in S06)
     "card_out": 2.0,
     "peel": 2.75,      # "counts people on the device": readings lift off the app's panel into the card
@@ -79,33 +81,29 @@ BEATS = {
 
 CHAPTER = "What did we build?"
 BADGE_KIND, BADGE_DETAIL = "LIVE SOFTWARE", "TEST CLIP"
-SUB_A = "iOS app running in the iPhone Simulator on a Mac · YOLO11n on the device"
-SUB_B = "public-domain (CC0) street clip, Toronto, not Macau"
+NOTE = "iPhone Simulator · Toronto, not Macau"
 CARD_LABEL = "example payload · test run, 29 Sep 2026"
-SENSOR_NOTE = "sensor_id = a random node label for a temporary sensing position, not a person or a device serial"
 SHIELD_TEXT, SHIELD_CODE = "image upload → ", "HTTP 403"
-SERVER_LABEL = "server"
+
+# ---------- the payload (transcribed exactly from ios_app_debug_payload.png) ----------
+# Values as the app sent them (JSON numbers); the card shows them rounded to `places` decimals, the
+# shot list's figures. The other keys (latitude / longitude, heading_deg, sensor_id, …) stay off the card.
+PAYLOAD_EXACT = [
+    ("person_count", 11, 0),
+    ("estimated_density", 0.2703125, 2),
+    ("flow_direction_deg", 115.78803499919758, 0),
+    ("vision_confidence", 0.9146414969243168, 2),
+]
+PAYLOAD = [(k, f"{v:.{n}f}") for k, v, n in PAYLOAD_EXACT]        # 11, 0.27, 116, 0.91
 
 _ost = _shot["on_screen_text"]
 assert _ost.startswith(f"Chapter card (top-left, 2 s): {CHAPTER} | "), _ost
-assert f"{BADGE_KIND} · {BADGE_DETAIL}" in _ost
-assert f"{SUB_A} · {SUB_B}" in _ost
-assert SENSOR_NOTE in _ost
-assert (SHIELD_TEXT + SHIELD_CODE) in _ost
-assert "example payload · test run, 29 Sep 2026" in _shot["notes"]
-
-# ---------- the payload (transcribed exactly from ios_app_debug_payload.png) ----------
-# Rows in the storyboard's order; values as the app sent them (JSON numbers, the id as a string).
-PAYLOAD = [
-    ("person_count", "11"),
-    ("estimated_density", "0.2703125"),
-    ("flow_direction_deg", "115.78803499919758"),
-    ("vision_confidence", "0.9146414969243168"),
-    ("latitude", "22.19282"),
-    ("longitude", "113.53925"),
-    ("heading_deg", "0"),
-    ("sensor_id", '"node-a3cd4a"'),
-]
+assert f"Badge (top-right): {BADGE_KIND} · {BADGE_DETAIL} |" in _ost
+assert f"Note under the badge: {NOTE} |" in _ost
+assert " · ".join(f"{k} {v}" for k, v in PAYLOAD) + " · … |" in _ost
+assert f"Shield: {SHIELD_TEXT + SHIELD_CODE}" in _ost
+assert "sensor_id =" not in _ost and "iOS app running" not in _ost
+assert CARD_LABEL in _shot["notes"]
 
 
 def _swift_keys() -> set[str]:
@@ -124,8 +122,6 @@ def _swift_keys() -> set[str]:
 _keys = _swift_keys()
 for _k, _ in PAYLOAD:
     assert _k in _keys, f"{_k} is not a key of SensorObservation.swift"
-_node = re.search(r'CROWDPULSE_PHONE_NODE",\s*"([^"]+)"', (ROOT / "experiments" / "simulation_harness" / "run_sim.py").read_text())
-assert _node and f'"{_node.group(1)}"' == dict(PAYLOAD)["sensor_id"]
 assert "status_code=403" in (ROOT / "backend" / "app" / "main.py").read_text()
 
 # ---------- layout ----------
@@ -140,11 +136,11 @@ PHONE = (440, -16, 937, 1064)
 # speed, vision confidence, stability, upload, buffered.
 CELLS = [(0.29, 0.446), (0.675, 0.446), (0.29, 0.495), (0.675, 0.495),
          (0.29, 0.545), (0.675, 0.545), (0.29, 0.594), (0.675, 0.594)]
-CELL_FOR_ROW = [0, 1, 2, 4, 3, 5, 7, 6]       # card row i peels from CELLS[CELL_FOR_ROW[i]]
+CELL_FOR_ROW = [0, 1, 2, 4]                    # card row i peels from CELLS[CELL_FOR_ROW[i]]: people, density, flow, vision confidence
 CELL_W, CELL_H = 130, 30
 
-CARD_W, PAD, ROW_H = 560, 24, 34
-CARD_Y = 182
+CARD_W, PAD, ROW_H = 500, 24, 44
+CARD_Y = 236                                   # card y 236-518, between the badge note (to y 146) and the photo's path (y 702)
 ROWS_Y0 = 62                                   # first row, inside the card
 CARD_X_BUILD, CARD_X_DOCK = 992, 1192          # the card builds near the phone, then slides right
 RACK = (1774, 200, 1860, 752)                  # the server, right edge
@@ -222,31 +218,25 @@ def back_out(t: float, s: float = 1.6) -> float:
 # ---------- static sprites (drawn once) ----------
 
 def top_slot() -> Image.Image:
-    """Badge pill and the two small Simulator / clip lines on a semi-opaque backing."""
+    """Badge pill and the one-line Simulator note under it, on a semi-opaque backing."""
     img = transparent()
-    wa, wb = tw(SUB_A, 20, 500), tw(SUB_B, 20, 500)
-    # backing flush with the pill's right edge (x 1860); the lines sit 16 px inside it
-    x0 = 1860 - 16 - max(wa, wb) - 16
-    rounded(img, (x0, 104, 1860, 166), 12, fill=NAVY, alpha=0.78)
+    # backing flush with the pill's right edge (x 1860); the note sits 16 px inside it
+    x0 = 1860 - 16 - tw(NOTE, 24, 600) - 16
+    rounded(img, (x0, 104, 1860, 146), 12, fill=NAVY, alpha=0.85)
     badge(img, BADGE_KIND, BADGE_DETAIL)
-    d = ImageDraw.Draw(img)
-    txt(d, (1844, 112), SUB_A, 20, 500, INK, anchor="ra")
-    txt(d, (1844, 138), SUB_B, 20, 500, INK_2, anchor="ra")
+    txt(ImageDraw.Draw(img), (1844, 111), NOTE, 24, 600, INK, anchor="ra")
     return img
 
 
 def card_panel() -> tuple[Image.Image, Image.Image, int]:
     """Card background with its label (returns panel, soft shadow, card height)."""
-    note_lines = wrap(SENSOR_NOTE, 20, 500, CARD_W - 2 * PAD)
     rows_end = ROWS_Y0 + len(PAYLOAD) * ROW_H
-    note_y = rows_end + 30 + 14
-    h = note_y + len(note_lines) * 26 + 18
+    h = rows_end + 44                                           # room for the "…" (more keys) under the rows
 
     def draw(d, k):
         d.rounded_rectangle((0, 0, CARD_W * k - 1, h * k - 1), 16 * k, fill=(*NAVY_2, 235),
                             outline=(*CYAN, 110), width=2 * k)
         d.line([(PAD * k, 50 * k), ((CARD_W - PAD) * k, 50 * k)], fill=(*NAVY_3, 255), width=2 * k)
-        d.line([(PAD * k, (rows_end + 30) * k), ((CARD_W - PAD) * k, (rows_end + 30) * k)], fill=(*NAVY_3, 255), width=2 * k)
         for i in range(0, len(PAYLOAD), 2):                    # faint stripes for row reading
             y = ROWS_Y0 + i * ROW_H
             d.rounded_rectangle((12 * k, y * k, (CARD_W - 12) * k, (y + ROW_H) * k), 8 * k, fill=(*NAVY_3, 90))
@@ -254,7 +244,7 @@ def card_panel() -> tuple[Image.Image, Image.Image, int]:
     d = ImageDraw.Draw(panel)
     d.ellipse((PAD, 22, PAD + 10, 32), fill=(*CYAN, 255))
     txt(d, (PAD + 18, 27), CARD_LABEL, 20, 600, INK_2, anchor="lm")
-    txt(d, (PAD, rows_end + 10), "…", 26, 700, INK_2, anchor="lm")     # more keys not shown
+    txt(d, (PAD, rows_end + 18), "…", 28, 700, INK_2, anchor="lm")     # more keys not shown
     shadow = Image.new("RGBA", (CARD_W + 60, h + 60), (0, 0, 0, 0))
     ImageDraw.Draw(shadow).rounded_rectangle((30, 36, CARD_W + 30, h + 36), 16, fill=(0, 0, 0, 120))
     shadow = shadow.filter(ImageFilter.GaussianBlur(12))
@@ -264,22 +254,8 @@ def card_panel() -> tuple[Image.Image, Image.Image, int]:
 def row_sprite(key: str, value: str) -> Image.Image:
     im = Image.new("RGBA", (CARD_W, ROW_H), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    txt(d, (PAD, ROW_H // 2), key, 22, 500, KEY_COL, anchor="lm")
-    txt(d, (CARD_W - PAD, ROW_H // 2), value, 22, 650, INK, anchor="rm")
-    return im
-
-
-def note_sprite() -> Image.Image:
-    lines = wrap(SENSOR_NOTE, 20, 500, CARD_W - 2 * PAD)
-    im = Image.new("RGBA", (CARD_W, len(lines) * 26 + 6), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    for i, ln in enumerate(lines):
-        y = 2 + i * 26
-        if ln.startswith("sensor_id"):
-            txt(d, (PAD, y), "sensor_id", 20, 600, KEY_COL)
-            txt(d, (PAD + tw("sensor_id", 20, 600), y), ln[len("sensor_id"):], 20, 500, INK_2)
-        else:
-            txt(d, (PAD, y), ln, 20, 500, INK_2)
+    txt(d, (PAD, ROW_H // 2), key, 26, 500, KEY_COL, anchor="lm")
+    txt(d, (CARD_W - PAD, ROW_H // 2), value, 28, 700, INK, anchor="rm")
     return im
 
 
@@ -357,30 +333,17 @@ def pill_403() -> Image.Image:
     return im
 
 
-def label_sprite(text: str, size: int = 20, weight: int = 600) -> Image.Image:
-    w, h = tw(text, size, weight) + 24, size + 14
-
-    def draw(d, k):
-        d.rounded_rectangle((0, 0, w * k - 1, h * k - 1), 10 * k, fill=(*NAVY, 200))
-    im = smooth(w, h, draw)
-    txt(ImageDraw.Draw(im), (w // 2, h // 2), text, size, weight, INK_2, anchor="mm")
-    return im
-
-
 TOP = top_slot()
 PANEL, SHADOW, CARD_H = card_panel()
 ROWS = [row_sprite(k, v) for k, v in PAYLOAD]
-NOTE = note_sprite()
-NOTE_Y = ROWS_Y0 + len(PAYLOAD) * ROW_H + 44
 RACK_IMG, RACK_GLOW = rack_sprite(), rack_sprite(glow=True)
 SHIELD = shield_sprite()
 PHOTO = photo_sprite()
 CROSS = cross_sprite()
 P403 = pill_403()
-SERVER_TAG = label_sprite(SERVER_LABEL)
 CARD_GLOW = smooth(CARD_W + 12, CARD_H + 12, lambda d, k: d.rounded_rectangle(
     (2 * k, 2 * k, (CARD_W + 10) * k, (CARD_H + 10) * k), 20 * k, outline=(*CYAN, 255), width=4 * k))
-assert CARD_Y + CARD_H < 650 and CARD_X_DOCK + CARD_W < RACK[0] - 12
+assert CARD_Y > 146 + 40 and CARD_Y + CARD_H < 650 and CARD_X_DOCK + CARD_W < RACK[0] - 12
 
 # ---------- timing ----------
 STAGGER, LIFT, FLY, TEXT_FADE = 0.06, 0.16, 0.50, 0.22
@@ -416,7 +379,7 @@ def pill_img(w: float, h: float, a_fill: float) -> Image.Image:
 def frame(t: float) -> Image.Image:
     img = transparent()
 
-    # top slot: badge and the two small lines, the whole shot; the chapter card, the first 2 s
+    # top slot: badge and the Simulator note, the whole shot; the chapter card, the first 2 s
     put(img, TOP, 0, 0, progress(t, BEATS["badge_in"], 0.3))
     chapter_card(img, CHAPTER, fade(t, BEATS["card_in"], BEATS["card_out"], 0.25))
 
@@ -427,7 +390,6 @@ def frame(t: float) -> Image.Image:
         put(img, RACK_IMG, rx, RACK[1] - 12, ra)
         pulse = fade(t, BEATS["dock"] - 0.05, BEATS["dock"] + DOCK_PULSE, 0.15)
         put(img, RACK_GLOW, rx, RACK[1] - 12, pulse)
-        put_c(img, SERVER_TAG, (RACK[0] + RACK[2]) / 2 + (1 - ra) * 30, RACK[3] + 30, ra)
 
     # payload card
     cx = card_x(t)
@@ -439,8 +401,6 @@ def frame(t: float) -> Image.Image:
         for i, row in enumerate(ROWS):
             _, land = pill_times(i)
             put(img, row, cx, CARD_Y + ROWS_Y0 + i * ROW_H, progress(t, land - 0.06, TEXT_FADE))
-        _, last = pill_times(len(ROWS) - 1)
-        put(img, NOTE, cx, CARD_Y + NOTE_Y, progress(t, last, 0.3))
         # the card's outline pulses with the server as it docks
         put(img, CARD_GLOW, cx - 6, CARD_Y - 6, fade(t, BEATS["dock"] - 0.05, BEATS["dock"] + DOCK_PULSE, 0.15))
 

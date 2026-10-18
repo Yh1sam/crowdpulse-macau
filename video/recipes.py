@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import ImageDraw
 
 from assemble import png, probe_duration
-from style import (BUILD, INK, INK_2, NAVY, SAFE, WARNING, CRITICAL, CYAN, badge, chapter_card, draw_text, footer,
+from style import (BUILD, INK, INK_2, NAVY, SAFE, WARNING, CRITICAL, badge, chapter_card, draw_text, footer,
                    legend_strip, rounded, text_size, transparent)
 
 MG, CLIPS, OVL = BUILD / "mg", BUILD / "clips", BUILD / "overlays"
@@ -24,15 +24,6 @@ def solid_footer(img, text: str) -> None:
     assert w <= 1150, f"footer is {w} px, over the 1150 px slot: {text}"
     rounded(img, (46, 1026, 60 + w + 14, 1066), 8, fill=NAVY)
     footer(img, text)
-
-
-def badge_solid_sub(img, kind: str, detail: str, sub: str) -> None:
-    """The status badge with its one-line sub-line on a solid navy backing (style.badge's own backing is
-    78% opaque, which lets the captured page show through)."""
-    badge(img, kind, detail)
-    sw, _ = text_size(sub, 20, 500)
-    rounded(img, (1860 - sw - 16, 100, 1868, 132), 8, fill=NAVY)
-    draw_text(img, (1860 - sw, 106), sub, 20, 500, INK_2)
 
 
 def legend_docked(img, band_top: int | None = None) -> None:
@@ -123,7 +114,11 @@ def s08(dur: float):
     cursor's rhythm at the three splices (on 0.7 s once, on or off 0.3 s three times, instead of 0.5 s). The codes
     show at 2.83 / 4.80 / 7.43 s, 0.10-0.12 s before their stamps.
     The take is raised 30 px (its top 30 px are empty navy), so the terminal window (y 170-775) ends 25 px above
-    [MEMBER 3]'s lower-third (y 800-890, 0.2-3.2 s; S08 is that member's first voice-over shot)."""
+    [MEMBER 3]'s lower-third (y 800-890, 0.2-3.2 s; S08 is that member's first voice-over shot).
+    On screen (19 Oct declutter): the chapter card, the plain LIVE SOFTWARE badge and three short stamps (a code,
+    its verb and at most two words); no footer (the checks' test file is in script.md section 4)."""
+    spec("S08", "Badge (top-right): LIVE SOFTWARE (cyan)", "202 accepted · numbers only", "422 rejected · face-ID field",
+         "403 refused · image upload")
     take = segments("S08", CLIPS / "S08.mp4", [
         (0.0, 1.4, FULL, FULL),     # 0.0-1.4: the prompt (cursor on 1.0-1.5 s)
         (0.2, 2.3, FULL, FULL),     # 1.4-3.5: the prompt again from 0.2 s (cursor on 0.7 s once); command 1 and 202 at 2.83
@@ -132,11 +127,10 @@ def s08(dur: float):
     ])
     ov = [
         (png("S08_card", lambda img: chapter_card(img, "Can it be trusted?")), 0.0, 2.0),
-        (png("S08_badge", lambda img: badge(img, "LIVE SOFTWARE", "recorded live")), 0.0, dur),
-        (png("S08_footer", lambda img: footer(img, "same checks in backend/tests/test_api.py · real requests to a fresh backend on localhost:8001")), 0.0, dur),
-        (png("S08_s1", lambda img: stamp(img, 300, 311, "202 accepted · numbers only", SAFE)), 2.95, dur),      # "accepts"
-        (png("S08_s2", lambda img: stamp(img, 300, 416, "422 rejected · extra field face_id (closed schema)", WARNING)), 4.9, dur),  # "rejects"
-        (png("S08_s3", lambda img: stamp(img, 300, 556, "403 refused · image upload (PRIVACY_MODE on by default)", CRITICAL)), 7.55, dur),  # "refuses"
+        (png("S08_badge", lambda img: badge(img, "LIVE SOFTWARE")), 0.0, dur),
+        (png("S08_s1", lambda img: stamp(img, 300, 311, "202 accepted · numbers only", SAFE)), 2.95, dur),    # "accepts"
+        (png("S08_s2", lambda img: stamp(img, 300, 416, "422 rejected · face-ID field", WARNING)), 4.9, dur),  # "rejects"
+        (png("S08_s3", lambda img: stamp(img, 300, 556, "403 refused · image upload", CRITICAL)), 7.55, dur),  # "refuses"
     ]
     return ["-i", str(take)], ov, [], "crop=1920:1050:0:30,pad=1920:1080:0:0:color=0x0B1220"
 
@@ -182,13 +176,16 @@ def s03(dur: float):
     detail (WARNING) from 105.4 s, the zone CRITICAL from about 111 s, the +5 / +10 rows CRITICAL and confident
     from 116.2 s (14:10:05 sim). Zone detail never scrolls, so its own WHY list is never on screen: the
     'why' beat is the sidebar's reason list (the dashboard's Reasons for the first forecast row, +5 min,
-    WARNING at 76% confidence), after the lower-third (0.2-3.2 s). Beats keyed to the guide voice's
+    WARNING at 76% confidence), from the cut to it (S03 has no lower-third since 19 Oct: [MEMBER 2]'s is on
+    S09). Beats keyed to the guide voice's
     pauses (voice from 0.2 s): 'with a simulated Golden Week crowd' 1.4-3.4 s, 'Senado Square's forecast' about
     3.6-5.5 s, 'turns critical' about 5.7-6.3 s, 'It shows how sure it is' 6.55-8.0 s ('how sure' about
-    7.05-7.6 s: the '+5 / +10 / +15 min' and 'confidence' callouts, once the zoom to the rows has settled),
+    7.05-7.6 s: the '+5 / +10 / +15 min' and 'how sure' callouts, once the zoom to the rows has settled),
     'and why' 8.2-8.8 s. The 'why' highlight cannot move to 'and why': the capture shows the reasons only
     before Zone detail opens, and cutting back to them after the CRITICAL rows would run the SIM CLOCK
     backwards and pair a WARNING-time reason list with CRITICAL rows; it stays on 'crowd, Senado Square's'.
+    On screen (19 Oct declutter): the plain badge (no sub-line: the caption says 'simulated Golden Week crowd'
+    and the captured status bar shows the SIM CLOCK), the three callouts the voice names and the map credit.
     Re-key to the real take."""
     c2a = CLIPS / "C2a.mp4"
     # side: the sidebar's reasons (source y 735-970) with the +15 row's probability line above them, from
@@ -206,45 +203,23 @@ def s03(dur: float):
         (117.2, 119.9, rows, rows, 1069),           # 7.3-10.0: held still so the callouts sit beside the rows, not on them
     ])
     x0, y0 = to_out(side, 1382, 722); x1, y1 = to_out(side, 1858, 983)
-    assert 132 < y0 and y1 < 900, (y0, y1)  # under the badge sub-line, above the caption band
-    spec("S03", "LIVE SOFTWARE · SIMULATED CROWD", "Simulated Golden Week afternoon · SIM CLOCK, 10× speed", "+5 / +10 / +15 min",
-         "confidence", "why", "Footer: Map © OpenStreetMap contributors")
+    bx0 = 1860 - text_size("LIVE SOFTWARE · SIMULATED CROWD", 24, 700)[0] - 44  # the badge's left edge (style.badge)
+    # the 'why' pill (y0 - 60 to y0 - 10) left of the badge (y 48-94), the box above the caption band
+    assert y0 - 60 > 0 and x0 + text_size("why", 28, 700)[0] + 40 < bx0 and y1 < 900, (x0, y0, y1, bx0)
+    spec("S03", "Badge (top-right): LIVE SOFTWARE · SIMULATED CROWD |", "Callouts: why · +5 / +10 / +15 min · how sure",
+         "Footer: Map © OpenStreetMap contributors")
     hy = to_out(rows, 0, 847)[1] - 25  # the Prediction panel's header line ('Prediction updated …')
     ov = [
-        (png("S03_badge", lambda img: badge_solid_sub(img, "LIVE SOFTWARE", "SIMULATED CROWD", "Simulated Golden Week afternoon · SIM CLOCK, 10× speed")), 0.0, dur),
-        # from after the lower-third (0.2-3.2 s) to the cut to Zone detail
-        (png("S03_why", lambda img: (highlight(img, (x0, y0, x1, y1)), callout(img, x0, y0 - 60, "why"))), 3.3, 4.4),
+        (png("S03_badge", lambda img: badge(img, "LIVE SOFTWARE", "SIMULATED CROWD")), 0.0, dur),
+        # from just after the cut to the sidebar crop (2.9 s) to the cut to Zone detail
+        (png("S03_why", lambda img: (highlight(img, (x0, y0, x1, y1)), callout(img, x0, y0 - 60, "why"))), 3.0, 4.4),
         # in the Prediction panel's header line, right of "Prediction updated …", clear of the rows' probabilities;
-        # on "how sure", as the zoom settles
-        (png("S03_rows", lambda img: (callout(img, 580, hy, "+5 / +10 / +15 min"), callout(img, 900, hy, "confidence"))), 7.3, dur),
+        # on "how sure", as the zoom settles; "how sure" stands over the rows' "…% confidence" chips
+        (png("S03_rows", lambda img: (callout(img, 580, hy, "+5 / +10 / +15 min"), callout(img, 900, hy, "how sure"))), 7.3, dur),
         # while the map (or its corner, in the sidebar crop) is on screen
         (png("S03_footer", lambda img: footer(img, "Map © OpenStreetMap contributors")), 0.0, 4.4),
     ]
     return ["-i", str(base)], ov, [], ""
-
-
-def gloss_panel(img) -> None:
-    """S04 notice beat: the languages, an English gloss of the zh and pt notices' openings, and the English
-    notice's closing AI clause (backend/app/services/intervention.py AI_NOTICE["en"]; the zh and pt notices
-    end with the same clause in their language), so a viewer with the sound off sees that the notice says
-    an AI forecast is involved. On a solid panel over the card's title (already shown in the route beat),
-    clear of the notice lines and the buttons."""
-    rows = [("zh", [("議事亭前地目前非常擁擠…", 600, INK), ("(Senado Square is very crowded…)", 500, INK_2)]),
-            ("pt", [("Largo do Senado: grande afluência de visitantes…", 600, INK), ("(Senado Square: many visitors…)", 500, INK_2)]),
-            ("en", [("… ends:", 500, INK_2), ("Advice from an AI crowd forecast, approved by staff.", 600, INK)])]
-    widths = [text_size(f"{tag}  " + "  ".join(t for t, _, _ in parts), 26, 600)[0] for tag, parts in rows]
-    assert max(widths) < 1700, widths
-    x0, y0 = 12, 100  # y 100-312, x 12-1908: covers the card's title, summary and route line whole, ends above the green line
-    rounded(img, (x0, y0, 1908, 312), 16, fill=NAVY, outline=CYAN, width=3)
-    x0 = 40
-    draw_text(img, (x0 + 34, y0 + 18), "中文 · English · Português", 28, 700, CYAN)
-    for i, (tag, parts) in enumerate(rows):
-        y = y0 + 70 + i * 46  # last row's text ends about y 296, above the panel's edge at 312
-        draw_text(img, (x0 + 30, y), tag, 26, 700, CYAN)
-        tx = x0 + 30 + text_size(tag, 26, 700)[0] + 18
-        for text, weight, colour in parts:
-            draw_text(img, (tx, y), text, 26, weight, colour)
-            tx += text_size(text, 26, weight)[0] + 16
 
 
 def s04(dur: float):
@@ -255,16 +230,18 @@ def s04(dur: float):
     from 136.8 s. Beats are keyed to the guide voice (voice from 0.2 s): 'stair-free detour' 1.1-2.1 s,
     'with notices in Chinese, English and Portuguese' 2.3-5.4 s, 'A person must approve it' 5.6-7.0 s ('approve'
     about 6.3-6.7 s; the scripted click lands at 7.23 s, on 'and we'), 'and we log their name' 7.2-8.4 s
-    ('log' about 7.6 s, 'their name' about 7.9-8.4 s); re-key to the real take."""
+    ('log' about 7.6 s, 'their name' about 7.9-8.4 s); re-key to the real take.
+    On screen (19 Oct declutter): the badge, one callout at a time on the words it names ('no stairs' over the
+    card's own 'no stairs', the three language names over the opened notice, 'needs a person's approval'), a
+    plain highlight on the audit row's name (the page's own 'Audit log' heading names it), and from the click to
+    the end the 'Scripted click' note. No English gloss of the notices: the caption says what they are."""
     b2 = CLIPS / "C2b2.mp4"
-    spec("S04", "LIVE SOFTWARE · SIMULATED CROWD", "accessibility check: this route avoids stairs", "中文 · English · Português",
-         "needs a person's approval", "audit log", "zh 議事亭前地目前非常擁擠… (Senado Square is very crowded…)",
-         "pt Largo do Senado: grande afluência de visitantes… (Senado Square: many visitors…)",
-         "click scripted for this recording · the approval runs the real code path")
+    spec("S04", "Badge (top-right): LIVE SOFTWARE · SIMULATED CROWD |", "no stairs", "中文 · English · Português",
+         "needs a person's approval", "Footer (small, from the APPROVE click to the end of the shot): Scripted click")
     route, notice, ev, appr, log = (335, 231, 1510), (320, 214, 1540), (330, 470, 1060), (300, 40, 1580), (322, 0, 1035)
     base = segments("S04", b2, [
-        (111.8, 113.0, FULL, route),   # 0.0-1.2: 'Deciding as' field and the Senado card; ease in to
-        (113.0, 114.0, route, route),  # 1.2-2.2: the route line ('no stairs') and the green accessibility line
+        (111.8, 112.8, FULL, route),   # 0.0-1.0: 'Deciding as' field and the Senado card; ease in to
+        (112.8, 114.0, route, route),  # 1.0-2.2: the route line ('no stairs') and the green accessibility line
         (115.4, 118.6, notice, notice),  # 2.2-5.4: zh / en / pt notice, each ending with the AI clause
         (121.2, 122.2, ev, ev),        # 5.4-6.4: buttons and the evidence bullets
         (125.9, 126.9, appr, appr),    # 6.4-7.4: 'Deciding as demo-operator-1' and the scripted APPROVE click (7.23 s)
@@ -272,47 +249,42 @@ def s04(dur: float):
     ])
     ov = [
         (png("S04_badge", lambda img: badge(img, "LIVE SOFTWARE", "SIMULATED CROWD")), 0.0, dur),
-        (png("S04_c1", lambda img: callout(img, 720, 556, "accessibility check: this route avoids stairs")), 1.2, 2.2),
-        (png("S04_c2", gloss_panel), 2.4, 5.4),
+        # "stair-free detour" (1.1-2.1 s): the route line's own "no stairs" boxed, the pill at that line's end,
+        # above the green accessibility line; up 1.2 s (2 words: at least 1.1 s)
+        (png("S04_c1", lambda img: (highlight(img, (1072, 444, 1184, 484)), callout(img, 1490, 436, "no stairs", size=26))), 1.0, 2.2),
+        # "with notices in Chinese, English and Portuguese": right of the opened 'Public notice (…)' line, above the ZH line
+        (png("S04_c2", lambda img: callout(img, 1060, 374, "中文 · English · Português")), 2.4, 5.4),
         # beside the button row, right of 'deciding as demo-operator-1' and under the badge (not in the Evidence panel)
         (png("S04_c3a", lambda img: callout(img, 1396, 108, "needs a person's approval")), 5.5, 6.4),
         (png("S04_c3b", lambda img: callout(img, 990, 802, "needs a person's approval")), 6.4, 7.4),
-        (png("S04_c4", lambda img: callout(img, 200, 640, "audit log")), 7.6, dur),                # "log"
         (png("S04_c4b", lambda img: highlight(img, (450, 722, 1064, 836))), 7.9, dur),             # "their name": demo-operator-1's row
-        # from the APPROVE click (the pointer rests on the button from 6.95 s; it presses at 7.23 s) to the end
-        (png("S04_footer", lambda img: solid_footer(img, "click scripted for this recording · the approval runs the real code path")), 7.1, dur),
+        # from the APPROVE click (the pointer rests on the button from 6.95 s; it presses at 7.23 s) to the end; in the
+        # footer slot, a step brighter and larger than a source footer (INK_2, 22 px), as it is a required note
+        (png("S04_footer", lambda img: (rounded(img, (46, 1022, 60 + text_size("Scripted click", 22, 600)[0] + 14, 1066), 8, fill=NAVY),
+                                        draw_text(img, (60, 1031), "Scripted click", 22, 600, INK_2))), 7.1, dur),
     ]
     return ["-i", str(base)], ov, [], ""
 
 
-def strip(name: str, src: Path, t0: float, t1: float, box: tuple[int, int, int, int], y_out: int) -> Path:
-    """Cuts t0-t1 out of a 1920x1080 recording, crops box (x, y, w, h) in source pixels, scales it to the
-    full 1920 px width and sets it at y_out on navy (a letterboxed strip, for a panel that is wide and short)."""
-    import subprocess
-    SEG.mkdir(parents=True, exist_ok=True)
-    out = SEG / f"{name}.mp4"
-    x, y, w, h = box
-    assert 1920 * h / w + y_out <= 1080, "strip runs off the frame"
-    vf = (f"trim={t0}:{t1},setpts=PTS-STARTPTS,fps=30,crop={w}:{h}:{x}:{y},scale=1920:-2,"
-          f"pad=1920:1080:0:{y_out}:color=0x0B1220,setsar=1")
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(src), "-vf", vf, "-c:v", "libx264", "-crf", "16",
-                    "-pix_fmt", "yuv420p", str(out)], check=True)
-    return out
-
-
 def s09(dur: float):
-    # tail2: only the C2b2 'Decided / expired' list (approved #6, then the superseded 'Increase monitoring …',
-    # 'Deploy staff …' rows; source y 0-330, above the 'Audit log' heading at y 345), as a strip on navy, so
-    # S09 does not repeat S04's closing picture of the same list over the audit log.
-    rows = (300, 554, 1080)  # raised so the +10 min row and its LOW CONFIDENCE badge sit above the caption band
-    tail = segments("S09_tail", CLIPS / "C2a.mp4", [(107.0, 109.5, rows, rows, 1080)])  # navy below the recording
-    tail2 = strip("S09_tail2", CLIPS / "C2b2.mp4", 137.6, 139.1, (316, 0, 1576, 330), 190)
-    base = concat_clips("S09", [MG / "S09_mg.mp4", tail, tail2])
-    spec("S09", "Stronger recommendations replace weaker pending ones")
+    # From the cut at 5.0 s (video/mg/S09.py DURATION) to the end: C2a's Zone detail Prediction panel at 14:08:28
+    # sim (source 107.0-111.0 s; the panel does not change in that window): +5 min WARNING at 63% confidence,
+    # and the +10 min row with the dashboard's own LOW CONFIDENCE — HUMAN REVIEW REQUIRED badge, zoomed (2.3x) so
+    # that badge reads without a callout. The picture below source y 1068 (a cut-off 'density' line) is navy, so
+    # the caption band sits on navy. On "a person must review it" (7.05 s) a plain highlight frames that badge.
+    # 19 Oct declutter: the "Decided / expired" strip and its callouts ("Stronger recommendations replace weaker
+    # pending ones", a duplicate LOW CONFIDENCE pill) are gone: neither is spoken, and the strip showed S04's
+    # approval before S04 makes it.
+    panel = (280, 790, 830)  # source x 280-1110 (the Prediction panel, left of Sensor reliability), y 790-1257 on the extended canvas
+    tail = segments("S09_tail", CLIPS / "C2a.mp4", [(107.0, 111.0, panel, panel, 1068)])
+    base = concat_clips("S09", [MG / "S09_mg.mp4", tail])
+    spec("S09", "Dashboard (from the cut): Badge (top-right): LIVE SOFTWARE · dashboard",
+         "a highlight box on the dashboard's own LOW CONFIDENCE — HUMAN REVIEW REQUIRED badge")
+    x0, y0 = to_out(panel, 362, 1029); x1, y1 = to_out(panel, 846, 1062)  # the badge in source pixels
+    assert y1 + 12 < to_out(panel, 0, 1068)[1], (y1, "the highlight ends above the navy cut")
     ov = [
-        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 5.0, dur),   # from the cut (S09.py DURATION)
-        (png("S09_rows", lambda img: callout(img, 980, 160, "LOW CONFIDENCE — HUMAN REVIEW REQUIRED", (245, 166, 35))), 5.2, 7.5),
-        (png("S09_dec", lambda img: callout(img, 541, 650, "Stronger recommendations replace weaker pending ones")), 7.5, dur),
+        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 5.0, dur),   # from the cut
+        (png("S09_hl", lambda img: highlight(img, (x0 - 12, y0 - 12, x1 + 12, y1 + 12))), 7.0, dur),  # "a person must review it"
     ]
     return ["-i", str(base)], ov, [], ""
 
@@ -321,6 +293,7 @@ S12_CUT = 7.0  # = video/mg/S12.py DURATION: the cut to the README insert, as M2
 
 
 def s12(dur: float):
+    # S12 was dropped from the cut on 19 Oct (no shotlist entry, so assemble.py never calls this); kept for reference.
     # README_insert.mp4 (re-captured 17 Oct from the current README.md, video/shots/readme_insert.json):
     # the page settles at 3.4 s with the Correction paragraph at y 171-388, x 528-1384, 30 px below the
     # previous paragraph, so the highlight box has room above and below it; it is 7.6 s long, still from 3.4 s.
@@ -341,30 +314,43 @@ def s12(dur: float):
     return ["-i", str(base)], ov, [], ""
 
 
+S15_HEADER, S15_HEDGE = "with vs without the closure", "averages over arrivals in both plans"
+S15_DOTS = "24 of 40: no step-free route either way"
+
+
 def s15_panel(img, stage: int) -> None:
-    """S15 counters (stage 0, from the walkers line) and the 40-dot grid of simulated wheelchair users: at
-    stage 1 all 40 dots are wheelchair purple, at stage 2 the 24 with no step-free route in either plan turn
-    grey (shotlist S15: 'a 40-dot grid in which 24 dots turn grey'; the 16 who arrive in both plans stay
-    purple) and the dot-grid lines appear. Numbers: sketchfuture/VERIFICATION.md (#721: wheelchair 16/40
-    arrive in both plans, 24 have no step-free route in either; walkers 40/40, strollers 28/40), matching
-    the captured plan's walker and wheelchair cards (40/40, 16/40, '24 人無可用路線')."""
+    """S15 overlay on a solid panel at the left (SketchFuture's map and cards sit behind it), one idea at a time.
+    Stage 0 (the walkers / wheelchair users sentence): the header, the three counters and a one-line hedge that
+    the averages cover only those who arrive in both plans. Stages 1-2 ('And 24 of our 40 …'): the counters give
+    way to the 40-dot grid of simulated wheelchair users: at stage 1 all 40 dots are wheelchair purple, at stage
+    2 the 24 with no step-free route in either plan turn grey (shotlist S15: 'a 40-dot grid in which 24 dots turn
+    grey'; the 16 who arrive in both plans stay purple) and its label appears. Numbers: sketchfuture/VERIFICATION.md
+    (#721: wheelchair 16/40 arrive in both plans, 24 have no step-free route in either; walkers 40/40, strollers
+    28/40; those counts left the screen on 19 Oct and are kept for Q&A), matching the captured plan's walker and
+    wheelchair cards (40/40, 16/40, '24 人無可用路線')."""
     purple, grey = (118, 88, 181), (98, 113, 138)
-    rounded(img, (40, 170, 900, 808 if stage else 536), 22, fill=(11, 18, 32))  # solid: SketchFuture's cards sit behind it
-    draw_text(img, (76, 196), "same 120 simulated people, with vs without the closure", 26, 600, INK)
-    for i, (who, val, col) in enumerate([("walkers", "+17 s", (36, 124, 118)), ("wheelchair users", "+30 s", purple), ("stroller users", "+21 s", (206, 103, 68))]):
-        y = 250 + i * 70
-        rounded(img, (76, y, 96, y + 40), 6, fill=col)
-        draw_text(img, (114, y + 2), who, 30, 600, INK)
-        draw_text(img, (860, y + 2), val, 34, 800, INK, anchor="ra")
-    draw_text(img, (76, 466), "averages over those who arrive in both plans: walkers 40/40 · wheelchair users 16/40 · stroller users 28/40", 21, 500, INK_2, max_width=800)
-    if stage:
-        d = ImageDraw.Draw(img)
-        for k in range(40):
-            cx, cy = 96 + (k % 10) * 46, 580 + (k // 10) * 46
-            d.ellipse((cx - 16, cy - 16, cx + 16, cy + 16), fill=grey if stage == 2 and k >= 16 else purple)
+    if stage == 0:
+        rounded(img, (40, 170, 900, 520), 22, fill=(11, 18, 32))  # solid: SketchFuture's cards sit behind it
+        draw_text(img, (76, 196), S15_HEADER, 26, 600, INK_2)
+        for i, (who, val, col) in enumerate([("walkers", "+17 s", (36, 124, 118)), ("wheelchair users", "+30 s", purple), ("stroller users", "+21 s", (206, 103, 68))]):
+            y = 250 + i * 70
+            rounded(img, (76, y, 96, y + 40), 6, fill=col)
+            draw_text(img, (114, y + 2), who, 30, 600, INK)
+            draw_text(img, (860, y + 2), val, 34, 800, INK, anchor="ra")
+        draw_text(img, (76, 466), S15_HEDGE, 22, 500, INK_2)
+        return
+    rounded(img, (40, 170, 900, 412), 22, fill=(11, 18, 32))
+    d = ImageDraw.Draw(img)
+    for k in range(40):
+        cx, cy = 96 + (k % 10) * 46, 222 + (k // 10) * 46
+        d.ellipse((cx - 16, cy - 16, cx + 16, cy + 16), fill=grey if stage == 2 and k >= 16 else purple)
     if stage == 2:
-        draw_text(img, (580, 572), "24 of 40 wheelchair users: no step-free route in EITHER plan", 24, 700, INK, max_width=300)
-        draw_text(img, (580, 700), "missing map detail or real barriers? Needs a site survey.", 22, 500, INK_2, max_width=300)
+        # the label in three lines, broken after "24 of 40:" (a width wrap would end line 1 on "no")
+        head, rest = S15_DOTS.split(": ")
+        draw_text(img, (580, 196), head + ":", 40, 800, INK)
+        for i, ln in enumerate(("no step-free route", "either way")):
+            assert ln in rest and text_size(ln, 28, 700)[0] <= 880 - 580, ln  # inside the panel (x 40-900)
+            draw_text(img, (580, 260 + i * 38), ln, 28, 700, INK)
 
 
 def s15(dur: float):
@@ -373,13 +359,14 @@ def s15(dur: float):
     the guide voice (from 0.2 s): 'walkers lose seventeen seconds' 6.2 s, 'And 24 of our 40' 10.1 s.
     The picture is letterboxed to 1760x990 on navy, so the footer and the docked evidence legend (S10-S16)
     sit on the navy strip below it, and SketchFuture's own map legend and OpenStreetMap credit, at the
-    picture's bottom edge, stay uncovered."""
+    picture's bottom edge, stay uncovered. On screen (19 Oct declutter): the badge, the counters (header,
+    three rows, a six-word hedge) only during their sentence, then the dot grid with one eight-word label; the
+    map credit only while SketchFuture's map is on screen; no run number or file path."""
     c2c = CLIPS / "C2c.mp4"
-    spec("S15", "MODEL CHECK · synthetic cohort", "same 120 simulated people, with vs without the closure",
-         "walkers +17 s · wheelchair users +30 s · stroller users +21 s",
-         "averages over those who arrive in both plans: walkers 40/40 · wheelchair users 16/40 · stroller users 28/40",
-         "24 of 40 wheelchair users: no step-free route in EITHER plan · missing map detail or real barriers? Needs a site survey.",
-         "Footer: Map © OpenStreetMap contributors, ODbL · example run #721, sketchfuture/VERIFICATION.md")
+    spec("S15", "MODEL CHECK · synthetic cohort", f"Counter header: {S15_HEADER} |",
+         "walkers +17 s · wheelchair users +30 s · stroller users +21 s", f"Small, under the counters: {S15_HEDGE} |",
+         f"{S15_DOTS} |", "Footer: Map © OpenStreetMap contributors")
+    assert len(S15_HEDGE.split()) <= 6 and len(S15_DOTS.split()) <= 8
     # card: y 62-765, between the card above and this card's 'Decided / expired' list, which in this 13 Oct
     # capture still shows the pre-'Deciding as' actor 'by operator' (the backend now refuses that name).
     card, results = (300, 62, 1250), (1000, 330, 920)
@@ -394,7 +381,8 @@ def s15(dur: float):
         (png("S15_counters", lambda img: s15_panel(img, 0)), 6.0, 9.9),
         (png("S15_dots40", lambda img: s15_panel(img, 1)), 9.9, 10.6),  # 'And 24 of our 40': the 40 dots, then
         (png("S15_dots", lambda img: s15_panel(img, 2)), 10.6, dur),     # 24 of them turn grey
-        (png("S15_footer", lambda img: solid_footer(img, "Map © OpenStreetMap contributors, ODbL · example run #721, sketchfuture/VERIFICATION.md")), 0.0, dur),
+        # from the cut to SketchFuture's OpenStreetMap map (2.4 s) to the end
+        (png("S15_footer", lambda img: solid_footer(img, "Map © OpenStreetMap contributors")), 2.4, dur),
         (png("S15_legend", legend_docked), 0.0, dur),
     ]
     return ["-i", str(base)], ov, [], "scale=1760:990,pad=1920:1080:80:0:color=0x0B1220"

@@ -1,30 +1,29 @@
-"""Shot S01 (0:00.0-0:13.5, 13.5 s): a sourced fact, then the Mrs Chan hook. Voice from 3.0 s: "This is Mrs Chan,
-going to see the Ruins of St. Paul's. From her wheelchair, she sees only backs, not the crowd building ahead."
+"""Shot S01 (0:00.0-0:11.0, 11.0 s): the Mrs Chan hook. Voice from 0.2 s: "This is Mrs Chan, going to see the
+Ruins of St. Paul's. From her wheelchair, she sees only backs, not the crowd building ahead."
 
-0-3.0 s: a silent fact title on plain navy, no badge and no map (public record, not illustration): "Golden Week
-2025: crowd control lifted, then reimposed 45 minutes later." with its source footer. From 3.0 s the story: the
-ILLUSTRATION badge and the "Illustrative story" line come in, the top-down schematic of the zone model draws in,
-and Mrs Chan's wheelchair icon with its "Mrs Chan" tag sets off north from Av. de Almeida Ribeiro towards
-the pin at Company of Jesus Square (the square below the Ruins; she is never put on the St. Paul's steps); then
-her seated eye height: an armrest in the foreground, a wall of grey silhouettes swaying ahead; then a crane back
-up to the map as Senado's disc goes amber to red.
+The shot opens straight on the map (no title; since 19 Oct the 3 s fact title and its footer are gone, so the voice
+starts at once): the top-down schematic of the zone model draws in under the ILLUSTRATION badge, and Mrs Chan's
+wheelchair icon with its "Mrs Chan" tag sets off north from Av. de Almeida Ribeiro towards the pin at Company of
+Jesus Square (the square below the Ruins; she is never put on the St. Paul's steps); then her seated eye height: an
+armrest in the foreground, a wall of grey silhouettes swaying ahead; then a crane back up to the map as Senado's
+disc goes amber to red. Map labels only for the three places the story needs (the Ruins, Senado, Almeida); no pin
+label and no small "Illustrative story" line (the badge carries it, and S06's voice says "Mrs Chan is made up").
 
 Data sources (read here, never retyped):
-  - docs/video/shotlist.json, shot S01: DURATION (end_s - start_s), the voice start ("voice from 3.0 s") and
-    every on-screen line (fact title, footer, small line, tag, badge), asserted against the storyboard row in
-    docs/video/script.md section 3 and, for the fact, against docs/research/brief-evidence.md section 1 row 3
-    (the 4 Oct 2025 control times; the "45 minutes" is checked as 16:25 minus 15:40).
+  - docs/video/shotlist.json, shot S01: DURATION (end_s - start_s) and every on-screen line (labels, tag, badge),
+    asserted against the storyboard row in docs/video/script.md section 3. The voice start is video/assemble.py's
+    (VOICE_START, the default 0.2 s for this shot).
   - shared/zones.json (via ahpo.py): zone lat/lon (linear projection), the 7 links, has_stairs / steep
     (the hatched steps; her dotted step-free route Senado -> St. Dominic's -> Rua de S. Paulo -> Company of
     Jesus Square is found by search over links without stairs or steep sections), Chinese place names.
   - experiments/results/simulation_run/A_timeline.csv: senado_square true_density, the ONLY data on the map.
     Shot time is mapped onto sim 13:53-14:09 across the two map beats (SIM_KEYS); the colour is the recorded
     value as held, thresholded with shared/config.json congestion_thresholds (the dashboard's).
-Mrs Chan, the dots and the silhouettes are illustrative choreography (badge ILLUSTRATION, from 3.0 s only).
+Mrs Chan, the dots and the silhouettes are illustrative choreography (badge ILLUSTRATION, from the first frame).
 
-Beats are keyed to the guide voice video/build/guide/S01.wav (say -v Daniel -r 155), laid 3.0 s into the shot
+Beats are keyed to the guide voice video/build/guide/S01.wav (say -v Daniel -r 155), laid 0.2 s into the shot
 (ffmpeg silencedetect boundaries, word positions inside a clause from `say` prefix lengths); re-key them to the
-real take. video/assemble.py must lay this shot's voice, captions and lower-third from 3.0 s (VOICE_START).
+real take.
 
 Outputs: video/build/mg/S01.mp4, video/build/mg/stills/S01_*.png
 Run:  .venv/bin/python video/mg/S01.py            (stills and render)
@@ -40,104 +39,82 @@ from pathlib import Path  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # video/mg, for style.py
 from style import *  # noqa: E402,F401,F403
 import ahpo  # noqa: E402
-from ahpo import MapScene, EyeLevel, Cam, HOME, MAIN_PATH, POS, AHPO_S01_END, paste, text_sprite  # noqa: E402
+from ahpo import MapScene, EyeLevel, Cam, HOME, MAIN_PATH, POS, AHPO_S01_END, paste  # noqa: E402
 
 import numpy as np  # noqa: E402
-from PIL import Image, ImageDraw  # noqa: E402
+from PIL import Image  # noqa: E402
 
 SHOT = "S01"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 13.5 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 11.0 s
 
-# ---------- text: the shotlist's on-screen items, checked against the storyboard and the evidence brief ----------
+# ---------- text: the shotlist's on-screen items, checked against the storyboard ----------
 
 _ITEMS = {}
 for _it in _shot["on_screen_text"].split(" | "):
     _m = re.match(r"^([^:(]+?)(?: \(([^)]*)\))?: (.*)$", _it)
     assert _m, _it
     _ITEMS[_m.group(1)] = (_m.group(2) or "", _m.group(3))
-FACT_TITLE = _ITEMS["Fact title"][1]
-FOOTER = _ITEMS["Footer"][1]
-SMALL = _ITEMS["Small grey"][1]
+# 19 Oct declutter: labels, her tag and the badge only (no fact title, footer, small line or pin label)
+assert set(_ITEMS) == {"Labels", "Tag on her icon", "Badge"}, sorted(_ITEMS)
 TAG = _ITEMS["Tag on her icon"][1]
 BADGE = _ITEMS["Badge"][1]
 assert BADGE == "ILLUSTRATION" and BADGE in BADGES, BADGE
-assert SMALL.startswith("Illustrative story."), SMALL
+assert "from 0 s" in _ITEMS["Badge"][0], _ITEMS["Badge"]          # the story is labelled from its first frame
 assert TAG == "Mrs Chan", TAG
 
-# the time windows in the shotlist: title and footer 0-3.0 s, small line and badge from 3.0 s, voice from 3.0 s
-TITLE_END = 3.0
-assert _ITEMS["Fact title"][0].startswith(f"0-{TITLE_END} s") and _ITEMS["Footer"][0] == f"0-{TITLE_END} s", _ITEMS
-assert f"from {TITLE_END} s" in _ITEMS["Small grey"][0] and f"from {TITLE_END} s" in _ITEMS["Badge"][0], _ITEMS
-VOICE_START = float(re.search(r"voice from ([\d.]+) s", _shot["visual"]).group(1))
-assert VOICE_START == TITLE_END, VOICE_START
+# the voice starts where video/assemble.py lays it (no title any more: its default, 0.2 s)
+sys.path.insert(0, str(ROOT / "video"))
+from assemble import SPEAKER, VOICE_START as _ASM_VOICE_START  # noqa: E402
+VOICE_START = _ASM_VOICE_START.get(SHOT, 0.2)
+assert VOICE_START == 0.2, VOICE_START
+assert "voice from 3.0 s" not in _shot["visual"], "the shotlist still describes the old title beat"
 
-# the map's labels and the pin line are drawn by ahpo.py: they must still be the storyboard's
+# the map's labels are drawn by ahpo.py: they must still be the storyboard's, and only those three
 _labels = _ITEMS["Labels"][1]
 for _zid, _en in ahpo.LABEL_EN.items():
     assert f"{ahpo.ZONES[_zid]['name_zh']} {_en}" in _labels, (_zid, _labels)
-assert "pin: view of the Ruins from the square below" in _labels, _labels
+assert _labels.count(" · ") == len(ahpo.LABEL_EN) - 1 and "pin" not in _labels, _labels
 
-# the same lines, verbatim, in the storyboard row (script.md section 3)
+# the same lines in the storyboard row (script.md section 3)
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} |"))
-for _txt in (FACT_TITLE, FOOTER, SMALL, TAG):
-    assert f'"{_txt}"' in _row, _txt
-
-# the fact: the footer's times are the evidence brief's (section 1, row 3), and "45 minutes" is their gap
-_m = re.fullmatch(r"(.+?), (\d+ \w+ \d{4}): control (\d\d:\d\d)-(\d\d:\d\d), again (\d\d:\d\d)-(\d\d:\d\d) · (.+), (\d+ \w+ \d{4})",
-                  FOOTER)
-assert _m, FOOTER
-_brief = (ROOT / "docs" / "research" / "brief-evidence.md").read_text().replace("–", "-")
-_row3 = next(l for l in _brief.splitlines() if l.startswith("| 3 |"))
-assert f"{_m.group(2)}: {_m.group(1)} control ran {_m.group(3)}-{_m.group(4)}" in _row3, _row3
-assert f"control ran again {_m.group(5)}-{_m.group(6)}" in _row3, _row3
-assert "Macao Daily News, 2025-10-05" in _row3 and _m.group(7) == "Macao Daily News" and _m.group(8) == "5 Oct 2025"
-_mins = lambda hhmm: int(hhmm[:2]) * 60 + int(hhmm[3:])  # noqa: E731
-GAP_MIN = _mins(_m.group(5)) - _mins(_m.group(4))
-assert f"reimposed {GAP_MIN} minutes later" in FACT_TITLE and "Golden Week 2025" in FACT_TITLE, (GAP_MIN, FACT_TITLE)
-assert "dangerous" not in (FACT_TITLE + FOOTER).lower()
+_on_screen = _row.split(" | ")[5]                                 # the storyboard's on-screen cell
+assert f'"{TAG}"' in _on_screen and BADGE in _on_screen and _labels in _on_screen, _on_screen
+assert _on_screen.count("<br>") == len(_ITEMS) - 1, "storyboard row S01 shows more on-screen items than the shotlist"
 
 # ---------- beats ----------
 
-# Shot seconds. Guide clauses (silencedetect, -35 dB, 0.08 s), + 3.0 s:
-#   "This is Mrs Chan," 3.00-4.30 ("Mrs" from 3.64, "Chan" about 4.06) | "going to see the Ruins of St. Paul's."
-#   4.52-6.82 ("the Ruins" about 5.43-6.22, "of St. Paul's" 6.30) | "From her wheelchair," 7.08-8.04 |
-#   "she sees only backs," 8.25-9.58 | "not the crowd building ahead." 9.80-11.18 (guide regenerated 18 Oct for the
-#   new name, 8.28 s file: every clause after the first is 0.28 s later than with the old name). The shot ends at 13.5 s.
+# Shot seconds. Guide clauses (silencedetect, -35 dB, 0.08 s), + 0.2 s:
+#   "This is Mrs Chan," 0.20-1.50 ("Mrs" from 0.84, "Chan" about 1.26) | "going to see the Ruins of St. Paul's."
+#   1.72-4.02 ("the Ruins" about 2.63-3.42, "of St. Paul's" 3.50) | "From her wheelchair," 4.28-5.24 |
+#   "she sees only backs," 5.45-6.78 | "not the crowd building ahead." 7.00-8.38 (8.28 s file, the same audio as
+#   when the voice started at 3.0 s behind the old fact title: every beat moved 2.8 s earlier). The shot ends at 11.0 s.
 # re-key to the real voice take
 BEATS = {
-    "title_in": 0.0,      # fact title: line 1 rises in, line 2 just after (both fully in by 0.27 s)
-    "footer_in": 0.15,    # its source footer (fully in by 0.30 s)
-    "accent": 0.45,       # amber underline grows under "45 minutes later." (done by 0.85 s)
-    "title_out": 2.8,     # title and footer fade; gone by 2.95, before anything of the story appears
-    "map_in": TITLE_END,  # 3.0: streets, steps and zone discs draw in; badge and "Illustrative story" line come in
+    "map_in": 0.0,        # first frame: map paper; streets, steps and zone discs draw in (done by about 1.05 s)
     "voice": VOICE_START,  # "This is"
-    "almeida_label": 3.4,
-    "ahpo_in": 3.62,      # "Mrs Chan": her icon lands with a ring
-    "tag_in": 4.0,        # "Chan": the tag slides in
-    "move": 4.53,         # "going": she sets off north
-    "senado_label": 4.78,
-    "route_hint": 4.98,   # "to see": her dotted step-free route draws towards the pin
-    "pin": 5.48,          # "the Ruins": the pin drops at Company of Jesus Square
-    "ruins_label": 5.63,
-    "pin_label": 5.83,    # "view of the Ruins from the square below" (readable until the push-in at 7.08)
-    "push_in": 7.08,      # "From her wheelchair": the camera pushes in on her ...
-    "move_end": 7.23,
-    "eye": 7.58,          # ... cross-fades and drops to her seated eye height ("wheelchair")
-    "eye_push": 8.28,     # "she sees only backs": the wall closes in a little
-    "crane": 9.73,        # "not the crowd building ahead": crane back up ...
-    "map_back": 9.98,     # ... the map returns, zoomed on her, and pulls out
-    "map_home": 10.93,
+    "almeida_label": 0.6,
+    "ahpo_in": 0.82,      # "Mrs Chan": her icon lands with a ring
+    "tag_in": 1.2,        # "Chan": the tag slides in
+    "move": 1.73,         # "going": she sets off north
+    "senado_label": 1.98,
+    "route_hint": 2.18,   # "to see": her dotted step-free route draws towards the pin
+    "pin": 2.68,          # "the Ruins": the pin drops at Company of Jesus Square
+    "ruins_label": 2.83,  # (all three labels read until the push-in at 4.28)
+    "push_in": 4.28,      # "From her wheelchair": the camera pushes in on her ...
+    "move_end": 4.43,
+    "eye": 4.78,          # ... cross-fades and drops to her seated eye height ("wheelchair")
+    "eye_push": 5.48,     # "she sees only backs": the wall closes in a little
+    "crane": 6.93,        # "not the crowd building ahead": crane back up ...
+    "map_back": 7.18,     # ... the map returns, zoomed on her, and pulls out
+    "map_home": 8.13,
 }
-# Quick title fades (0.15 s) so the 13-word title and its footer are at full strength from 0.30 s to 2.80 s
-# (2.5 s) for sound-off viewers, and the title is gone before the story starts at 3.0 s.
-TITLE_FADE = 0.15
-assert BEATS["title_out"] + TITLE_FADE < BEATS["map_in"]
+assert abs(BEATS["voice"] - 0.2) < 1e-9 and BEATS["ahpo_in"] > BEATS["voice"]
 # Shot time -> sim time across the two map beats (Senado's colour): beat 1 starts at the first recorded row,
 # the eye-level beat skips ahead off screen, beat 2 ends at 14:09 (storyboard window 13:53-14:09). Senado
-# crosses CRITICAL (14:08:09) at about 11.5 s, on the settled map after the last word, and holds red to the end.
-SIM_KEYS = [(BEATS["map_in"], ahpo.senado_series()[0][0]), (7.78, ahpo.hms("14:02:00")),
-            (BEATS["map_back"], ahpo.hms("14:05:30")), (11.98, ahpo.hms("14:09:00"))]
+# crosses CRITICAL (14:08:09) at about 8.7 s, on the settled map after the last word (8.38), and holds red to the end.
+SIM_KEYS = [(BEATS["map_in"], ahpo.senado_series()[0][0]), (4.98, ahpo.hms("14:02:00")),
+            (BEATS["map_back"], ahpo.hms("14:05:30")), (9.18, ahpo.hms("14:09:00"))]
 
 
 def sim_of(t: float) -> float:
@@ -153,58 +130,10 @@ SCENE = MapScene()
 EYE = EyeLevel()
 
 
-# ---------- the fact title (0-3.0 s, plain navy) ----------
-
-TITLE_SIZE = 74
-_cut = FACT_TITLE.index(", then ") + 1
-TITLE_L1, TITLE_L2 = FACT_TITLE[:_cut], FACT_TITLE[_cut + 1:]
-ACCENT = f"{GAP_MIN} minutes later."
-assert TITLE_L2.endswith(ACCENT) and f"{TITLE_L1} {TITLE_L2}" == FACT_TITLE
-L2_HEAD = TITLE_L2[:-len(ACCENT)]
-
-
-def _line2_sprite() -> Image.Image:
-    a = text_sprite(L2_HEAD, TITLE_SIZE, 700, INK)
-    b = text_sprite(ACCENT, TITLE_SIZE, 700, WARNING)
-    off = int(round(text_font(L2_HEAD, TITLE_SIZE, 700).getlength(L2_HEAD)))
-    img = Image.new("RGBA", (off + b.width, max(a.height, b.height)), (0, 0, 0, 0))
-    img.alpha_composite(a, (0, 0))
-    img.alpha_composite(b, (off, 0))
-    return img
-
-
-T1 = text_sprite(TITLE_L1, TITLE_SIZE, 700, INK)
-T2 = _line2_sprite()
-T_GAP = 96                                    # baseline-to-baseline (px)
-T_TOP = 540 - 40 - (T_GAP + T1.height) / 2     # the block sits a little above centre
-T1_XY = ((W - T1.width) / 2, T_TOP)
-T2_XY = ((W - T2.width) / 2, T_TOP + T_GAP)
-assert max(T1.width, T2.width) <= W - 2 * 140, (T1.width, T2.width)
-_acc_x0 = T2_XY[0] + 2 + text_font(L2_HEAD, TITLE_SIZE, 700).getlength(L2_HEAD)
-ACCENT_LINE = (_acc_x0, _acc_x0 + text_font(ACCENT, TITLE_SIZE, 700).getlength(ACCENT[:-1]))   # under the words, not the stop
-ACCENT_Y = T2_XY[1] + T2.height + 10
-assert text_size(FOOTER, 20, 500)[0] <= 1150, text_size(FOOTER, 20, 500)
-
-
-def draw_title(img: Image.Image, t: float) -> None:
-    out = 1 - progress(t, BEATS["title_out"], TITLE_FADE)
-    if out <= 0:
-        return
-    for i, (spr, (x, y)) in enumerate(((T1, T1_XY), (T2, T2_XY))):
-        k = progress(t, BEATS["title_in"] + 0.05 + 0.07 * i, TITLE_FADE)
-        if k > 0:
-            paste(img, spr, (x, y + 14 * (1 - k)), k * out)
-    u = progress(t, BEATS["accent"], 0.4)
-    if u > 0:
-        x0, x1 = ACCENT_LINE
-        rounded(img, (x0, ACCENT_Y, lerp(x0, x1, u), ACCENT_Y + 5), 2, fill=WARNING, alpha=0.9 * out)
-    footer(img, FOOTER, progress(t, BEATS["footer_in"], TITLE_FADE) * out)
-
-
 # ---------- her tag: "Mrs Chan" ----------
 # The same pill as ahpo.MapScene's tag (which S18 carries on), drawn here so it can slide in on its own beat: left
-# of her icon, sliding in from it. It must clear the speaker lower-third (x 60-739, y 800-890), which
-# video/assemble.py shows for 3 s from the voice start (3.0 s) while she is beside Almeida.
+# of her icon, sliding in from it. It must clear the speaker lower-third (x 60-559, y 800-890), which
+# video/assemble.py shows for 3 s from the voice start (0.2-3.2 s) while she is beside Almeida.
 
 assert TAG == ahpo.NAME, (TAG, ahpo.NAME)
 TAG_SPRITE = ahpo.tag_sprite(TAG).reduce(ahpo.SS)
@@ -218,11 +147,9 @@ def tag_box(p, r: float, k: float) -> tuple[float, float]:
 
 # the tag clears the speaker lower-third that video/assemble.py lays over this shot (its own SPEAKER entry, drawn
 # with style.lower_third), from where she starts to where she stops
-sys.path.insert(0, str(ROOT / "video"))
-from assemble import SPEAKER, VOICE_START as _ASM_VOICE_START  # noqa: E402
 _lt = transparent()
 lower_third(_lt, *SPEAKER[SHOT])
-LT_BOX = _lt.getbbox()                                        # (60, 800, 739, 890) for [MEMBER 4]
+LT_BOX = _lt.getbbox()                                        # (60, 800, x1, 890) for [MEMBER 4], "Medicine"
 for _s in (0.0, AHPO_S01_END):
     _x, _y = tag_box(MAIN_PATH.at(_s), 21, 1.0)
     assert _x >= LT_BOX[2] + 12 or _y + TAG_SPRITE.height <= LT_BOX[1] - 8, (_s, _x, _y, LT_BOX)
@@ -277,7 +204,7 @@ def map_frame(t: float) -> Image.Image:
     s_her = ahpo_s(t)
     labels = {"almeida_ribeiro": progress(t, BEATS["almeida_label"], 0.4),
               "senado_square": progress(t, BEATS["senado_label"], 0.4),
-              "ruins_st_paul": progress(t, BEATS["ruins_label"], 0.4)}
+              "ruins_st_paul": progress(t, BEATS["ruins_label"], 0.4)}       # the storyboard's three, no more
     zoomed = 0.0 if cam.home else clamp((cam.zoom - 1) / 0.3)    # labels and tag are gone before the push carries them off frame
     label_fade = 1 - zoomed
     route_k = progress(t, BEATS["route_hint"], 1.3)
@@ -296,8 +223,7 @@ def map_frame(t: float) -> Image.Image:
         senado_alpha=progress(t, BEATS["map_in"] + 0.35, 0.4),
         dots_alpha=progress(t, BEATS["map_in"] + 0.6, 0.6),
         labels=labels,
-        pin=(pin_k, -36 * (1 - pin_k)) if pin_k > 0 else None,
-        pin_label_alpha=progress(t, BEATS["pin_label"], 0.4),
+        pin=(pin_k, -36 * (1 - pin_k)) if pin_k > 0 else None,      # no pin label (19 Oct declutter)
         ahpo={"p": MAIN_PATH.at(s_her), "alpha": ahpo_a, "scale": ahpo_scale,
               "ring": clamp((t - BEATS["ahpo_in"] - 0.05) / 0.9) if t < BEATS["ahpo_in"] + 0.95 else 0.0,
               "tag": 0.0},                       # S01 draws the tag itself, on its own beat (below)
@@ -308,10 +234,6 @@ def map_frame(t: float) -> Image.Image:
     if ta > 0:
         r = 21 * cam.zoom ** 0.6 * ahpo_scale
         paste(img, TAG_SPRITE, tag_box(cam(MAIN_PATH.at(s_her)), r, ta), ta)
-    # the map comes up from plain navy (the title beat has no map paper)
-    k = progress(t, BEATS["map_in"], 0.35)
-    if k < 0.999:
-        img = Image.blend(canvas(NAVY).convert("RGBA"), img, k)
     return img
 
 
@@ -331,8 +253,8 @@ def eye_mix(t: float) -> float:
     return progress(t, BEATS["eye"], 0.4) * (1 - progress(t, BEATS["map_back"], 0.4))
 
 
-# scrims over the silhouettes: bottom, so the small line stays legible; top, so the badge keeps its contrast
-# over the grey heads
+# scrims over the silhouettes: bottom, so the caption band stays calm over the grey bodies; top, so the badge keeps
+# its contrast over the grey heads
 _SCRIM = np.zeros((H, W, 4), np.uint8)
 _SCRIM[..., :3] = NAVY
 _ys = np.arange(H, dtype=np.float32)
@@ -341,29 +263,9 @@ _SCRIM[..., 3] = (np.maximum(np.clip((_ys - 960) / 70, 0, 1) * 225,
 SCRIM = Image.fromarray(_SCRIM, "RGBA")
 
 
-# ---------- overlays (from 3.0 s only: never over the fact title) ----------
-
-SMALL_LINES = wrap(SMALL, 20, 500, 1100)
-assert len(SMALL_LINES) <= 2
-
-
-def draw_overlays(img: Image.Image, t: float) -> None:
-    a = progress(t, BEATS["map_in"], 0.45)
-    for i, ln in enumerate(SMALL_LINES):
-        draw_text(img, (60, 1006 + i * 28), ln, 20, 500, INK_2, a)
-    badge(img, BADGE, alpha=progress(t, BEATS["map_in"], 0.45))
-
-
 # ---------- frame ----------
 
-TITLE_BG = canvas(NAVY).convert("RGBA")
-
-
 def draw_frame(t: float) -> Image.Image:
-    if t < BEATS["map_in"]:
-        img = TITLE_BG.copy()                     # plain navy: no map, no badge, no story line
-        draw_title(img, t)
-        return img
     eye_k = eye_mix(t)
     if eye_k >= 0.999:
         img = eye_frame(t)
@@ -373,12 +275,12 @@ def draw_frame(t: float) -> Image.Image:
         img = Image.blend(map_frame(t), eye_frame(t), eye_k)
     if eye_k > 0:
         paste(img, SCRIM, (0, 0), eye_k)
-    draw_overlays(img, t)
+    badge(img, BADGE)                              # from the first frame: the story is an illustration
     return img
 
 
-STILLS = {"title_in": 0.3, "title": 1.6, "title_late": 2.79, "story_in": 3.3, "tag": 4.6, "walk": 6.2, "pin": 6.9, "eye": 8.9, "crane": 10.3,
-          "red": 12.0, "end": DURATION - 1 / FPS}
+STILLS = {"open": 0.0, "story_in": 0.5, "tag": 1.8, "walk": 3.4, "pin": 4.1, "eye": 6.1, "crane": 7.5, "red": 9.2,
+          "end": DURATION - 1 / FPS}
 
 if __name__ == "__main__":
     for name, ts in STILLS.items():
@@ -386,9 +288,6 @@ if __name__ == "__main__":
     print("Senado state by sim time:", [(ahpo.clock(s), v, ahpo.state_of(v)) for s, v in ahpo._change_points() if s <= SIM_KEYS[-1][1] + 60])
     crit = next(t / 100 for t in range(int(SIM_KEYS[0][0] * 100), int(DURATION * 100))
                 if ahpo.state_of(ahpo.senado_density(sim_of(t / 100))) == "CRITICAL")
-    print(f"Senado turns CRITICAL at shot {crit:.2f} s; tag {TAG_SPRITE.size}; title widths {T1.width}, {T2.width}")
-    if _ASM_VOICE_START.get(SHOT, 0.2) != VOICE_START:
-        print(f"WARNING: video/assemble.py VOICE_START[{SHOT!r}] is {_ASM_VOICE_START.get(SHOT, 0.2)}, the storyboard says {VOICE_START}: "
-              "the voice, captions and lower-third would start over the fact title")
+    print(f"Senado turns CRITICAL at shot {crit:.2f} s; tag {TAG_SPRITE.size}; lower-third {LT_BOX}")
     if "--stills" not in sys.argv:
         print(render(SHOT, DURATION, draw_frame))
