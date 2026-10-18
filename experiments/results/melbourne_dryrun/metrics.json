@@ -1,21 +1,26 @@
 {
   "mode": "DRY RUN \u2014 NOT A RESULT",
-  "generated_at_utc": "2026-10-16 15:05",
+  "generated_at_utc": "2026-10-18 16:10",
   "prereg": {
     "expected_sha256": "36f6ff9f99ecdd610f5b74ca433d9bea8317b2f4360cdaf9436fb33b7664f66e",
-    "problems": [
-      "the README section has uncommitted edits (or git is unavailable)"
-    ],
+    "problems": [],
     "sha256": "36f6ff9f99ecdd610f5b74ca433d9bea8317b2f4360cdaf9436fb33b7664f66e",
     "heading": "## Pre-registered analysis (committed 16-17 Oct 2026, before the test window)",
     "hash_matches": true,
-    "committed_unchanged": false
+    "committed_unchanged": true,
+    "commit": "95057e2ef9418acd6d9dc32a4c5778ee7f89e12c",
+    "commit_date": "2026-10-16T23:21:04+08:00",
+    "committed_before_window": true,
+    "remote_branches": [
+      "origin/codex/sketchfuture",
+      "origin/main"
+    ],
+    "pushed_to_remote": true,
+    "earlier_commits_dated_later": []
   },
   "script": {
-    "uncommitted_changes": true,
-    "problems": [
-      "experiments/melbourne_eval.py has uncommitted changes (or is untracked, or git is unavailable)"
-    ],
+    "uncommitted_changes": false,
+    "problems": [],
     "commits_after_window_opened": []
   },
   "horizons": {
@@ -75,7 +80,7 @@
             "WARNING": 2115,
             "CRITICAL": 2385
           },
-          "ece": 0.07267221876132754,
+          "ece": 0.07267221876132755,
           "roc_auc_ovr_macro": 0.9832424803133838,
           "f1_macro_ci95": [
             0.797041911987939,
@@ -1992,9 +1997,7 @@
   "deviations": [],
   "guards": {
     "problems": [
-      "the README section has uncommitted edits (or git is unavailable)",
-      "experiments/melbourne_eval.py has uncommitted changes (or is untracked, or git is unavailable)",
-      "the test window is not over (it ends 2026-10-22T13:00:00+00:00; now 2026-10-16T15:05:44+00:00)"
+      "the test window is not over (it ends 2026-10-22T13:00:00+00:00; now 2026-10-18T16:10:59+00:00)"
     ]
   }
 }

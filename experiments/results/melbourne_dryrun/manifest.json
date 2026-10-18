@@ -1,11 +1,14 @@
 {
   "mode": "DRY RUN \u2014 NOT A RESULT",
-  "generated_at_utc": "2026-10-16 15:05",
-  "git_head": "79595e9a10c32beeb177b7377b40b3b5e494e28e",
+  "generated_at_utc": "2026-10-18 16:10",
+  "git_head": "b6b9c884eb4f40a7e98ede003bd65373f88fb306",
   "prereg_sha256": "36f6ff9f99ecdd610f5b74ca433d9bea8317b2f4360cdaf9436fb33b7664f66e",
-  "prereg_commit": null,
-  "prereg_pushed_to_remote": null,
-  "prereg_remote_branches": null,
+  "prereg_commit": "95057e2ef9418acd6d9dc32a4c5778ee7f89e12c",
+  "prereg_pushed_to_remote": true,
+  "prereg_remote_branches": [
+    "origin/codex/sketchfuture",
+    "origin/main"
+  ],
   "allow_short_window": null,
   "files": [
     {
