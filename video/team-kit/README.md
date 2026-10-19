@@ -2,7 +2,7 @@
 
 The team has four members; [MEMBER 3] covers Engineering and Business.
 
-Files for the team to film with. Use the current [voice lines](../../docs/video/voice-lines.md) and [shot-by-shot script](../../docs/video/script.md), aligned to the 4:22 review cut. The shared doc "CrowdPulse Macau 錄製包" may still contain the older wording and timings; this revision has updated the local recording files only.
+Files for the team to film with. Use the current [voice lines](../../docs/video/voice-lines.md) and [shot-by-shot script](../../docs/video/script.md), aligned to the current 4:54 (294 s) review cut. The shared doc "CrowdPulse Macau 錄製包" may still contain the older wording and timings; this revision has updated the local recording files only.
 
 | file | use |
 |---|---|
@@ -12,6 +12,10 @@ Files for the team to film with. Use the current [voice lines](../../docs/video/
 | `prop_M4_step_free_route.png` | S05 prop for [MEMBER 4]: print it (A4 landscape). Regenerated 19 Oct from the new S18 ending (risk flagged, staff check the route; no APPROVED stamp): reprint any older copy. |
 
 [MEMBER 1] holds a phone on a clamp, with its screen off unless the app is really installed on that phone.
+
+**S05 filming (43.5 s planned):** record two complete contribution sentences per member, using the exact lines in the recording hand-off. Keep each person visible through their second sentence and leave a natural breath before cutting to the next member. The current guide cuts are approximately 0–6.07 s (M1), 6.07–12.80 s (M2), 12.80–19.93 s (M3), 19.93–28.83 s (M4), then the group. These are references to re-key to the actual takes.
+
+All four speak together: "Together, we are CrowdPulse Macau. Our question: can ordinary phones, sending only numbers, help forecast crowds without identifying anyone?" Keep the group visible for the full question (guide 31.85–39.92 s). Only after the last word does the existing title animation begin (about 39.95 s), followed by a two-second silent hold at 41.50–43.50 s. S05's robot guide alone uses pitch-preserving 0.9 tempo; record natural voices and provide the synchronized `voice/S05.wav` after editing.
 
 S17: film at least 5 s of a real run from the project folder:
 

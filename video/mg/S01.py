@@ -8,11 +8,12 @@ Jesus Square (the square below the Ruins; she is never put on the St. Paul's ste
 armrest in the foreground, a wall of grey silhouettes swaying ahead; then a crane back up to the map as Senado's
 disc goes amber to red. Map labels only for the three places the story needs (the Ruins, Senado, Almeida); no pin
 label and no small "Illustrative story" line (the badge carries it, and S06's voice says "Mrs Chan is made up").
-After the voice (8.55-11.85 s, the second review of 19 Oct) the real event the old title card carried comes back as
+After the voice (8.55 s to the cut at 12.0 s) the real event the old title card carried comes back as
 a short overlay over the settled map, Senado red: a two-line fact ("Crowd control lifted, reimposed 45 minutes
 later") and its source, on the empty left half of the frame, bridging into S06's "Mrs Chan is made up. The crowds
-are not." It is two text elements, so the three place labels and her tag dim while it shows (declutter rule 1) and
-are back before the last frame: S18 opens on this shot's final map state, so the overlay is gone by 11.85 s.
+are not." It is two text elements, so the three place labels and her tag dim while it shows (declutter rule 1).
+The overlay holds through the last frame, avoiding a brief return of the labels before the camera cut. S18
+returns to the same underlying map state and framing, without this factual overlay.
 
 Data sources (read here, never retyped):
   - docs/video/shotlist.json, shot S01: DURATION (end_s - start_s) and every on-screen line (labels, tag, badge,
@@ -122,8 +123,8 @@ assert _on_screen.count("<br>") == len(_ITEMS) - 1, "storyboard row S01 shows mo
 #   1.72-4.02 ("the Ruins" about 2.63-3.42, "of St. Paul's" 3.50) | "From her wheelchair," 4.28-5.24 |
 #   "she sees only backs," 5.45-6.78 | "not the crowd building ahead." 7.00-8.38 (8.28 s file, the same audio as
 #   when the voice started at 3.0 s behind the old fact title: every beat moved 2.8 s earlier). The shot ends at
-#   12.0 s (11.0 -> 12.0 s in the second review): after the voice the fact overlay reads 8.55-11.85 s over the settled
-#   map, and the last frames hold the map alone, as S18 opens on it.
+#   12.0 s: after the voice the fact overlay reads from 8.55 s through the final frame. The labels stay dimmed
+#   until the camera cut; S18 later returns to the same underlying map state.
 # re-key to the real voice take
 BEATS = {
     "map_in": 0.0,        # first frame: map paper; streets, steps and zone discs draw in (done by about 1.05 s)
@@ -144,7 +145,6 @@ BEATS = {
     "map_back": 7.18,     # ... the map returns, zoomed on her, and pulls out
     "map_home": 8.13,
     "fact_in": 8.55,      # after the last word (8.38) and the guide's end (8.48): the fact line and its source fade in
-    "fact_out": 11.55,    # ... and fade out, gone by 11.85: the last frames are the map alone (S18 opens on them)
 }
 assert abs(BEATS["voice"] - 0.2) < 1e-9 and BEATS["ahpo_in"] > BEATS["voice"]
 # Shot time -> sim time across the two map beats (Senado's colour): beat 1 starts at the first recorded row,
@@ -196,23 +196,24 @@ for _s in (0.0, AHPO_S01_END):
 # Second review (19 Oct): the Golden Week 2025 fact that the old 3 s title card carried returns as a short overlay
 # over the settled map (Senado red), after the last word, never as a title. Two text elements (the fact line, wrapped
 # to two lines, and its source), so the three place labels and her tag dim with it (declutter rule 1: at most two
-# text elements beside the badge) and are back before the last frame. It sits on the empty left half of the frame:
+# text elements beside the badge) and stay dimmed through the cut. It sits on the empty left half of the frame:
 # the map's nearest feature there is the Tercena disc (x ~830, y ~570), Senado's area starts at x ~930, y ~690, the
 # caption band is y 920-990 and the speaker lower-third (0.2-3.2 s) is long gone.
 
-FACT_FADE_IN, FACT_FADE_OUT = 0.25, 0.3
+FACT_FADE_IN = 0.25
 
 
 def fact_alpha(t: float) -> float:
-    return progress(t, BEATS["fact_in"], FACT_FADE_IN) * (1 - progress(t, BEATS["fact_out"], FACT_FADE_OUT))
+    """Fade in once, then hold the fact and source until the shot cuts."""
+    return progress(t, BEATS["fact_in"], FACT_FADE_IN)
 
 
-_fully = BEATS["fact_out"] - (BEATS["fact_in"] + FACT_FADE_IN)                 # fully readable: 2.75 s
+_fully = DURATION - 1 / FPS - (BEATS["fact_in"] + FACT_FADE_IN)
 for _txt in (FACT, SOURCE):
     assert _fully >= 0.3 * n_words(_txt) + 0.5, (_txt, _fully)                # declutter rule 5, at full opacity
-assert BEATS["fact_out"] + FACT_FADE_OUT - BEATS["fact_in"] >= 3.0            # the brief: at least 3 s on screen
+assert DURATION - BEATS["fact_in"] >= 3.0                                  # the brief: at least 3 s on screen
 assert BEATS["fact_in"] >= VOICE_START + 8.28 and BEATS["fact_in"] >= BEATS["map_home"]   # after the guide and the pull-out
-assert fact_alpha(DURATION - 3 / FPS) == 0.0 == fact_alpha(DURATION - 1 / FPS)  # the last frames are the map alone
+assert all(fact_alpha(DURATION - f / FPS) == 1.0 for f in range(1, FPS + 1)), "hold the fact, not a flash of labels"
 
 FACT_X, FACT_Y = 100, 440
 FACT_SIZE, SOURCE_SIZE = 44, 26
@@ -285,7 +286,7 @@ def map_frame(t: float) -> Image.Image:
               "ruins_st_paul": progress(t, BEATS["ruins_label"], 0.4)}       # the storyboard's three, no more
     zoomed = 0.0 if cam.home else clamp((cam.zoom - 1) / 0.3)    # labels and tag are gone before the push carries them off frame
     label_fade = 1 - zoomed
-    dim = 1 - fact_alpha(t)                                       # labels and tag give way to the fact overlay, then return
+    dim = 1 - fact_alpha(t)                                       # labels and tag give way to the fact overlay through the cut
     route_k = progress(t, BEATS["route_hint"], 1.3)
     route = None
     if route_k > 0:
@@ -360,7 +361,7 @@ def draw_frame(t: float) -> Image.Image:
 
 
 STILLS = {"open": 0.0, "story_in": 0.5, "tag": 1.8, "walk": 3.4, "pin": 4.1, "eye": 6.1, "crane": 7.5, "red": 9.2,
-          "fact": 9.7, "fact_fading": 11.7, "end": DURATION - 1 / FPS}
+          "fact": 9.7, "fact_hold": 11.7, "end": DURATION - 1 / FPS}
 
 if __name__ == "__main__":
     for name, ts in STILLS.items():
@@ -369,7 +370,7 @@ if __name__ == "__main__":
     crit = next(t / 100 for t in range(int(SIM_KEYS[0][0] * 100), int(DURATION * 100))
                 if ahpo.state_of(ahpo.senado_density(sim_of(t / 100))) == "CRITICAL")
     print(f"Senado turns CRITICAL at shot {crit:.2f} s; tag {TAG_SPRITE.size}; lower-third {LT_BOX}")
-    print(f"fact overlay {BEATS['fact_in']}-{BEATS['fact_out'] + FACT_FADE_OUT} s, lines {FACT_LINES}; "
-          f"labels back for the last frame: dim {1 - fact_alpha(DURATION - 1 / FPS):.2f}")
+    print(f"fact overlay {BEATS['fact_in']}-{DURATION} s, lines {FACT_LINES}; "
+          f"labels remain dimmed through the cut: dim {1 - fact_alpha(DURATION - 1 / FPS):.2f}")
     if "--stills" not in sys.argv:
         print(render(SHOT, DURATION, draw_frame))

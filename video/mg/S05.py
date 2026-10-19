@@ -1,4 +1,4 @@
-"""S05 · Team self-introductions and title card (0:27.0-0:40.5, 13.5 s).
+"""S05 · Two-sentence team introductions, shared research question and title card (43.5 s).
 
 Storyboard: docs/video/script.md section 3, row S05; section 2 "Team roles" (four members, [MEMBER 3] carries both
 Engineering and Business; the "Self-introductions (S05)" bullet); section 5D and section 6 "team_footage" (what to
@@ -6,11 +6,11 @@ film); docs/video/shotlist.json, entry S05. Section 4 has no claims row for S05 
 
 Data sources:
   - docs/video/shotlist.json: the shot duration (end_s - start_s); the narration (asserted below, and checked
-    against the storyboard row): four cuts of one sentence each on what that member worked on, M1 T, M2 S, M3 E and
-    B, M4 M, then all four together; and, from its on-screen text ("Slates" item), the discipline word(s) each
+    against the storyboard row): four cuts of two complete sentences each, M1 T, M2 S, M3 E and B, M4 M, then all
+    four speaking the introduction and research question together; and, from its on-screen text ("Slates" item), the discipline word(s) each
     member's slate shows beside them (T Technology, S Science, E Engineering + B Business, M Medicine).
   - docs/video/script.md, section 2 "Team roles": the STEMB letters each member's tile strip lights, and the
-    "Self-introductions (S05)" bullet, which pairs each sentence with its discipline (both checked).
+    "Self-introductions (S05)" bullet, which pairs each contribution with its discipline (both checked).
   - video/build/guide/S05.wav (video/guide.py): the beats are keyed to its word boundaries.
   - shared/zones.json: the 7 zones and 7 street links that collapse into the wordmark, and the step-free route
     (Senado Square -> St. Dominic's -> Rua de S. Paulo -> Company of Jesus Square, no stairs) drawn on M4's map prop.
@@ -23,7 +23,7 @@ Outputs:
   - video/build/overlays/S05_title.mov: the title build alone (band, question, navy scrim, graph -> wordmark), with
     alpha, full shot length, so it can be laid over the real group footage at assembly.
   - video/build/mg/stills/S05_*.png: layout checks at the key beats.
-Not drawn here (added at assembly): the burned-in captions, which carry each member's sentence, so the slates stay
+Not drawn here (added at assembly): the burned-in captions, which carry both sentences and the shared question, so the slates stay
 above the caption band (y 920-990). S05 has no lower-third (the slates name each speaker's discipline), and the
 storyboard gives it no chapter card, badge or footer.
 
@@ -46,16 +46,22 @@ from PIL import Image, ImageDraw  # noqa: E402
 
 SHOT = "S05"
 _entry = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 13.5 s
+DURATION = round(_entry["end_s"] - _entry["start_s"], 3)  # 43.5 s
 
 # The narration, verbatim (shotlist.json and the storyboard row must agree); the slates and BEATS follow it.
-NARRATION = ("[M1] I worked on the app. [M2] I worked on the forecasts. [M3] I worked on the server, and how we'd "
-             "deploy it. [M4] I worked on health and accessibility. [ALL] Together, we are CrowdPulse Macau.")
+NARRATION = (
+    "[M1] I worked on the phone app. It counts people on the device, so only numbers leave the phone. "
+    "[M2] I worked on the forecasts. We compare them with simple baselines to see whether they actually add value. "
+    "[M3] I worked on the server and deployment plan. We built in privacy checks and made sure every approval is logged. "
+    "[M4] I worked on health and accessibility. We test who might be left behind, including wheelchair users, before discussing a route. "
+    "[ALL] Together, we are CrowdPulse Macau. Our question: can ordinary phones, sending only numbers, "
+    "help forecast crowds without identifying anyone?"
+)
 assert _entry["narration"] == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
 _script = (ROOT / "docs" / "video" / "script.md").read_text()
 _row = next(l for l in _script.splitlines() if l.startswith(f"| {SHOT} |"))
 assert [c.strip() for c in _row.strip().strip("|").split(" | ")][3] == NARRATION, "storyboard row S05 disagrees"
-ROLL = dict(re.findall(r"\[(M\d|ALL)\]\s*([^\[]+?)\s*(?=\[|$)", NARRATION))  # speaker -> sentence
+ROLL = dict(re.findall(r"\[(M\d|ALL)\]\s*([^\[]+?)\s*(?=\[|$)", NARRATION))  # speaker -> full contribution
 # STEMB letters per member, from the "Team roles" table (section 2): "| [MEMBER 3] | **E** Engineering · **B** ..."
 ROLE_LETTERS = {f"M{n}": "".join(re.findall(r"\*\*([STEMB])\*\*", cell))
                 for n, cell in re.findall(r"^\| \[MEMBER (\d)\] \| ([^|]+) \|", _script, re.M)}
@@ -65,45 +71,43 @@ _slates = next(p for p in _entry["on_screen_text"].split(" | ") if p.startswith(
 DISCIPLINE = [[tuple(pair.split(" ", 1)) for pair in item.split(" + ")]          # [[("T", "Technology")], ...]
               for item in re.search(r"discipline word: (.+?), and the S T E M B strip", _slates).group(1).split(" · ")]
 assert all(word == dict(STEMB)[l] for d in DISCIPLINE for l, word in d), DISCIPLINE
-# The "Self-introductions (S05)" bullet (section 2) pairs each sentence with its discipline, in the same order:
-# "I worked on the app." (T Technology) / ... / "Together, we are CrowdPulse Macau." (its first five quotes)
+# The Self-introductions bullet pairs each complete contribution with its discipline, in speaking order.
 _intro = next(l for l in _script.splitlines() if l.startswith("- **Self-introductions (S05):**"))
 assert re.findall(r'"([^"]+)"(?: \(([^)]+)\))?', _intro)[:len(ROLL)] == \
     [(ROLL[k], " + ".join(f"{l} {w}" for l, w in d)) for k, d in zip(ROLL, DISCIPLINE)] + [(ROLL["ALL"], "")], \
     "Team roles 'Self-introductions (S05)' bullet disagrees with the narration or the slates"
 
-# Times in seconds from the shot start, keyed to the guide voice (video/build/guide/S05.wav, from video/guide.py),
-# which assemble.py starts 0.2 s into the shot. Line and clause boundaries: its pauses (ffmpeg
-# silencedetect=noise=-35dB:d=0.08); inside the last line, its 10 ms energy envelope. Speech, in shot time:
-#   0.20-1.18 "I worked on the app."  1.48-3.18 "I worked on the forecasts."
-#   3.41-6.10 "I worked on the server, and how we'd deploy it." (comma pause 4.65-4.85)
-#   6.33-8.41 "I worked on health and accessibility."
-#   8.67-10.94 "Together, we are CrowdPulse Macau." ("Together," 8.67-9.18, "we" 9.37, "are" 9.69,
-#     "CrowdPulse" 10.07-10.51, "Macau" 10.53-10.94)
-#   10.94-13.5 silence; the title card is complete for the 2 s hold from 11.5.
-# The guide reads the lines with no hand-off gaps, only its 0.2-0.3 s sentence pauses. Each member cut is a hard cut
-# on the end of the previous line, so the new speaker gets that whole pause as air before their first word (a real
-# take needs it), and their caption follows when they start to speak. A cut lands on the first frame after the
-# line ends (1.2, 3.2, 6.13, 8.43 s); the first cut is the shot's first frame.
-# re-key to the real voice take (the real hand-offs will be longer: the slot leaves 0.56 s after the guide's last
-# word before the hold; beyond that, the overrun plan's cut 9 applies, never the hold)
+# Guide voice: pitch-preserving 0.9 tempo, 39.7161 s, laid 0.2 s into this shot. Sentence-end
+# pauses measured with ffmpeg silencedetect (-35 dB, >=0.2 s) put the four complete contributions
+# at file times 0–5.833667, 6.088771–12.575, 12.811271–19.713021 and 19.962937–28.608271.
+# Cut on the first video frame after each second sentence, leaving the following pause as breath.
+# The shared introduction is 29.083458–31.605625 in shot time; the research question starts at
+# 31.849437 and ends with the guide at 39.9161. All four stay visible until it is completely spoken.
+# The existing title animation follows, then the fixed final two-second silent hold. Re-key to real takes.
+VOICE_START = 0.2
+GUIDE_SPEECH_END = VOICE_START + 39.7161
+
+
+def cut_after(file_time: float) -> float:
+    """First 30 fps frame after a measured word ending in the guide audio."""
+    return math.ceil((file_time + VOICE_START) * FPS) / FPS
+
+
 BEATS = {
-    "m1": 0.0,          # [M1] "I worked on the app."                           (from 0.20; 1.2 s on screen)
-    "m2": 1.18,         # [M2] "I worked on the forecasts."                     (hard cut; 2.0 s on screen)
-    "m3": 3.18,         # [M3] "I worked on the server, and how we'd deploy it." (hard cut; E and B lit; 2.9 s)
-    "m4": 6.11,         # [M4] "I worked on health and accessibility."          (hard cut; 2.3 s on screen)
-    "group": 8.41,      # [ALL] "Together, we are CrowdPulse Macau."  (hard cut to the group slate, all five lit)
-    "question": 8.45,   # with the group cut (one frame after it, before "Together,"): the research question rises
-                        # on a band under the group, clear of the slate's text above it (y 184-384) and of the
-                        # caption band; on screen 5.05 s to the end (5.0 s from its first text frame, 8.5), at
-                        # full strength from 9.0. 19 Oct: brought in 0.8 s earlier (was 9.25: 4.25 s on screen)
-                        # so it reads for at least 5.0 s, never over a member's slate (assert after QUESTION)
-    "scrim": 9.7,       # "are": navy starts to cover the group shot (fully covered ~0.9 s later)
-    "graph_in": 9.8,    # "are": the 7-zone graph draws in
-    "collapse": 10.2,   # "CrowdPulse": the graph shrinks into the mark; the wordmark unrolls on "Macau" (10.56-11.16)
-    "challenge": 10.8,  # "Responsible AI · Challenge 2(c)" settles as "Macau" ends
-    "hold": 11.5,       # silence: title card held to the end of the shot (2 s, never cut, section 6)
+    "m1": 0.0,
+    "m2": cut_after(5.833667),
+    "m3": cut_after(12.575),
+    "m4": cut_after(19.713021),
+    "group": cut_after(28.608271),
+    "question": 31.85,  # all four say "Our question"; the band appears under their faces
+    "scrim": 39.95,     # only after "anyone?" has finished
+    "graph_in": 39.95,
+    "collapse": 40.5,
+    "challenge": 41.0,
+    "hold": 41.5,
 }
+assert BEATS["scrim"] >= GUIDE_SPEECH_END and BEATS["graph_in"] >= GUIDE_SPEECH_END, \
+    "the group must stay visible throughout its spoken question"
 assert BEATS["hold"] == round(DURATION - 2.0, 3), "the silent title hold is 2 s"
 
 COL_DUR, COL_STAGGER = 0.6, 0.012   # graph collapse: duration and per-node stagger (s)
@@ -153,7 +157,7 @@ def step_free_route(src: str = "senado_square", dst: str = "jesus_square") -> li
 
 ROUTE = {frozenset(p) for p in step_free_route()}
 
-MEMBERS = [  # speaking order (storyboard): T, S, E + B, M; the sentence is the caption, not drawn on the slate
+MEMBERS = [  # speaking order: T, S, E + B, M; both sentences are captioned at assembly
     dict(beat="m1", tag="[MEMBER 1]", prop="phone",
          film="head-and-shoulders, holding a phone on a clamp. Screen off, unless the app was really installed "
               "on that phone (then the Setup tab, no street clip). Nothing that suggests a field run."),
@@ -171,6 +175,7 @@ assert [m["beat"].upper() for m in MEMBERS] == [k for k in ROLL if k != "ALL"], 
 assert {m["beat"].upper(): m["letters"] for m in MEMBERS} == ROLE_LETTERS, ROLE_LETTERS
 assert {l for m in MEMBERS for l in m["letters"]} == {l for l, _ in STEMB}, "the four members cover all of STEMB"
 assert all(m["line"].startswith("I worked on ") for m in MEMBERS), "each member says what they worked on"
+assert all(len(re.findall(r"[.!?](?:\s|$)", m["line"])) == 2 for m in MEMBERS), "hold each member for two sentences"
 
 # ---------- text of the title card (storyboard, verbatim) ----------
 
@@ -185,7 +190,8 @@ assert DURATION - (BEATS["question"] + 0.05) >= max(5.0, 0.3 * len(QUESTION.spli
     "the research question must be on screen at least 5.0 s"
 GROUP_LABEL = "All four"
 assert len(MEMBERS) == 4 and GROUP_LABEL.lower().endswith("four"), "the group label names the team size"
-GROUP_FILM = f"all four: '{ROLL['ALL'].rstrip('.')}'"   # all four: 'Together, we are CrowdPulse Macau'
+assert ROLL["ALL"] == f"Together, we are CrowdPulse Macau. {QUESTION}", "all four speak the full core question"
+GROUP_FILM = "all four: introduction and question together"
 
 # ---------- layout ----------
 
@@ -660,7 +666,7 @@ def title_layer(t: float) -> Image.Image:
         return L
     L.alpha_composite(alpha_mul(BAND_IMG, progress(t, BEATS["question"], 0.45)))
     scrim = progress(t, BEATS["scrim"], 0.9)
-    glow = progress(t, BEATS["graph_in"] - 0.1, 0.4)  # under the scrim, so the total cover only ever grows
+    glow = progress(t, BEATS["graph_in"], 0.4)  # no title glow over the last words of the shared question
     if glow > 0.004 and scrim < 0.999:
         L.alpha_composite(alpha_mul(GLOW_IMG, glow))
     if scrim > 0:
@@ -690,8 +696,12 @@ _CUTS = [BEATS[m["beat"]] for m in MEMBERS] + [BEATS["group"]]
 STILLS = {  # name: time (s); each member slate at the middle of its cut, then the group, the title build and the hold
     **{f"{m['beat']}_{m['word'].replace(' + ', '_').lower()}": round((a + b) / 2, 2)
        for m, a, b in zip(MEMBERS, _CUTS, _CUTS[1:])},                    # m1_technology ... m4_medicine
+    "m1_end": BEATS["m2"] - 1 / FPS,
+    "m2_start": BEATS["m2"],
     "group_all_four": BEATS["group"] + 0.4,
-    "group_question": BEATS["graph_in"] - 0.1,
+    "question_start": BEATS["question"] + 0.6,
+    "group_question": (BEATS["question"] + GUIDE_SPEECH_END) / 2,
+    "question_end": 39.9,
     "collapse": BEATS["collapse"] + 0.25,
     "wordmark": BEATS["collapse"] + WORD_DELAY + WORD_DUR * 0.55,
     "hold": BEATS["hold"] + 1.75,

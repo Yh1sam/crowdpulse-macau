@@ -1,9 +1,9 @@
-"""Shot S07, "How is ours different?" (22 s), team voice-over.
+"""Shot S07, "But how is ours different?" (24 s), team voice-over.
 
-Preserves the existing police-system comparison and the two principle chips. The right-hand operating
-loop now names staff placement explicitly: phones count on-device, send numbers to the dashboard,
-forecasts show uncertainty, and an operator reviews each suggested detour. A short phone-detail line
-appears within the existing first station; no extra scene or police capability claim is introduced.
+Three sequential beats preserve the police-system comparison and its sourced wording. The existing
+system appears first. A large central spoken question then holds over dimmed, frozen context, with
+the proposal hidden. Event staff and their temporary sensing kit are introduced before the four-station
+operating loop. The proposal explicitly supports the existing system; no moral comparison is made.
 
 Wording comes from docs/video/shotlist.json and is checked against the S07 storyboard row. Zone geometry
 comes from shared/zones.json. BEATS follow the 19 Oct guide and must be re-keyed to the team's real take.
@@ -32,48 +32,53 @@ SHOT = "S07"
 # ---------------------------------------------------------------- spec (read, never retyped)
 
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 22 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)
+assert DURATION == 24.0, DURATION
 NARRATION = _shot["narration"]
 
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} |"))
 _cols = [c.strip() for c in _row.strip().strip("|").split(" | ")]
 assert len(_cols) == 7 and _cols[3] == NARRATION, "storyboard row S07 and shotlist.json disagree on the narration"
 
-_KEYS = ["Chapter card", "Left column", "Under it", "Band label", "Two principle chips", "Right column", "Phone detail", "Footer"]
+_KEYS = ["Central question", "Left column", "Under it", "Map band label", "Operator introduction", "Proposal framing", "Right column", "Phone detail", "Footer"]
 _spec = {}
 for _part in _shot["on_screen_text"].split(" | "):
     _m = re.match(r"^([A-Z][a-z ]+?)(?: \(([^)]*)\))?: (.*)$", _part.strip())
     assert _m and _m.group(1) in _KEYS, f"unexpected on-screen part: {_part!r}"
     _spec[_m.group(1)] = _m.group(3)
 assert list(_spec) == _KEYS, list(_spec)                          # 19 Oct declutter: nothing else on screen
-CARD, POLICY, BAND_LABEL, FOOTER = _spec["Chapter card"], _spec["Under it"], _spec["Band label"], _spec["Footer"]
+QUESTION, POLICY, BAND_LABEL, FOOTER = _spec["Central question"], _spec["Under it"], _spec["Map band label"], _spec["Footer"]
+assert QUESTION == "But how is ours different?", QUESTION
 LEFT_HEAD, *LEFT_ITEMS = _spec["Left column"].split(" · ")
-PRINCIPLES = _spec["Two principle chips"].split(" · ")            # ["Privacy", "No one left behind"]
+OPERATOR, KIT = _spec["Operator introduction"].split(" · ")
+FRAMING = _spec["Proposal framing"]
 RIGHT_HEAD, *RIGHT_ITEMS = _spec["Right column"].split(" · ")
 PHONE_DETAIL = _spec["Phone detail"]
 assert LEFT_HEAD == "Police system (public information)" and RIGHT_HEAD == "What we propose", (LEFT_HEAD, RIGHT_HEAD)
-assert len(LEFT_ITEMS) == 2 and len(RIGHT_ITEMS) == 4 and len(PRINCIPLES) == 2
-for _txt in (CARD, LEFT_HEAD, *LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, RIGHT_HEAD, *RIGHT_ITEMS, PHONE_DETAIL, FOOTER):
+assert len(LEFT_ITEMS) == 2 and len(RIGHT_ITEMS) == 4
+for _txt in (QUESTION, LEFT_HEAD, *LEFT_ITEMS, POLICY, BAND_LABEL, OPERATOR, KIT, FRAMING, RIGHT_HEAD, *RIGHT_ITEMS, PHONE_DETAIL, FOOTER):
     assert _txt in _cols[5], f"not in the storyboard row: {_txt!r}"
-assert not any(c.isdigit() for c in "".join(PRINCIPLES + RIGHT_ITEMS)), "the team's aims and proposal carry no numbers"
+assert not any(c.isdigit() for c in "".join(RIGHT_ITEMS)), "the proposal labels carry no numbers"
+assert "We believe" not in NARRATION and "No one left behind" not in _cols[5]
 # never set the two systems against each other in words (script.md section 6, "Never say or show")
 _all = " ".join([LEFT_HEAD, *LEFT_ITEMS, POLICY, RIGHT_HEAD, *RIGHT_ITEMS]).lower()
 assert not any(w in _all for w in ("better", "replace", "lack", "we'd add", "instead")), _all
 # 19 Oct declutter: labels of at most 6 words, a short source footer that fits one line of the footer slot
-assert all(len(t.split()) <= 6 for t in (*LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, *RIGHT_ITEMS, PHONE_DETAIL)), "a label is too long"
+assert all(len(t.split()) <= 6 for t in (*LEFT_ITEMS, POLICY, BAND_LABEL, OPERATOR, KIT, FRAMING, *RIGHT_ITEMS, PHONE_DETAIL)), "a label is too long"
 assert len(FOOTER.replace(" · ", " ").split()) <= 7 and text_size(FOOTER, 20, 500)[0] <= 1150, FOOTER
 
 # The narration, clause by clause as the guide voice pauses (BEATS are keyed to these).
 CLAUSES = ["Macau's police already run a crowd warning system here.",
-           "We believe crowd safety shouldn't cost privacy,", "or leave anyone behind.",
-           "Staff place our phones on temporary mounts:", "they count on-device and send only numbers to the dashboard.",
-           "Forecasts show their confidence;", "an operator reviews each suggested detour."]
+           QUESTION,
+           "We propose a temporary sensing kit for event staff,", "to support the existing system.",
+           "Staff place the phones;", "the phones count on-device and send only numbers.",
+           "On the dashboard, staff review forecasts and suggested detours before acting."]
 assert " ".join(CLAUSES) == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
 # each right-column item arrives on the voice's own words for it
-_LOOP_WORDS = [("Staff place", "phones"), ("on-device", "only numbers"),
-               ("Forecasts", "confidence"), ("operator", "detour")]
+_LOOP_WORDS = [("event staff", "temporary sensing kit"), ("Staff place", "phones"),
+               ("on-device", "only numbers"), ("dashboard", "staff review")]
 assert all(a in NARRATION and b in NARRATION for a, b in _LOOP_WORDS)
-assert [it.split()[0].lower() for it in RIGHT_ITEMS] == ["staff-placed", "forecasts", "detours", "a"], RIGHT_ITEMS
+assert [it.split()[0].lower() for it in RIGHT_ITEMS] == ["staff", "on-device", "dashboard", "staff"], RIGHT_ITEMS
 
 # ---------------------------------------------------------------- zone model
 
@@ -108,13 +113,14 @@ assert "jesus_square" in CORRIDOR
 assert BAND_LABEL == "Ruins to Senado"                             # the band's two ends, as the corridor runs
 
 # ---------------------------------------------------------------- timing
-# Guide voice S07.wav re-keyed on 19 Oct (18.811 s; placed at 0.2 s by assembly).
+# Guide voice S07.wav re-keyed on 19 Oct (20.00 s; placed at 0.2 s by assembly).
 # Clause boundaries, ffmpeg silencedetect at -35 dB /0.08 s:
-# police:0.20-3.49; belief:3.73-6.42; inclusion:6.64-8.07; staff placement:8.32-11.00;
-# on-device counting and numerical hand-over:11.23-14.27; forecasts:14.53-16.34;
-# operator review:16.56-19.01. Re-key these beats to the team's recorded take.
+# police:0.20-3.49; question:3.73-5.18; intended user/kit:5.41-8.53; support:8.76-10.62;
+# staff placement:10.87-12.38; on-device counting/numerical hand-over:12.61-15.31;
+# dashboard:15.54-16.41; staff review:16.63-20.20. Re-key to the team's recorded take.
+QUESTION_START, QUESTION_END = 3.48, 6.0
+QUESTION_IN, QUESTION_OUT = 0.2, 0.3
 BEATS = {
-    "card": 0.0,          # chapter card in (out after about 2 s)
     "map": 0.0,           # the zone graph, on the right
     "band": 0.15,         # "Macau's police": the band sweeps Ruins -> Senado
     "left": 0.85,         # "police": the police column and its header
@@ -122,29 +128,31 @@ BEATS = {
     "left_1": 1.88,       # "crowd warning system": "Real-time monitoring and alerts"
     "left_2": 2.6,        # "system here": "Zone forecasts planned"
     "here": 3.13,         # "here": the band brightens once
-    "policy": 3.75,       # sentence ends: the 2026 Policy Address line under the column (on screen only)
-    "map_out": 4.6,       # "crowd safety": the map and its label fade (gone by 5.1); the column reads alone
-    "privacy": 5.95,
-    "behind": 6.65,
-    "fold": 8.35,         # staff place phones: principles fold into the operating loop
-    "right": 8.35,
-    "right_head": 8.4,
-    "loop": 8.7,
-    "item_0": 8.8,        # staff placement
-    "phone_detail": 11.25,  # on-device counting, then numbers only to the dashboard
-    "item_1": 14.55,
-    "needle": 15.7,
-    "item_2": 16.6,
-    "item_3": 17.5,
-    "close": 18.6,
+    "policy": 2.95,       # complete the sourced police context before the question
+    "map_out": QUESTION_END,
+    "right": 6.05,        # first introduce the intended operator and temporary kit
+    "right_head": 6.1,
+    "operator": 6.25,
+    "framing": 8.75,
+    "stations": 10.45,
+    "loop": 10.7,
+    "item_0": 10.9,
+    "item_1": 12.6,
+    "phone_detail": 14.0,
+    "item_2": 15.8,
+    "needle": 16.5,
+    "item_3": 17.4,
+    "close": 19.7,
 }
-CARD_HOLD = 2.0
 FADE = 0.35
 # every right-column item reads for at least 0.3 s per word + 0.5 s (19 Oct declutter, rule 5)
 for _i, _it in enumerate(RIGHT_ITEMS):
     assert DURATION - BEATS[f"item_{_i}"] >= 0.3 * len(_it.split()) + 0.5, _it
-assert BEATS["map_out"] - BEATS["band_label"] >= 0.3 * len(BAND_LABEL.split()) + 0.5
-assert DURATION - 19.01 >= 2.0, "the finished comparison holds for 2 s after the guide voice"
+assert QUESTION_START - BEATS["band_label"] >= 0.3 * len(BAND_LABEL.split()) + 0.5
+assert QUESTION_END - QUESTION_START - QUESTION_IN - QUESTION_OUT >= 0.3 * len(QUESTION.split()) + 0.5
+assert min(BEATS[k] for k in ("operator", "right", "loop")) >= QUESTION_END
+assert BEATS["item_0"] - BEATS["operator"] >= 0.3 * len(f"{OPERATOR} {KIT}".split()) + 0.5
+assert DURATION - 20.2 >= 2.0, "the finished comparison holds for 2 s after the guide voice"
 
 # ---------------------------------------------------------------- layout and colours
 
@@ -155,7 +163,7 @@ R = 26
 BAND_HW = 64                                        # half-width of the police band (px)
 BAND = tuple(int(c) for c in lerp(BLUE, INK, 0.30))
 
-COL_Y0 = 200                                        # both column cards start here (chapter card: y 48-112)
+COL_Y0 = 200                                        # both comparison cards stay below the central-question stage
 L_BOX = (60, COL_Y0, 900)                           # left card x0, y0, x1
 R_BOX = (1020, COL_Y0, 1860)                        # right card x0, y0, x1
 PAD = 36
@@ -171,9 +179,8 @@ LOOP_X = R_BOX[0] + 50                              # the return arrow runs up t
 R_TEXT_X = ST_X + ST_R + 28
 R_Y1 = ST_Y[-1] + ST_R + 44
 assert R_Y1 <= 800, "the right column must stay clear of the lower area and the caption band (y 920-990)"
-PRINCIPLE_H, PRINCIPLE_GAP, PRINCIPLE_SIZE = 84, 16, 36   # principle chips, stacked on the right
-PRINCIPLE_CX = (R_BOX[0] + R_BOX[2]) / 2
-PRINCIPLE_Y0 = 400
+QUESTION_SIZE, QUESTION_CX, QUESTION_CY = 84, W / 2, 475
+assert text_size(QUESTION, QUESTION_SIZE, 700)[0] <= W - 240
 
 
 def ease_out_back(t: float, k: float = 1.25) -> float:
@@ -359,18 +366,6 @@ def card_bg(img: Image.Image, box, bar, alpha: float) -> None:
 
 # ---------------------------------------------------------------- icons (drawn at SS scale)
 
-def no_image_icon(d: ImageDraw.ImageDraw, cx: float, cy: float, s: float) -> None:
-    """A picture (frame, hills, sun) struck through: no images. The strike cuts a clear gap."""
-    w, h = 52 * s, 40 * s
-    d.rounded_rectangle((cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2), int(7 * s), outline=(*INK, 255), width=int(4 * s))
-    d.polygon([(cx - w / 2 + 7 * s, cy + h / 2 - 7 * s), (cx - 7 * s, cy - 3 * s), (cx + 3 * s, cy + 7 * s),
-               (cx + 10 * s, cy + 1 * s), (cx + w / 2 - 7 * s, cy + h / 2 - 7 * s)], fill=(*INK, 255))
-    d.ellipse((cx + 8 * s, cy - h / 2 + 8 * s, cx + 17 * s, cy - h / 2 + 17 * s), fill=(*INK, 255))
-    a, b = (cx - w / 2 - 4 * s, cy - h / 2 - 7 * s), (cx + w / 2 + 4 * s, cy + h / 2 + 7 * s)
-    d.line([a, b], fill=(0, 0, 0, 0), width=int(13 * s))         # ImageDraw replaces pixels: a transparent gap
-    d.line([a, b], fill=(*INK, 255), width=int(4 * s))
-
-
 def gauge_icon(d: ImageDraw.ImageDraw, cx: float, cy: float, s: float, needle: float) -> None:
     """A dial (three arc segments) with a needle at `needle` (0 = left, 1 = right): how sure a forecast is."""
     r = 22 * s
@@ -397,10 +392,13 @@ def icon_spr(kind: str, needle_q: int = 0) -> Image.Image:
     big = Image.new("RGBA", (ICON_BOX * SS, ICON_BOX * SS), (0, 0, 0, 0))
     d = ImageDraw.Draw(big)
     c = ICON_BOX * SS / 2
-    if kind == "privacy":
-        no_image_icon(d, c, c, 0.85 * SS)
-    elif kind == "wheelchair":                     # style.wheelchair_icon is drawn about (-4, -3) off its centre
-        wheelchair_icon(d, c + 4 * 1.05 * SS, c + 3 * 1.05 * SS, 1.05 * SS, colour=(*INK, 255), width=4)
+    if kind == "phone":
+        d.rounded_rectangle((c - 16 * SS, c - 25 * SS, c + 16 * SS, c + 25 * SS),
+                            5 * SS, outline=(*INK, 255), width=3 * SS)
+        d.line([(c - 6 * SS, c + 18 * SS), (c + 6 * SS, c + 18 * SS)], fill=(*CYAN, 255), width=3 * SS)
+    elif kind == "counts":
+        for x, y in ((c - 16 * SS, c + 3 * SS), (c, c - 4 * SS), (c + 16 * SS, c + 3 * SS)):
+            person_glyph(d, x, y, 0.45 * SS)
     elif kind == "gauge":
         gauge_icon(d, c, c, SS, needle_q / 20)
     else:
@@ -408,35 +406,17 @@ def icon_spr(kind: str, needle_q: int = 0) -> Image.Image:
     return _down(big, ICON_BOX, ICON_BOX)
 
 
-STATION_ICONS = ["privacy", "gauge", "wheelchair", "person"]   # station i's icon; 0 and 2 come from the chips
-CHIP_ICON = {0: "privacy", 1: "wheelchair"}                     # principle chip -> its icon
-CHIP_STATION = {0: 0, 1: 2}                                     # ... and the station it folds onto
-CHIP_ICON_SCALE = 1.2
+STATION_ICONS = ["phone", "counts", "gauge", "person"]
 
 
-@lru_cache(maxsize=None)
-def principle_spr(i: int) -> Image.Image:
-    """Principle chip i without its icon: label on the panel's navy, with a CrowdPulse-cyan bar at left;
-    the icon is pasted separately (it moves into the right column at the fold)."""
-    label = PRINCIPLES[i]
-    tx = PAD + 10 + ICON_BOX + 16
-    w, h = int(tx + text_w(label, PRINCIPLE_SIZE, 700) + PAD + 4), PRINCIPLE_H
-    lay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    rounded(lay, (0, 0, w - 1, h - 1), 16, fill=NAVY_2, alpha=0.94)
-    rounded(lay, (0, 0, 7, h - 1), 3, fill=CYAN)
-    l, t_, r, b = text_font(label, PRINCIPLE_SIZE, 700).getbbox(label, anchor="la")
-    put_text(lay, tx, h / 2 - (t_ + b) / 2, label, PRINCIPLE_SIZE, 700, INK)
-    return lay
-
-
-def principle_box(i: int) -> tuple[float, float]:
-    """Top-left of principle chip i (stacked and left-aligned, the pair centred on the right column)."""
-    return PRINCIPLE_CX - max(principle_spr(j).width for j in range(2)) / 2, PRINCIPLE_Y0 + i * (PRINCIPLE_H + PRINCIPLE_GAP)
-
-
-def chip_icon_centre(i: int) -> tuple[float, float]:
-    x, y = principle_box(i)
-    return x + PAD + 10 + ICON_BOX / 2, y + PRINCIPLE_H / 2
+@lru_cache(maxsize=1)
+def event_staff_spr() -> Image.Image:
+    """The same hi-vis staff figures used elsewhere in the video, without official insignia."""
+    big = Image.new("RGBA", (140 * SS, 120 * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(big)
+    for x in (36, 104):
+        staff_icon(d, x * SS, 68 * SS, 1.5 * SS)
+    return _down(big, 140, 120)
 
 
 # layout checks: every line fits its card, and the right column's items are left-aligned past the stations
@@ -445,7 +425,8 @@ assert all(PAD + 40 + text_w(t, ITEM_SIZE, 500) <= L_BOX[2] - L_BOX[0] - PAD for
 assert PAD + 10 + text_w(POLICY, POLICY_SIZE, 600) <= L_BOX[2] - L_BOX[0] - PAD, POLICY
 assert all(R_TEXT_X + text_w(t, ITEM_SIZE, 600) <= R_BOX[2] - PAD for t in RIGHT_ITEMS), RIGHT_ITEMS
 assert R_TEXT_X + text_w(PHONE_DETAIL, 24, 500) <= R_BOX[2] - PAD
-assert all(PRINCIPLE_CX + principle_spr(i).width / 2 <= 1860 for i in range(2))
+assert R_BOX[0] + PAD + 10 + text_w(FRAMING, 24, 500) <= R_BOX[2] - PAD
+assert R_BOX[0] + 220 + text_w(KIT, 34, 600) <= R_BOX[2] - PAD
 
 
 # ---------------------------------------------------------------- drawing
@@ -492,22 +473,6 @@ def draw_left(img: Image.Image, t: float) -> None:
         put_text(img, x0 + PAD + 10, L_POLICY_Y + (1 - k_pol) * 10, POLICY, POLICY_SIZE, 600, INK_2, k_pol)
 
 
-def draw_principles(img: Image.Image, t: float) -> None:
-    """The two principle chips; at the fold their words fade while their icons fly to stations 1 and 3."""
-    words_out = 1 - progress(t, BEATS["fold"], 0.3)
-    fly = progress(t, BEATS["fold"], 0.65)
-    for i, key in enumerate(("privacy", "behind")):
-        k = progress(t, BEATS[key], 0.35)
-        if k <= 0:
-            continue
-        x, y = principle_box(i)
-        paste(img, principle_spr(i), x - 24 * (1 - k), y, k * words_out)
-        cx, cy = chip_icon_centre(i)
-        sx, sy = ST_X, ST_Y[CHIP_STATION[i]]
-        px, py = lerp(cx - 24 * (1 - k), sx, fly), lerp(cy, sy, fly) - 40 * math.sin(math.pi * fly)
-        paste(img, icon_spr(CHIP_ICON[i]), px, py, k, scale=lerp(CHIP_ICON_SCALE, 1.0, fly), anchor="mm")
-
-
 def _arrow_head(d: ImageDraw.ImageDraw, tip, direction, colour, size=9.0) -> None:
     dx, dy = direction
     n = math.hypot(dx, dy) or 1
@@ -519,7 +484,7 @@ def _arrow_head(d: ImageDraw.ImageDraw, tip, direction, colour, size=9.0) -> Non
 
 def draw_loop(img: Image.Image, t: float) -> None:
     """The loop: a link down between each pair of stations, and a return arrow up the left back to the top.
-    Drawn on "one loop"; the return arrow turns cyan on "approve" (the loop is closed)."""
+    It follows the operator introduction; the return arrow lights as staff review before acting."""
     k = progress(t, BEATS["loop"], 0.6)
     if k <= 0:
         return
@@ -559,7 +524,7 @@ def draw_loop(img: Image.Image, t: float) -> None:
 
 
 def draw_right(img: Image.Image, t: float) -> None:
-    """The right column: card, header, four stations on the loop, the items as the voice names them."""
+    """Introduce the intended event staff and kit first, then reveal their operating loop."""
     a = progress(t, BEATS["right"], FADE)
     if a <= 0:
         return
@@ -567,23 +532,31 @@ def draw_right(img: Image.Image, t: float) -> None:
     card_bg(img, (x0 + (1 - a) * 18, y0, x1 + (1 - a) * 18, R_Y1), CYAN, a)
     kh = progress(t, BEATS["right_head"], 0.4)
     put_text(img, x0 + PAD + 10, y0 + 30 + (1 - kh) * 10, RIGHT_HEAD, HEAD_SIZE, 700, CYAN, kh)
+    framing = progress(t, BEATS["framing"], 0.4)
+    put_text(img, x0 + PAD + 10, y0 + 80, FRAMING, 24, 500, INK_2, framing)
+
+    intro = progress(t, BEATS["operator"], 0.35) * (1 - progress(t, BEATS["stations"] - 0.25, 0.35))
+    if intro > 0:
+        paste(img, event_staff_spr(), x0 + 56, y0 + 180, intro)
+        put_text_mid(img, x0 + 220, y0 + 210, OPERATOR, 44, 700, INK, intro)
+        put_text_mid(img, x0 + 220, y0 + 270, KIT, 34, 600, INK_2, intro)
+
+    stations = progress(t, BEATS["stations"], 0.35)
+    if stations <= 0:
+        return
     draw_loop(img, t)
     lay = transparent()
     d = ImageDraw.Draw(lay)
     for i in range(4):                                # station discs: grey while waiting, cyan rim once named
         lit = progress(t, BEATS[f"item_{i}"], 0.4)
         rim = tuple(int(v) for v in lerp(INK_3, CYAN, lit))
-        d.ellipse((ST_X - ST_R, ST_Y[i] - ST_R, ST_X + ST_R, ST_Y[i] + ST_R), fill=(*NAVY_3, int(255 * a)),
-                  outline=(*rim, int(255 * a)), width=3)
+        d.ellipse((ST_X - ST_R, ST_Y[i] - ST_R, ST_X + ST_R, ST_Y[i] + ST_R), fill=(*NAVY_3, int(255 * a * stations)),
+                  outline=(*rim, int(255 * a * stations)), width=3)
     img.alpha_composite(lay)
-    fly_done = t >= BEATS["fold"] + 0.65
     for i, txt in enumerate(RIGHT_ITEMS):
         k = progress(t, BEATS[f"item_{i}"], 0.4)
         kind = STATION_ICONS[i]
-        if i in CHIP_STATION.values():                # chip icons: drawn here once they have landed
-            if fly_done:
-                paste(img, icon_spr(kind), ST_X, ST_Y[i], 1.0, anchor="mm")
-        elif k > 0:
+        if k > 0:
             needle_q = 4 + round(10 * progress(t, BEATS["needle"], 0.6)) if kind == "gauge" else 0
             paste(img, icon_spr(kind, needle_q), ST_X, ST_Y[i], clamp(k / 0.5), scale=lerp(0.6, 1.0, ease_out_back(k)), anchor="mm")
         if k > 0:
@@ -596,17 +569,42 @@ def draw_right(img: Image.Image, t: float) -> None:
 # ---------------------------------------------------------------- frame
 
 BASE = canvas()
+QUESTION_SCRIM = Image.new("RGBA", (W, H), (*NAVY, 235))
+
+
+def question_alpha(t: float) -> float:
+    if t < QUESTION_START or t >= QUESTION_END:
+        return 0.0
+    return min(
+        progress(t, QUESTION_START, QUESTION_IN),
+        1 - progress(t, QUESTION_END - QUESTION_OUT, QUESTION_OUT),
+    )
+
+
+def draw_question(img: Image.Image, t: float) -> None:
+    """A single dominant question over static, dimmed context; no other animation runs here."""
+    alpha = question_alpha(t)
+    if alpha <= 0:
+        return
+    paste(img, QUESTION_SCRIM, 0, 0, alpha)
+    spr, _, _ = text_spr(QUESTION, QUESTION_SIZE, 700, INK)
+    paste(img, spr, QUESTION_CX, QUESTION_CY, alpha, anchor="mm")
+    rounded(img, (QUESTION_CX - 84, QUESTION_CY + 75,
+                  QUESTION_CX + 84, QUESTION_CY + 80), 2, fill=CYAN, alpha=alpha)
 
 
 def draw_frame(t: float) -> Image.Image:
     img = BASE.copy()
-    draw_map(img, t)
-    draw_left(img, t)
-    draw_right(img, t)
-    if t < BEATS["fold"] + 0.65:
-        draw_principles(img, t)
-    # fixed slots
-    chapter_card(img, CARD, fade(t, BEATS["card"] - 0.3, BEATS["card"] + CARD_HOLD + 0.3, 0.3))
+    # The existing-system context settles before the question. Keep its pixels
+    # fixed throughout the focused question, then fade only the map away.
+    context_time = min(t, QUESTION_START)
+    map_layer = transparent()
+    draw_map(map_layer, context_time)
+    paste(img, map_layer, 0, 0, 1 - progress(t, BEATS["map_out"], 0.5))
+    draw_left(img, context_time)
+    if t >= QUESTION_END:
+        draw_right(img, t)
+    draw_question(img, t)
     footer(img, FOOTER)
     return img
 
@@ -614,16 +612,15 @@ def draw_frame(t: float) -> Image.Image:
 STILLS = {  # beat name -> time (s) for the layout stills
     "band": 1.6,
     "here": 3.35,
-    "policy": 4.4,
-    "belief": 5.8,
-    "privacy": 6.4,
-    "principles": 8.1,
-    "fold": 8.65,
-    "loop": 9.3,
-    "phones": 12.0,
-    "forecasts": 15.8,
-    "detours": 17.1,
-    "approve": 19.5,
+    "question": 4.0,
+    "question_hold": 5.3,
+    "question_exit": 5.85,
+    "operator": 7.5,
+    "support": 9.8,
+    "phones": 11.8,
+    "counts": 14.5,
+    "forecasts": 16.6,
+    "review": 19.2,
     "end": DURATION - 1 / FPS,
 }
 

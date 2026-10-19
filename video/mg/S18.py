@@ -1,8 +1,9 @@
 """Shot S18 (4:21.5-4:28.5, 7.0 s): back to Mrs Chan. "Back to Mrs Chan. The system flags the risk; staff check her
 route and stay beside her."
 
-The system flags, people act. The shot opens on S01's last frame (same map and framing, ahpo.py: her icon stopped
-short of Senado on her main route, Senado red, her dotted route to the pin, the place labels and her tag); the place
+The system flags, people act. The shot returns to S01's underlying map state and framing, without its factual
+overlay (ahpo.py: her icon stopped short of Senado on her main route, Senado red, her dotted route to the pin,
+the place labels and her tag); the place
 labels fade and an amber ring pulses on her; a red ring pulses from Senado and a short "Risk flagged" marker takes
 Senado's label's place; a staff icon (hi-vis vest) walks up from Av. de Almeida Ribeiro to her side while her route
 north turns into marching dashes in the vest colour, labelled "staff check" (being checked, never shown as cleared);
@@ -80,7 +81,7 @@ assert ahpo.NAME == "Mrs Chan" and ahpo.NAME in _shot["narration"]
 # "staff (3.53) check (3.92) her route (4.2-4.85) and stay (5.1) beside her." (-6.04)
 # re-key to the real voice take
 BEATS = {
-    "labels_out": 0.35,   # the place labels carried over from S01's last frame fade (gone by 0.85)
+    "labels_out": 0.35,   # the place labels on the return map fade (gone by 0.85)
     "ring": 0.95,         # "Mrs Chan": an amber ring pulses out from her icon
     "tag_out": 1.6,       # her "Mrs Chan" tag (from S01) fades once her name has been said (gone by 1.9)
     "flag": 2.36,         # "flags": a red ring pulses from Senado; its label gives way to the "Risk flagged" marker
@@ -111,9 +112,9 @@ _FLAG_SIM = ahpo.hms(next(e for e in ahpo.run_a_events() if e.get("event") == "s
 assert _FLAG_SIM <= SIM_KEYS[0][1], (ahpo.clock(_FLAG_SIM), ahpo.clock(SIM_KEYS[0][1]))
 
 SCENE = MapScene()
-# the scene's own clock (drifting dots, Senado's pulse) runs on from S01's last frame, so nothing jumps at the cut
+# The scene clock resumes S01's underlying map choreography; its factual overlay is not carried into this return.
 _s01 = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == "S01")
-SCENE_T0 = round(_s01["end_s"] - _s01["start_s"], 3)                                         # 11.0 s
+SCENE_T0 = round(_s01["end_s"] - _s01["start_s"], 3)                                         # 12.0 s
 
 # ---------- Mrs Chan (stopped where S01 left her) and the staff member ----------
 
