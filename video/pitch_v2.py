@@ -27,8 +27,8 @@ from PIL import Image, ImageDraw, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "video"), str(ROOT / "video" / "mg")]
-from v2_story import PEOPLE, export, scenes, timecode
-from style import (font, text_size, wrap, zone_graph, project, wheelchair_icon, staff_icon)
+from v2_story import PEOPLE, RUNTIME_S, export, scenes
+from style import font, text_size, wrap, wheelchair_icon, staff_icon
 from assemble import caption_chunks, caption_bounds, pauses
 
 W, H, FPS = 1920, 1080, 30
@@ -86,6 +86,11 @@ def paste(img, tile, x, y, alpha=1.0):
         tile = tile.copy()
         tile.putalpha(tile.getchannel("A").point(lambda a: int(a * max(0, alpha))))
     img.paste(tile, (round(x), round(y)), tile)
+
+
+def dissolve(img, previous, following, amount):
+    """Blend complete layouts; never move a crop through unrelated UI panels."""
+    img.alpha_composite(Image.blend(previous, following, max(0, min(1, amount))))
 
 
 def text(img, x, y, value, size=36, weight=500, colour=WHITE, alpha=1, width=0, centre=False):
@@ -330,6 +335,7 @@ class Scene:
         self.sid, self.shot = sid, SHOTS[sid]
         self.report = json.loads((BUILD / "guide.json").read_text())[sid]
         self.readers = {}
+        self.entry_frame = None
 
     def footage(self, name, at, width=1600):
         if name not in self.readers:
@@ -363,9 +369,20 @@ class Scene:
         text(img, 1750, 1036, REVIEW_NOTE, 17, 450, MUTED)
         return img.convert("RGB")
 
-    def draw(self, t):
+    def content(self, t):
         img = backdrop().copy()
         getattr(self, f"draw_{self.sid}")(img, t)
+        return img
+
+    def draw(self, t):
+        img = self.content(t)
+        if self.sid != "N01" and t < .3:
+            if self.entry_frame is None:
+                previous = Scene(f"N{int(self.sid[1:]) - 1:02d}")
+                slot = previous.shot["end_s"] - previous.shot["start_s"]
+                self.entry_frame = previous.content(slot - 1 / FPS)
+                previous.close()
+            img = Image.blend(self.entry_frame, img, phase(t, 0, .3))
         return self.finish(img, t)
 
     def draw_N01(self, img, t):
@@ -379,8 +396,12 @@ class Scene:
             frame = hook.map_frame(source_t)
         elif t < return_start:
             frame = hook.eye_frame(5.3 + .6 * ease((t - eye_start) / max(1, return_start - eye_start)))
+            if t < eye_start + .6:
+                frame = Image.blend(hook.map_frame(4.2), frame, phase(t, eye_start, .6))
         else:
             frame = hook.map_frame(8.3)
+            if t < return_start + .6:
+                frame = Image.blend(hook.eye_frame(5.9), frame, phase(t, return_start, .6))
         img.alpha_composite(frame)
         pill(img, "ILLUSTRATION", 1590, 50, MUTED)
 
@@ -406,6 +427,14 @@ class Scene:
                 text(img, x + 122, 658, day, 40, 600, centre=True)
             text(img, W / 2, 785, "Brief crowd controls at the Ruins", 29, 450, MUTED, centre=True)
         footer(img, "Source: Public Security Police Force · 8 Oct 2026")
+        if q <= t < q + .3:
+            previous = backdrop().copy()
+            self.draw_N03(previous, q - 1 / FPS)
+            dissolve(img, previous, img.copy(), phase(t, q, .3))
+        elif q + 2.5 <= t < q + 2.8:
+            previous = backdrop().copy()
+            self.draw_N03(previous, q + 2.5 - 1 / FPS)
+            dissolve(img, previous, img.copy(), phase(t, q + 2.5, .3))
 
     def draw_N04(self, img, t):
         group(img, t, "question")
@@ -422,26 +451,40 @@ class Scene:
 
     def draw_N06(self, img, t):
         reveal = cue(self.report, 1)
+        existing = backdrop().copy()
+        header(existing, "Building on existing work", "Public information · Macau", t)
+        big_words(existing, ["Crowd warning", "already exists."], 280, 84, t=t)
+        text(existing, 125, 535, "Public Security Police Force", 34, 450, MUTED)
+        footer(existing, "Source: Legislative Assembly reply · 28 Jan 2026")
         if t < reveal:
-            header(img, "Building on existing work", "Public information · Macau", t)
-            big_words(img, ["Crowd warning", "already exists."], 280, 84, t=t)
-            text(img, 125, 535, "Public Security Police Force", 34, 450, MUTED)
-            footer(img, "Source: Legislative Assembly reply · 28 Jan 2026")
+            img.alpha_composite(existing)
             return
-        a = phase(t, reveal, .85)
-        header(img, "A temporary sensing kit", "For event staff · proposed support", t)
-        p = snapshot("S02_sim_masked", 6)
+        a = phase(t, reveal, 1.0)
+        product = backdrop().copy()
+        header(product, "A temporary sensing kit", "For event staff · proposed support", t)
+        p = snapshot("S02_sim_masked", 0)
         screen = snapshot("C2a", 119)
-        zoom = phase(t, 16, 4.5)
-        box = (mix(1910, 540, a), 260, mix(3010, 1710, a), 795)
+        zoom = phase(t, 14.4, 3.2)
+        box = (540, 260, 1710, 795)
         composition = Image.new("RGBA", (W, H))
         window(composition, screen, box, "CrowdPulse dashboard", crop=(280, 65, 1910, 810))
         staff_icon(ImageDraw.Draw(composition), 1795, 750, 1.7)
         text(composition, 260, 835, "Phone", 28, 550, MUTED, centre=True)
         text(composition, 1125, 835, "Dashboard + staff review", 28, 550, MUTED, centre=True)
-        paste(img, composition, 0, 0, 1 - zoom)
-        phone(img, p, mix(1120 - 990 * a, 785, zoom), mix(205, 168, zoom), mix(600, 704, zoom))
-        pill(img, "NO PARTNER YET", 1470, 56, AMBER)
+        paste(product, composition, 0, 0, 1 - zoom)
+        phone(product, p, mix(130, 785, zoom), mix(205, 168, zoom), mix(600, 704, zoom))
+        pill(product, "NO PARTNER YET", 1470, 56, AMBER)
+        dissolve(img, existing, product, a)
+
+    def phone_readout(self, img, frame, amount=1):
+        """A crop expands into the free space beside its source, without crossing the device."""
+        tile = frame.crop((0, int(frame.height * .414), frame.width, int(frame.height * .658)))
+        box = mix((1090, 492, 1200, 545), (120, 501, 830, 838), amount)
+        x0, y0, x1, y1 = box
+        layer = Image.new("RGBA", (W, H))
+        roundbox(layer, (x0 - 8, y0 - 8, x1 + 8, y1 + 8), (53, 66, 83), 26)
+        image_panel(layer, tile, box, radius=20, contain=True)
+        paste(img, layer, 0, 0, amount)
 
     def draw_N07(self, img, t):
         header(img, "The crowd. In numbers.", "Working prototype · iPhone Simulator · Toronto test clip", t)
@@ -450,71 +493,108 @@ class Scene:
         phone(img, frame, mix(785, 1220, k), 168, 704)
         if k > 0:
             big_words(img, ["On-device", "counting."], 245, 76, t=t, delay=4.3)
-            tile = frame.crop((0, int(frame.height * .405), frame.width, int(frame.height * .675)))
-            x = mix(1210, 120, phase(t, 6.3, 1.0))
-            roundbox(img, (x - 8, 493, x + 718, 846), (53, 66, 83), 26)
-            image_panel(img, tile, (x, 501, x + 710, 838), radius=20, contain=True)
+            self.phone_readout(img, frame, phase(t, 6.3, 1.1))
         footer(img, "Recorded excerpt · final readout held · Toronto: Raysonho / Wikimedia Commons / CC0 · faces pixelated")
 
     def draw_N08(self, img, t):
-        switch = max(6.0, cue(self.report, 2))
+        switch = cue(self.report, 2)
+        feed = backdrop().copy()
+        header(feed, "From phone to dashboard", "Numerical test feed · Almeida Ribeiro", t)
+        p = self.footage("S02_sim_masked", 7.05, 600)
+        phone(feed, p, 1220, 168, 704)
+        self.phone_readout(feed, p)
+        big_words(feed, ["Numbers received."], 265, 65, t=t)
+        if t >= cue(self.report, 1):
+            text(feed, 125, 385, "Test-feed zone: Almeida Ribeiro", 31, 500, CYAN,
+                 phase(t, cue(self.report, 1), .45))
+        footer(feed, "Recorded phone readout · held for explanation")
         if t < switch:
-            header(img, "A numerical test feed", "Almeida Ribeiro · backend integration", t)
-            big_words(img, ["Received by", "the backend."], 300, 70, t=t)
-            # Keep the real phone readable on the right, clear of the words.
-            p = self.footage("S02_sim_masked", 18 + t, 600)
-            move = phase(t, 0, 1)
-            phone(img, p, mix(1220, 1320, move), mix(168, 205, move), mix(704, 610, move))
-            text(img, 125, 560, "Test-feed zone: Almeida Ribeiro", 33, 500, CYAN)
-            footer(img, "Recorded phone readout · held for explanation")
+            img.alpha_composite(feed)
             return
-        header(img, "Inspect the forecast", "Working software · simulated Macau crowd", t)
-        rel = t - switch
-        if rel < 3.0:
-            at = 100.4 + rel * 1.1
-            crop = mix((280, 60, 1920, 1040), (760, 120, 1920, 980), phase(rel, 1, 2))
-        elif rel < 5.5:
-            at = 103.7 + (rel - 3) * .5
-            crop = (1180, 663, 1915, 1000)
+
+        dashboard = backdrop().copy()
+        header(dashboard, "Inspect the forecast", "Recorded views · simulated Senado scenario", t)
+        box = (130, 245, 1790, 830)
+        forecast_start = cue(self.report, 3) - .55
+        reasons_start = cue(self.report, 3) + 3.25
+        if t < forecast_start:
+            frame = self.footage("C2a", 100.4 + min(2.6, t - switch))
+            crop = (280, 60, 1920, 1040)
+            window(dashboard, frame, box, "SIMULATED MACAU CROWD · LIVE-MAP RECORDING", crop)
         else:
-            at = min(119.8, 111.6 + (rel - 5.5) * 1.3)
-            crop = mix((280, 70, 1910, 1070), (300, 785, 1100, 1067), phase(rel, 5.5, 1.1))
-        frame = self.footage("C2a", at)
-        window(img, frame, (130, 245, 1790, 830), "SIMULATED MACAU CROWD · SENADO", crop)
-        footer(img, "Map © OpenStreetMap contributors · forecast and crowd shown here are simulated")
+            forecast = backdrop().copy()
+            header(forecast, "Inspect the forecast", "Recorded views · simulated Senado scenario", t)
+            # A labelled recorded detail keeps all magnified readings from one actual frame.
+            frame = snapshot("C2a", 119)
+            crop = mix((280, 65, 1910, 1070), (300, 785, 1100, 1067),
+                       phase(t, forecast_start, 1.0))
+            window(forecast, frame, box, "RECORDED FORECAST DETAIL", crop)
+            if t < reasons_start:
+                dashboard = forecast
+                if t < forecast_start + .5:
+                    previous = backdrop().copy()
+                    header(previous, "Inspect the forecast", "Recorded views · simulated Senado scenario", t)
+                    window(previous, snapshot("C2a", 103), box,
+                           "SIMULATED MACAU CROWD · LIVE-MAP RECORDING", (280, 60, 1920, 1040))
+                    dissolve(dashboard, previous, forecast, phase(t, forecast_start, .5))
+            else:
+                reasons = backdrop().copy()
+                header(reasons, "See the reasons", "Recorded explanation · simulated Senado scenario", t)
+                window(reasons, snapshot("C2a", 104.3), box, "RECORDED EXPLANATION DETAIL",
+                       (1180, 663, 1915, 1000))
+                dissolve(dashboard, forecast, reasons, phase(t, reasons_start, .6))
+        footer(dashboard, "Map © OpenStreetMap contributors · recorded details from separate moments of the simulated scenario")
+        dissolve(img, feed, dashboard, phase(t, switch, .6))
+
+    def approval_view(self, t, stage):
+        view = backdrop().copy()
+        header(view, "Review before acting", "Working software · simulated crowd · scripted click", t)
+        start = cue(self.report, 1)
+        if stage == 0:
+            at, crop = 111.8 + min(t, start) * .4, (300, 70, 1880, 940)
+        elif stage == 1:
+            at = min(127.5, 125.5 + max(0, t - start) * .5)
+            crop = (335, 100, 1880, 900)
+        elif stage == 2:
+            at, crop = 137 + max(0, t - start - 4) * .35, (322, 350, 1880, 780)
+        else:
+            window(view, snapshot("C2b2", 116.5), (130, 230, 1790, 780),
+                   "RECORDED NOTICE EXAMPLE", (335, 520, 1880, 745))
+            for i, label in enumerate(("Chinese", "English", "Portuguese")):
+                pill(view, label, 420 + i * 410, 825, CYAN)
+            return view
+        window(view, self.footage("C2b2", at), (130, 230, 1790, 835),
+               "STAFF APPROVAL WORKFLOW" if stage < 2 else "RECORDED DECISION · AUDIT LOG", crop)
+        return view
 
     def draw_N09(self, img, t):
-        header(img, "Review before acting", "Working software · simulated crowd · scripted click", t)
-        if t < 4.7:
-            at, crop = 111.8 + t * .4, (300, 70, 1880, 940)
-        elif t < 8.7:
-            at, crop = 125.5 + (t - 4.7) * .5, (300, 40, 1880, 940)
+        starts = [0, cue(self.report, 1), cue(self.report, 1) + 4, cue(self.report, 2)]
+        stage = sum(t >= point for point in starts[1:])
+        current = self.approval_view(t, stage)
+        if stage and t < starts[stage] + .45:
+            previous = self.approval_view(starts[stage] - 1 / FPS, stage - 1)
+            dissolve(img, previous, current, phase(t, starts[stage], .45))
         else:
-            at, crop = 137 + (t - 8.7) * .35, (322, 350, 1880, 780)
-        if t >= cue(self.report, 2):
-            # An explicitly labelled evidence insert, not a reversal of the workflow clock.
-            notice = snapshot("C2b2", 116.5)
-            window(img, notice, (130, 230, 1790, 780), "RECORDED NOTICE EXAMPLE",
-                   (335, 520, 1880, 745))
-            for i, label in enumerate(("Chinese", "English", "Portuguese")):
-                pill(img, label, 420 + i * 410, 825, CYAN)
-        else:
-            frame = self.footage("C2b2", at)
-            window(img, frame, (130, 230, 1790, 835), "STAFF APPROVAL WORKFLOW", crop)
+            img.alpha_composite(current)
         footer(img, "Scripted click · demo-operator-1 is a fictional, self-declared demonstration name")
 
     def draw_N10(self, img, t):
         header(img, "Privacy by design", "Numerical observations · no image uploads", t)
         terminal = cue(self.report, 2)
+        local = img.copy()
+        big_words(local, ["Process locally.", "Send numbers."], 300, 87, t=t)
+        pill(local, "ON THE DEVICE", 125, 580)
         if t < terminal:
-            big_words(img, ["Process locally.", "Send numbers."], 300, 87, t=t)
-            pill(img, "ON THE DEVICE", 125, 580)
+            img.alpha_composite(local)
             return
         n = 0 if t < cue(self.report, 3) else 1 if t < cue(self.report, 4) else 2
         frame = snapshot("S08", (2.5, 4.9, 7.35)[n])
         window(img, frame, (130, 230, 1790, 820), "RECORDED SERVER TEST", (60, 170, 1860, 775))
         label, colour = (("202 · accepted", CYAN), ("422 · rejected", AMBER), ("403 · image refused", RED))[n]
         pill(img, label, 1370, 58, colour, 23)
+        if t < terminal + .45:
+            current = img.copy()
+            dissolve(img, local, current, phase(t, terminal, .45))
 
     def draw_N11(self, img, t):
         header(img, "Test the counts", "Real camera benchmark · held-out frames", t)
@@ -537,10 +617,15 @@ class Scene:
         if t >= cue(self.report, 3) - .15:
             pill(img, "NOT YET IN THE APP", 1330, 60, AMBER)
         footer(img, "Mall dataset: Chen et al., 2012 · derived analysis only")
+        boundary = cue(self.report, 1)
+        if boundary <= t < boundary + .45:
+            previous = backdrop().copy()
+            self.draw_N11(previous, boundary - 1 / FPS)
+            dissolve(img, previous, img.copy(), phase(t, boundary, .45))
 
     def draw_N12(self, img, t):
-        failure = max(10.7, cue(self.report, 2))
-        review = max(failure + 7, cue(self.report, 3))
+        failure = cue(self.report, 2)
+        review = cue(self.report, 3)
         if t < failure:
             header(img, "Test the prediction", "Held-out simulated days · 15-minute forecast", t)
             m = json.loads((ROOT / "ml/models/metrics.json").read_text())["per_horizon"]["h15"]
@@ -571,22 +656,39 @@ class Scene:
             header(img, "Uncertainty stays visible", "Adjusted score · staff review cue", t)
             frame = snapshot("C2a", 108)
             window(img, frame, (200, 260, 1720, 750), "ACTUAL REVIEW INTERFACE", (300, 790, 1100, 1070))
-            text(img, W / 2, 800, "Not a calibrated probability", 35, 550, AMBER, centre=True)
+            if t >= cue(self.report, 4):
+                text(img, W / 2, 800, "Not a calibrated probability", 35, 550, AMBER,
+                     phase(t, cue(self.report, 4), .45), centre=True)
+        for boundary in (failure, review):
+            if boundary <= t < boundary + .45:
+                previous = backdrop().copy()
+                self.draw_N12(previous, boundary - 1 / FPS)
+                dissolve(img, previous, img.copy(), phase(t, boundary, .45))
 
     def draw_N13(self, img, t):
         header(img, "Who can use the route?", "MODEL CHECK · full closure · synthetic wheelchair journeys", t)
         if t < cue(self.report, 1):
             text(img, W / 2, 425, "What about Mrs Chan?", 84, 650, centre=True)
             return
-        source = snapshot("C2c", 10)
-        image_panel(img, source, (100, 205, 1820, 790), crop=(0, 50, 1300, 900))
-        roundbox(img, (160, 260, 1760, 745), PANEL, 32, LINE)
+        source = self.footage("C2c", 7 + min(3, (t - cue(self.report, 1)) * .6))
+        window(img, source, (130, 230, 1790, 835), "RECORDED SKETCHFUTURE MODEL CHECK")
+        grid_start = cue(self.report, 1) + 3.4
+        if t < grid_start:
+            footer(img, "Map © OpenStreetMap contributors · full-closure stress test, not route certification")
+            return
+        recorded = img.copy()
+        cohort = backdrop().copy()
+        header(cohort, "Who can use the route?", "MODEL CHECK · full closure · synthetic wheelchair journeys", t)
+        roundbox(cohort, (160, 260, 1760, 745), PANEL, 32, LINE)
         for i, title in enumerate(("Before", "After full closure")):
             x = 285 + i * 850
-            text(img, x + 190, 300, title, 35, 600, centre=True)
-            dot_grid(img, x, 405)
-            text(img, x + 190, 625, "24 / 40", 56, 650, PURPLE, centre=True)
-        text(img, W / 2, 795, "Purple: no mapped step-free route in either plan", 35, 550, centre=True)
+            text(cohort, x + 190, 300, title, 35, 600, centre=True)
+            dot_grid(cohort, x, 405)
+            text(cohort, x + 190, 625, "24 / 40", 56, 650, PURPLE, centre=True)
+        text(cohort, W / 2, 795, "Purple: no mapped step-free route in either plan", 32, 550, centre=True)
+        if t >= cue(self.report, 2):
+            pill(cohort, "MAP DATA + ON-SITE CHECKS", 660, 862, AMBER)
+        dissolve(img, recorded, cohort, phase(t, grid_start, .6))
         footer(img, "Map © OpenStreetMap contributors · model reachability is not field certification")
 
     def draw_N14(self, img, t):
@@ -609,7 +711,8 @@ class Scene:
             text(img, x + 400, 585, status, 23, 550, colour, centre=True)
 
     def draw_N16(self, img, t):
-        frame = legacy("S18").draw_frame(min(6.95, t * .88))
+        source_t = float(np.interp(t, [0, 1.4, 2, 3.6, 5.4, 8], [0, 1.6, 3.53, 4.3, 5.1, 6.95]))
+        frame = legacy("S18").draw_frame(source_t)
         img.alpha_composite(frame)
 
     def draw_N17(self, img, t):
@@ -689,11 +792,11 @@ def assemble():
                     dest.writeframes(src.readframes(src.getnframes()))
             else:
                 dest.writeframes(b"\0" * (shot["end_s"] - shot["start_s"]) * 96000)
-    final = out / "crowdpulse_v2_full_1080p.mp4"
+    final = out / "crowdpulse_v2_reviewed_full_1080p.mp4"
     run(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-i", str(audio), "-c:v", "copy", "-bsf:v", H264_COLOUR,
          "-af", "loudnorm=I=-18:TP=-2:LRA=9", "-ar", "48000", "-ac", "2", "-c:a", "aac", "-b:a", "192k",
-         "-t", "277", "-movflags", "+faststart", str(final)])
-    preview = out / "crowdpulse_v2_full_preview_720p.mp4"
+         "-t", str(RUNTIME_S), "-movflags", "+faststart", str(final)])
+    preview = out / "crowdpulse_v2_reviewed_full_preview_720p.mp4"
     run(["ffmpeg", "-v", "error", "-y", "-i", str(final), "-vf", "scale=1280:720", "-c:v", "libx264",
          "-crf", "21", "-preset", "fast", *COLOUR, "-bsf:v", H264_COLOUR,
          "-c:a", "copy", "-movflags", "+faststart", str(preview)])

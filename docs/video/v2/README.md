@@ -1,12 +1,12 @@
 # CrowdPulse V2 production guide
 
-The current reconstruction follows the approved 18-scene story and revised four-person allocation. Runtime is **4:37 (277 seconds)**, including six seconds of credits. This is a complete review cut with stock guide narration and labelled camera placeholders, ready for reviewing the sequence and recording the real team takes.
+The current reconstruction follows the approved 18-scene story and revised four-person allocation. After the full-sequence pacing review, runtime is **4:15 (255 seconds)**, including six seconds of credits. This is a complete review cut with stock guide narration and labelled camera placeholders, ready for reviewing the sequence and recording the real team takes.
 
 ## Local outputs
 
-- Full preview: `video/build/v2/cut/crowdpulse_v2_full_preview_720p.mp4`
-- 1080p master: `video/build/v2/cut/crowdpulse_v2_full_1080p.mp4`
-- Final-cut review sheets: `video/build/v2/qa/full-cut-review-1.jpg` and `full-cut-review-2.jpg`
+- Full preview: `video/build/v2/cut/crowdpulse_v2_reviewed_full_preview_720p.mp4`
+- 1080p master: `video/build/v2/cut/crowdpulse_v2_reviewed_full_1080p.mp4`
+- Sequential review frames and motion sheets: `video/build/v2/qa/full-pass-reviewed/` and `video/build/v2/qa/motion-reviewed/`
 - Per-sentence guide timing: `video/build/v2/guide.json`
 
 Derived media is ignored by Git and stays local. The older `docs/video/shotlist.json`, scripts and renderer remain intact for reproducing the previous cut; they are not the V2 narrative source.
@@ -42,7 +42,7 @@ The renderer preserves screen aspect ratios, uses bounded sequential video decod
 
 ## Product presentation and evidence
 
-N06 introduces the full phone/dashboard/staff composition, then moves the phone into the N07 opening position. N07 moves from the full device to a magnified crop of its actual numerical readout. N08 labels the Almeida Ribeiro test feed before switching to the separate, simulated Senado recording. N09 shows suggestion, recorded approval and audit, followed by a separately labelled notice insert. It does not present an earlier notice capture as a later live event.
+N06 introduces the full phone/dashboard/staff composition, then moves the phone into the N07 opening position. N07 moves from the full device to a magnified crop of its actual numerical readout. N08 carries the phone/readout composition across the cut, labels the Almeida Ribeiro test feed, then switches to the simulated Senado recording. Forecast and explanation details are clearly labelled inserts from separate recorded moments. N09 shows suggestion, recorded approval and audit, followed by a separately labelled notice insert. It does not present an earlier notice capture as a later live event.
 
 | Evidence | Treatment in this cut |
 |---|---|
@@ -56,13 +56,8 @@ N06 introduces the full phone/dashboard/staff composition, then moves the phone 
 | Accessibility | Full-closure stress test, synthetic 40-journey wheelchair cohort; 24 unreachable both before and after; purple dots mean no mapped step-free route, not newly excluded journeys |
 | Melbourne | Pre-registered test pending; no held-out results opened or calculated for this edit |
 
-## Verification — 19 October 2026
+## Review and verification
 
-- Both exports: **277.000 seconds, 8,310 video frames, 30 fps**. Master 1920×1080; preview 1280×720. H.264, limited-range BT.709; AAC stereo at 48 kHz. Fast-start metadata for playback.
-- Both full files passed FFmpeg error-fatal decoding of all video and audio, with no decoder errors. Colour metadata was then explicitly tagged BT.709 without re-encoding picture or audio.
-- Guide audio fits all 17 spoken slots. Every caption lies within its scene window and the 1,480-pixel caption-safe width. Credits occupy the final six seconds.
-- Measured finished audio: **−18.08 LUFS integrated**, **−4.88 dBTP** peak, 5.0 LU loudness range; no clipping indicated.
-- Inspected source-render stills for all scenes, then 24 samples extracted from the assembled 720p export covering all 18 scenes, the phone composition transition, enlarged readout, approval audit, notice insert and server rejection. This is sampled visual QA plus complete technical decoding, not a claim of a separate human viewing/listening session.
-- Rechecked caption timing against sentence audio, actual metric files, the before/after cohort semantics, readable crop scaling and preservation of recording aspect ratios. The product captures and guide audio are complete; real team camera/voice and pending submission details remain to be supplied.
+See [the full-sequence review and fixes](review.md) for the concrete defects, revised timing and verification evidence. The earlier 4:37 files remain in the local cut folder for comparison. The reviewed files use a distinct name to avoid confusing them with that version.
 
-The cut has not been submitted or published. Cost approval and other competition submission checks remain separate from producing this preview.
+The cut has not been submitted or published. The review still uses stock guide narration and camera placeholders; real team camera/voice recordings and pending submission details remain separate.
