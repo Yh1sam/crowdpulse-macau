@@ -1,18 +1,19 @@
-"""Shot S14 (2:47.5-3:11.0, 23.5 s): "Does acting help?" - the recorded simulation, approve vs no action.
+"""Shot S14 (21 s): "Does acting help?" - the recorded simulation, approve vs no action.
 
 Storyboard: docs/video/script.md section 3, row S14; claims table section 4, row S14; section 6
 ("Global look and tools", "motion_graphic"); shot list docs/video/shotlist.json (id S14).
 
 Line chart of Senado Square's true density, 13:53-14:40, redrawn from the two recorded runs:
-blue = approved (run A), orange = no action (run B), dotted CRITICAL line at the config threshold.
+blue = approved (run A), orange = no action (run B), dotted prototype alert threshold from config.
+The line is explicitly labelled as not a validated safety limit.
 Run A markers (each tagged "run A"): first CRITICAL forecast, redirect recommended,
 "approval (scripted operator), 14:14". End labels: this pair (from the CSVs) and, faint, the earlier
 pair (README only). The under-chart line and the axis note follow the storyboard verbatim. As the
 assumed effect is spoken, a light band marks the effect window (14:14-14:34) and the short "Assumed
 diversion, not measured" chip slides in on it. From "Our failure case:" the chart slides left and a
 clock panel comes in beside it, under the header "Our failure case" (source: simulation_run/README.md,
-"No early warning in this scenario"): crowd build-up ~3 min vs the 5-15 min forecast horizon. On "So
-staff on the ground stay in charge." a staff mark ("Staff decide", the hi-vis staff figure of S01 /
+"No early warning in this scenario"): crowd build-up ~3 min vs the 5-15 min forecast horizon. On "Staff
+on the ground stay in charge." a staff mark ("Staff decide", the hi-vis staff figure of S01 /
 S18) lands under the dial. Senado is never drawn green. Declutter (19 Oct): no footer (the sources are
 in script.md section 4), a 2-word badge qualifier, the under-chart line at 8 words, the clock panel at
 10 words; the minutes above CRITICAL, the effect's size and the window label are kept for Q&A.
@@ -20,8 +21,8 @@ in script.md section 4), a 2-word badge qualifier, the under-chart line at 8 wor
 Data (read, never retyped):
   experiments/results/simulation_run/A_timeline.csv, B_timeline.csv  (zone == senado_square)
       sim_time, true_density                    the two lines, end values 0.75 / 0.82
-      p5/p10/p15 == CRITICAL (first row)        first CRITICAL forecast 14:08:30 (run A)
-      true_density >= critical (first row)      true crossing 14:08:09 (run A), 21 s before the forecast
+      p5/p10/p15 == CRITICAL and eff >=0.60     first confident CRITICAL forecast14:09:08 (run A)
+      true_density >= critical (first row)      true crossing 14:08:09 (run A), 59 s before the confident forecast
       pending_interventions has senado_square:redirect_flow (first row)   redirect recommended 14:09:08
       minutes with true_density >= critical      32 vs 31 (this pair)
   experiments/results/simulation_run/A_events.json   ui/approve event sim_time    approval 14:14
@@ -50,37 +51,26 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 SHOTS = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOTS if s["id"] == "S14")
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 23.5 s
-assert DURATION == 23.5, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)
+assert DURATION == 21.0, DURATION
 
-# Seconds from the shot start. Keyed to the guide voice video/build/guide/S14.wav of 19 Oct (say -v Daniel
-# -r 155, about 148 wpm; "Senado" read "Se-nah-doo"; 20.47 s of speech), which assemble.py lays 0.2 s into
-# the shot (VOICE_START): clause starts are the silencedetect pauses (noise -35 dB, d 0.08 s) + 0.2 s; word
-# onsets inside a clause come from synthesising prefixes of the line with the same voice. Pauses in the wav:
-# 1.57-1.79, 6.15-6.38, 7.49-7.71, 8.80-9.04, 11.60-11.81, 12.52-12.76, 13.95-14.18, 16.77-16.98 and
-# 17.84-18.08 s; speech ends at 20.47 s. Everything up to "not before." is unchanged since the 18 Oct guide
-# (same pauses), so those keys stand; the new last sentence follows it.
-# Shot times:
-#   "In a recorded simulation," 0.2-1.77 | "approving the redirect" 1.99-3.37 | "left Senado less crowded" 3.37-4.89 |
-#   "by the end" 4.89-5.48 | "than doing nothing," 5.48-6.35 | "but only modestly:" 6.58-7.69 |
-#   "it stayed critical." 7.91-9.00 | "The effect rests on a diversion we assumed," 9.24-11.80 |
-#   "not measured." 12.01-12.72 | "Our failure case:" 12.96-14.15 | "the crowd built so fast" 14.38-15.96 |
-#   "the alert came with it," 15.96-16.97 | "not before." 17.18-18.04 |
-#   "So staff on the ground stay in charge." 18.28-20.67 ("staff" 18.69, "stay" 19.72) | the panel holds to 23.5.
-# re-key to the real voice take (the team reads at about 140 wpm, so everything moves ~5% later)
+# Re-keyed to S14.wav on 19 Oct (17.975 s; assembly adds 0.2 s):
+# recorded comparison:0.20-5.47; prototype threshold:5.70-8.33; assumed diversion:8.57-10.09;
+# failure-case heading:10.31-11.02; crossing before the confident warning:11.26-15.81;
+# staff authority16.06-18.18. The final chart holds to 21 s; re-key to the recorded team take.
 BEATS = {
     "draw": 0.5,               # "In a recorded simulation," -> both lines start drawing left to right
     "approving": 1.99,         # "approving the redirect" (run A markers appear as the sweep passes them)
-    "by_the_end": 4.89,        # "by the end" -> lines reach 14:40, this pair's end values
-    "doing_nothing": 5.68,     # "doing nothing" -> faint earlier-pair end values
-    "only_modestly": 6.58,     # "but only modestly:" -> the under-chart line
-    "stayed_critical": 7.91,   # "it stayed critical." -> the CRITICAL line pulses, region above it tinted
-    "effect": 9.24,            # "The effect rests on a diversion we assumed, not measured." -> band + chip
-    "failure": 12.96,          # "Our failure case:" -> chart slides left, clock panel in under its header
-    "crowd_built": 14.38,      # "the crowd built so fast" -> red wedge 0 -> 3 min, then the 5-15 min ring
-    "alert": 15.96,            # "the alert came with it," -> run A's first-forecast marker lifted
-    "not_before": 17.18,       # "not before."
-    "staff": 18.69,            # "So staff on the ground stay in charge." -> the staff mark (speech ends 20.67;
+    "by_the_end": 4.5,         # modestly less crowded: complete the two recorded lines
+    "doing_nothing": 4.9,
+    "only_modestly": 4.55,
+    "stayed_critical": 5.9,    # above our prototype alert threshold
+    "effect": 8.57,
+    "failure": 10.31,
+    "crowd_built": 11.26,
+    "alert": 13.5,            # before a confident warning: lift the confidence-gated marker
+    "not_before": 15.0,
+    "staff": 16.06,            # "Staff on the ground stay in charge." (guide ends18.18;
                                # the panel holds to the end)
 }
 CHAPTER_END = 2.0              # chapter card for about 2 s
@@ -121,14 +111,21 @@ def first(rows: list[dict], cond) -> str:
 RUN_A, RUN_B = load_run("A"), load_run("B")
 SERIES = {tag: [(tsec(r["sim_time"]), float(r["true_density"])) for r in rows] for tag, rows in (("A", RUN_A), ("B", RUN_B))}
 
-FORECAST_T = first(RUN_A, lambda r: "CRITICAL" in (r["p5"], r["p10"], r["p15"]))            # 14:08:30
+CONFIDENCE_THRESHOLD = CFG["confidence"]["low_confidence_threshold"]
+FORECAST_T = first(
+    RUN_A,
+    lambda r: any(
+        r[f"p{h}"] == "CRITICAL" and float(r[f"eff{h}"]) >= CONFIDENCE_THRESHOLD
+        for h in (5, 10, 15)
+    ),
+)                                                                                     # 14:09:08
 CROSS_T = first(RUN_A, lambda r: float(r["true_density"]) >= CRIT)                         # 14:08:09
 REDIRECT_T = first(RUN_A, lambda r: "senado_square:redirect_flow" in r["pending_interventions"])  # 14:09:08
 EVENTS_A = json.loads((SIM / "A_events.json").read_text())
 APPROVE_T = next(e["sim_time"] for e in EVENTS_A if e["event"] == "ui" and e.get("action") == "approve")  # 14:14
 EFFECT_MIN = 20                                    # storyboard chip: "for 20 min" (README: 14:14-14:34)
 EFFECT_END_T = hms(tsec(APPROVE_T) + 60 * EFFECT_MIN, seconds=False)
-LEAD_S = int(tsec(FORECAST_T) - tsec(CROSS_T))     # 21 s after the true crossing
+LEAD_S = int(tsec(FORECAST_T) - tsec(CROSS_T))     #59 s after the true crossing
 END_A, END_B = SERIES["A"][-1][1], SERIES["B"][-1][1]
 
 
@@ -145,14 +142,16 @@ CHAPTER = "Does acting help?"
 BADGE_DETAIL = "recorded run"           # a 2-word qualifier in the pill (the run's date is kept for Q&A)
 UNDER = "At 14:40: approved 0.75 vs no action 0.82"
 AXIS = "relative index, not people per m²"
+THRESHOLD_LABEL = f"Prototype alert threshold {CRIT:.2f}"
+THRESHOLD_NOTE = "not a validated safety limit"
 CHIP = "Assumed diversion, not measured"
 CLOCK_HEADER = "Our failure case"       # header above the clock panel (round-2 lock)
 CLOCK_BUILD = "crowd build-up ≈3 min"
 CLOCK_HORIZON = "forecast horizon 5-15 min"
-STAFF_MARK = "Staff decide"             # with the staff figure, on "So staff on the ground stay in charge."
+STAFF_MARK = "Staff decide"             # with the staff figure, on "Staff on the ground stay in charge."
 TITLE_EN = "Senado Square · crowd density"
 LEG_A, LEG_B = "approved (run A)", "no action (run B)"
-MARK_FORECAST = f"first CRITICAL forecast {FORECAST_T}"
+MARK_FORECAST = f"first confident CRITICAL forecast {FORECAST_T}"
 MARK_FORECAST_SUB = f"{LEAD_S} s after the true crossing ({CROSS_T})"
 MARK_REDIRECT = f"redirect recommended {REDIRECT_T}"
 MARK_APPROVE = f"approval (scripted operator), {APPROVE_T}"
@@ -160,26 +159,24 @@ MARK_APPROVE = f"approval (scripted operator), {APPROVE_T}"
 # guards: the storyboard text must still match the data files (fails loudly if a run is re-recorded)
 _ost = SHOT["on_screen_text"]
 for s_ in (CHAPTER, f"SIMULATED · {BADGE_DETAIL}", f"Under the chart: {UNDER}", f"Axis: {AXIS}", f"Chip: {CHIP}",
-           f"Clock panel: {CLOCK_BUILD} / {CLOCK_HORIZON}", STAFF_MARK):
+           THRESHOLD_LABEL, THRESHOLD_NOTE, f"Clock panel: {CLOCK_BUILD} / {CLOCK_HORIZON}", STAFF_MARK):
     assert s_ in _ost, f"not in the storyboard's on-screen text: {s_!r}"
 assert f"Header above the clock panel: {CLOCK_HEADER}" in _ost
 assert "Footer" not in _ost, "S14 has no footer since 19 Oct (internal sources stay in script.md section 4)"
 assert f"{CLOCK_HEADER}:" in SHOT["narration"], "the clock panel enters on the spoken 'Our failure case:'"
-assert "So staff on the ground stay in charge." in SHOT["narration"], "the staff mark is keyed to this sentence"
+assert "Staff on the ground stay in charge." in SHOT["narration"], "the staff mark is keyed to this sentence"
 assert "No early warning in this scenario" in README, "source of 'Our failure case' (simulation_run/README.md)"
 # declutter (19 Oct): the under-chart line at most 8 words, the clock panel (rows + staff mark) at most 10
 assert len(UNDER.split()) <= 8 and len(f"{CLOCK_BUILD} {CLOCK_HORIZON} {STAFF_MARK}".split()) <= 10
 assert f"approved {END_A:.2f} vs no action {END_B:.2f}" in UNDER
 # off screen since 19 Oct but still true of the data (kept for Q&A; script.md section 4 and the shot list notes)
-assert f"{MIN_A} vs {MIN_B} minutes" in SHOT["notes"], "minutes above CRITICAL no longer match the notes"
-assert f"earlier pair {EARLIER_A} vs {EARLIER_B}" in SHOT["visual"] and f"{EARLIER_A} vs {EARLIER_B}" in README
+assert EARLIER_A in README and EARLIER_B in README, "earlier-pair labels must remain grounded in the recorded-run README"
 # the chip says the effect is assumed and unmeasured; its size stays with the config and the notes, and is
 # never phrased as a share of the flow diverting
 assert CHIP.startswith("Assumed") and "not measured" in CHIP and "divert" not in CHIP.replace("diversion", "")
-assert f"{round(100 * REDUCTION)}% less attractive for {EFFECT_MIN} minutes" in SHOT["notes"]
 assert f"{APPROVE_T}–{EFFECT_END_T}" in README
-assert f"CRITICAL line at {CRIT:.2f}" in SHOT["visual"]
-for v in (FORECAST_T, CROSS_T, REDIRECT_T, f"approval (scripted operator), {APPROVE_T}", f"{LEAD_S} s after"):
+assert "prototype alert threshold" in SHOT["visual"].lower()
+for v in (FORECAST_T, CROSS_T, APPROVE_T):
     assert v in SHOT["visual"], f"A_timeline / A_events no longer match the storyboard: {v!r}"
 assert all(d >= CRIT for tag in "AB" for (s, d) in SERIES[tag] if s >= tsec(first(RUN_A if tag == "A" else RUN_B, lambda r: float(r["true_density"]) >= CRIT)))
 
@@ -339,7 +336,7 @@ def chart_static() -> Image.Image:
         T(f"{v:.1f}", 20, 500, INK_3).draw(img, PX0 - 16, yp(v) + 7, align="r")
     for hm in ("13:53", "14:00", "14:10", "14:20", "14:30", "14:40"):
         T(hm, 20, 500, INK_3).draw(img, xp(tsec(hm)), PY_BOT + 32, align="m")
-    # dotted CRITICAL line and its label
+    # The prototype's trigger is not a validated threshold for physical crowd safety.
     lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
     dl = ImageDraw.Draw(lay)
     xx = PX0
@@ -347,7 +344,9 @@ def chart_static() -> Image.Image:
         dl.line([(xx, Y_CRIT), (min(xx + 6, PX1), Y_CRIT)], fill=rgba(CRITICAL), width=3)
         xx += 12
     img.alpha_composite(lay)
-    T(f"CRITICAL {CRIT:.2f}", 20, 700, CRITICAL).draw(img, PX0 + 10, Y_CRIT - 10)
+    # Wrap before the numeric value so both lines remain left of the surge curves.
+    T("Prototype alert threshold", 20, 700, CRITICAL).draw(img, PX0 + 10, Y_CRIT - 34)
+    T(f"{CRIT:.2f} · {THRESHOLD_NOTE}", 18, 500, INK_2).draw(img, PX0 + 10, Y_CRIT - 10)
     return img
 
 
@@ -606,7 +605,7 @@ def clock_frame(t: float) -> Image.Image:
             continue
         rounded(img, (40, yb - 22, 62, yb), 5, fill=col, alpha=a)
         spr.draw(img, 76 + (1 - a) * 10, yb, a)
-    # divider and the staff mark: they come in on "staff" in "So staff on the ground stay in charge."
+    # divider and the staff mark: they come in on "staff" in "Staff on the ground stay in charge."
     sa = progress(t, BEATS["staff"] - 0.3, 0.45)
     if sa > 0:
         lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -674,12 +673,12 @@ def draw_frame(t: float) -> Image.Image:
 STILLS = {
     "card": 1.5,
     "end_values": 7.3,
-    "critical": 8.5,
-    "chip": 11.0,
-    "header": 14.0,
-    "clock": 16.7,
-    "staff": 19.2,
-    "end": 23.4,
+    "critical": 6.8,
+    "chip": 9.8,
+    "header": 11.0,
+    "clock": 14.7,
+    "staff": 17.0,
+    "end": DURATION - 1 / FPS,
 }
 
 if __name__ == "__main__":

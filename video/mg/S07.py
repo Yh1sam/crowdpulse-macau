@@ -1,44 +1,16 @@
-"""Shot S07, "How is ours different?" (0:40.5-1:01.0, 20.5 s), [MEMBER 4] voice-over. Motion graphic.
+"""Shot S07, "How is ours different?" (22 s), team voice-over.
 
-The WHY -> HOW hinge. Credits the police crowd warning system and its planned expansion (on screen),
-states the team's two aims (privacy, no one left behind), then claims only what CrowdPulse proposes, as
-one loop: movable phones that send only numbers, forecasts that say how sure they are, and detours
-checked for stairs that a person must approve. Since 19 Oct the shot ends on ONE clean two-column
-comparison (a judge asked for the difference from the existing system to be explained more directly):
-"Police system (public information)" on the left, "What we propose" on the right. It replaces the dense
-police panel and the "What we propose" keyword line, and the phones / packets / forecast chips on the map.
+Preserves the existing police-system comparison and the two principle chips. The right-hand operating
+loop now names staff placement explicitly: phones count on-device, send numbers to the dashboard,
+forecasts show uncertainty, and an operator reviews each suggested detour. A short phone-detail line
+appears within the existing first station; no extra scene or police capability claim is introduced.
 
-Beats (keyed to the guide voice, see BEATS):
-  "Macau's police already run a crowd warning system here."
-        The 7-zone graph on the right. A soft shaded band lights up over the zone model's whole corridor
-        (Ruins -> Company of Jesus Square -> Rua de S. Paulo -> St. Dominic's -> Senado), labelled
-        "Ruins to Senado", and brightens once on "here". The band is an area only: no camera positions
-        are drawn. It ends flat just past Senado's disc, short of Av. de Almeida Ribeiro. On the left the
-        police column builds on the voice (header, its two items, then the Policy Address line under it)
-        and stays to the end of the shot.
-  "We believe crowd safety shouldn't cost anyone their privacy, or leave anyone behind."
-        The map fades out; two principle chips build on the right, "Privacy" (a crossed-out picture) on
-        "privacy" and "No one left behind" (a wheelchair) on "leave anyone behind". No numbers, no claims:
-        the team's aims, as the voice says.
-  "So we propose one loop: movable phones that send only numbers, forecasts that say how sure they are,
-   and detours checked for stairs that a person must approve."
-        The chips' words fade and their two icons move into the right column, onto its first and third
-        stations; "What we propose" comes in on "propose"; the loop draws on "one loop" (four stations
-        linked downwards, a return arrow back to the top); the items arrive on "movable", "forecasts"
-        (a gauge whose needle settles on "how sure"), "detours" and "a person"; the return arrow lights on
-        "approve" and both columns hold for the last 2.1 s. The two columns are never aligned row by row
-        and carry no ticks or crosses, so nothing reads as a feature the police system lacks.
-
-Data sources (nothing below is retyped):
-- docs/video/shotlist.json, S07: duration, narration and every on-screen line (only the timing labels are
-  stripped), each checked word for word against the S07 storyboard row in docs/video/script.md section 3.
-- shared/zones.json: the 7 zones and 7 streets (style.draw_zone_graph). The band's corridor is the
-  shortest street path from the Ruins to Senado Square.
+Wording comes from docs/video/shotlist.json and is checked against the S07 storyboard row. Zone geometry
+comes from shared/zones.json. BEATS follow the 19 Oct guide and must be re-keyed to the team's real take.
 
 Output: video/build/mg/S07.mp4 and video/build/mg/stills/S07_<beat>.png.
-Run:    .venv/bin/python video/mg/S07.py                          full render + stills
-        .venv/bin/python video/mg/S07.py --stills                 stills only
-        .venv/bin/python video/mg/S07.py --preview 1.5 9.0 --out DIR   single frames for checks
+Run: .venv/bin/python video/mg/S07.py [--stills]
+     .venv/bin/python video/mg/S07.py --preview 1.5 12.0 --out DIR
 """
 from __future__ import annotations
 
@@ -60,14 +32,14 @@ SHOT = "S07"
 # ---------------------------------------------------------------- spec (read, never retyped)
 
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 20.5 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 22 s
 NARRATION = _shot["narration"]
 
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} |"))
 _cols = [c.strip() for c in _row.strip().strip("|").split(" | ")]
 assert len(_cols) == 7 and _cols[3] == NARRATION, "storyboard row S07 and shotlist.json disagree on the narration"
 
-_KEYS = ["Chapter card", "Left column", "Under it", "Band label", "Two principle chips", "Right column", "Footer"]
+_KEYS = ["Chapter card", "Left column", "Under it", "Band label", "Two principle chips", "Right column", "Phone detail", "Footer"]
 _spec = {}
 for _part in _shot["on_screen_text"].split(" | "):
     _m = re.match(r"^([A-Z][a-z ]+?)(?: \(([^)]*)\))?: (.*)$", _part.strip())
@@ -78,28 +50,30 @@ CARD, POLICY, BAND_LABEL, FOOTER = _spec["Chapter card"], _spec["Under it"], _sp
 LEFT_HEAD, *LEFT_ITEMS = _spec["Left column"].split(" · ")
 PRINCIPLES = _spec["Two principle chips"].split(" · ")            # ["Privacy", "No one left behind"]
 RIGHT_HEAD, *RIGHT_ITEMS = _spec["Right column"].split(" · ")
+PHONE_DETAIL = _spec["Phone detail"]
 assert LEFT_HEAD == "Police system (public information)" and RIGHT_HEAD == "What we propose", (LEFT_HEAD, RIGHT_HEAD)
 assert len(LEFT_ITEMS) == 2 and len(RIGHT_ITEMS) == 4 and len(PRINCIPLES) == 2
-for _txt in (CARD, LEFT_HEAD, *LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, RIGHT_HEAD, *RIGHT_ITEMS, FOOTER):
-    assert f'"{_txt}"' in _cols[5], f"not in the storyboard row: {_txt!r}"
+for _txt in (CARD, LEFT_HEAD, *LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, RIGHT_HEAD, *RIGHT_ITEMS, PHONE_DETAIL, FOOTER):
+    assert _txt in _cols[5], f"not in the storyboard row: {_txt!r}"
 assert not any(c.isdigit() for c in "".join(PRINCIPLES + RIGHT_ITEMS)), "the team's aims and proposal carry no numbers"
 # never set the two systems against each other in words (script.md section 6, "Never say or show")
 _all = " ".join([LEFT_HEAD, *LEFT_ITEMS, POLICY, RIGHT_HEAD, *RIGHT_ITEMS]).lower()
 assert not any(w in _all for w in ("better", "replace", "lack", "we'd add", "instead")), _all
 # 19 Oct declutter: labels of at most 6 words, a short source footer that fits one line of the footer slot
-assert all(len(t.split()) <= 6 for t in (*LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, *RIGHT_ITEMS)), "a label is too long"
+assert all(len(t.split()) <= 6 for t in (*LEFT_ITEMS, POLICY, BAND_LABEL, *PRINCIPLES, *RIGHT_ITEMS, PHONE_DETAIL)), "a label is too long"
 assert len(FOOTER.replace(" · ", " ").split()) <= 7 and text_size(FOOTER, 20, 500)[0] <= 1150, FOOTER
 
 # The narration, clause by clause as the guide voice pauses (BEATS are keyed to these).
 CLAUSES = ["Macau's police already run a crowd warning system here.",
-           "We believe crowd safety shouldn't cost anyone their privacy,", "or leave anyone behind.",
-           "So we propose one loop:", "movable phones that send only numbers,", "forecasts that say how sure they are,",
-           "and detours checked for stairs that a person must approve."]
+           "We believe crowd safety shouldn't cost privacy,", "or leave anyone behind.",
+           "Staff place our phones on temporary mounts:", "they count on-device and send only numbers to the dashboard.",
+           "Forecasts show their confidence;", "an operator reviews each suggested detour."]
 assert " ".join(CLAUSES) == NARRATION, "narration changed: re-measure the guide voice and re-key BEATS"
 # each right-column item arrives on the voice's own words for it
-_LOOP_WORDS = [("movable phones", "only numbers"), ("forecasts", "how sure"), ("detours", "stairs"), ("a person", "approve")]
+_LOOP_WORDS = [("Staff place", "phones"), ("on-device", "only numbers"),
+               ("Forecasts", "confidence"), ("operator", "detour")]
 assert all(a in NARRATION and b in NARRATION for a, b in _LOOP_WORDS)
-assert [it.split()[0].lower() for it in RIGHT_ITEMS] == ["movable", "forecasts", "detours", "a"], RIGHT_ITEMS
+assert [it.split()[0].lower() for it in RIGHT_ITEMS] == ["staff-placed", "forecasts", "detours", "a"], RIGHT_ITEMS
 
 # ---------------------------------------------------------------- zone model
 
@@ -134,21 +108,11 @@ assert "jesus_square" in CORRIDOR
 assert BAND_LABEL == "Ruins to Senado"                             # the band's two ends, as the corridor runs
 
 # ---------------------------------------------------------------- timing
-# Guide voice video/build/guide/S07.wav (say -v Daniel -r 155), laid at 0.2 s into the shot.
-# Clause boundaries from `ffmpeg -af silencedetect=noise=-35dB:d=0.08` on the wav, plus 0.2 s:
-#   0.20-3.49   "Macau's police already run a crowd warning system here."
-#   3.73-7.04   "We believe crowd safety shouldn't cost anyone their privacy,"
-#   7.25-8.68   "or leave anyone behind."
-#   8.94-10.32  "So we propose one loop:"
-#   10.59-12.80 "movable phones that send only numbers,"
-#   13.03-15.16 "forecasts that say how sure they are,"
-#   15.36-18.41 "and detours checked for stairs that a person must approve."   (then 2.1 s without voice)
-# Word times inside a clause from the speech end of `say` on the words before them (guide.spoken_text
-# applied), plus 0.2 s: "police" 0.85, "crowd warning system" 1.88, "here" 3.13, "privacy" 6.63,
-# "leave" 7.59, "behind" 8.16, "propose" 9.56, "one loop" 10.0, "movable" 10.59, "phones" 11.13,
-# "only numbers" 12.07, "forecasts" 13.03, "how sure" 14.29, "detours" 15.71, "stairs" 16.82,
-# "a person" 17.32, "approve" 18.04.
-# re-key to the real voice take (the team speaks at about 140 wpm)
+# Guide voice S07.wav re-keyed on 19 Oct (18.811 s; placed at 0.2 s by assembly).
+# Clause boundaries, ffmpeg silencedetect at -35 dB /0.08 s:
+# police:0.20-3.49; belief:3.73-6.42; inclusion:6.64-8.07; staff placement:8.32-11.00;
+# on-device counting and numerical hand-over:11.23-14.27; forecasts:14.53-16.34;
+# operator review:16.56-19.01. Re-key these beats to the team's recorded take.
 BEATS = {
     "card": 0.0,          # chapter card in (out after about 2 s)
     "map": 0.0,           # the zone graph, on the right
@@ -160,18 +124,19 @@ BEATS = {
     "here": 3.13,         # "here": the band brightens once
     "policy": 3.75,       # sentence ends: the 2026 Policy Address line under the column (on screen only)
     "map_out": 4.6,       # "crowd safety": the map and its label fade (gone by 5.1); the column reads alone
-    "privacy": 6.63,      # "privacy": first principle chip
-    "behind": 7.59,       # "leave anyone behind": second principle chip
-    "fold": 9.1,          # "So we propose": the chips' words fade, their icons move into the right column
-    "right": 9.3,         # the right column's card and its four empty stations
-    "right_head": 9.56,   # "propose": "What we propose"
-    "loop": 10.0,         # "one loop": the loop draws (links down, return arrow up)
-    "item_0": 10.65,      # "movable phones": "Movable phones, numbers only"
-    "item_1": 13.05,      # "forecasts": "Forecasts that state their confidence" (gauge icon)
-    "needle": 14.3,       # "how sure": the gauge's needle settles
-    "item_2": 15.75,      # "detours": "Detours checked for stairs"
-    "item_3": 17.35,      # "a person": "A person must approve" (person icon)
-    "close": 18.05,       # "approve": the return arrow lights; the loop is closed
+    "privacy": 5.95,
+    "behind": 6.65,
+    "fold": 8.35,         # staff place phones: principles fold into the operating loop
+    "right": 8.35,
+    "right_head": 8.4,
+    "loop": 8.7,
+    "item_0": 8.8,        # staff placement
+    "phone_detail": 11.25,  # on-device counting, then numbers only to the dashboard
+    "item_1": 14.55,
+    "needle": 15.7,
+    "item_2": 16.6,
+    "item_3": 17.5,
+    "close": 18.6,
 }
 CARD_HOLD = 2.0
 FADE = 0.35
@@ -179,7 +144,7 @@ FADE = 0.35
 for _i, _it in enumerate(RIGHT_ITEMS):
     assert DURATION - BEATS[f"item_{_i}"] >= 0.3 * len(_it.split()) + 0.5, _it
 assert BEATS["map_out"] - BEATS["band_label"] >= 0.3 * len(BAND_LABEL.split()) + 0.5
-assert DURATION - (18.41) >= 2.0, "the finished comparison holds for 2 s after the voice"
+assert DURATION - 19.01 >= 2.0, "the finished comparison holds for 2 s after the guide voice"
 
 # ---------------------------------------------------------------- layout and colours
 
@@ -479,6 +444,7 @@ assert PAD + 10 + text_w(LEFT_HEAD, HEAD_SIZE, 700) <= L_BOX[2] - L_BOX[0] - PAD
 assert all(PAD + 40 + text_w(t, ITEM_SIZE, 500) <= L_BOX[2] - L_BOX[0] - PAD for t in LEFT_ITEMS), LEFT_ITEMS
 assert PAD + 10 + text_w(POLICY, POLICY_SIZE, 600) <= L_BOX[2] - L_BOX[0] - PAD, POLICY
 assert all(R_TEXT_X + text_w(t, ITEM_SIZE, 600) <= R_BOX[2] - PAD for t in RIGHT_ITEMS), RIGHT_ITEMS
+assert R_TEXT_X + text_w(PHONE_DETAIL, 24, 500) <= R_BOX[2] - PAD
 assert all(PRINCIPLE_CX + principle_spr(i).width / 2 <= 1860 for i in range(2))
 
 
@@ -621,7 +587,10 @@ def draw_right(img: Image.Image, t: float) -> None:
             needle_q = 4 + round(10 * progress(t, BEATS["needle"], 0.6)) if kind == "gauge" else 0
             paste(img, icon_spr(kind, needle_q), ST_X, ST_Y[i], clamp(k / 0.5), scale=lerp(0.6, 1.0, ease_out_back(k)), anchor="mm")
         if k > 0:
-            put_text_mid(img, R_TEXT_X + (1 - k) * 14, ST_Y[i], txt, ITEM_SIZE, 600, INK, k)
+            detail = progress(t, BEATS["phone_detail"], 0.4) if i == 0 else 0.0
+            put_text_mid(img, R_TEXT_X + (1 - k) * 14, ST_Y[i] - 12 * detail, txt, ITEM_SIZE, 600, INK, k)
+            if i == 0:
+                put_text_mid(img, R_TEXT_X, ST_Y[i] + 25, PHONE_DETAIL, 24, 500, INK_2, detail)
 
 
 # ---------------------------------------------------------------- frame
@@ -647,14 +616,14 @@ STILLS = {  # beat name -> time (s) for the layout stills
     "here": 3.35,
     "policy": 4.4,
     "belief": 5.8,
-    "privacy": 7.1,
-    "principles": 8.7,
-    "fold": 9.45,
-    "loop": 10.5,
-    "phones": 12.4,
-    "forecasts": 14.8,
-    "detours": 16.9,
-    "approve": 18.5,
+    "privacy": 6.4,
+    "principles": 8.1,
+    "fold": 8.65,
+    "loop": 9.3,
+    "phones": 12.0,
+    "forecasts": 15.8,
+    "detours": 17.1,
+    "approve": 19.5,
     "end": DURATION - 1 / FPS,
 }
 

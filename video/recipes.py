@@ -267,24 +267,20 @@ def s04(dur: float):
 
 
 def s09(dur: float):
-    # From the cut at 5.0 s (video/mg/S09.py DURATION) to the end: C2a's Zone detail Prediction panel at 14:08:28
-    # sim (source 107.0-111.0 s; the panel does not change in that window): +5 min WARNING at 63% confidence,
-    # and the +10 min row with the dashboard's own LOW CONFIDENCE — HUMAN REVIEW REQUIRED badge, zoomed (2.3x) so
-    # that badge reads without a callout. The picture below source y 1068 (a cut-off 'density' line) is navy, so
-    # the caption band sits on navy. On "a person must review it" (7.05 s) a plain highlight frames that badge.
-    # 19 Oct declutter: the "Decided / expired" strip and its callouts ("Stronger recommendations replace weaker
-    # pending ones", a duplicate LOW CONFIDENCE pill) are gone: neither is spoken, and the strip showed S04's
-    # approval before S04 makes it.
-    panel = (280, 790, 830)  # source x 280-1110 (the Prediction panel, left of Sensor reliability), y 790-1257 on the extended canvas
+    # Six seconds of the adjusted-score graphic, then four recorded seconds of
+    # the real review badge. Assembly holds the last frame for the final second.
+    # No probability equation or added accuracy claim is placed over the capture.
+    panel = (280, 790, 830)
     tail = segments("S09_tail", CLIPS / "C2a.mp4", [(107.0, 111.0, panel, panel, 1068)])
     base = concat_clips("S09", [MG / "S09_mg.mp4", tail])
-    spec("S09", "Dashboard (from the cut): Badge (top-right): LIVE SOFTWARE · dashboard",
+    spec("S09", "Adjusted confidence score",
+         "Dashboard (from the cut): Badge (top-right): LIVE SOFTWARE · dashboard",
          "a highlight box on the dashboard's own LOW CONFIDENCE — HUMAN REVIEW REQUIRED badge")
-    x0, y0 = to_out(panel, 362, 1029); x1, y1 = to_out(panel, 846, 1062)  # the badge in source pixels
-    assert y1 + 12 < to_out(panel, 0, 1068)[1], (y1, "the highlight ends above the navy cut")
+    x0, y0 = to_out(panel, 362, 1029); x1, y1 = to_out(panel, 846, 1062)
+    assert y1 + 12 < to_out(panel, 0, 1068)[1]
     ov = [
-        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 5.0, dur),   # from the cut
-        (png("S09_hl", lambda img: highlight(img, (x0 - 12, y0 - 12, x1 + 12, y1 + 12))), 7.0, dur),  # "a person must review it"
+        (png("S09_live", lambda img: badge(img, "LIVE SOFTWARE", "dashboard")), 6.0, dur),
+        (png("S09_hl", lambda img: highlight(img, (x0 - 12, y0 - 12, x1 + 12, y1 + 12))), 6.0, dur),
     ]
     return ["-i", str(base)], ov, [], ""
 
@@ -314,74 +310,57 @@ def s12(dur: float):
     return ["-i", str(base)], ov, [], ""
 
 
-S15_HEADER, S15_HEDGE = "with vs without the closure", "averages over arrivals in both plans"
+S15_HEADER = "Full-closure stress test"
 S15_DOTS = "24 of 40: no step-free route either way"
+S15_ACTION = "Staff must inspect the route"
 
 
 def s15_panel(img, stage: int) -> None:
-    """S15 overlay on a solid panel at the left (SketchFuture's map and cards sit behind it), one idea at a time.
-    Stage 0 (the walkers / wheelchair users sentence): the header, the three counters and a one-line hedge that
-    the averages cover only those who arrive in both plans. Stages 1-2 ('And 24 of our 40 …'): the counters give
-    way to the 40-dot grid of simulated wheelchair users: at stage 1 all 40 dots are wheelchair purple, at stage
-    2 the 24 with no step-free route in either plan turn grey (shotlist S15: 'a 40-dot grid in which 24 dots turn
-    grey'; the 16 who arrive in both plans stay purple) and its label appears. Numbers: sketchfuture/VERIFICATION.md
-    (#721: wheelchair 16/40 arrive in both plans, 24 have no step-free route in either; walkers 40/40, strollers
-    28/40; those counts left the screen on 19 Oct and are kept for Q&A), matching the captured plan's walker and
-    wheelchair cards (40/40, 16/40, '24 人無可用路線')."""
+    """One idea at a time: test context, then observed model limitation, then staff action.
+
+    Run #721 has sixteen of forty wheelchair participants arrive in both plans.
+    The other twenty-four have no modelled step-free route in either plan. This
+    does not validate the recommended partial redirect or a real accessible route.
+    """
     purple, grey = (118, 88, 181), (98, 113, 138)
     if stage == 0:
-        rounded(img, (40, 170, 900, 520), 22, fill=(11, 18, 32))  # solid: SketchFuture's cards sit behind it
-        draw_text(img, (76, 196), S15_HEADER, 26, 600, INK_2)
-        for i, (who, val, col) in enumerate([("walkers", "+17 s", (36, 124, 118)), ("wheelchair users", "+30 s", purple), ("stroller users", "+21 s", (206, 103, 68))]):
-            y = 250 + i * 70
-            rounded(img, (76, y, 96, y + 40), 6, fill=col)
-            draw_text(img, (114, y + 2), who, 30, 600, INK)
-            draw_text(img, (860, y + 2), val, 34, 800, INK, anchor="ra")
-        draw_text(img, (76, 466), S15_HEDGE, 22, 500, INK_2)
+        rounded(img, (40, 170, 900, 310), 22, fill=NAVY)
+        draw_text(img, (76, 212), S15_HEADER, 38, 700, INK)
         return
-    rounded(img, (40, 170, 900, 412), 22, fill=(11, 18, 32))
+    rounded(img, (40, 170, 900, 490 if stage == 3 else 412), 22, fill=NAVY)
     d = ImageDraw.Draw(img)
     for k in range(40):
         cx, cy = 96 + (k % 10) * 46, 222 + (k // 10) * 46
-        d.ellipse((cx - 16, cy - 16, cx + 16, cy + 16), fill=grey if stage == 2 and k >= 16 else purple)
-    if stage == 2:
-        # the label in three lines, broken after "24 of 40:" (a width wrap would end line 1 on "no")
+        d.ellipse((cx - 16, cy - 16, cx + 16, cy + 16), fill=grey if stage >= 2 and k >= 16 else purple)
+    if stage >= 2:
         head, rest = S15_DOTS.split(": ")
         draw_text(img, (580, 196), head + ":", 40, 800, INK)
-        for i, ln in enumerate(("no step-free route", "either way")):
-            assert ln in rest and text_size(ln, 28, 700)[0] <= 880 - 580, ln  # inside the panel (x 40-900)
-            draw_text(img, (580, 260 + i * 38), ln, 28, 700, INK)
+        for i, line in enumerate(("no step-free route", "either way")):
+            assert line in rest and text_size(line, 28, 700)[0] <= 300
+            draw_text(img, (580, 260 + i * 38), line, 28, 700, INK)
+    if stage == 3:
+        draw_text(img, (76, 430), S15_ACTION, 30, 600, INK)
 
 
 def s15(dur: float):
-    """C2c (13 Oct capture): the St. Dominic's card is still until 4.2 s (TEST IN SKETCHFUTURE clicked
-    within it), a blank page at 4.23 s, SketchFuture loaded and compared by 5.1 s, then still. Beats keyed to
-    the guide voice (from 0.2 s): 'walkers lose seventeen seconds' 6.2 s, 'And 24 of our 40' 10.1 s.
-    The picture is letterboxed to 1760x990 on navy, so the footer and the docked evidence legend (S10-S16)
-    sit on the navy strip below it, and SketchFuture's own map legend and OpenStreetMap credit, at the
-    picture's bottom edge, stay uncovered. On screen (19 Oct declutter): the badge, the counters (header,
-    three rows, a six-word hedge) only during their sentence, then the dot grid with one eight-word label; the
-    map credit only while SketchFuture's map is on screen; no run number or file path."""
+    # Retain the original software capture; name its purpose explicitly. Its
+    # travel-time values remain visible in the UI, without added English callouts.
     c2c = CLIPS / "C2c.mp4"
-    spec("S15", "MODEL CHECK · synthetic cohort", f"Counter header: {S15_HEADER} |",
-         "walkers +17 s · wheelchair users +30 s · stroller users +21 s", f"Small, under the counters: {S15_HEDGE} |",
-         f"{S15_DOTS} |", "Footer: Map © OpenStreetMap contributors")
-    assert len(S15_HEDGE.split()) <= 6 and len(S15_DOTS.split()) <= 8
-    # card: y 62-765, between the card above and this card's 'Decided / expired' list, which in this 13 Oct
-    # capture still shows the pre-'Deciding as' actor 'by operator' (the backend now refuses that name).
+    spec("S15", "MODEL CHECK · synthetic cohort", f"Context: {S15_HEADER}",
+         S15_DOTS, S15_ACTION, "Footer: Map © OpenStreetMap contributors")
     card, results = (300, 62, 1250), (1000, 330, 920)
     base = segments("S15", c2c, [
-        (1.8, 4.2, card, card),        # 0.0-2.4: St. Dominic's card; TEST IN SKETCHFUTURE clicked
-        (4.9, 7.0, FULL, FULL),        # 2.4-4.5: SketchFuture opens the plan and compares
-        (7.0, 13.0, FULL, results),    # 4.5-10.5: walker and wheelchair results
-        (13.0, 18.8, results, FULL),   # 10.5-16.3: back out to the whole plan (held to the end)
+        (1.8, 4.2, card, card),
+        (4.9, 7.0, FULL, FULL),
+        (7.0, 13.0, FULL, results),
+        (13.0, 18.8, results, FULL),
     ])
     ov = [
         (png("S15_badge", lambda img: badge(img, "MODEL CHECK", "synthetic cohort")), 0.0, dur),
-        (png("S15_counters", lambda img: s15_panel(img, 0)), 6.0, 9.9),
-        (png("S15_dots40", lambda img: s15_panel(img, 1)), 9.9, 10.6),  # 'And 24 of our 40': the 40 dots, then
-        (png("S15_dots", lambda img: s15_panel(img, 2)), 10.6, dur),     # 24 of them turn grey
-        # from the cut to SketchFuture's OpenStreetMap map (2.4 s) to the end
+        (png("S15_context", lambda img: s15_panel(img, 0)), 0.4, 4.0),
+        (png("S15_dots40", lambda img: s15_panel(img, 1)), 4.0, 4.6),
+        (png("S15_dots", lambda img: s15_panel(img, 2)), 4.6, 10.2),
+        (png("S15_action", lambda img: s15_panel(img, 3)), 10.2, dur),
         (png("S15_footer", lambda img: solid_footer(img, "Map © OpenStreetMap contributors")), 2.4, dur),
         (png("S15_legend", legend_docked), 0.0, dur),
     ]

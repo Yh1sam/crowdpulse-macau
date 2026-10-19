@@ -1,43 +1,13 @@
-"""Shot S10 (1:45.0-2:09.0, 24.0 s): "Does it work? Every result is labelled."
+"""S10 · Held-out simulation: +15 min macro-F1 and critical-minutes recall.
 
-Storyboard: docs/video/script.md section 3, row S10; claims table section 4, rows S10; section 6
-("motion_graphic" shot rules, "On-screen text load"); shot list docs/video/shotlist.json (id S10).
+The evidence legend docks before the two metric cards. The macro-F1 panel introduces the
+model and persistence baseline, then slides left while the 91% / 79% recall card arrives.
+Both cards and the readable accuracy comparison hold to the cut. All results remain under
+SIMULATED; confidence-gating figures stay in the supporting evidence rather than this shot.
 
-0-1.5 s   the four evidence badges appear centre-screen, then shrink and dock as the bottom-right
-          legend strip (style.legend_strip), where they stay for the rest of the shot. The voice
-          starts at 0.8 s, over the docking legend (VOICE_START below; video/assemble.py must use it).
-          The row drops to the strip's height by 1.4 s and slides right into place, beside the
-          first caption box, never behind it (see DOCK_DROP).
-then      the +15 min macro-F1 pair, model vs "no change", at 3 decimals, no gap label (the +5 and
-          +10 min pairs left the picture in the 19 Oct declutter: only the +15 pair is spoken).
-9.3-16.0  the one-line accuracy comparison, in a pill at the foot of the F1 panel (under the bars,
-          so the panel and its accuracy line read as one element; its "96.4% vs 94.3%" takes its
-          order from the named bars, so it leaves with them).
-11.0 s    "and caught": the panel slides left and the critical-minutes card comes in on the right,
-          "91%" landing on "ninety-one", "79%" on "seventy-nine" (back since the second review of
-          19 Oct, with its clause: the easiest number for a non-technical judge).
-15.6 s    "When they flagged": the F1 panel fades out, the critical-minutes card slides into its
-          place and the flagged-vs-rest card follows it in on the right (in place by 16.8 s).
-23.3-24.0 the settled cards hold after the last word ("the rest: 97%" is fully in from 21.8 s).
-Badge SIMULATED pinned. No footer (no outside source: the data is the team's own simulation).
-At most two cards beside the chapter card, the badge and the caption, plus the accuracy line while
-the F1 panel shows (DECLUTTER, 19 Oct, and the second review). Off screen, kept for Q&A (script.md
-5F): recall at 3 decimals, the +5 / +10 min pairs, the 9 / 2 / 3-day split, flagged share, other
-horizons' gating, the stress day and the +15 min gain interval.
-
-Data (read, never retyped):
-  ml/models/metrics.json
-    per_horizon.h15.test.f1_macro                              model macro-F1
-    per_horizon.h15.persistence_baseline.test.f1_macro         "no change" macro-F1
-    per_horizon.h15.test.per_class.CRITICAL.recall             91%
-    per_horizon.h15.persistence_baseline.test.per_class.CRITICAL.recall   79%
-    per_horizon.h15.confidence_gating.accuracy_flagged / accuracy_confident   56% / 97%
-    per_horizon.h15.test.accuracy                              accuracy line: model 96.4%
-    per_horizon.h15.persistence_baseline.test.accuracy         accuracy line: "no change" 94.3%
-    per_horizon.h15.test.support.SAFE / test.n                 accuracy line: always SAFE 84.6%
-  docs/video/shotlist.json: duration, narration and every on-screen line (asserted below)
-
-Run: .venv/bin/python video/mg/S10.py   -> video/build/mg/S10.mp4 and stills in video/build/mg/stills/
+Numbers come from ml/models/metrics.json. Narration, duration and on-screen text come from
+docs/video/shotlist.json. Beats retain the first sentence's guide timing; re-key to real voices.
+Run: .venv/bin/python video/mg/S10.py [--stills]
 """
 from __future__ import annotations
 
@@ -56,21 +26,10 @@ from PIL import Image, ImageChops, ImageDraw  # noqa: E402
 
 SHOT = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOT if s["id"] == "S10")
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 24.0 s
-assert DURATION == 24.0, DURATION                      # 20.5 -> 24.0 s in the second review (19 Oct)
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)
 
-# Seconds from the shot start, keyed to the guide voice video/build/guide/S10.wav (say -v Daniel
-# -r 155, 22.50 s) laid from VOICE_START: word times measured from its pauses (silencedetect) and
-# prefix syntheses, 19 Oct (the second review restored the 18 Oct narration, and the guide pauses
-# end at 2.40 / 6.42 / 10.21 / 13.17 / 14.85 / 17.26 / 20.53 / 21.53 s into the file, as then).
-# Shot times: "On simulated days it had never seen," 0.8-3.0 | "our fifteen-minute forecasts scored
-# an F one of point eight six five," 3.2-7.0 | "against point seven nine five for assuming nothing
-# changes," 7.2-10.8 | "and caught ninety-one percent of critical minutes," 11.0-13.75 ("caught"
-# 11.42-11.68, "ninety-one" 11.68-12.31) | "against seventy-nine." 13.97-15.44 ("seventy-nine" 14.58)
-# | "When they flagged themselves as uncertain," 15.65-17.83 ("flagged" about 16.15-16.50) | "they
-# were right only about fifty-six percent of the time;" 18.06-21.12 ("right" 18.58, "fifty-six"
-# 19.36) | "otherwise," 21.33-22.13 | "ninety-seven." 22.33-23.30 (the voice ends at 23.30, the shot
-# holds to 24.0). Re-key to the real take.
+# The shortened narration keeps the original first sentence, so its word-aligned beats stay:
+# +15 min F1 values at 5.85 / 7.85 s; critical recall at 11.7 / 14.6 s. Both cards then hold.
 VOICE_START = 0.8              # script.md section 6 (S10 voice from 0.8 s); assemble.py VOICE_START["S10"]
 BEATS = {
     "legend_in": 0.0,          # four badges appear centre-screen (no voice yet)
@@ -84,14 +43,9 @@ BEATS = {
     "and_catch": 11.0,         # "and caught" (11.0-11.68) -> the panel slides left (from 10.7), the critical-minutes card in
     "ninety_one": 11.7,        # "ninety-one percent of critical minutes" (11.68) -> "91%" lands
     "seventy_nine": 14.6,      # "against seventy-nine" ("seventy-nine" 14.58-15.44) -> "79%" lands
-    "f1_out": 15.6,            # "When they flagged" ("When" 15.65) -> the F1 panel, with its accuracy line, fades out
-    "shift": 15.9,             # ... the critical-minutes card slides into its place, the flagged card follows in
-    "flagged": 16.3,           # "flagged" (about 16.15-16.50): the flagged-vs-rest card is half-way in
-    "right_only": 18.55,       # "they were right only about" ("right" 18.58) -> flagged bar grows, "right 56%" lands
-    "fifty_six": 19.4,         # "fifty-six percent of the time" (19.36)
-    "the_rest": 21.35,         # "otherwise, ninety-seven" ("otherwise" 21.33; "97" 22.33-23.30; voice ends 23.30)
 }
 CHAPTER_END = 2.0              # chapter card shown for about 2 s
+assert DURATION >= BEATS["seventy_nine"] + 1.5, "allow time to read the final recall value"
 
 # ---------- data ----------
 
@@ -102,9 +56,6 @@ F1_MODEL = H15["test"]["f1_macro"]                               # 0.865
 F1_BASE = H15["persistence_baseline"]["test"]["f1_macro"]        # 0.795
 CRIT_MODEL = round(100 * H15["test"]["per_class"]["CRITICAL"]["recall"])                         # 91
 CRIT_BASE = round(100 * H15["persistence_baseline"]["test"]["per_class"]["CRITICAL"]["recall"])  # 79
-GATE = H15["confidence_gating"]
-ACC_FLAGGED = round(100 * GATE["accuracy_flagged"])
-ACC_REST = round(100 * GATE["accuracy_confident"])
 # accuracy line (round-2 lock): +15 min test accuracy, "no change" accuracy, and the always-SAFE
 # accuracy worked out from the test support (SAFE 14,505 of 17,152; not a stored metric)
 _test, _base = H15["test"], H15["persistence_baseline"]["test"]
@@ -116,7 +67,7 @@ ACC_SAFE = 100 * _test["support"]["SAFE"] / _test["n"]           # 84.6
 # guard: the spoken narration must match the data file (fails loudly if metrics.json changes)
 _spoken = SHOT["narration"]
 for v in (f"{F1_MODEL:.3f}", f"against {F1_BASE:.3f}", f"caught {CRIT_MODEL} percent of critical minutes",
-          f"against {CRIT_BASE}.", f"{ACC_FLAGGED} percent", f"otherwise, {ACC_REST}"):
+          f"against {CRIT_BASE}."):
     assert v in _spoken, f"metrics.json no longer matches the narration: {v!r}"
 
 # ---------- on-screen text (storyboard wording, asserted against the shot list) ----------
@@ -125,21 +76,18 @@ CHAPTER = "Does it work? Every result is labelled."
 AXIS = "macro-F1: SAFE, WARNING, CRITICAL weighted equally"   # the axis definition, at most 6 words
 BAR_NAMES = ("model", "no change")                           # inside the bars (direct labels, no legend)
 H_TAG = "+15 min"
+SCOPE = "Held-out simulated days"
 CRIT_LINE = f"of critical minutes caught ({H_TAG})"          # under the big numbers, at most 6 words
-FLAG_LABEL, FLAG_VALUE = "flagged as uncertain:", f"right {ACC_FLAGGED}%"
-REST_LABEL, REST_VALUE = "the rest:", f"{ACC_REST}%"
 ACC_HEAD = "Accuracy:"
 ACC_BODY = f"{ACC_MODEL:.1f}% vs {ACC_BASE:.1f}% · always SAFE {ACC_SAFE:.1f}%"
 assert len(AXIS.split()) <= 6 and len(CRIT_LINE.split()) <= 6, (AXIS, CRIT_LINE)
 
 _ost = SHOT["on_screen_text"]
 for v in (f"Chapter card (top-left): {CHAPTER}", "Badge (top-right): SIMULATED (pinned)", f"Axis: {AXIS}",
-          f"Bars ({H_TAG}): {BAR_NAMES[0]} / {BAR_NAMES[1]}",
-          f"Accuracy line (from about {BEATS['accuracy_line']} s to about {BEATS['f1_out']} s, under the bars): "
-          f"{ACC_HEAD} {ACC_BODY}",
-          f"Big numbers (from about {BEATS['and_catch']} s): {CRIT_MODEL}% vs {CRIT_BASE}% {CRIT_LINE}",
-          f"Bars (from about {BEATS['flagged']} s): {FLAG_LABEL} {FLAG_VALUE} · {REST_LABEL} {REST_VALUE}"):
+          f"Bars ({H_TAG}): {BAR_NAMES[0]} / {BAR_NAMES[1]}", SCOPE, f"{ACC_HEAD} {ACC_BODY}",
+          f"Big numbers (from about {BEATS['and_catch']} s): {CRIT_MODEL}% vs {CRIT_BASE}% {CRIT_LINE}"):
     assert v in _ost, f"shotlist.json on_screen_text no longer matches: {v!r}"
+assert "flagged as uncertain" not in _ost and "When they flagged" not in _spoken
 assert "Footer" not in _ost, "S10 has no footer (19 Oct declutter)"
 
 MODEL_C = CYAN
@@ -151,8 +99,8 @@ CH_W, CH_H = 860, 630             # macro-F1 panel (with the accuracy line at it
 CH_Y = 160
 CH_X_CENTRE = (W - CH_W) // 2     # 530 while it is the only element
 CH_X_LEFT = 60                    # after "and caught"
-COL_X0, COL_X1 = 980, 1860        # the right card slot (critical minutes, then flagged vs the rest), the panel's height
-CARD_W = COL_X1 - COL_X0          # 880; the left slot, after the panel leaves, is x 60-940
+COL_X0, COL_X1 = 980, 1860        # the critical-minutes card, beside the F1 panel
+CARD_W = COL_X1 - COL_X0          # 880
 CB_Y0, CB_Y1 = CH_Y, CH_Y + CH_H
 
 # plot geometry inside the panel (local coordinates)
@@ -348,6 +296,7 @@ def chart_static() -> Image.Image:
     img = Image.new("RGBA", (CH_W, CH_H), (0, 0, 0, 0))
     rounded(img, (0, 0, CH_W - 1, CH_H - 1), 22, fill=NAVY_2)
     draw_text(img, (40, 34), AXIS, 26, 600, INK)
+    draw_text(img, (40, 78), SCOPE, 24, 500, INK_2)
     # y-axis: 0, 0.5 and 1.0 only (the two values carry the reading)
     for v in (0.0, 0.5, 1.0):
         draw_text(img, (P_X0 - 22, ypos(v)), "0" if v == 0 else f"{v:.1f}", 20, 500, INK_3, anchor="rm")
@@ -446,73 +395,24 @@ def card_a(t: float) -> Image.Image:
     return img
 
 
-# ---------- 4. flagged vs the rest card ----------
-
-TRACK_X0, TRACK_X1 = 48, CARD_W - 48
-ROWS = [  # (label, value text, share 0-1, label baseline y, solid fill?)
-    (FLAG_LABEL, FLAG_VALUE, GATE["accuracy_flagged"], 205, False),
-    (REST_LABEL, REST_VALUE, GATE["accuracy_confident"], 375, True),
-]
-ROW_BEATS = [BEATS["right_only"] - 0.1, BEATS["the_rest"] - 0.5]   # value text fades in 0.55 s after each
-TRACK_H = 64
-assert ROW_BEATS[1] + 0.55 + 0.4 + 0.3 * 3 + 0.5 <= DURATION, "the last value cannot be read before the cut"
-
-
-def card_b(t: float) -> Image.Image:
-    w_, h_ = CARD_W, CB_Y1 - CB_Y0
-    img = Image.new("RGBA", (w_, h_), (0, 0, 0, 0))
-    rounded(img, (0, 0, w_ - 1, h_ - 1), 22, fill=NAVY_2)
-    lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(lay)
-    d_img = ImageDraw.Draw(img)
-    for (label, value, share, y, solid), beat in zip(ROWS, ROW_BEATS):
-        draw_text(img, (TRACK_X0, y), label, 34, 600, INK, anchor="ls")
-        g = progress(t, beat, 1.0)
-        by0, by1 = y + 22, y + 22 + TRACK_H
-        d_img.rounded_rectangle((TRACK_X0, by0, TRACK_X1, by1), 14, fill=NAVY_3)
-        if g > 0:
-            xe = TRACK_X0 + (TRACK_X1 - TRACK_X0) * share * g
-            r = int(min(14, (xe - TRACK_X0) / 2))       # grows from nothing, no pop
-            if xe - TRACK_X0 >= 2:
-                if solid:
-                    d.rounded_rectangle((TRACK_X0, by0, xe, by1), r, fill=rgba(MODEL_C, 1))
-                else:
-                    d.rounded_rectangle((TRACK_X0, by0, xe, by1), r, fill=rgba(MODEL_C, 0.32),
-                                        outline=rgba(MODEL_C, 1), width=min(3, max(1, r)))
-        lx = TRACK_X0 + text_size(label + " ", 34, 600)[0] + 8
-        draw_text(img, (lx, y), value, 34, 700, MODEL_C, progress(t, beat + 0.55, 0.4), anchor="ls")
-    img.alpha_composite(lay)
-    return img
-
-
 # ---------- frame ----------
 
 BASE = canvas()
-SHIFT_DUR = 0.9        # the cards move one slot left on "When they flagged"
-F1_FADE = 0.4          # the F1 panel is gone before the critical-minutes card reaches its slot (x < 940)
-assert progress(BEATS["f1_out"] + F1_FADE, BEATS["shift"], SHIFT_DUR) < 0.05, "the cards would overlap the fading panel"
-
 
 def draw_frame(t: float) -> Image.Image:
     img = BASE.copy()
 
-    # macro-F1 panel (with its accuracy line): fades in, slides left on "and caught", fades out on "When they flagged"
-    a_ch = progress(t, BEATS["chart_in"], 0.55) * (1 - progress(t, BEATS["f1_out"], F1_FADE))
+    # The two metric cards stay together after the recall values land.
+    a_ch = progress(t, BEATS["chart_in"], 0.55)
     if a_ch > 0:
         slide = progress(t, BEATS["and_catch"] - 0.3, 0.8)
-        x = lerp(CH_X_CENTRE, CH_X_LEFT, slide) - 40 * progress(t, BEATS["f1_out"], F1_FADE)   # drifts off left
-        y = CH_Y - (1 - progress(t, BEATS["chart_in"], 0.55)) * 20     # settles from above: never dips into the lower-third area
+        x = lerp(CH_X_CENTRE, CH_X_LEFT, slide)
+        y = CH_Y - (1 - a_ch) * 20
         paste(img, chart_frame(t), (x, y), a_ch)
 
-    # the two cards: the critical-minutes card enters the right slot as the panel finishes its slide, then
-    # moves to the left slot on "When they flagged" with the flagged-vs-rest card following it in
-    shift = progress(t, BEATS["shift"], SHIFT_DUR)
-    a_a = progress(t, BEATS["and_catch"] + 0.2, 0.6)
-    if a_a > 0:
-        paste(img, card_a(t), (lerp(COL_X0, CH_X_LEFT, shift) + (1 - a_a) * 50, CB_Y0), a_a)
-    a_b = progress(t, BEATS["shift"], 0.4)
-    if a_b > 0:
-        paste(img, card_b(t), (lerp(COL_X0 + (COL_X0 - CH_X_LEFT), COL_X0, shift), CB_Y0), a_b)
+    a_recall = progress(t, BEATS["and_catch"] + 0.2, 0.6)
+    if a_recall > 0:
+        paste(img, card_a(t), (COL_X0 + (1 - a_recall) * 50, CB_Y0), a_recall)
 
     # overlay slots (no footer: no outside source in this shot)
     chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
@@ -527,9 +427,7 @@ STILLS = {
     "f1_bars": 10.4,         # both +15 values emphasised, accuracy line in (before the slide); also
                              # the source of video/team-kit/prop_M2_F1_chart.png, [MEMBER 2]'s S05 prop
     "critical_minutes": 15.3,  # "79%" landed on "seventy-nine"; the panel and its accuracy line still up
-    "shift": 16.35,          # "flagged": the panel gone, the cards moving one slot left
-    "flagged": 19.9,         # "right 56%" landed on "fifty-six"
-    "flagged_vs_rest": 23.95,  # the settled end frame, after the 0.7 s end hold
+    "hold": DURATION - 0.05,  # F1, accuracy and recall readable together at the cut
 }
 
 if __name__ == "__main__":

@@ -1,53 +1,14 @@
-"""Shot S13 (2:26.0-2:47.5, 21.5 s): 2,000 annotated mall frames, a steady under-count, and a
-post-hoc calibration shown as a lead, not proof, beside a guess that uses no detector.
+"""S13 · One-camera counting benchmark and post-hoc calibration, shown as a lead, not proof.
 
-Storyboard: docs/video/script.md, section 3 row S13, section 4 claims row S13, section 6 ("Global
-look and tools", "motion_graphic", "figure" S13, "On-screen text load"). Shot list:
-docs/video/shotlist.json (id S13). Badge: REAL DATA · Mall benchmark.
+The detector's systematic under-count is shown on the existing scatter plot. Twenty labelled
+frames calibrate that one camera: held-out count error 13.4 → 3.3 people per frame, beside a
+no-detector guess of 4.8 on the same scale. Numeric endpoints are static; only the error bar
+interpolates, so an in-between animation frame cannot be mistaken for another experiment.
+"One camera · not yet in the app" stays visible throughout the calibration panel.
 
-Layout (no chapter card: the "Does it work?" card belongs to S10; no lower-third: [MEMBER 1]'s
-is in S02):
-  right   the repo chart mall_count_scatter.png at 1:1 on a light card. The orange Apple cloud is
-          dimmed with a Pillow mask (and its legend row faded), so the chart's own legend names
-          the one bright cloud ("YOLO11n CoreML (app default)"); the dashed perfect-count line is
-          traced and labelled; an arrow marks the gap between the line and the cloud (the
-          under-count), on "steadily under-counted". Dimmed further in stage 2.
-  left    stage 1: one card at a time, each the number being spoken: "2,000 annotated frames",
-          then "93% of boxes are people" (on "ninety-three percent").
-          stage 2 (from "With twenty labelled frames"): the "20 labelled frames" tag, the counter
-          13.4 -> 3.3 people per frame over an error bar, the no-detector guess as a second bar on
-          the same scale with its label "No-detector guess: 4.8" (30 px, larger than the 28 px
-          limits line; from the countdown to the end), and the limits line "One camera · not yet
-          in the app" (on "each camera would need calibrating on site", to the end).
-  Nothing is drawn in the caption band (y 900-995).
-Declutter (19 Oct): besides the badge, the caption and the citation footer, at most two text
-elements at once (the chart and one number card; then the counter with its guess, and at the end
-the limits line). The 59% count ratio, the near / middle / far recall bars (78 / 64 / 42%: they
-could not be read in the 2.8 s left before stage 2), the "YOLO11n, the app default" pill (the
-chart's legend says it), "each dot = one frame", the "true ≈ a × detected + b" schematic, "post-hoc"
-and "held-out frames 801-2000" left the picture; they stay in script.md (section 4, 5F).
-
-Never any Mall imagery: only the chart is used (it contains no dataset frame).
-
-Data (read at render time, never retyped):
-  experiments/results/mall/mall_count_scatter.png       the chart (data-to-pixel mapping measured
-                                                         from its own gridlines)
-  experiments/results/mall/metrics.json
-    meta.frames                                          2,000 annotated frames
-    meta.dataset                                         the citation (Chen ..., 2012)
-    results.yolo11n.precision                            93% of boxes are people
-    results.yolo11n.post_hoc_linear_calibration
-      .held_out_frames                                   801-2000 (checked against the guess's)
-      .raw_mae_held_out                                  13.4 people per frame
-      ."20 frames spread over 1-800".mae_held_out        3.3 people per frame (20 labelled frames)
-  experiments/results/uncertainty/metrics.json (summary.md, section 6)
-    mall.detector_free.mean_of_20_calibration_frames.mae_held_out    4.8 (4.79): always say 30.05
-  docs/video/shotlist.json                               duration, narration and the verbatim
-                                                         on-screen lines (badge, cards, guess,
-                                                         limits line, footer)
-
-Run: .venv/bin/python video/mg/S13.py            -> video/build/mg/S13.mp4 + stills
-     .venv/bin/python video/mg/S13.py --stills   (stills only, for checking the layout)
+Numbers and chart come from experiments/results/mall/ and experiments/results/uncertainty/.
+Narration, duration and on-screen text come from docs/video/shotlist.json. Never show Mall imagery.
+Run: .venv/bin/python video/mg/S13.py [--stills]
 """
 from __future__ import annotations
 
@@ -68,38 +29,30 @@ from style import ROOT  # noqa: E402
 
 SHOT_ID = "S13"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT_ID)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)   # 21.5 s
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)
 
-# Seconds from the shot start, keyed to the guide voice video/build/guide/S13.wav (say -v Daniel
-# -r 155, 19.32 s) laid from VOICE_START: word times from its pauses (silencedetect: 2.40-2.62,
-# 4.49-4.71, 7.54-7.78, 9.48-9.70, 11.52-11.80, 14.97-15.21, 15.61-15.82, 16.62-16.84 s into the
-# file) and prefix syntheses, 19 Oct (up to "people per frame." the same audio as on 18 Oct).
-# Shot times: "On two thousand annotated mall frames," 0.2-2.6 ("two thousand" 0.6) | "the detector
-# steadily under-counted," 2.8-4.7 ("steadily" 3.6, "under-counted" 4.0) | "yet ninety-three
-# percent of its boxes were people." 4.9-7.7 ("ninety-three" 5.4) | "With twenty labelled frames,"
-# 8.0-9.7 ("twenty" 8.3, "labelled frames" 8.8) | "we calibrated that one camera," 9.9-11.7 |
-# "cutting error from thirteen to about three people per frame." 12.0-15.2 ("thirteen" 13.15,
-# "three" 13.95-14.35) | "A lead, not proof:" 15.4-16.8 | "each camera would need calibrating on
-# site." 17.0-19.5 (the voice ends at 19.52; the shot holds to 21.5). Re-key to the real voice take.
+# Guide clause boundaries (+0.2 s voice offset), measured with silencedetect on 19 Oct:
+# frames / one camera 0.2–2.65; under-count 2.86–4.30; twenty-frame calibration 4.56–7.40;
+# counting error 7.67–11.30; fixed guess 11.54–13.39; not in the app 13.65–15.83.
+# Re-key these beats to the team's real take.
 VOICE_START = 0.2           # video/assemble.py default
 BEATS = {
     "card_in": 0.0,         # scatter card fades in (voice from 0.2 s)
-    "two_thousand": 0.5,    # "two thousand annotated mall frames" (0.6-2.7) -> frames card
-    "dim_apple": 0.9,       # before "annotated" (1.26) -> orange Apple cloud dims
-    "perfect_line": 2.2,    # before "the detector" (2.8) -> dashed perfect-count line traced
-    "under_arrow": 3.5,     # "steadily under-counted" (3.6-4.8) -> under-count arrow and its label
-    "under_count": 4.0,     # "under-counted" (4.04) -> arrow label emphasised
-    "ninety_three": 5.35,   # "yet ninety-three percent of its boxes" ("ninety-three" 5.38): the frames
-                            # card gives way to "93% of boxes are people"
-    "calibrate_in": 8.3,    # stage 2, on "twenty" (8.3) in "With twenty labelled frames," (8.0-9.7)
-    "twenty": 8.9,          # "labelled frames" (8.8-9.7) -> "20 labelled frames" tag
-    "error": 12.0,          # "cutting error" (12.0-12.7) -> "count error" label
-    "thirteen": 13.0,       # "from thirteen" ("thirteen" 13.15) -> 13.4, the error bar fills
-    "three": 13.45,         # "to about three" (13.47; "three" 13.95-14.35) -> counts down to 3.3 by 14.3
-    "guess": 13.45,         # the same moment, to the end: the no-detector guess bar and its label
-    "each_camera": 17.0,    # "each camera would need calibrating on site" (17.04-19.54) -> limits line, to the end
+    "two_thousand": 0.5,    # frame-count card
+    "dim_apple": 0.9,       # retain the detector's own legend while dimming the Apple series
+    "perfect_line": 2.2,    # before "the detector" -> dashed perfect-count line
+    "under_arrow": 3.1,     # the detector under-counted
+    "under_count": 3.6,
+    "calibrate_in": 4.55,   # "Twenty labelled frames" -> calibration panel and scope chip
+    "twenty": 4.6,
+    "error": 7.65,          # "cutting counting error"
+    "thirteen": 8.95,       # raw error endpoint
+    "three": 9.35,          # calibrated endpoint appears directly; only the bar interpolates
+    "guess": 11.55,         # "A fixed guess" -> the no-detector comparison
+    "each_camera": 13.65,   # not-yet-in-app sentence emphasises the already-visible scope chip
 }
-COUNT_DOWN = 0.85           # 13.4 -> 3.3 takes this long, landing on "three"
+BAR_SHRINK = 0.85           # only the bar moves; the printed calibrated endpoint is always 3.3
+assert DURATION >= BEATS["each_camera"] + 2.5, "keep the scope disclosure readable before the cut"
 
 # ---------- on-screen text: verbatim from the shot list ----------
 
@@ -113,7 +66,7 @@ def _field(prefix: str) -> str:
 BADGE_KIND, BADGE_DETAIL = _field("Badge (top-right):").split(" · ", 1)   # REAL DATA | Mall benchmark
 FOOTER = _field("Footer:")
 GUESS_LINE = _field("Beside the counter (required, at least the limits line's size):")
-CAVEAT = _field("Limits line (from 'each camera would need calibrating on site' to the end):")
+CAVEAT = next(p.split(":", 1)[1].strip() for p in _OST if p.startswith("Limits line ("))
 
 # ---------- data ----------
 
@@ -121,7 +74,6 @@ MALL = ROOT / "experiments" / "results" / "mall"
 METRICS = json.loads((MALL / "metrics.json").read_text())
 YOLO = METRICS["results"]["yolo11n"]
 FRAMES = METRICS["meta"]["frames"]
-PREC_PCT = round(100 * YOLO["precision"])
 CAL = YOLO["post_hoc_linear_calibration"]
 HELD_OUT = CAL["held_out_frames"]
 RAW_MAE = CAL["raw_mae_held_out"]
@@ -134,7 +86,6 @@ GUESS_MAE = UNC["detector_free"]["mean_of_20_calibration_frames"]["mae_held_out"
 
 FRAMES_TXT = f"{FRAMES:,}"
 FRAMES_LABEL = "annotated frames"
-PREC_TXT, PREC_LABEL = f"{PREC_PCT}%", "of boxes are people"
 RAW_TXT, CAL_TXT = f"{RAW_MAE:.1f}", f"{CAL_MAE:.1f}"
 TAG_TXT = f"{N_LABELLED} labelled frames"
 PPF = "people per frame"
@@ -142,7 +93,8 @@ ERR_LABEL = "count error"
 
 # guards: the storyboard wording must still match the data files (fails loudly if either changes)
 assert BADGE_KIND in BADGES and BADGE_DETAIL == "Mall benchmark", (BADGE_KIND, BADGE_DETAIL)
-assert f"{FRAMES_TXT} {FRAMES_LABEL}" in _OST and f"{PREC_TXT} {PREC_LABEL}" in _OST
+assert f"{FRAMES_TXT} {FRAMES_LABEL}" in _OST
+assert "boxes are people" not in SHOT["on_screen_text"]
 assert f"Counter: {ERR_LABEL} {RAW_TXT} → {CAL_TXT} {PPF}, tag {TAG_TXT}" in _OST
 assert "Chart labels: perfect count · under-count" in _OST
 assert GUESS_LINE == f"No-detector guess: {GUESS_MAE:.1f}", GUESS_LINE
@@ -153,16 +105,14 @@ assert all(len([w for w in x.split() if w != "·"]) <= 7 for x in (CAVEAT, FOOTE
 assert UNC["held_out_frames"] == HELD_OUT and UNC["calibration_frames"].startswith(_K20), UNC["calibration_frames"]
 _unc_yolo = UNC["detectors"]["yolo11n"]                       # the same two errors, unrounded
 assert round(_unc_yolo["raw_mae_held_out"], 2) == RAW_MAE and round(_unc_yolo["calibrated_20"]["mae_held_out"], 2) == CAL_MAE
-assert f"{RAW_MAE:.1f} → {CAL_MAE:.1f} people per frame" in SHOT["visual"]
-assert f"'{N_LABELLED} labelled frames'" in SHOT["visual"]
-assert f"no-detector guess ({GUESS_MAE:.1f})" in SHOT["visual"]
-# spoken: "two thousand", "93 percent", "With twenty labelled frames", "from thirteen to about three"
+# Spoken endpoints and calibration scope must match the source data.
 _said = SHOT["narration"]
-assert FRAMES == 2000 and "two thousand annotated mall frames" in _said
-assert f"{PREC_PCT} percent of its boxes were people" in _said
-assert N_LABELLED == 20 and "With twenty labelled frames" in _said
+assert FRAMES == 2000 and "two thousand frames from one mall camera" in _said
+assert "percent of its boxes" not in _said
+assert N_LABELLED == 20 and "Twenty labelled frames" in _said
 assert (round(RAW_MAE), round(CAL_MAE)) == (13, 3) and "from thirteen to about three people per frame" in _said
-assert "that one camera" in _said and "A lead, not proof: each camera would need calibrating on site." in _said
+assert "calibrate that camera" in _said and "This calibration is not yet in the app." in _said
+assert round(GUESS_MAE) == 5 and "A fixed guess scored about five." in _said
 
 # ---------- colours ----------
 
@@ -384,9 +334,7 @@ def number_card(num: str, num_colour, label: str) -> Image.Image:
 
 
 FRAMES_CARD = number_card(FRAMES_TXT, INK, FRAMES_LABEL)
-PREC_CARD = number_card(PREC_TXT, BLUE_L, PREC_LABEL)
 assert 36 + adv(FRAMES_TXT, 88, 700) + 22 + adv(FRAMES_LABEL, 34, 600) <= COL_W - 36
-assert 36 + adv(PREC_TXT, 88, 700) + 22 + adv(PREC_LABEL, 34, 600) <= COL_W - 36
 
 
 # ---------- left column, stage 2: calibration ----------
@@ -401,7 +349,7 @@ GAP = 26
 _row_w = adv(RAW_TXT, NUM, 700) * 2 + 2 * GAP + ARROW_W
 L_RIGHT = (CAL_W - _row_w) / 2 + adv(RAW_TXT, NUM, 700)    # right edge of 13.4
 A_X0, A_X1 = L_RIGHT + GAP, L_RIGHT + GAP + ARROW_W         # arrow span
-R_LEFT = A_X1 + GAP                                         # left edge of the counting number
+R_LEFT = A_X1 + GAP                                         # left edge of the calibrated endpoint
 DIGIT_MID = ROW_BASE - 34                                   # arrow height (middle of the digits)
 BAR_Y0, BAR_Y1 = 396, 428                                   # count error: raw (outline) -> calibrated (solid)
 BAR_X0, BAR_X1 = 36, CAL_W - 36
@@ -442,14 +390,14 @@ def cal_card(t: float) -> Image.Image:
     # the counter: 13.4 -> 3.3 people per frame
     la = progress(t, BEATS["thirteen"], 0.4)
     draw_text(img, (L_RIGHT, ROW_BASE + (1 - la) * 12), RAW_TXT, NUM, 700, INK_2, la, anchor="rs")
-    cd = progress(t, BEATS["three"], COUNT_DOWN)
+    cd = progress(t, BEATS["three"], BAR_SHRINK)
     ra = progress(t, BEATS["three"] - 0.15, 0.3)
     value = lerp(RAW_MAE, CAL_MAE, cd)
-    draw_text(img, (R_LEFT, ROW_BASE), f"{value:.1f}", NUM, 700, tuple(int(c) for c in lerp(INK_2, BLUE_L, cd)), ra, anchor="ls")
-    pa = progress(t, BEATS["three"] + COUNT_DOWN - 0.1, 0.4)
+    draw_text(img, (R_LEFT, ROW_BASE), CAL_TXT, NUM, 700, BLUE_L, ra, anchor="ls")
+    pa = progress(t, BEATS["three"] - 0.1, 0.4)
     draw_text(img, (CAL_W / 2, ROW_BASE + 46), PPF, 30, 500, INK_2, pa, anchor="ms")
 
-    # error bar: the raw error stays as an outline; the solid bar follows the counter
+    # Only the bar interpolates; the numeric 13.4 and 3.3 endpoints never count through invented values.
     g = progress(t, BEATS["thirteen"] + 0.1, 0.5)
     if g > 0:
         lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -462,7 +410,7 @@ def cal_card(t: float) -> Image.Image:
         bar(dl, BAR_X0, BAR_Y0, BAR_X0 + cur, BAR_Y1, rgba(col))
         img.alpha_composite(lay)
 
-    # the no-detector guess (required, from the countdown to the end): a grey bar on the error bar's
+    # the no-detector guess (required, from the comparison to the end): a grey bar on the error bar's
     # scale, so 3.3 (calibrated) and 4.8 (always say 30.05, no detector) can be compared at a glance
     gg = progress(t, BEATS["guess"], 0.6)
     if gg > 0:
@@ -472,9 +420,8 @@ def cal_card(t: float) -> Image.Image:
         draw_text(img, (GUESS_X1 + 18, (GUESS_Y0 + GUESS_Y1) / 2), GUESS_LINE, GUESS_SIZE, 600, INK,
                   progress(t, BEATS["guess"] + 0.3, 0.4), anchor="lm")
 
-    # the limits line, on "each camera would need calibrating on site", to the end; its outline
-    # brightens as it lands
-    ca = progress(t, BEATS["each_camera"], 0.5)
+    # Scope is visible from the calibration panel's arrival, before either error value is claimed.
+    ca = progress(t, BEATS["calibrate_in"], 0.5)
     if ca > 0:
         em = progress(t, BEATS["each_camera"] + 0.3, 0.45)
         rounded(img, CHIP, 18, fill=NAVY_3, alpha=ca)
@@ -499,17 +446,11 @@ def draw_frame(t: float) -> Image.Image:
         rounded(card, (0, 0, SC_W - 1, SC_H - 1), 22, fill=NAVY, alpha=0.45 * dim2)
     paste(img, card, (SC_X0 + (1 - a_sc) * 26, SC_Y0), a_sc)
 
-    # left, stage 1: "2,000 annotated frames", then "93% of boxes are people" in the same slot
-    # (one card at a time: the frames card leaves in 0.3 s, the next arrives as "ninety-three" is said)
-    out1 = progress(t, BEATS["ninety_three"] - 0.5, 0.3)
+    # The frame-count card gives way directly to calibration; precision is supporting evidence.
+    out1 = progress(t, BEATS["calibrate_in"], 0.3)
     a1 = progress(t, BEATS["two_thousand"] - 0.25, 0.5) * (1 - out1)
     if a1 > 0:
         paste(img, FRAMES_CARD, (COL_X0 + (1 - progress(t, BEATS["two_thousand"] - 0.25, 0.5)) * 24 - 40 * out1, SLOT[0]), a1)
-    in2 = progress(t, BEATS["ninety_three"] - 0.2, 0.45)
-    out2 = progress(t, BEATS["calibrate_in"], 0.4)
-    a2 = in2 * (1 - out2)
-    if a2 > 0:
-        paste(img, PREC_CARD, (COL_X0 + (1 - in2) * 24 - 50 * out2, SLOT[0]), a2)
 
     # left, stage 2: calibration
     a_cal = progress(t, BEATS["calibrate_in"] + 0.35, 0.5)
@@ -525,11 +466,11 @@ def draw_frame(t: float) -> Image.Image:
 
 STILLS = {
     "open": 1.5,           # chart in, Apple dimming, 2,000 annotated frames
-    "scatter": 4.6,        # dimmed, perfect line traced, under-count arrow, still 2,000
-    "boxes": 6.5,          # 93% of boxes are people
-    "tag": 11.0,           # stage 2: the 20 labelled frames tag, chart dimmed
-    "counter": 16.0,       # 13.4 -> 3.3 people per frame beside the guess
-    "limits": 21.45,       # the limits line, held to the end
+    "scatter": 4.3,        # under-count, before calibration
+    "tag": 5.6,            # calibration scope disclosed before either error endpoint
+    "transition": BEATS["three"] + 0.55,  # moving bar, static 3.3 endpoint
+    "counter": 13.2,       # calibrated error beside the no-detector guess
+    "limits": DURATION - 0.05,  # scope disclosure held to the cut
 }
 
 if __name__ == "__main__":
