@@ -159,6 +159,32 @@ def chapter_card(img: Image.Image, text: str, alpha: float = 1.0) -> None:
     draw_text(img, (84, 63), text, 34, 700, INK, alpha)
 
 
+def chapter_question(img: Image.Image, text: str, t: float, dock_at: float = 2.0,
+                     dock_duration: float = 0.4, header_size: int = 40) -> None:
+    """Give a spoken question the stage, then retain it as a readable section heading.
+
+    Draw after the scene's content. Its opaque navy focus covers competing content until
+    the question moves to the header; captions are added separately by the assembler.
+    The answer normally starts at 2.6 s (2.4 s into its guide, plus the voice offset).
+    """
+    if t < 0:
+        return
+    entering = progress(t, 0.0, 0.25)
+    docking = progress(t, dock_at, dock_duration)
+    rounded(img, (-1, -1, W + 1, H + 1), 0, fill=NAVY, alpha=1 - docking)
+    size = round(lerp(84, header_size, docking))
+    width, _ = text_size(text, size, 700)
+    assert width < W - 120, text
+    x = lerp(W / 2, 60 + width / 2, docking)
+    y = lerp(475 + (1 - entering) * 18, 80, docking)
+    draw_text(img, (x, y), text, size, 700, INK, entering, anchor="mm")
+    line_x = lerp(W / 2 - 84, 60, docking)
+    line_y = lerp(554, 119, docking)
+    line_width = 168 * progress(t, 0.12, 0.35)
+    rounded(img, (line_x, line_y, line_x + max(1, line_width), line_y + 5),
+            2, fill=CYAN, alpha=entering)
+
+
 def badge(img: Image.Image, kind: str, detail: str = "", sub: str = "", alpha: float = 1.0) -> None:
     """Top-right status pill, right edge at x 1860, y 48; optional one-line sub-line under it."""
     if alpha <= 0:

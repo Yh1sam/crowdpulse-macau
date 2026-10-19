@@ -18,23 +18,23 @@
   {
     "id": "S06",
     "start_s": 12.0,
-    "end_s": 27.0,
-    "speaker": "[MEMBER 4] (on camera 0-6.9 s, then VO)",
-    "narration": "Mrs Chan is made up. The crowds are not. This Golden Week, police briefly imposed crowd control at the Ruins on three afternoons. In a crush, victims typically suffocate standing up, from chest compression.",
+    "end_s": 29.0,
+    "speaker": "[MEMBER 4] (question VO, on camera 2.4-9.3 s, then VO)",
+    "narration": "Why does it matter? Mrs Chan is made up. The crowds are not. This Golden Week, police briefly imposed crowd control at the Ruins on three afternoons. In a crush, victims typically suffocate standing up, from chest compression.",
     "visual_type": "motion_graphic",
-    "visual": "0-6.9 s (\"Mrs Chan is made up. The crowds are not. This Golden Week, police briefly imposed crowd control at the\"): M4 medium shot, eye level; nothing over the take after the 2 s chapter card. 6.9-9 s (\"...the Ruins on three afternoons\"): the S01 zone schematic; dots pile up on Rua de S. Paulo below the Ruins (illustration); three date chips stack beside the Ruins, the only labelled place. 9-15 s (the medical sentence): the map fades out; on a plain navy background, a simple body-outline diagram drawn from shapes, two arrows pressing on the chest from front and back, annotated only with the sourced mechanism; abstract, nothing graphic, never over the Macau map. Re-key the beats to the word timestamps of the real take.",
-    "on_screen_text": "Chapter card (top-left, 2 s): Why does it matter? | Map label (6.9-9 s): 大三巴牌坊 Ruins of St. Paul's | Date chips (6.9-9 s, beside the Ruins): 2 Oct · 3 Oct · 4 Oct | Footer (6.9-9 s): Police, 8 Oct 2026 | Body label (9-15 s): front-to-back pressure → chest can't fully expand → asphyxia | Citation (9-15 s, footer slot): Gill & Landi, 2004 | Badge (top-right, from 6.9 s, over the schematic and the body diagram): ILLUSTRATION",
+    "visual": "0-2.4 s: prominent central spoken question, Why does it matter?, on navy with a gentle fade/rise and cyan underline. It shrinks/moves into a persistent 40 px header as the answer begins at 2.6 s. 2.4-9.3 s: M4 medium shot (stand-in until filmed), saying Mrs Chan is made up, the crowds are not, and the sourced Golden Week context. 9.3-11.55 s: the existing Macau schematic and three date chips, with police citation. From 11.55 s: existing abstract chest-compression diagram, off the map, with medical citation. Preserve all figures, sources and illustration labels; re-key to real takes.",
+    "on_screen_text": "Chapter question (central then persistent header): Why does it matter? | Map label (9.3-11.55 s): 大三巴牌坊 Ruins of St. Paul's | Date chips (9.3-11.55 s, beside the Ruins): 2 Oct · 3 Oct · 4 Oct | Footer (9.3-11.55 s): Police, 8 Oct 2026 | Body label (11.55-17 s): front-to-back pressure → chest can't fully expand → asphyxia | Citation (11.55-17 s, footer slot): Gill & Landi, 2004 | Badge (top-right, from 9.3 s, over the schematic and the body diagram): ILLUSTRATION",
     "assets": [
       "team camera",
       "shared/zones.json",
       "docs/research/brief-evidence.md (sections 1 and 5)"
     ],
-    "notes": "No source calls these crowds 'dangerous', so the old premise ('become dangerously crowded') is replaced by the sourced fact; the proposal now opens with the same fact. 'This Golden Week' means 1-7 Oct 2026. 'Briefly' is the source's own word (短暫實施); on 4 Oct, Rua de S. Paulo was one-way uphill from 13:50 to 15:10 (Macao Daily News, 5 Oct 2026; off screen since 19 Oct, when the chips became dates only, sourced to the police release). The same measure ran on the afternoons of 3-5 Oct 2024, and Rua de S. Paulo was controlled in 2025 (brief-evidence.md, section 1). The medical sentence opens 'In a crush' so it reads as a general mechanism, and paraphrases Gill & Landi 2004 (doi:10.1097/01.paf.0000147316.62883.8b): 'People who succumb in these scenarios typically die (\"standing up\") in a vertical position', and the cause is 'asphyxia due to chest compression'. It is a general mechanism from a 1991 New York case, never a Macau event: no crush injury at these sites was found for 2024-2026, so the body diagram is drawn off the map (the short citation 'Gill & Landi, 2004' is on screen; the case details stay in script.md section 4). The 210,000-arrivals tag and its footer left the picture on 19 Oct (the voice never says the number; kept for Q&A, script.md section 4). If it ever returns, keep 'National Day holiday record' whole: the all-time daily record is 248,000 on 2 May 2026 (brief-evidence.md, section 1), so 'record day' or 'Golden Week record' would be false. 210,000 counts visitor arrivals to all of Macau, not people at the Ruins."
+    "notes": "Chapter emphasis revision: the opening question is spoken; its guide answer starts at 2.4 s within the audio (2.6 s into the shot). Keep the question as a 40 px header after its central focus. Re-key all answer animations and recording cues to the new guide. No source calls these crowds 'dangerous', so the old premise ('become dangerously crowded') is replaced by the sourced fact; the proposal now opens with the same fact. 'This Golden Week' means 1-7 Oct 2026. 'Briefly' is the source's own word (短暫實施); on 4 Oct, Rua de S. Paulo was one-way uphill from 13:50 to 15:10 (Macao Daily News, 5 Oct 2026; off screen since 19 Oct, when the chips became dates only, sourced to the police release). The same measure ran on the afternoons of 3-5 Oct 2024, and Rua de S. Paulo was controlled in 2025 (brief-evidence.md, section 1). The medical sentence opens 'In a crush' so it reads as a general mechanism, and paraphrases Gill & Landi 2004 (doi:10.1097/01.paf.0000147316.62883.8b): 'People who succumb in these scenarios typically die (\"standing up\") in a vertical position', and the cause is 'asphyxia due to chest compression'. It is a general mechanism from a 1991 New York case, never a Macau event: no crush injury at these sites was found for 2024-2026, so the body diagram is drawn off the map (the short citation 'Gill & Landi, 2004' is on screen; the case details stay in script.md section 4). The 210,000-arrivals tag and its footer left the picture on 19 Oct (the voice never says the number; kept for Q&A, script.md section 4). If it ever returns, keep 'National Day holiday record' whole: the all-time daily record is 248,000 on 2 May 2026 (brief-evidence.md, section 1), so 'record day' or 'Golden Week record' would be false. 210,000 counts visitor arrivals to all of Macau, not people at the Ruins."
   },
   {
     "id": "S05",
-    "start_s": 27.0,
-    "end_s": 70.5,
+    "start_s": 29.0,
+    "end_s": 72.5,
     "speaker": "ALL (on camera: two sentences each, then shared introduction and core question)",
     "narration": "[M1] I worked on the phone app. It counts people on the device, so only numbers leave the phone. [M2] I worked on the forecasts. We compare them with simple baselines to see whether they actually add value. [M3] I worked on the server and deployment plan. We built in privacy checks and made sure every approval is logged. [M4] I worked on health and accessibility. We test who might be left behind, including wheelchair users, before discussing a route. [ALL] Together, we are CrowdPulse Macau. Our question: can ordinary phones, sending only numbers, help forecast crowds without identifying anyone?",
     "visual_type": "team_footage",
@@ -47,8 +47,8 @@
   },
   {
     "id": "S07",
-    "start_s": 70.5,
-    "end_s": 94.5,
+    "start_s": 72.5,
+    "end_s": 96.5,
     "speaker": "[MEMBER 2] (VO)",
     "narration": "Macau's police already run a crowd warning system here. But how is ours different? We propose a temporary sensing kit for event staff, to support the existing system. Staff place the phones; the phones count on-device and send only numbers. On the dashboard, staff review forecasts and suggested detours before acting.",
     "visual_type": "motion_graphic",
@@ -62,24 +62,24 @@
   },
   {
     "id": "S08",
-    "start_s": 94.5,
-    "end_s": 103.5,
+    "start_s": 96.5,
+    "end_s": 106.5,
     "speaker": "[MEMBER 3] (VO)",
-    "narration": "We enforce privacy in code. Our server accepts a numbers-only reading, rejects one with a face-ID field, and refuses an image.",
+    "narration": "Can it be trusted? Our server accepts a numbers-only reading, rejects one with a face-ID field, and refuses an image.",
     "visual_type": "terminal",
-    "visual": "Real terminal recording (dark theme, 28 pt or larger) against a separate backend on a fresh database. Three commands typed in turn: (1) valid numbers-only observation → 202; (2) the same JSON plus 'face_id':'abc' → 422; (3) multipart JPEG upload → 403 with the server message 'PRIVACY_MODE: media uploads are not accepted. Send numerical metadata only.' Each code stamps on as it is spoken (green 202, amber 422, red 403), as a short label: the code, its verb and at most two words.",
-    "on_screen_text": "Chapter card (top-left): Can it be trusted? | Badge (top-right): LIVE SOFTWARE (cyan) | 202 accepted · numbers only | 422 rejected · face-ID field | 403 refused · image upload",
+    "visual": "0–2.4 s: a large central spoken question, then a persistent 40 px header. Reveal the recorded terminal with the answer at 2.6 s and defer the first speaker strip until then. Preserve all three real requests and responses, extending only idle prompt time by 0.47 s. Recorded codes appear at 3.30/5.27/7.90 s; English 202/422/403 callouts appear at 3.42/5.37/8.02 s and hold. The plain LIVE SOFTWARE badge accompanies the terminal after the question; do not typeset or invent command output.",
+    "on_screen_text": "Chapter question (central then persistent header): Can it be trusted? | Badge (top-right): LIVE SOFTWARE (cyan) | 202 accepted · numbers only | 422 rejected · face-ID field | 403 refused · image upload",
     "assets": [
       "backend on port 8001 with CROWDPULSE_DATABASE_URL=sqlite:///privacy_demo.db",
       "obs.json / obs_face.json built from docs/testing.md section 5 with a fresh UTC timestamp",
       "frame.jpg: blank generated image with no people"
     ],
-    "notes": "Record live, never typeset. Use a separate backend so the test reading never joins the C2 dashboard run. Dry-run all three codes before recording. Deliberate visual beat: 21 words in 9.0 s (guide 8.4 s) leaves room for the three code stamps; 0.5 s of stamp hold is already given back, and cut 1 can take up to 0.5 s more if the real take allows. The badge is LIVE SOFTWARE (cyan), one of the defined badges. Recorded live with video/record_terminal.py: the three commands run in a real shell inside a pseudo-terminal, every output byte is saved with its time, and the renderer draws that stream frame by frame (dark monospace, 28 pt or larger, 1920x1080, 30 fps). Nothing is retyped; never typeset this shot by hand. The assembly (video/recipes.py, s08) only cuts or repeats idle prompt time between the commands, so each code shows as its verb is spoken; every command keeps its recorded response."
+    "notes": "Chapter emphasis revision: the opening question is spoken; its guide answer starts at 2.4 s within the audio (2.6 s into the shot). Keep the question as a 40 px header after its central focus. Re-key all answer animations and recording cues to the new guide. Record live, never typeset. Use a separate backend so the test reading never joins the C2 dashboard run. Dry-run all three codes before recording. Deliberate visual beat: 21 words in 9.0 s (guide 8.4 s) leaves room for the three code stamps; 0.5 s of stamp hold is already given back, and cut 1 can take up to 0.5 s more if the real take allows. The badge is LIVE SOFTWARE (cyan), one of the defined badges. Recorded live with video/record_terminal.py: the three commands run in a real shell inside a pseudo-terminal, every output byte is saved with its time, and the renderer draws that stream frame by frame (dark monospace, 28 pt or larger, 1920x1080, 30 fps). Nothing is retyped; never typeset this shot by hand. The assembly (video/recipes.py, s08) only cuts or repeats idle prompt time between the commands, so each code shows as its verb is spoken; every command keeps its recorded response."
   },
   {
     "id": "S09",
-    "start_s": 103.5,
-    "end_s": 114.5,
+    "start_s": 106.5,
+    "end_s": 117.5,
     "speaker": "[MEMBER 4] (VO)",
     "narration": "Unreliable or unusual sensor data lowers our confidence score. The adjusted score tells staff when to review a forecast; it isn't a calibrated probability.",
     "visual_type": "motion_graphic",
@@ -95,25 +95,25 @@
   },
   {
     "id": "S02",
-    "start_s": 114.5,
-    "end_s": 121.5,
+    "start_s": 117.5,
+    "end_s": 125.5,
     "speaker": "[MEMBER 1] (VO)",
-    "narration": "Here's what we built. Our phone app counts people on the device, and sends only numbers.",
+    "narration": "What did we build? Our phone app counts people on the device, and sends only numbers.",
     "visual_type": "ios_capture",
-    "visual": "iPhone Simulator recording of the CrowdPulse Sensor app (Mode Video and Detector YOLO11n set on the Setup tab, then Start pressed on the Live tab) playing the CC0 Yonge & Dundas clip: green boxes on pedestrians, counters ticking, gentle push-in. Recognisable near-field faces are pixelated in post (head band only, boxes left visible). Motion-graphic overlay: on 'counts people on the device' (about 2.75-3.96 s into the shot in the guide voice) the numbers peel off the panel into a payload card; on 'and sends' (about 4.2-4.75 s) it slides to a server icon; on 'only numbers' (about 4.75-5.6 s) a photo icon tries to follow and bounces off a shield and 'HTTP 403' lands; hold to the cut at 7.0 s (the 403 holds about 1.5 s). Key all three animations to the word timestamps of the real take. If the 403 cannot hold for at least 1 s, move 0.5 s from S04 to S02 (S02 77.0-84.5, S03 84.5-94.5, S04 94.5-103.0) and update this file, the storyboard and the structure table in script.md together.",
-    "on_screen_text": "Chapter card (top-left, 2 s): What did we build? | Badge (top-right): LIVE SOFTWARE · TEST CLIP | Note under the badge: iPhone Simulator · Toronto, not Macau | Payload card (real key names; values from your own Debug-tab capture, rounded, e.g.): person_count 11 · estimated_density 0.27 · flow_direction_deg 116 · vision_confidence 0.91 · … | Shield: image upload → HTTP 403",
+    "visual": "0–2.4 s: the spoken question owns the screen, then docks as a persistent 36 px header, leaving space beside the phone. At 2.6 s the answer and first speaker identification begin. Preserve the masked iPhone Simulator recording and its Toronto/test-clip disclosure. At 3.75 s real payload fields peel into a card; the server appears at 4.6 s, the card travels at 5.3 s and docks at 6.0 s. The shield and blocked-image illustration follow, with HTTP 403 landing at 6.25 s and holding through the 8 s cut. All displayed payload values retain the original recorded provenance.",
+    "on_screen_text": "Chapter question (central then persistent header): What did we build? | Badge (top-right): LIVE SOFTWARE · TEST CLIP | Note under the badge: iPhone Simulator · Toronto, not Macau | Payload card (real key names; values from your own Debug-tab capture, rounded, e.g.): person_count 11 · estimated_density 0.27 · flow_direction_deg 116 · vision_confidence 0.91 · … | Shield: image upload → HTTP 403",
     "assets": [
       "xcrun simctl io booted recordVideo --codec=h264 S02_sim.mp4 (recorded during the C2 run, in C2a's map wait)",
       "fallback: experiments/results/simulation_run/ios_app_video_mode_30s.mp4",
       "reference: experiments/results/simulation_run/ios_app_debug_payload.png",
       "ios/CrowdPulseSensor/Sources/Models/SensorObservation.swift (payload key names)"
     ],
-    "notes": "Never say or caption 'this phone' without the Simulator caption: no physical-phone run is documented. Near-field faces can be identifiable; pixelate them (ffmpeg crop of the head band → scale down 12x → scale up with flags=neighbor → overlay back, only for the seconds a face is recognisable). Keep the push-in modest. Set location first: xcrun simctl location booted set 22.19282,113.53925. Which backend (decision, script.md section 6, ios_capture): reproduce runs A and B. The app posts to the C2 backend on http://localhost:8000 (its default Backend URL) and joins at Almeida Ribeiro during every C2 run, and S02 is recorded in that same run, for about 30 s during C2a's map wait (stop recordVideo well before C2a's click); its readings are re-timed onto the simulated clock (docs/testing.md 6.2), as in runs A and B, so the README timing table stays the reference. Never point the app at the S08 privacy backend (:8001) or at a second backend while C2 runs. If S02 must be re-shot outside C2: a separate backend with CROWDPULSE_LIVE_SIM=false and its own database (e.g. phone_demo.db) on :8000, started only when no C2 backend is running. Take the Debug-tab payload screenshot after C2b, while the app is still running. sensor_id is off screen since 19 Oct; if asked, its wording follows docs/privacy.md ('a temporary sensing position, not a person or a device serial'); the iOS app generates it once per install, so never say 'not a device'. If the reference PNG values are used instead of a fresh capture, label them 'example payload · test run, 29 Sep 2026'."
+    "notes": "Chapter emphasis revision: the opening question is spoken; its guide answer starts at 2.4 s within the audio (2.6 s into the shot). Keep the question as a 40 px header after its central focus. Re-key all answer animations and recording cues to the new guide. Never say or caption 'this phone' without the Simulator caption: no physical-phone run is documented. Near-field faces can be identifiable; pixelate them (ffmpeg crop of the head band → scale down 12x → scale up with flags=neighbor → overlay back, only for the seconds a face is recognisable). Keep the push-in modest. Set location first: xcrun simctl location booted set 22.19282,113.53925. Which backend (decision, script.md section 6, ios_capture): reproduce runs A and B. The app posts to the C2 backend on http://localhost:8000 (its default Backend URL) and joins at Almeida Ribeiro during every C2 run, and S02 is recorded in that same run, for about 30 s during C2a's map wait (stop recordVideo well before C2a's click); its readings are re-timed onto the simulated clock (docs/testing.md 6.2), as in runs A and B, so the README timing table stays the reference. Never point the app at the S08 privacy backend (:8001) or at a second backend while C2 runs. If S02 must be re-shot outside C2: a separate backend with CROWDPULSE_LIVE_SIM=false and its own database (e.g. phone_demo.db) on :8000, started only when no C2 backend is running. Take the Debug-tab payload screenshot after C2b, while the app is still running. sensor_id is off screen since 19 Oct; if asked, its wording follows docs/privacy.md ('a temporary sensing position, not a person or a device serial'); the iOS app generates it once per install, so never say 'not a device'. If the reference PNG values are used instead of a fresh capture, label them 'example payload · test run, 29 Sep 2026'."
   },
   {
     "id": "S03",
-    "start_s": 121.5,
-    "end_s": 131.5,
+    "start_s": 125.5,
+    "end_s": 135.5,
     "speaker": "[MEMBER 2] (VO)",
     "narration": "On our dashboard, with a simulated Golden Week crowd, Senado Square's forecast turns critical. It shows how sure it is, and why.",
     "visual_type": "ui_capture",
@@ -127,8 +127,8 @@
   },
   {
     "id": "S04",
-    "start_s": 131.5,
-    "end_s": 140.5,
+    "start_s": 135.5,
+    "end_s": 144.5,
     "speaker": "[MEMBER 3] (VO)",
     "narration": "It recommends a stair-free detour, with notices in Chinese, English and Portuguese. A person must approve it, and we log their name.",
     "visual_type": "ui_capture",
@@ -142,22 +142,22 @@
   },
   {
     "id": "S10",
-    "start_s": 140.5,
-    "end_s": 157.5,
+    "start_s": 144.5,
+    "end_s": 162.5,
     "speaker": "[MEMBER 2] (VO)",
-    "narration": "On simulated days it had never seen, our fifteen-minute forecasts scored an F1 of 0.865, against 0.795 for assuming nothing changes, and caught 91 percent of critical minutes, against 79.",
+    "narration": "Does it work? On unseen simulated days, our fifteen-minute forecasts scored an F1 of 0.865, against 0.795 for assuming nothing changes, and caught 91 percent of critical minutes, against 79.",
     "visual_type": "motion_graphic",
-    "visual": "Preserve the evidence legend docking into the bottom-right strip and the +15-minute F1 panel. Show only model0.865 versus no-change0.795, with the subtitle Held-out simulated days. Keep the readable accuracy comparison under those bars. On 'and caught', slide the panel left and bring91% versus79% critical minutes caught onto the right. Hold both panels to the end. Remove the56%/97% section entirely; it remains in supporting evidence, not another stage of this shot.",
-    "on_screen_text": "Chapter card (top-left): Does it work? Every result is labelled. | Badge (top-right): SIMULATED (pinned) | Legend strip (bottom-right): SIMULATED · REAL DATA · MODEL CHECK · PENDING | Axis: macro-F1: SAFE, WARNING, CRITICAL weighted equally | Subtitle: Held-out simulated days | Bars (+15 min): model / no change | Accuracy line (from about 9.3 s to the end, under the bars): Accuracy: 96.4% vs 94.3% · always SAFE 84.6% | Big numbers (from about 11.0 s): 91% vs 79% of critical minutes caught (+15 min)",
+    "visual": "0–2.4 s: central spoken question then persistent 40 px header; the answer starts at 2.6 s. Keep the evidence legend docked, with no central legend animation competing for attention. Reveal the held-out simulated +15 minute macro-F1 comparison, 0.865 versus 0.795, and its accuracy line. Accuracy becomes visible from 10.65 s; the recall comparison begins around 12.4 s, showing 91% versus 79% of critical minutes. Both result cards remain together. The final 79% is fully visible by about 16.1 s and holds through 18 s. No new data or changed model result.",
+    "on_screen_text": "Chapter question (central then persistent header): Does it work? | Badge (top-right): SIMULATED (pinned) | Legend strip (bottom-right): SIMULATED · REAL DATA · MODEL CHECK · PENDING | Axis: macro-F1: SAFE, WARNING, CRITICAL weighted equally | Subtitle: Held-out simulated days | Bars (+15 min): model / no change | Accuracy line (from about 10.65 s to the end, under the bars): Accuracy: 96.4% vs 94.3% · always SAFE 84.6% | Big numbers (from about 12.4 s): 91% vs 79% of critical minutes caught (+15 min)",
     "assets": [
       "ml/models/metrics.json"
     ],
-    "notes": "Read all values from ml/models/metrics.json. Main narration is F1 and CRITICAL recall on held-out simulated days only. Accuracy remains visible and in the149-word proposal. No real-world early-warning claim. The model-only uncertainty56%/97%, its denominator and the different live adjusted-score rule stay in experiments/results/uncertainty/summary.md and script5F. No interpolated or rounded-value gap is presented as another result."
+    "notes": "Chapter emphasis revision: the opening question is spoken; its guide answer starts at 2.4 s within the audio (2.6 s into the shot). Keep the question as a 40 px header after its central focus. Re-key all answer animations and recording cues to the new guide. Read all values from ml/models/metrics.json. Main narration is F1 and CRITICAL recall on held-out simulated days only. Accuracy remains visible and in the149-word proposal. No real-world early-warning claim. The model-only uncertainty56%/97%, its denominator and the different live adjusted-score rule stay in experiments/results/uncertainty/summary.md and script5F. No interpolated or rounded-value gap is presented as another result."
   },
   {
     "id": "S11",
-    "start_s": 157.5,
-    "end_s": 174.5,
+    "start_s": 162.5,
+    "end_s": 179.5,
     "speaker": "[MEMBER 1] (VO)",
     "narration": "Then we tried real footage. On eleven frames of a public-domain street clip, the open YOLO model in our app counted 97 percent as many nearby people as a careful hand count; across the whole scene, only 27.",
     "visual_type": "figure",
@@ -172,8 +172,8 @@
   },
   {
     "id": "S13",
-    "start_s": 174.5,
-    "end_s": 192.5,
+    "start_s": 179.5,
+    "end_s": 197.5,
     "speaker": "[MEMBER 1] (VO)",
     "narration": "On two thousand frames from one mall camera, the detector under-counted. Twenty labelled frames let us calibrate that camera, cutting counting error from thirteen to about three people per frame. A fixed guess scored about five. This calibration is not yet in the app.",
     "visual_type": "figure",
@@ -188,25 +188,25 @@
   },
   {
     "id": "S14",
-    "start_s": 192.5,
-    "end_s": 213.5,
+    "start_s": 197.5,
+    "end_s": 218.5,
     "speaker": "[MEMBER 3] (VO)",
-    "narration": "In a recorded simulation, approving the redirect left Senado modestly less crowded, but still above our prototype alert threshold. The diversion was assumed, not measured. Our failure case: the surge crossed that threshold before a confident warning. Staff on the ground stay in charge.",
+    "narration": "Does acting help? In a recorded simulation, approving the redirect left Senado modestly less crowded, but still above our prototype alert threshold. The diversion was assumed, not measured. Our failure case: the surge crossed that threshold before a confident warning. Staff on the ground stay in charge.",
     "visual_type": "motion_graphic",
-    "visual": "Preserve the two recorded simulation curves and assumed-effect band. Label the dotted0.70 line Prototype alert threshold with the short qualification not a validated safety limit. Keep the14:40 end comparison0.75 versus0.82. Show the named failure case: runA true crossing14:08:09 and first confident CRITICAL forecast14:09:08. Any recommendation-created marker is separate from approval at14:14. Finish with the existing staff figures and Staff decide mark on the final sentence.",
-    "on_screen_text": "Chapter card (top-left): Does acting help? | Badge (top-right): SIMULATED · recorded run (amber) | Under the chart: At 14:40: approved 0.75 vs no action 0.82 | Axis: relative index, not people per m² | Threshold: Prototype alert threshold 0.70 · not a validated safety limit | Chip: Assumed diversion, not measured | Header above the clock panel: Our failure case | Clock panel: crowd build-up ≈3 min / forecast horizon 5-15 min; from 'Staff on the ground': two staff figures + Staff decide",
+    "visual": "0–2.4 s: central spoken question then persistent 40 px header. With the answer at 2.6 s, reveal the same recorded-simulation comparison; all previous body beats move 2.4 s later. Preserve approved 0.75 versus no action 0.82, the prototype alert threshold 0.70 and its not-validated-safety-limit label, assumed rather than measured diversion, and the failure clock showing confident warning 59 seconds after threshold crossing. Staff figures appear with the final sentence from about 18.46 s; the shot ends at 21 s. Recorded marker times: true threshold crossing 14:08:09, first confident CRITICAL forecast 14:09:08, and approval at 14:14; keep these distinct.",
+    "on_screen_text": "Chapter question (central then persistent header): Does acting help? | Badge (top-right): SIMULATED · recorded run (amber) | Under the chart: At 14:40: approved 0.75 vs no action 0.82 | Axis: relative index, not people per m² | Threshold: Prototype alert threshold 0.70 · not a validated safety limit | Chip: Assumed diversion, not measured | Header above the clock panel: Our failure case | Clock panel: crowd build-up ≈3 min / forecast horizon 5-15 min; from 'Staff on the ground': two staff figures + Staff decide",
     "assets": [
       "experiments/results/simulation_run/A_timeline.csv",
       "experiments/results/simulation_run/B_timeline.csv",
       "experiments/results/simulation_run/A_events.json",
       "fallback: experiments/results/simulation_run/simulation_run_timeline.png (top panel)"
     ],
-    "notes": "Use recorded runA: true CRITICAL crossing14:08:09, first confident (effective score≥0.60) CRITICAL forecast14:09:08. The first forecast at any confidence was14:08:30, so do not substitute that marker for the spoken confident warning. Approval is scripted at14:14. Live simulation changes route attractiveness; no measured fraction of people complying is claimed. End density improved modestly but stayed above0.70; time above CRITICAL was not shortened. Thresholds are experimental prototype settings, not a crowd-crush safety standard."
+    "notes": "Chapter emphasis revision: the opening question is spoken; its guide answer starts at 2.4 s within the audio (2.6 s into the shot). Keep the question as a 40 px header after its central focus. Re-key all answer animations and recording cues to the new guide. Use recorded runA: true CRITICAL crossing14:08:09, first confident (effective score≥0.60) CRITICAL forecast14:09:08. The first forecast at any confidence was14:08:30, so do not substitute that marker for the spoken confident warning. Approval is scripted at14:14. Live simulation changes route attractiveness; no measured fraction of people complying is claimed. End density improved modestly but stayed above0.70; time above CRITICAL was not shortened. Thresholds are experimental prototype settings, not a crowd-crush safety standard."
   },
   {
     "id": "S15",
-    "start_s": 213.5,
-    "end_s": 230.5,
+    "start_s": 218.5,
+    "end_s": 235.5,
     "speaker": "[MEMBER 4] (VO)",
     "narration": "On Macau's mapped streets, we stress-tested a full corridor closure. Twenty-four of forty simulated wheelchair users had no step-free route in either plan. This isn't a route safety check: staff must inspect the route and assist people on site.",
     "visual_type": "ui_capture",
@@ -221,29 +221,29 @@
   },
   {
     "id": "S16",
-    "start_s": 230.5,
-    "end_s": 238.5,
+    "start_s": 235.5,
+    "end_s": 243.5,
     "speaker": "[MEMBER 2] (VO)",
-    "narration": "Our next test uses real Melbourne pedestrian counts under pre-registered rules. Results are still pending.",
+    "narration": "What's next? A pre-registered test on real Melbourne pedestrian counts. Results are still pending.",
     "visual_type": "motion_graphic",
-    "visual": "Eight-second status-only version using the existing recorded sensor dots and clock. Show the99 sensors in the initial archived24hours, then a concise pre-registered-test status. No result chart, invented verdict, silent reserved slot or production placeholder appears. The entire shot states a future test whose results are not yet available. Preserve the source licence and Not Macau qualification.",
-    "on_screen_text": "Chapter card (top-left): What's next? | Badge (top-right): PENDING | Sensor count beside the dots: 99 Melbourne street sensors / in the archive's first 24 hours | Calendar strip header: archived hourly since 12 Oct 2026 | Status: Pre-registered test · Analysis pending · Macro-F1 vs no-change baseline | Footer: City of Melbourne · CC BY | Caveat card: Not Macau: tests the method",
+    "visual": "0–2.4 s: central spoken question then persistent 40 px header. From 2.6–4.4 s, compactly show only the initial Melbourne archive snapshot; retain the 99-sensor basis, calendar, licence and Not Macau limitation. Pre-registered test, Analysis pending and Macro-F1 versus no-change baseline are fully visible by 5.65 s and stay through 8 s. No held-out analysis, result chart or claimed outcome.",
+    "on_screen_text": "Chapter question (central then persistent header): What's next? | Badge (top-right): PENDING | Sensor count beside the dots: 99 Melbourne street sensors / in the archive's first 24 hours | Calendar strip header: archived hourly since 12 Oct 2026 | Status: Pre-registered test · Analysis pending · Macro-F1 vs no-change baseline | Footer: City of Melbourne · CC BY | Caveat card: Not Macau: tests the method",
     "assets": [
       "experiments/datasets/melbourne/minute/*.csv.gz",
       "experiments/datasets/melbourne/sensors.csv",
       "experiments/datasets/melbourne/README.md"
     ],
-    "notes": "Complete pending-result fallback, not an editing placeholder. Keep the frozen preregistration95057e2 and its SHA checks. Primary outcome remains +15-minute macro-F1 minus persistence, confidence interval and prespecified verdict; Melbourne's relative busyness classes are not Macau safety ground truth. No MAE task is introduced. This animation reads only the initial committed11–12Oct snapshot, not the held-out test days. Replace this shot only after the real test completes, report the registered result whether favourable or not, and re-time from the new narration."
+    "notes": "Chapter emphasis revision: the opening question is spoken; its guide answer starts at 2.4 s within the audio (2.6 s into the shot). Keep the question as a 40 px header after its central focus. Re-key all answer animations and recording cues to the new guide. Complete pending-result fallback, not an editing placeholder. Keep the frozen preregistration95057e2 and its SHA checks. Primary outcome remains +15-minute macro-F1 minus persistence, confidence interval and prespecified verdict; Melbourne's relative busyness classes are not Macau safety ground truth. No MAE task is introduced. This animation reads only the initial committed11–12Oct snapshot, not the held-out test days. Replace this shot only after the real test completes, report the registered result whether favourable or not, and re-time from the new narration."
   },
   {
     "id": "S17",
-    "start_s": 238.5,
-    "end_s": 257.5,
+    "start_s": 243.5,
+    "end_s": 261.5,
     "speaker": "[MEMBER 1] (VO over B-roll)",
-    "narration": "Phones on temporary mounts can serve one festival, then move to the next. We see Macau's police, who run crowd control, as the intended user. The whole chain runs end to end in simulation, with 124 automated tests passing.",
+    "narration": "Can it happen? Phones on temporary mounts can serve different festivals. Macau's police are our intended user. The prototype runs end to end in simulation, with 124 automated tests passing.",
     "visual_type": "motion_graphic",
-    "visual": "Times from the guide voice of 18 Oct (the real take, at about 140 wpm, runs later); re-key to the real take. 0-4.95 s: a phone-on-clamp icon hops between festival dates on a calendar while a pole-mounted camera stays bolted in place. 4.95-9.84 s (the intended-user line): an operator card with a separate 'No partner yet' chip (on 'Macau's police', about 5.6 s; generic shapes, no emblems); no cost panel (the team lead decided on 19 Oct to keep the one-year cost off screen, 5A item 4), so the card holds alone. About 9.84-14.75 s: B-roll filmed by the team (film at least 5 s), a member runs .venv/bin/python -m pytest and the screen shows '54 passed'; from about 11.6 s ('in simulation') the counters 54 · 24 · 33 · 13 come in over it at their final values (no count-up, so a paused frame never shows a partial sum), and only then the '= 124' total, which lands on 124 on 'a hundred and twenty-four' (about 12.9 s). About 14.75-19.0 s (from 'tests'): the roadmap arrow, four stations.",
-    "on_screen_text": "Chapter card (top-left): Can it happen? | Intended user: Public Security Police Force · counts only, never images | Chip: No partner yet | Cost panel (none): [not shown: the team lead decided on 19 Oct to keep the one-year cost off screen; docs/cost-estimate.md is a Q&A answer] | Counters (from about 11.6 s, final values only; the total after all four): Python 54 · dashboard 24 · SketchFuture 33 · iOS 13 = 124 automated tests | Roadmap (about 14.75-19.0 s): Simulation prototype (done) → Melbourne real-data check → school counting test → street pilot, trilingual signs (battery and placement untested)",
+    "visual": "0–2.4 s: central spoken question then persistent 40 px header. Phones on temporary mounts appear at 2.6 s and move between festival calendars. The intended-user card appears at 6.15 s; its No partner yet chip at 6.25 s. At 8.75 s: B-roll filmed by the team (film at least 5 s), a member runs .venv/bin/python -m pytest and the screen shows '54 passed'. Static suite values 54 · 24 · 33 · 13 enter at 10.75 s; their total enters at 11.77 s and lands on 124 by 12.05 s, with no count-up. The roadmap runs from 13.4–18 s, fully settled from about 13.9 s. Preserve simulation, pending real-data test, school test and permission-dependent pilot stages; no cost panel.",
+    "on_screen_text": "Chapter question (central then persistent header): Can it happen? | Intended user: Public Security Police Force · counts only, never images | Chip: No partner yet | Cost panel (none): [not shown: the team lead decided on 19 Oct to keep the one-year cost off screen; docs/cost-estimate.md is a Q&A answer] | Counters (from about 10.75 s, final values only; the total after all four): Python 54 · dashboard 24 · SketchFuture 33 · iOS 13 = 124 automated tests | Roadmap (about 13.4-18.0 s): Simulation prototype (done) → Melbourne real-data check → school counting test → street pilot, trilingual signs (battery and placement untested)",
     "assets": [
       "docs/testing.md (iOS 13; the other three suites recounted 16 Oct: pytest --collect-only 54, dashboard vitest 24, SketchFuture vitest 33)",
       "docs/deployment.md (operational model)",
@@ -253,16 +253,16 @@
       "docs/research/brief-evidence.md (sections 3, 6 and 8)",
       "team camera B-roll of a real test run"
     ],
-    "notes": "The spoken business slot names the intended user (12 words). The department's official name, Public Security Police Force, is on the card (19 Oct; it fits on one line of the lone card at 46 px, 1,257 of 1,344 px), not in the voice (round-2 lock). The intended user is the team's proposal, not an agreement: the 'No partner yet' chip must be readable on its own. Law 14/2018, Art. 3: the police 'maintain public order' and 'control and supervise vehicle and pedestrian movement'. 'Counts only, never images' is the closed schema and the 403 for media (S02, S08). Partner departments are a Q&A answer, not on screen (5F). The AGPL / Ultralytics licence caveat moved to 5F too; S20 already credits both licences. Tests: 124 = Python 54 (.venv/bin/python -m pytest --collect-only, and a full run: 54 passed) + dashboard 24 + SketchFuture 33 (vitest run, 16 Oct; the same counts on 17 Oct) + iOS 13 (docs/testing.md, not re-run); read 'a hundred and twenty-four'. Film the B-roll with .venv/bin/python -m pytest, without -q: pyproject.toml already adds -q, and a second -q hides the '54 passed' summary line. If any suite count changes before the voice shoot, recount and update the narration, the counters, the B-roll and docs/testing.md together. Cost: docs/deployment.md no longer has a cost table; the one-year estimate is docs/cost-estimate.md, a TEAM ESTIMATE draft (public prices opened 16 Oct 2026, quantities still to be confirmed) that the team has not approved. The team lead decided on 19 Oct not to show any cost in the video (script.md 5A item 4): the sheet stays in the repo as a Q&A answer (5F), and the panel stays off. 39 written / 42 spoken words in 19.0 s (0.95 at 140 wpm; guide 15.46 s, ending at 15.66 s), counting a hyphenated word once, as everywhere in script.md. The slot comes from the guide voice (script.md section 1, 'How the slots were set'): 19.5 s after the team-voice rewrite (18.5 s plus the reading's growth, 14.90 → 15.46 s, × 1.05, rounded up to the next 0.5 s), then trimmed 0.5 s in the why → how → what reorder to pay for S07's belief line. No overrun cut (the intended-user line is already the short form)."
+    "notes": "Spoken question focus followed by a persistent header. Current guide: answer 2.624 s, intended-user sentence 6.250 s, prototype 8.743 s, test-count clause 11.733 s. Camera B-roll starts at 8.75 s; film at least five seconds, with the real \"54 passed\" summary visible. The other suite totals and overall124 are sourced in the testing documents. Intended user is Macau's Public Security Police Force; no partner or deployment is claimed. Cost sheet remains Q&A-only. Re-key the graphics and overlay to the real take."
   },
   {
     "id": "S17b",
-    "start_s": 257.5,
-    "end_s": 269.5,
+    "start_s": 261.5,
+    "end_s": 273.5,
     "speaker": "[MEMBER 3] (VO)",
     "narration": "If it fails, who answers? The person who approved it, named in our log, and the department running it. Every notice says an AI forecast is involved.",
     "visual_type": "motion_graphic",
-    "visual": "Motion-graphics card on navy in the S07 / S17 style: a title and three rows, shapes and icons only, no department emblem, no badge. 0.0 s: the title and row 1 appear (icon: a figure with a walking stick beside a wheelchair outline); the title is fully in before the voice asks it. 0.5 s: the voice starts with the title question. About 2.8 s ('The person who approved it'): row 2 builds (icon: a log list with a name line). About 7.2 s ('Every notice'): row 3 builds (icon: a sign). Times from the guide voice of 18 Oct: the voice ends about 10.0 s; the card holds to 12.0 s. Title and rows stay above y 780, clear of the lower-third (y 800-890) and the caption band (y 920-990); the footer sits in the footer slot. Re-key to the real take.",
+    "visual": "Motion-graphics card on navy in the S07 / S17 style: a title and three rows, shapes and icons only, no department emblem, no badge. 0.0-2.6 s: the existing large title stands alone while the question is spoken; row 1 stays hidden until 2.6 s so it cannot compete. Then row 1 appears (icon: a figure with a walking stick beside a wheelchair outline). 0.5 s: the voice starts with the title question. About 2.8 s ('The person who approved it'): row 2 builds (icon: a log list with a name line). About 7.2 s ('Every notice'): row 3 builds (icon: a sign). Times from the guide voice of 18 Oct: the voice ends about 10.0 s; the card holds to 12.0 s. Title and rows stay above y 780, clear of the lower-third (y 800-890) and the caption band (y 920-990); the footer sits in the footer slot. Re-key to the real take.",
     "on_screen_text": "Title: If it fails, who answers? | Row 1: May be more vulnerable: older, less mobile · can't read Chinese | Row 2: Who answers: the named approver · the department running it | Row 3: Telling the public: signs (planned) · every notice mentions AI | Footer: To be confirmed with the authorities",
     "assets": [
       "backend/app/services/engine.py (decide_intervention: the approver's name as decided_by and as the audit-log actor)",
@@ -276,8 +276,8 @@
   },
   {
     "id": "S18",
-    "start_s": 269.5,
-    "end_s": 276.5,
+    "start_s": 273.5,
+    "end_s": 280.5,
     "speaker": "[MEMBER 4] (VO)",
     "narration": "Back to Mrs Chan. The system flags the risk; staff check her route and stay beside her.",
     "visual_type": "motion_graphic",
@@ -293,8 +293,8 @@
   },
   {
     "id": "S19",
-    "start_s": 276.5,
-    "end_s": 288.0,
+    "start_s": 280.5,
+    "end_s": 292.0,
     "speaker": "[MEMBER 3], [MEMBER 4], [MEMBER 2], [MEMBER 1] (on camera, relay)",
     "narration": "[M3] Next, we want a supervised street pilot in Macau, with permission. [M4] The AI recommends. [M2] A person decides. [M1] Nothing identifying leaves the phone.",
     "visual_type": "team_footage",
@@ -307,8 +307,8 @@
   },
   {
     "id": "S20",
-    "start_s": 288.0,
-    "end_s": 294.0,
+    "start_s": 292.0,
+    "end_s": 298.0,
     "speaker": "none",
     "narration": "",
     "visual_type": "motion_graphic",

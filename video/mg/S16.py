@@ -69,21 +69,20 @@ SHOT = next(s for s in SHOTS if s["id"] == "S16")
 DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)
 assert 7.5 <= DURATION <= 8.0, DURATION
 
-# Re-keyed to S16.wav on 19 Oct (6.482 s; assembly adds 0.2 s):
-# real Melbourne counts under pre-registered rules:0.20-4.92; pending status:5.16-6.68.
-# Only the archive's fixed first 24-hour snapshot is animated. The status card holds to 8 s.
+# The opening question owns the first2.4 s; the answer starts at2.6 s. Compress only
+# the fixed snapshot's playback, preserving a readable pending/method card at the end.
+ANSWER_START = 2.6
 BEATS = {
-    "dots": 0.0,
-    "playback": 0.55,
-    "real_counts": 0.8,
-    "ninety_nine": 1.6,
-    "melbourne": 2.2,
-    "announced": 4.25,
-    "result": 4.8,
-    "pending": 5.15,
+    "dots": ANSWER_START,
+    "playback": ANSWER_START,
+    "real_counts": 2.65,
+    "ninety_nine": 3.4,
+    "melbourne": 3.8,
+    "announced": 4.6,
+    "result": 4.95,
+    "pending": 5.2,
     "method": 5.25,
 }
-CHAPTER_END = 2.0                          # chapter card for about 2 s
 PLAYBACK_END = BEATS["announced"] - 0.2    # the 24 hours play from BEATS["playback"] to here, then hold
 
 # ---------- on-screen text (storyboard wording, checked against the shot list) ----------
@@ -101,13 +100,15 @@ METHOD_LABEL = "Macro-F1 vs no-change baseline"
 
 _ost = SHOT["on_screen_text"]
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith("| S16 |"))
-for s_ in (f"Chapter card (top-left): {CHAPTER}", "Badge (top-right): PENDING", f"Footer: {CREDIT}",
+for s_ in (f"Chapter question (central then persistent header): {CHAPTER}", "Badge (top-right): PENDING", f"Footer: {CREDIT}",
            f"Calendar strip header: {SINCE}", f"Caveat card: {CAVEAT_LEAD} {CAVEAT_REST}",
            RESULT_HEAD, STATUS_LABEL, METHOD_LABEL):
     assert s_ in _ost, f"not in the storyboard's on-screen text: {s_!r}"
 for s_ in (CREDIT, SINCE, f"{CAVEAT_LEAD} {CAVEAT_REST}"):
     assert s_ in _row, f"not in script.md's S16 row: {s_!r}"
 assert "Melbourne" in SHOT["narration"]
+assert SHOT["narration"].startswith(CHAPTER)
+assert DURATION - BEATS["method"] - 0.4 >= 0.3 * len(METHOD_LABEL.split()) + 0.5
 assert len(f"{CAVEAT_LEAD} {CAVEAT_REST}".split()) <= 5 and len(CREDIT.replace("·", "").split()) <= 7
 assert not re.search(r"[\w-]+/[\w./-]+|\b[0-9a-f]{7,40}\b", " ".join([CREDIT, SINCE, CAVEAT_REST, BASIS_TAIL])), \
     "no repo paths or commit hashes in the picture (declutter, 19 Oct)"
@@ -746,23 +747,25 @@ def draw_result(img: Image.Image, t: float) -> None:
 
 
 def draw_frame(t: float) -> Image.Image:
-    img = (BASE_BADGE if t >= 0.6 else BASE).copy()
+    if t < ANSWER_START:
+        img = canvas()
+        chapter_question(img, CHAPTER, t)
+        return img
+    img = BASE_BADGE.copy()
     img.alpha_composite(map_frame(t), (MAP_BOX[0], MAP_BOX[1]))
     draw_right_column(img, t)
     draw_result(img, t)
-    if t < 0.6:
-        badge(img, "PENDING", alpha=progress(t, 0.1, 0.4))
-    if t <= CHAPTER_END:
-        chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
+    chapter_question(img, CHAPTER, t)
     return img
 
 
 STILLS = {
-    "card": 0.8,
-    "night": 1.5,
-    "count": 2.0,
-    "basis": 3.0,
-    "announced": 4.7,
+    "question": 1.0,
+    "question_docking": 2.2,
+    "answer": 3.15,
+    "count": 3.8,
+    "basis": 4.2,
+    "announced": 5.0,
     "pending": 6.2,
     "end": DURATION - 1 / FPS,
 }

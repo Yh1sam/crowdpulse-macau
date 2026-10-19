@@ -143,10 +143,10 @@ _all = [l for _, letters in COLUMNS for l in letters]
 assert sorted(_all) == sorted(l for l, _ in STEMB), COLUMNS                   # together: all five, none twice
 WORDS = dict(STEMB)                                                             # letter -> discipline word
 
-# What each member worked on, in their own words: the phrase from their S05 sentence, "[Mn] I worked on <phrase>."
+# Keep the contribution from the first sentence; S05 now adds an explanatory second sentence.
 _s05_narration = next(s for s in _shots if s["id"] == "S05")["narration"]
 _s05 = dict(re.findall(r"\[(M\d|ALL)\]\s*([^\[]+?)\s*(?=\[|$)", _s05_narration))   # speaker -> sentence
-WORKED_ON = {f"[MEMBER {k[1:]}]": re.fullmatch(r"I worked on (.+)\.", line).group(1)
+WORKED_ON = {f"[MEMBER {k[1:]}]": re.match(r"I worked on ([^.]+)\.", line).group(1)
              for k, line in _s05.items() if k != "ALL"}   # [MEMBER 1] -> "the app", ...
 assert list(WORKED_ON) == [tag for tag, _ in COLUMNS], (WORKED_ON, COLUMNS)    # one phrase per member column
 

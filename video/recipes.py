@@ -9,8 +9,8 @@ from pathlib import Path
 from PIL import ImageDraw
 
 from assemble import png, probe_duration
-from style import (BUILD, INK, INK_2, NAVY, SAFE, WARNING, CRITICAL, badge, chapter_card, draw_text, footer,
-                   legend_strip, rounded, text_size, transparent)
+from style import (BUILD, INK, INK_2, NAVY, SAFE, WARNING, CRITICAL, badge, chapter_question, draw_text, footer,
+                   legend_strip, render_overlay, rounded, text_size, transparent)
 
 MG, CLIPS, OVL = BUILD / "mg", BUILD / "clips", BUILD / "overlays"
 MG_SHOTS = {"S01": "S01", "S05": "S05", "S06": "S06", "S07": "S07", "S10": "S10", "S11": "S11", "S13": "S13",
@@ -105,34 +105,35 @@ def s02(dur: float):
 
 
 def s08(dur: float):
-    """The real terminal session (video/build/clips/S08.mp4, drawn from S08.cast): each command and its code
-    appear together (code 0.02-0.06 s after the command, at 1.63 / 3.97 / 5.82 s in the take). Each stamp lands
-    on its verb in the guide voice (voice from 0.2 s): 'accepts' 2.85 s, 'rejects' 4.77 s, 'refuses' 7.5 s. So
-    that each code shows just before its stamp (the take was timed to the old lines), idle prompt time between
-    the commands is cut or repeated. Nothing else changes: every command keeps its response and its latency as
-    recorded, and each splice joins two frames of the same screen, so the only difference is the blinking
-    cursor's rhythm at the three splices (on 0.7 s once, on or off 0.3 s three times, instead of 0.5 s). The codes
-    show at 2.83 / 4.80 / 7.43 s, 0.10-0.12 s before their stamps.
-    The take is raised 30 px (its top 30 px are empty navy), so the terminal window (y 170-775) ends 25 px above
-    [MEMBER 3]'s lower-third (y 800-890, 0.2-3.2 s; S08 is that member's first voice-over shot).
-    On screen (19 Oct declutter): the chapter card, the plain LIVE SOFTWARE badge and three short stamps (a code,
-    its verb and at most two words); no footer (the checks' test file is in script.md section 4)."""
-    spec("S08", "Badge (top-right): LIVE SOFTWARE (cyan)", "202 accepted · numbers only", "422 rejected · face-ID field",
+    """Keep every recorded command and response; extend only the initial idle prompt.
+
+    The spoken question owns 0–2.4 s, then stays as a header. The answer starts at
+    2.608 s; recorded status codes now appear at 3.30, 5.27 and 7.90 s, with their
+    callouts at 3.42, 5.37 and 8.02 s. The terminal remains above the speaker strip,
+    whose introduction is deferred until 2.6 s by assemble.py.
+    """
+    spec("S08", "Chapter question (central then persistent header): Can it be trusted?",
+         "Badge (top-right): LIVE SOFTWARE (cyan)", "202 accepted · numbers only", "422 rejected · face-ID field",
          "403 refused · image upload")
     take = segments("S08", CLIPS / "S08.mp4", [
-        (0.0, 1.4, FULL, FULL),     # 0.0-1.4: the prompt (cursor on 1.0-1.5 s)
-        (0.2, 2.3, FULL, FULL),     # 1.4-3.5: the prompt again from 0.2 s (cursor on 0.7 s once); command 1 and 202 at 2.83
-        (2.7, 5.0, FULL, FULL),     # 3.5-5.8: 0.4 s of prompt skipped; command 2 and 422 at 4.80
-        (4.2, 7.4, FULL, FULL),     # 5.8-9.0: 0.8 s of prompt repeated; command 3, its message and 403 at 7.43
+        (0.0, 1.4, FULL, FULL),
+        (0.2, 0.67, FULL, FULL),    # repeat .47 s of idle prompt; no command or response is repeated
+        (0.2, 2.3, FULL, FULL),     # 1.87–3.97: command 1 and its recorded response
+        (2.7, 5.0, FULL, FULL),     # 3.97–6.27: command 2 and its recorded response
+        (4.2, 7.4, FULL, FULL),     # 6.27–9.47: command 3 and its recorded refusal
     ])
+    def question_frame(t):
+        img = transparent()
+        chapter_question(img, "Can it be trusted?", t)
+        return img
+    question = render_overlay("S08_question", dur, question_frame)
     ov = [
-        (png("S08_card", lambda img: chapter_card(img, "Can it be trusted?")), 0.0, 2.0),
-        (png("S08_badge", lambda img: badge(img, "LIVE SOFTWARE")), 0.0, dur),
-        (png("S08_s1", lambda img: stamp(img, 300, 311, "202 accepted · numbers only", SAFE)), 2.95, dur),    # "accepts"
-        (png("S08_s2", lambda img: stamp(img, 300, 416, "422 rejected · face-ID field", WARNING)), 4.9, dur),  # "rejects"
-        (png("S08_s3", lambda img: stamp(img, 300, 556, "403 refused · image upload", CRITICAL)), 7.55, dur),  # "refuses"
+        (png("S08_badge", lambda img: badge(img, "LIVE SOFTWARE")), 2.4, dur),
+        (png("S08_s1", lambda img: stamp(img, 300, 311, "202 accepted · numbers only", SAFE)), 3.42, dur),
+        (png("S08_s2", lambda img: stamp(img, 300, 416, "422 rejected · face-ID field", WARNING)), 5.37, dur),
+        (png("S08_s3", lambda img: stamp(img, 300, 556, "403 refused · image upload", CRITICAL)), 8.02, dur),
     ]
-    return ["-i", str(take)], ov, [], "crop=1920:1050:0:30,pad=1920:1080:0:0:color=0x0B1220"
+    return ["-i", str(take)], ov, [(question, 0.0)], "crop=1920:1050:0:30,pad=1920:1080:0:0:color=0x0B1220"
 
 
 def placeholder(shot: str, what: str, dur: float):

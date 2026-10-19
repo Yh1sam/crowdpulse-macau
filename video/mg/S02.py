@@ -1,11 +1,11 @@
-"""Shot S02 OVERLAY (1:19.0-1:26.0, 7.0 s): "Here's what we built. Our phone app counts people on the
-device, and sends only numbers." It opens the WHAT part of the video.
+"""Shot S02 OVERLAY (8.0 s): "What did we build?" It opens the WHAT part of the video.
+The spoken question gets a central focus, then moves into a persistent header before the answer.
 
 A transparent overlay composited over the iPhone Simulator recording of the CrowdPulse Sensor app
 (Live tab, Video mode, YOLO11n, CC0 Yonge & Dundas clip) at assembly. The phone screen sits
 centre-left in the footage (x 440-937, clear of the chapter card), so everything here stays on the
 right third and along the top, on semi-opaque panels:
-  - the chapter card "What did we build?" (top-left, the first 2 s, as in the other chapters);
+  - the central spoken question, docking into a persistent 40 px header at 2.4 s;
   - badge LIVE SOFTWARE · TEST CLIP with one short note under it, "iPhone Simulator · Toronto, not
     Macau" (never show the app without it: no physical-phone run is documented);
   - on "counts people on the device": four readings peel off the app's counter panel into a payload
@@ -54,27 +54,21 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 SHOT = "S02"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 7.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 8.0 s
 
-# Beats in seconds from the shot start, keyed to the robot guide voice (video/build/guide/S02.wav, laid
-# 0.2 s into the shot by assemble.py). Clause boundaries from
-#   ffmpeg -i video/build/guide/S02.wav -af silencedetect=noise=-35dB:d=0.08 -f null -
-# (speech 0.00-1.17 | 1.41-3.76 | 3.98-5.40), each + 0.2 s; words inside a clause from the length of
-# `say -v Daniel -r 155` on the words before them and the level dips between words:
-# "Here's what we built." (0.25-1.37) "Our phone app counts people (2.75) on the device," (to 3.96)
-# "and sends (4.4) only numbers." (4.75-5.6), then hold to the cut at 7.0.
-# re-key to the real voice take
+# The question is voiced at 0.2 s; its answer starts at 2.608 s. The original answer
+# animation is shifted one second later, following the unchanged body wording. The
+# central question covers the footage until its header transition at 2.0–2.4 s.
+# Re-key to the team's real take.
 BEATS = {
-    "badge_in": 0.0,   # cut in: badge and the Simulator note, held for the whole shot
-    "card_in": 0.0,    # chapter card "What did we build?" on "Here's what we built." (2 s, as in S06)
-    "card_out": 2.0,
-    "peel": 2.75,      # "counts people on the device": readings lift off the app's panel into the card
-    "server_in": 3.6,  # the server appears on the right as the card finishes
-    "slide": 4.3,      # "and sends": the card slides right to the server
-    "dock": 5.0,       # the card reaches the server (link pulse)
-    "shield_in": 4.75, # "only": the shield rises in front of the server
-    "photo": 4.85,     # "only numbers": a photo icon appears and tries to follow
-    "impact": 5.25,    # "numbers": it bounces off the shield; "image upload → HTTP 403" lands (holds 1.5 s)
+    "badge_in": 2.4,  # reveal the software evidence with the answer
+    "peel": 3.75,     # answer now begins at 2.608 s, about one second later
+    "server_in": 4.6,
+    "slide": 5.3,
+    "dock": 6.0,
+    "shield_in": 5.75,
+    "photo": 5.85,
+    "impact": 6.25,   # the 403 explanation retains its reading hold
 }
 
 # ---------- text (verbatim from the storyboard / shot list) ----------
@@ -97,7 +91,8 @@ PAYLOAD_EXACT = [
 PAYLOAD = [(k, f"{v:.{n}f}") for k, v, n in PAYLOAD_EXACT]        # 11, 0.27, 116, 0.91
 
 _ost = _shot["on_screen_text"]
-assert _ost.startswith(f"Chapter card (top-left, 2 s): {CHAPTER} | "), _ost
+assert _ost.startswith(f"Chapter question (central then persistent header): {CHAPTER} | "), _ost
+assert _shot["narration"].startswith(CHAPTER)
 assert f"Badge (top-right): {BADGE_KIND} · {BADGE_DETAIL} |" in _ost
 assert f"Note under the badge: {NOTE} |" in _ost
 assert " · ".join(f"{k} {v}" for k, v in PAYLOAD) + " · … |" in _ost
@@ -379,9 +374,8 @@ def pill_img(w: float, h: float, a_fill: float) -> Image.Image:
 def frame(t: float) -> Image.Image:
     img = transparent()
 
-    # top slot: badge and the Simulator note, the whole shot; the chapter card, the first 2 s
+    # Reveal the badge with the answer; the question focus is composited last.
     put(img, TOP, 0, 0, progress(t, BEATS["badge_in"], 0.3))
-    chapter_card(img, CHAPTER, fade(t, BEATS["card_in"], BEATS["card_out"], 0.25))
 
     # server rack (slides in from the right a little)
     ra = progress(t, BEATS["server_in"], 0.45)
@@ -480,6 +474,7 @@ def frame(t: float) -> Image.Image:
     if qa > 0:
         put(img, P403, PILL_403_RIGHT - P403.width, PILL_403_Y - (1 - qa) * 16, qa)
 
+    chapter_question(img, CHAPTER, t, header_size=36)  # leave space beside the phone's x=440 edge
     return img
 
 
@@ -502,7 +497,8 @@ def preview_bg() -> Image.Image:
     return bg
 
 
-STILLS = {"badge": 1.0, "peel": 3.2, "card": 4.2, "dock": 5.0, "bounce": 5.4, "hold": 6.95}
+STILLS = {"question": 1.0, "docking": 2.2, "peel": 4.2, "card": 5.2,
+          "dock": 6.0, "bounce": 6.4, "hold": DURATION - 0.05}
 
 if __name__ == "__main__":
     bg = preview_bg()

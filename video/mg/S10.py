@@ -1,6 +1,6 @@
 """S10 · Held-out simulation: +15 min macro-F1 and critical-minutes recall.
 
-The evidence legend docks before the two metric cards. The macro-F1 panel introduces the
+The spoken central question docks into a persistent header before the two metric cards. The macro-F1 panel introduces the
 model and persistence baseline, then slides left while the 91% / 79% recall card arrives.
 Both cards and the readable accuracy comparison hold to the cut. All results remain under
 SIMULATED; confidence-gating figures stay in the supporting evidence rather than this shot.
@@ -12,7 +12,6 @@ Run: .venv/bin/python video/mg/S10.py [--stills]
 from __future__ import annotations
 
 import json
-from functools import lru_cache
 import sys
 
 from pathlib import Path  # noqa: E402
@@ -28,24 +27,21 @@ SHOT = json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text())
 SHOT = next(s for s in SHOT if s["id"] == "S10")
 DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)
 
-# The shortened narration keeps the original first sentence, so its word-aligned beats stay:
-# +15 min F1 values at 5.85 / 7.85 s; critical recall at 11.7 / 14.6 s. Both cards then hold.
-VOICE_START = 0.8              # script.md section 6 (S10 voice from 0.8 s); assemble.py VOICE_START["S10"]
+# The question has its own guide beat; the answer starts at2.6 s including assembly's0.2 s offset.
+# New S10.wav: body2.61-16.83; recall's final 'against79' clause begins15.34 s.
+VOICE_START, ANSWER_START = 0.2, 2.6
 BEATS = {
-    "legend_in": 0.0,          # four badges appear centre-screen (no voice yet)
-    "legend_dock": 0.85,       # they shrink and dock bottom-right, docked by 1.5 s
-    "voice_on": 0.8,           # "On simulated days it had never seen," (0.80-2.98)
-    "chart_in": 1.3,           # macro-F1 panel fades in; the two bars grow
-    "fifteen_minute": 3.55,    # "our fifteen-minute forecasts" ("fifteen" 3.54) -> "+15 min" label brightens
-    "f1_model": 5.85,          # "point eight six five" (5.86-7.06)
-    "f1_nochange": 7.85,       # "against point seven nine five" (7.22; "point" 7.85, "five" ends 9.16)
-    "accuracy_line": 9.3,      # after "point seven nine five" (ends 9.16): the accuracy line, until the panel leaves
-    "and_catch": 11.0,         # "and caught" (11.0-11.68) -> the panel slides left (from 10.7), the critical-minutes card in
-    "ninety_one": 11.7,        # "ninety-one percent of critical minutes" (11.68) -> "91%" lands
-    "seventy_nine": 14.6,      # "against seventy-nine" ("seventy-nine" 14.58-15.44) -> "79%" lands
+    "voice_on": ANSWER_START,
+    "chart_in": ANSWER_START,
+    "fifteen_minute": 4.8,
+    "f1_model": 7.15,
+    "f1_nochange": 9.15,
+    "accuracy_line": 10.65,
+    "and_catch": 12.4,
+    "ninety_one": 13.05,
+    "seventy_nine": 15.7,
 }
-CHAPTER_END = 2.0              # chapter card shown for about 2 s
-assert DURATION >= BEATS["seventy_nine"] + 1.5, "allow time to read the final recall value"
+assert DURATION >= BEATS["seventy_nine"] + 0.4 + 1.5, "allow time to read the final fully revealed recall value"
 
 # ---------- data ----------
 
@@ -72,7 +68,7 @@ for v in (f"{F1_MODEL:.3f}", f"against {F1_BASE:.3f}", f"caught {CRIT_MODEL} per
 
 # ---------- on-screen text (storyboard wording, asserted against the shot list) ----------
 
-CHAPTER = "Does it work? Every result is labelled."
+CHAPTER = "Does it work?"
 AXIS = "macro-F1: SAFE, WARNING, CRITICAL weighted equally"   # the axis definition, at most 6 words
 BAR_NAMES = ("model", "no change")                           # inside the bars (direct labels, no legend)
 H_TAG = "+15 min"
@@ -83,12 +79,13 @@ ACC_BODY = f"{ACC_MODEL:.1f}% vs {ACC_BASE:.1f}% · always SAFE {ACC_SAFE:.1f}%"
 assert len(AXIS.split()) <= 6 and len(CRIT_LINE.split()) <= 6, (AXIS, CRIT_LINE)
 
 _ost = SHOT["on_screen_text"]
-for v in (f"Chapter card (top-left): {CHAPTER}", "Badge (top-right): SIMULATED (pinned)", f"Axis: {AXIS}",
+for v in (f"Chapter question (central then persistent header): {CHAPTER}", "Badge (top-right): SIMULATED (pinned)", f"Axis: {AXIS}",
           f"Bars ({H_TAG}): {BAR_NAMES[0]} / {BAR_NAMES[1]}", SCOPE, f"{ACC_HEAD} {ACC_BODY}",
-          f"Big numbers (from about {BEATS['and_catch']} s): {CRIT_MODEL}% vs {CRIT_BASE}% {CRIT_LINE}"):
+          f"{CRIT_MODEL}% vs {CRIT_BASE}% {CRIT_LINE}"):
     assert v in _ost, f"shotlist.json on_screen_text no longer matches: {v!r}"
 assert "flagged as uncertain" not in _ost and "When they flagged" not in _spoken
 assert "Footer" not in _ost, "S10 has no footer (19 Oct declutter)"
+assert SHOT["narration"].startswith(CHAPTER)
 
 MODEL_C = CYAN
 BASE_C = GREY
@@ -141,135 +138,9 @@ def paste(dst: Image.Image, src: Image.Image, xy, alpha: float = 1.0) -> None:
     dst.alpha_composite(src, (int(round(xy[0])), int(round(xy[1]))))
 
 
-# ---------- 1. evidence legend: centre-screen, then docked (matches style.legend_strip exactly) ----------
-
+# The evidence key stays docked, so it cannot compete with the opening question.
 LEGEND = ["SIMULATED", "REAL DATA", "MODEL CHECK", "PENDING"]
-assert f"Legend strip (bottom-right): {' · '.join(LEGEND)} |" in _ost, "shotlist.json legend line no longer matches"
-K = 2.4                                  # centre-screen scale of the legend
-LEG_CY = 520                              # centre-screen row centre
-
-
-def dock_boxes() -> dict[str, tuple[int, int, int, int]]:
-    """The exact boxes legend_strip() draws (same arithmetic as style.legend_strip)."""
-    boxes, x = {}, 1860
-    for kind in reversed(LEGEND):
-        tw, _ = text_size(kind, 15, 700)
-        x0 = x - tw - 18
-        boxes[kind] = (x0, 1000, x, 1024)
-        x = x0 - 8
-    return boxes
-
-
-DOCK = dock_boxes()
-
-
-@lru_cache(maxsize=None)
-def pill_sprite(kind: str, k: float, morph: float = 1.0) -> Image.Image:
-    """One legend pill drawn at scale k, with legend_strip's proportions (text 15 px, pad 9, height 24).
-    morph 0: the large font's own letter spacing, text centred vertically (reads best centre-screen).
-    morph 1: each letter at k x its place in legend_strip's 15 px line (hinted advances) and 4 px below
-    the pill top, scaled, so the shrunk sprite lines up letter for letter with the strip it turns into.
-    In between, the letters slide (by at most a few pixels), so nothing is ever drawn twice."""
-    x0, y0, x1, y1 = DOCK[kind]
-    w_, h_ = int(round((x1 - x0) * k)), int(round((y1 - y0) * k))
-    img = Image.new("RGBA", (w_, h_), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    r, lw = int(round(12 * k)), max(2, int(round(2 * k)))
-    if kind == "PENDING":
-        d.rounded_rectangle((0, 0, w_ - 1, h_ - 1), r, fill=NAVY_2)
-        step, dash = 14 * k, 7 * k          # the same dashes as style.rounded(dash=True), scaled
-        x = float(r)
-        while x < w_ - r:
-            xe = min(x + dash, w_ - r)
-            d.line([(x, lw / 2), (xe, lw / 2)], fill=GREY, width=lw)
-            d.line([(x, h_ - 1 - lw / 2), (xe, h_ - 1 - lw / 2)], fill=GREY, width=lw)
-            x += step
-        colour = INK_2
-    else:
-        d.rounded_rectangle((0, 0, w_ - 1, h_ - 1), r, fill=BADGES[kind])
-        colour = NAVY
-    small, big = font(15, 700), font(int(round(15 * k)), 700)
-    _, t0, _, b0 = big.getbbox(kind, anchor="la")
-    y = lerp((h_ - (b0 - t0)) / 2 - t0, 4 * k, morph)
-    fit = k * small.getlength(kind) / big.getlength(kind)           # natural spacing, same overall width
-    for i, ch in enumerate(kind):
-        if ch == " ":
-            continue
-        x_strip = k * (small.getlength(kind[:i + 1]) - small.getlength(ch))   # where legend_strip puts it
-        x_nat = fit * (big.getlength(kind[:i + 1]) - big.getlength(ch))
-        d.text((9 * k + lerp(x_nat, x_strip, morph), y), ch, font=big, fill=colour, anchor="la")
-    return img
-
-
-def centre_boxes() -> dict[str, tuple[float, float, float, float]]:
-    """The legend row scaled by K and centred on the screen (same spacing as the docked strip)."""
-    left = min(b[0] for b in DOCK.values())
-    total = (1860 - left) * K
-    ox = (W - total) / 2
-    out = {}
-    for kind, (x0, y0, x1, y1) in DOCK.items():
-        out[kind] = (ox + (x0 - left) * K, LEG_CY - 12 * K, ox + (x1 - left) * K, LEG_CY + 12 * K)
-    return out
-
-
-CENTRE = centre_boxes()
-DOCK_START = BEATS["legend_dock"]
-DOCK_ARRIVE = DOCK_START + 0.65       # the pills land in the strip slot at 1.5 s
-# The row drops to the strip's y faster than it travels in x, accelerating (ease-in) and reaching
-# y 1012 at 1.4 s, then slides right along the strip row into its slots. The first caption (from
-# 0.8 s, box y 926-990 at x 645-1274) lies between the centre row and the strip, left of the slots
-# (SIMULATED's starts at x 1412). The pills are in the box's rows in one frame only (1.37 s), by
-# then 103 px right of it, so they never pass behind it (a drop of 0.45 s or less: 1 frame behind).
-DOCK_DROP = 0.55
-
-
-def drop(t: float) -> float:
-    """Vertical progress of the docking row: quadratic ease-in, complete DOCK_DROP s after the start."""
-    return clamp((t - DOCK_START) / DOCK_DROP) ** 2
-
-
-def strip_pills() -> dict[str, Image.Image]:
-    """Each pill exactly as legend_strip() draws it (cropped from a transparent layer)."""
-    layer = transparent()
-    legend_strip(layer)
-    # legend_strip draws exactly LEGEND's pills: nothing left of SIMULATED's slot, none missing
-    assert layer.getbbox()[0] == min(b[0] for b in DOCK.values()), (layer.getbbox(), DOCK)
-    return {k: layer.crop((x0, y0, x1 + 1, y1 + 1)) for k, (x0, y0, x1, y1) in DOCK.items()}
-
-
-STRIP = strip_pills()
-
-
-def draw_legend(img: Image.Image, t: float) -> None:
-    if t >= DOCK_ARRIVE:
-        legend_strip(img)
-        return
-    p = progress(t, DOCK_START, DOCK_ARRIVE - DOCK_START)
-    s = lerp(K, 1.0, p)                          # current scale of the row
-    # keep the large font's own letter spacing while the pills are big (legend_strip's hinted 15 px
-    # spacing, scaled up, reads as "SIMULAT ED"); switch to the strip's spacing only below about 1.5x,
-    # where the shift is a pixel or two and the pills are moving fast (about 3 frames)
-    morph = round(clamp((1.5 - s) / (1.5 - 1.2)), 2)
-    # then dissolve the sprite into legend_strip's own pixels (scaled; the letters already sit in the
-    # same places), so each pill lands as exactly the strip that stays
-    mix = clamp((1.2 - s) / (1.2 - 1.02))
-    py = drop(t)
-    for i, kind in enumerate(LEGEND):
-        a_in = progress(t, BEATS["legend_in"] + 0.07 * i, 0.35)
-        if a_in <= 0:
-            continue
-        pop = lerp(0.86, 1.0, a_in)                          # gentle grow-in
-        c0, d0 = CENTRE[kind], DOCK[kind]
-        box = tuple(lerp(c0[n], d0[n], p) for n in range(4))         # x and size follow p
-        cy = lerp((c0[1] + c0[3]) / 2, (d0[1] + d0[3]) / 2, py)     # y follows the faster drop
-        cx, cy = (box[0] + box[2]) / 2, cy + (1 - a_in) * 14
-        w_, h_ = (box[2] - box[0]) * pop, (box[3] - box[1]) * pop
-        dw, dh = d0[2] - d0[0], d0[3] - d0[1]
-        size = (max(1, int(round(w_ * (dw + 1) / dw))), max(1, int(round(h_ * (dh + 1) / dh))))
-        spr = pill_sprite(kind, K, morph).resize(size, Image.LANCZOS)
-        if mix > 0:
-            spr = Image.blend(spr, STRIP[kind].resize(size, Image.LANCZOS), mix)
-        paste(img, spr, (cx - w_ / 2, cy - h_ / 2), a_in)
+assert f"Legend strip (bottom-right): {' · '.join(LEGEND)} |" in _ost
 
 
 # ---------- 2. macro-F1 panel: the +15 min pair, with the accuracy line at its foot ----------
@@ -401,6 +272,9 @@ BASE = canvas()
 
 def draw_frame(t: float) -> Image.Image:
     img = BASE.copy()
+    if t < ANSWER_START:
+        chapter_question(img, CHAPTER, t)
+        return img
 
     # The two metric cards stay together after the recall values land.
     a_ch = progress(t, BEATS["chart_in"], 0.55)
@@ -415,18 +289,19 @@ def draw_frame(t: float) -> Image.Image:
         paste(img, card_a(t), (COL_X0 + (1 - a_recall) * 50, CB_Y0), a_recall)
 
     # overlay slots (no footer: no outside source in this shot)
-    chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
-    badge(img, "SIMULATED", alpha=progress(t, BEATS["legend_dock"] + 0.25, 0.4))
-    draw_legend(img, t)
+    badge(img, "SIMULATED", alpha=progress(t, ANSWER_START, 0.4))
+    legend_strip(img)
+    chapter_question(img, CHAPTER, t)
     return img
 
 
 STILLS = {
-    "legend_centre": 0.6,
-    "legend_docking": 1.15,
-    "f1_bars": 10.4,         # both +15 values emphasised, accuracy line in (before the slide); also
+    "question": 1.0,
+    "question_docking": 2.2,
+    "answer": 3.2,
+    "f1_bars": 11.8,         # both +15 values emphasised, accuracy line in (before the slide); also
                              # the source of video/team-kit/prop_M2_F1_chart.png, [MEMBER 2]'s S05 prop
-    "critical_minutes": 15.3,  # "79%" landed on "seventy-nine"; the panel and its accuracy line still up
+    "critical_minutes": 16.4,
     "hold": DURATION - 0.05,  # F1, accuracy and recall readable together at the cut
 }
 

@@ -14,9 +14,9 @@ Beats (shot seconds, keyed to the guide voice video/build/guide/S17b.wav, which 
 the shot (script.md section 6, "Guide track": S17b 0.5 s); clause starts are the silencedetect
 boundaries (noise -35 dB, d 0.08 s: 0, 1.30, 2.31, 3.92, 5.06, 6.71 s into the 9.45 s file of 19 Oct,
 unchanged since 18 Oct) + 0.5 s; re-key to the real take):
-0.0         the title, then row 1 ("May be more vulnerable", icon: a figure with a walking stick
-            beside a wheelchair outline); the footer. The title is fully in by 0.32 s.
-0.5-2.57    "If it fails, who answers?": the voice asks the title question (title and row 1 hold).
+0.0         the title alone, fully in by 0.32 s.
+0.5-2.57    "If it fails, who answers?": the voice asks the title question without competing rows.
+2.6         row 1 ("May be more vulnerable", walking stick / wheelchair icon) and the footer appear.
 2.81        "The person who approved it," -> row 2 builds ("Who answers", icon: a log list); it is
             outlined while it is spoken.
 4.42        "named in our log," -> the name line in the log icon lights up.
@@ -89,7 +89,7 @@ _ROW = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().split
 _cols = [c.strip() for c in _ROW.strip().strip("|").split(" | ")]
 assert len(_cols) == 7 and _cols[3] == SHOT["narration"], "narration differs between shotlist.json and script.md"
 for _s in [TITLE, *ROW_TEXT, FOOTER]:
-    assert f'"{_s}"' in _cols[5], f"script.md row {NAME} lacks {_s!r}"
+    assert _s in _cols[5], f"script.md row {NAME} lacks {_s!r}"
 
 # the beats below are keyed to these clauses (the guide's six speech runs); if the narration changes, re-key
 CLAUSES = ["If it fails,", "who answers?", "The person who approved it,", "named in our log,",
@@ -154,8 +154,8 @@ GUIDE_CLAUSES = [0.0, 1.297, 2.307, 3.920, 5.062, 6.712]   # silencedetect bound
 GUIDE_END = 9.454
 TITLE_IN = 0.35                              # the title's fade-in (it starts a frame before the cut)
 BEATS = {
-    "title": 0.0,                            # title, then row 1 (row 1 is not spoken)
-    "row1": 0.1,
+    "title": 0.0,                            # question stands alone until the spoken question finishes
+    "row1": 2.6,
     "question": VOICE + GUIDE_CLAUSES[0],    # 0.5  "If it fails, who answers?" (the title, read aloud)
     "row2": VOICE + GUIDE_CLAUSES[2],        # 2.81 "The person who approved it," -> row 2
     "named": VOICE + GUIDE_CLAUSES[3],       # 4.42 "named in our log," -> the name line lights
@@ -164,6 +164,7 @@ BEATS = {
     "voice_end": VOICE + GUIDE_END,          # 9.95; the card holds to 12.0
 }
 assert BEATS["title"] + TITLE_IN - 1 / FPS <= BEATS["question"], "the title must be fully in when the voice asks it"
+assert BEATS["row1"] >= 2.6, "unspoken details must not compete with the opening question"
 assert BEATS["voice_end"] < DURATION - 1.5, "the card must hold after the voice ends"
 BUILD_T = [BEATS["row1"], BEATS["row2"], BEATS["row3"]]
 ACTIVE = [None, (BEATS["row2"], BEATS["row3"]), (BEATS["row3"], BEATS["voice_end"] + 0.3)]   # outline while spoken
@@ -427,11 +428,11 @@ def frame(t: float) -> Image.Image:
         for j, key in enumerate(("head", "body")):
             kt = out_ease((t - t0 - 0.07 * (j + 1)) / 0.35)
             put(img, sp[key], kt, dy=lift + 10 * (1 - kt))
-    put(img, FOOTER_SPRITE, out_ease((t - 0.2) / 0.35))
+    put(img, FOOTER_SPRITE, out_ease((t - BEATS["row1"]) / 0.35))
     return img
 
 
-STILLS = {"title": 0.25, "row1": 0.45, "question": 1.9, "row2": 3.2, "named": 4.6, "department": 5.7,
+STILLS = {"title": 0.25, "question": 1.9, "question_end": 2.5, "row1": 3.0, "row2": 3.2, "named": 4.6, "department": 5.7,
           "row3": 7.5, "row3_built": 8.2, "voice_end": 10.3, "end": 11.95}
 
 if __name__ == "__main__":

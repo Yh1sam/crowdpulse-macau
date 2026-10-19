@@ -54,10 +54,9 @@ SHOT = next(s for s in SHOTS if s["id"] == "S14")
 DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)
 assert DURATION == 21.0, DURATION
 
-# Re-keyed to S14.wav on 19 Oct (17.975 s; assembly adds 0.2 s):
-# recorded comparison:0.20-5.47; prototype threshold:5.70-8.33; assumed diversion:8.57-10.09;
-# failure-case heading:10.31-11.02; crossing before the confident warning:11.26-15.81;
-# staff authority16.06-18.18. The final chart holds to 21 s; re-key to the recorded team take.
+# The spoken question has a dedicated focus beat. The unchanged answer recording
+# starts2.4 s later in the guide (2.6 s after assembly's voice offset).
+ANSWER_START, BODY_SHIFT = 2.6, 2.4
 BEATS = {
     "draw": 0.5,               # "In a recorded simulation," -> both lines start drawing left to right
     "approving": 1.99,         # "approving the redirect" (run A markers appear as the sweep passes them)
@@ -73,7 +72,7 @@ BEATS = {
     "staff": 16.06,            # "Staff on the ground stay in charge." (guide ends18.18;
                                # the panel holds to the end)
 }
-CHAPTER_END = 2.0              # chapter card for about 2 s
+BEATS = {key: when + BODY_SHIFT for key, when in BEATS.items()}
 DRAW_END = BEATS["by_the_end"] + 0.5
 
 # ---------- data ----------
@@ -165,6 +164,7 @@ assert f"Header above the clock panel: {CLOCK_HEADER}" in _ost
 assert "Footer" not in _ost, "S14 has no footer since 19 Oct (internal sources stay in script.md section 4)"
 assert f"{CLOCK_HEADER}:" in SHOT["narration"], "the clock panel enters on the spoken 'Our failure case:'"
 assert "Staff on the ground stay in charge." in SHOT["narration"], "the staff mark is keyed to this sentence"
+assert SHOT["narration"].startswith(CHAPTER)
 assert "No early warning in this scenario" in README, "source of 'Our failure case' (simulation_run/README.md)"
 # declutter (19 Oct): the under-chart line at most 8 words, the clock panel (rows + staff mark) at most 10
 assert len(UNDER.split()) <= 8 and len(f"{CLOCK_BUILD} {CLOCK_HORIZON} {STAFF_MARK}".split()) <= 10
@@ -646,9 +646,12 @@ BASE = canvas()
 
 def draw_frame(t: float) -> Image.Image:
     img = BASE.copy()
+    if t < ANSWER_START:
+        chapter_question(img, CHAPTER, t)
+        return img
 
     # chart panel: fades in, then slides left as the clock panel comes in
-    a_ch = progress(t, 0.0, 0.5)
+    a_ch = progress(t, ANSWER_START, 0.5)
     slide = progress(t, BEATS["failure"] - 0.5, 0.85)
     cx = lerp(CH_X_CENTRE, CH_X_LEFT, slide)
     paste(img, chart_frame(t), (cx, CH_Y + (1 - a_ch) * 18), a_ch)
@@ -664,20 +667,22 @@ def draw_frame(t: float) -> Image.Image:
         HEADER_S.draw(img, dx + 21, HEADER_BASE, a_ck)
 
     # overlay slots
-    chapter_card(img, CHAPTER, fade(t, 0.0, CHAPTER_END, 0.3))
-    badge(img, "SIMULATED", BADGE_DETAIL, alpha=progress(t, 0.1, 0.4))
+    badge(img, "SIMULATED", BADGE_DETAIL, alpha=progress(t, ANSWER_START, 0.4))
     legend_strip(img)
+    chapter_question(img, CHAPTER, t)
     return img
 
 
 STILLS = {
-    "card": 1.5,
-    "end_values": 7.3,
-    "critical": 6.8,
-    "chip": 9.8,
-    "header": 11.0,
-    "clock": 14.7,
-    "staff": 17.0,
+    "question": 1.0,
+    "question_docking": 2.2,
+    "answer": 3.5,
+    "end_values": 9.7,
+    "critical": 9.2,
+    "chip": 12.2,
+    "header": 13.4,
+    "clock": 17.1,
+    "staff": 19.4,
     "end": DURATION - 1 / FPS,
 }
 

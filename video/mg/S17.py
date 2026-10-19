@@ -1,46 +1,23 @@
-"""Shot S17 (3:50.5-4:09.5, 19.0 s): "Can it happen?" Feasibility and the intended user.
+"""S17 · Spoken feasibility question, intended user, test evidence and roadmap (18 s).
 
-Storyboard: docs/video/script.md section 3, row S17; claims table section 4, rows S17; section 6
-"motion_graphic" (S17: the cost panel appears only after the team approves docs/cost-estimate.md,
-labelled TEAM ESTIMATE, otherwise the operator card holds, never an empty panel; the "No partner
-yet" chip is readable on its own) and "Never say or show"; shot list docs/video/shotlist.json (id S17).
+The 19 Oct guide gives the opening question a dedicated focus beat; the answer begins
+at 2.4 s in the WAV (2.6 s after assembly's voice offset). The shared chapter_question
+helper draws the 84 px question last, then retains its 40 px header for the answer.
 
-Beats (shot seconds, keyed to the guide voice; re-key to the real voice take):
-0-4.95      "Phones on temporary mounts can serve one festival, then move to the next": a phone-on-
-            clamp kit hops between festival pages of a calendar (hops on "then move" and "the next")
-            while a pole-mounted counting camera stays bolted in place (badge ILLUSTRATION).
-4.95-9.84   "We see Macau's police, who run crowd control, as the intended user": the short operator
-            card (generic shapes, no emblems) and, on "Macau's police", the separate "No partner yet"
-            chip. The card names the department officially, "Public Security Police Force" (19 Oct;
-            one line on the lone card). The cost panel would slide in beside the card only if the shot
-            list's cost text were filled (labelled TEAM ESTIMATE, and the footer then names the sheet);
-            the team lead decided on 19 Oct to keep the cost off screen, so the text stays a bracketed
-            note and nothing is drawn.
-9.84-14.75  "The whole chain runs end to end in simulation": slate for the team's B-roll of a real
-            pytest run (hard cuts in and out, so the footage drops straight in; the window is about
-            4.9 s, so the take must run at least 5 s). From 11.62 s ("in simulation") the four suite
-            counters 54 · 24 · 33 · 13 come in over it, each with its final value (no count-up: a
-            paused frame never shows a partial sum); only when all four are fully in does "= 124"
-            come in, landing just before "a hundred" (12.91) and holding ~1.8 s through "and
-            twenty-four automated" (badge LIVE SOFTWARE).
-14.75-19.0  the roadmap arrow alone, four stations (cut on "tests").
-Declutter (19 Oct): no file-path or law footers, no badge sub-lines, no "peak periods" / "bolted in
-place" labels; the slate names the take, not the command.
+Guide-relative scene cues (shot seconds; re-key to the real take):
+  0.00-2.60   question, with other content hidden
+  2.60-6.15   temporary kit moves between illustrative festival calendar pages
+  6.15-8.75   intended Public Security Police Force user; separate No partner yet chip
+  8.75-13.40  real-test-run footage placeholder, four static suite values then total 124
+ 13.40-18.00  roadmap, fully readable by about 13.9 s (over four seconds of settled hold)
 
-Data (read, never retyped):
-  docs/video/shotlist.json, S17             chapter card, intended-user line, chip, cost text, the
-                                            counters line (the four suite counts and their sum:
-                                            54 / 24 / 33 / 13 = 124, recounted 16-17 Oct, re-run
-                                            19 Oct) and roadmap stations, split verbatim from
-                                            on_screen_text; the slate's '54 passed' from "visual"
-  docs/testing.md, section 1 table          cross-check of the four counts (iOS must agree; the other
-                                            three are reported if the table still has older counts)
-  docs/deployment.md, "Operational model"   the peak periods on the calendar pages (not its cost table)
-  docs/video/script.md, row S17             cross-check: the narration and every quoted line
+Data contracts remain in docs/video/shotlist.json, the current script storyboard,
+docs/testing.md and docs/deployment.md. The cost panel stays absent while its text
+is bracketed. Counters always display final values and show the total only after
+all four suites are visible. Camera footage and field validation remain pending.
 
 Run: .venv/bin/python video/mg/S17.py [--stills-only]
-  -> video/build/mg/S17.mp4, video/build/overlays/S17.mov (chapter card, badge and, over the B-roll,
-     the counters, to lay over the team's footage) and stills in video/build/mg/stills/.
+Outputs: video/build/mg/S17.mp4, video/build/overlays/S17.mov, and layout stills.
 """
 from __future__ import annotations
 
@@ -58,41 +35,36 @@ from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
 NAME = "S17"
 SHOT = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == NAME)
-DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)  # 19.0 s
-assert DURATION == 19.0, DURATION
+DURATION = round(SHOT["end_s"] - SHOT["start_s"], 3)
+assert DURATION == 18.0, DURATION
 
 # ---------- timing ----------
-# Shot seconds. Keyed to the guide voice video/build/guide/S17.wav of 18 Oct (say -v Daniel -r 155;
-# 15.46 s of speech, with 124 spoken "a hundred and twenty-four" as guide.py and script.md 5C say it),
-# which assemble.py lays 0.2 s into the shot: clause starts are the silencedetect boundaries (noise
-# -35 dB, d 0.08 s: 3.25, 4.75, 6.48, 8.12, 9.64, 12.43 s into the file) + 0.2 s; word onsets inside a
-# clause are the durations of `say` prefixes of the line (into the file: "Macau's" 5.37, "intended"
-# 8.55, "in simulation" 11.42, "hundred" 12.71, "twenty-four" 13.42, "automated" 13.96, "tests" 14.55,
-# "passing" 15.11; speech ends 15.43). The first clause and "then move to the next." are unchanged
-# since the 17 Oct guide (same pause at 3.02-3.25 s), so their keys stand. Re-key to the real voice
-# take (about 140 wpm, so everything after 0.2 s moves later).
+# Fresh S17.wav: 14.58 s. Silence ends in the file at 2.423729, 6.049875,
+# 8.542521 and 11.532750 s; assembly adds 0.2 s. Clause onsets are therefore
+# 2.624 (phones), 6.250 (intended user), 8.743 (prototype), 11.733 (with 124).
+# The roadmap enters under the closing test sentence so its four stations have
+# 4.1 s of fully settled reading time without exceeding the 18 s slot.
 BEATS = {
-    "phones": 0.2,         # "Phones on temporary mounts" -> calendar up, kit drops onto page 1
-    "kit_down": 0.45,      # kit drop starts (lands ~1.05 s)
-    "serve_one": 1.75,     # "can serve one festival" -> page 1 lights, the kit counts
-    "then_move": 3.45,     # "then move" (clause 3.45-4.72) -> hop to page 2; "bolted in place" on the pole
-    "to_the_next": 4.05,   # "the next" -> hop to page 3 (page 2 holds 3.75-4.05)
-    "user": 4.95,          # "We see Macau's police," (4.95-6.40) -> operator card, law footer
-    "police": 5.57,        # "Macau's police" -> the separate "No partner yet" chip
-    #                        "who run crowd control," (6.68-8.11) and "as the intended user." (8.32-9.61,
-    #                        "intended" 8.75): the card, chip and footer hold
-    "broll": 9.84,         # "The whole chain runs end to end in simulation" (9.84-12.40) -> hard cut to B-roll
-    "counters": 11.62,     # "in simulation" -> the four suite counters come in, at their final values
-    "with_total": 12.63,   # "with a hundred and twenty-four automated tests passing" (12.63-15.63)
-    "total": 12.91,        # "a | hundred" -> the "= 124" total has landed; it holds through "... automated"
-    "roadmap": 14.75,      # "tests" (onset 14.75) -> hard cut to the roadmap, alone to the end (4.75 s)
+    "phones": 2.60,
+    "kit_down": 2.65,
+    "counting": 3.50,
+    "hop_second": 4.55,
+    "hop_third": 5.20,
+    "user": 6.15,
+    "police": 6.25,
+    "broll": 8.75,
+    "counters": 10.75,
+    "with_total": 11.73,
+    "total": 12.05,
+    "roadmap": 13.40,
 }
+ROAD_DRAW_SECONDS = 0.50
+assert DURATION - (BEATS["roadmap"] + ROAD_DRAW_SECONDS) >= 4.0
 TILE_STAGGER, TILE_IN = 0.06, 0.35       # suite tile i fades in from counters + i * stagger over TILE_IN
 TOTAL_IN = 0.28                          # the "=" and the total fade in over this, ending on BEATS["total"]
-TOTAL_START = BEATS["total"] - TOTAL_IN  # 12.63: on "with", after the four tiles are fully in (12.15)
+TOTAL_START = BEATS["total"] - TOTAL_IN  # 11.77: after the four suite tiles have fully arrived
 assert BEATS["counters"] + 3 * TILE_STAGGER + TILE_IN <= TOTAL_START, "the total must come in after all four suites"
 assert BEATS["with_total"] - 0.05 <= TOTAL_START, "the total must not come in before the spoken total's clause"
-CHAPTER_END = 2.2
 HOP = 0.30                 # seconds per hop
 HOP_LIFT = 90              # px; the kit stays below the event names in the page header
 DROP_LIFT = 80             # px; the kit fades in while it drops onto page 1
@@ -108,7 +80,7 @@ EVENTS = [(p, ZH[p]) for p in ("Golden Week", "Grand Prix", "Chinese New Year") 
 assert len(EVENTS) == 3, PEAKS
 
 OST = [p.strip() for p in SHOT["on_screen_text"].split(" | ")]
-assert len(OST) == 6, OST   # chapter card + the five parts below; a new part needs a new drawing
+assert len(OST) == 6, OST   # chapter question plus the five content parts below
 
 
 def ost_part(label: str) -> str:
@@ -120,7 +92,7 @@ def ost_part(label: str) -> str:
     return hits[0]
 
 
-CHAPTER = ost_part("Chapter card")                                      # Can it happen?
+CHAPTER = ost_part("Chapter question")                                      # Can it happen?
 USER_LINE = "Intended user: " + ost_part("Intended user")               # shown whole, as written
 USER_HEAD, USER_BODY = USER_LINE.split(": ", 1)
 USER_HEAD += ":"
@@ -170,16 +142,17 @@ if TESTING_STALE:
           ", ".join(f"{label} {doc} (shot list: {n})" for label, n, doc in TESTING_STALE) +
           "; update it before the cut (the B-roll footer cites it)", file=sys.stderr)
 
-# the storyboard row must carry the same narration and lines (script.md section 3)
+# The current storyboard must carry the same narration and on-screen text;
+# quotation marks are formatting, not part of the content contract.
 _ROW = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {NAME} |"))
-assert f"| {SHOT['narration']} |" in _ROW, "narration differs between shotlist.json and script.md"
+_cells = [cell.strip() for cell in _ROW.strip().strip("|").split(" | ")]
+assert _cells[3] == SHOT["narration"], "narration differs between shotlist.json and script.md"
 for _s in (CHAPTER, USER_LINE, CHIP, COST_TEXT, COUNTERS_LINE, " → ".join(ROAD)):
-    assert f'"{_s}"' in _ROW, f"script.md row S17 lacks {_s!r}"
+    assert _s in _cells[5], f"script.md row S17 lacks on-screen text {_s!r}"
 
-# the beats above are keyed to these clauses; if the narration changes, re-key them
-CLAUSES = ["Phones on temporary mounts can serve one festival,", "then move to the next.",
-           "We see Macau's police,", "who run crowd control,", "as the intended user.",
-           "The whole chain runs end to end in simulation,", f"with {TOTAL} automated tests passing."]
+CLAUSES = ["Can it happen?", "Phones on temporary mounts can serve different festivals.",
+           "Macau's police are our intended user.", "The prototype runs end to end in simulation,",
+           f"with {TOTAL} automated tests passing."]
 assert SHOT["narration"] == " ".join(CLAUSES), SHOT["narration"]
 
 # guards: the screen text must agree with the narration, the visual column and the B-roll
@@ -204,7 +177,7 @@ assert not (COST_BRACKETED and SHOW_COST), "the cost panel must stay out while i
 COST_DRAWS = 0             # counted by draw_cost_panel(); checked after rendering
 
 BADGE_SEGMENTS = [  # (start, end, kind, detail, sub-line); no badge on the card or the roadmap, no sub-lines
-    (0.0, BEATS["user"], "ILLUSTRATION", "", ""),
+    (BEATS["phones"], BEATS["user"], "ILLUSTRATION", "", ""),
     (BEATS["broll"], BEATS["roadmap"], "LIVE SOFTWARE", "", ""),
 ]
 # section 6: a filled cost panel is "labelled TEAM ESTIMATE with that sheet in the footer", so the
@@ -570,7 +543,7 @@ def kit_state(t: float):
         lift = (1 - k) * DROP_LIFT
         x, y = KIT_POS[0]
         return (x, y - lift), lift, None, k
-    for ts, frm, to in ((BEATS["then_move"], 0, 1), (BEATS["to_the_next"], 1, 2)):
+    for ts, frm, to in ((BEATS["hop_second"], 0, 1), (BEATS["hop_third"], 1, 2)):
         if t < ts:
             return KIT_POS[frm], 0.0, frm, 1.0
         if t < ts + HOP:
@@ -583,26 +556,29 @@ def kit_state(t: float):
 
 def page_active(i: int, t: float) -> float:
     if i == 0:
-        return fade(t, BEATS["serve_one"], BEATS["then_move"] + 0.1, 0.3)
+        return fade(t, BEATS["counting"], BEATS["hop_second"] + 0.1, 0.3)
     if i == 1:
-        return fade(t, BEATS["then_move"] + HOP - 0.05, BEATS["to_the_next"] + 0.1, 0.08)
-    return fade(t, BEATS["to_the_next"] + HOP - 0.05, BEATS["user"] + 0.4, 0.18)
+        return fade(t, BEATS["hop_second"] + HOP - 0.05, BEATS["hop_third"] + 0.1, 0.08)
+    return fade(t, BEATS["hop_third"] + HOP - 0.05, BEATS["user"] + 0.4, 0.18)
 
 
 def part_calendar(img: Image.Image, t: float) -> None:
+    if t < BEATS["phones"]:
+        return
+    start = BEATS["phones"]
     out = 1 - progress(t, BEATS["user"] - 0.15, 0.3)          # leaves as "The intended user" starts, under the card
     if out <= 0:
         return
-    put(img, SCENE, out * progress(t, 0.0, 0.5))
+    put(img, SCENE, out * progress(t, start, 0.5))
     for j, sp in enumerate(HEAD_L + HEAD_R):
-        put(img, sp, out * progress(t, 0.05 * j, 0.4), dy=10 * (1 - progress(t, 0.05 * j, 0.4)))
+        put(img, sp, out * progress(t, start + 0.05 * j, 0.4), dy=10 * (1 - progress(t, start + 0.05 * j, 0.4)))
     for i, (base, rings) in enumerate(PAGES):
-        k = progress(t, 0.08 + 0.12 * i, 0.5)
+        k = progress(t, start + 0.08 + 0.12 * i, 0.5)
         dy = 24 * (1 - k)
         put(img, base, out * k, dy=dy)
         put(img, rings, out * k, dy=dy)
         put(img, GLOW[i], out * k * page_active(i, t), dy=dy)
-    put(img, (POLE, POLE_ORIGIN), out * progress(t, 0.15, 0.5))       # bolted in place: it never moves
+    put(img, (POLE, POLE_ORIGIN), out * progress(t, start + 0.15, 0.5))       # bolted in place: it never moves
 
     (kx, ky), lift, on_page, k_drop = kit_state(t)
     shadow_a = out * k_drop * (1 - lift / 180)
@@ -614,11 +590,11 @@ def part_calendar(img: Image.Image, t: float) -> None:
     if on_page is not None:
         act = page_active(on_page, t)
         if act > 0:
-            pulse = 0.55 + 0.45 * math.sin(2 * math.pi * 1.4 * (t - BEATS["serve_one"]))
+            pulse = 0.55 + 0.45 * math.sin(2 * math.pi * 1.4 * (t - BEATS["counting"]))
             put(img, (ARCS, (kx + KIT_W / 2 - 50, ky + KIT_PHONE_TOP - 50)), act * out * pulse)
 
 
-# ---------- part 2 (4.95-9.84 s): the operator card, the chip and (only if filled) the cost panel ----------
+# ---------- intended user, chip and optional filled cost panel ----------
 
 ICON_W, ICON_H = 230, 170
 
@@ -732,7 +708,7 @@ def part_user(img: Image.Image, t: float, sc: dict = USER_SCENE) -> None:
         draw_cost_panel(img, sc, t)
 
 
-# ---------- part 3 (9.84-14.75 s): B-roll slate and the counters over it ----------
+# ---------- test-run footage and static counters ----------
 
 SLATE = (120, 150, 1800, 880)
 
@@ -896,7 +872,7 @@ def part_counters(img: Image.Image, t: float) -> None:
         put(img, pulse_ring(ease(kp)), (1 - kp) * 0.9)
 
 
-# ---------- part 4 (14.75-19.0 s): the roadmap arrow, alone ----------
+# ---------- roadmap, held for readable next steps ----------
 
 ROAD_Y, ROAD_X0, ROAD_X1 = 520, 150, 1772
 ST_X = [300 + i * (1620 - 300) / 3 for i in range(4)]
@@ -941,7 +917,7 @@ def part_roadmap(img: Image.Image, t: float) -> None:
     tr = BEATS["roadmap"]
     a = 1 - (1 - clamp((t - tr) / 0.3)) ** 3                    # ease-out: something is on screen right after the cut
     put(img, ROAD_LABEL, a, dy=8 * (1 - a))
-    k_line = 1 - (1 - clamp((t - tr) / 1.3)) ** 3               # the arrow draws left to right, fast start
+    k_line = 1 - (1 - clamp((t - tr) / ROAD_DRAW_SECONDS)) ** 3               # the arrow draws left to right, fast start
     if k_line <= 0:
         return
     xe = lerp(ROAD_X0, ROAD_X1, k_line)
@@ -958,9 +934,7 @@ def part_roadmap(img: Image.Image, t: float) -> None:
             put(img, sp, ks, dy=(10 * (1 - ks)) if j else 0)
 
 
-# ---------- fixed slots (chapter card, badge, footer) ----------
-
-CHAPTER_SPRITE = layer_sprite(lambda im: chapter_card(im, CHAPTER))
+# ---------- fixed slots (persistent question, badge, footer) ----------
 BADGES_S = [(a, b, layer_sprite(lambda im, k=k, dt=dt, sub=sub: badge(im, k, dt, sub))) for a, b, k, dt, sub in BADGE_SEGMENTS]
 FOOTERS_S = [(a, b, layer_sprite(lambda im, txt=txt: footer(im, txt))) for a, b, txt in FOOTER_SEGMENTS]
 for _a, _b, (_im, _pos) in FOOTERS_S:
@@ -988,9 +962,11 @@ def seg_alpha(t: float, a: float, b: float, edge: float = 0.3) -> float:
 
 
 def slots(img: Image.Image, t: float, scrim: bool = False) -> None:
-    """Chapter card, badge with sub-line, footer. scrim=True (overlay only) backs the small grey
-    footer with a dark pill so it reads over camera footage."""
-    put(img, CHAPTER_SPRITE, fade(t, 0.0, CHAPTER_END, 0.3), dy=-8 * (1 - progress(t, 0, 0.3)))
+    """Draw badges/footer, then the foreground question and persistent header.
+
+    scrim=True backs a footer over camera footage. The question is always last,
+    keeping its focused opening independent from the underlying scene.
+    """
     for a, b, sp in BADGES_S:
         put(img, sp, seg_alpha(t, a, b))
     for (a, b, sp), sc in zip(FOOTERS_S, FOOTER_SCRIMS):
@@ -998,6 +974,7 @@ def slots(img: Image.Image, t: float, scrim: bool = False) -> None:
         if scrim:
             put(img, sc, al)
         put(img, sp, al)
+    chapter_question(img, CHAPTER, t)
 
 
 # ---------- frame drawing ----------
@@ -1017,7 +994,9 @@ def foreground(t: float) -> Image.Image:
 
 def frame_mp4(t: float) -> Image.Image:
     img = BG.copy()
-    if t < BEATS["broll"]:
+    if t < BEATS["phones"]:
+        pass  # question focus: answer content and its animations have not started
+    elif t < BEATS["broll"]:
         part_calendar(img, t)
         part_user(img, t)
     elif t < BEATS["roadmap"]:
@@ -1029,9 +1008,26 @@ def frame_mp4(t: float) -> Image.Image:
     return img
 
 
-STILLS = {"chapter": 1.2, "hop": 3.6, "page2": 3.9, "hop2": 4.15, "page3": 4.7, "handover": 4.97,
-          "card": 5.4, "chip": 7.0, "intended": 9.0, "slate": 10.9, "tiles_in": 11.75, "tiles": 12.3,
-          "total_in": 12.75, "total": 13.1, "held": 14.7, "roadmap": 17.0, "end": 18.95}
+STILLS = {
+    "question_enter": 0.25,
+    "question": 1.2,
+    "question_dock": 2.2,
+    "answer": 2.8,
+    "calendar": 3.9,
+    "hop": 4.7,
+    "page3": 5.7,
+    "card": 6.55,
+    "chip": 7.4,
+    "slate": 9.2,
+    "tiles_in": 10.9,
+    "tiles": 11.4,
+    "total_in": 11.9,
+    "total": 12.25,
+    "held": 13.35,
+    "roadmap_enter": 13.55,
+    "roadmap": 14.1,
+    "end": DURATION - 1 / FPS,
+}
 
 if __name__ == "__main__":
     for k_, tt in STILLS.items():

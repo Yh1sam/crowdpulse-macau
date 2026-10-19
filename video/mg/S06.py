@@ -1,8 +1,8 @@
-"""Shot S06 (0:12.0-0:27.0, 15.0 s): "Why does it matter?"
+"""Shot S06 (0:12.0-0:29.0, 17.0 s): "Why does it matter?"
 
-[MEMBER 4] on camera for 6.9 s (a placeholder slate until the take is filmed): the chapter card for 2 s,
-then nothing over the take (the 210,000-arrivals tag and its footer left on 19 Oct: the voice never says
-the number). From "...the Ruins", voice-over over the zone schematic: illustrative dots pile up on Rua de
+The spoken question has a central focus from the opening, then docks into a persistent header by 2.4 s.
+[MEMBER 4] answers from 2.6 s and stays on camera until 9.3 s (a placeholder until filmed). The
+210,000-arrivals tag stays out: the voice never says that number. From "...the Ruins", voice-over over the zone schematic: illustrative dots pile up on Rua de
 S. Paulo below the Ruins while three date chips (the police crowd-control afternoons) stack beside the
 Ruins, the only labelled place. On the medical sentence the map fades out completely; on a plain navy
 background a side-view body outline drawn from shapes appears, two arrows press on the chest from front
@@ -19,8 +19,8 @@ real dates from the police release (footer). The body diagram is shapes only, of
 carries no text but the sourced mechanism (Gill & Landi 2004).
 
 Outputs:
-  video/build/mg/S06.mp4                    the full shot (camera slate 0-6.9 s)
-  video/build/overlays/S06_cam_overlay.mov  0-6.9 s chapter card with alpha, for the real camera take
+  video/build/mg/S06.mp4                    the full shot (question focus, then camera slate to 9.3 s)
+  video/build/overlays/S06_cam_overlay.mov  0-9.3 s focus and persistent header with alpha, for the real camera take
   video/build/mg/stills/S06_*.png           layout checks
 
 Run:  .venv/bin/python video/mg/S06.py            (stills, overlay and render)
@@ -42,44 +42,37 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter  # noqa: E402
 
 SHOT = "S06"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 15.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 17.0 s
 START_S = _shot["start_s"]
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} | 0:"))
 
-# Beats in seconds from the shot start. The narration starts 0.2 s into the shot (assemble.py,
-# VOICE_START). Keyed to the guide voice (video/build/guide/S06.wav, say -v Daniel -r 155):
-# silencedetect pauses at 1.24-1.54, 2.58-2.82, 3.86-4.17, 8.42-8.65, 9.39-9.62 and 11.89-12.19 s
-# of the wav; word starts from synthesising prefixes of the line, checked against the wav's 20 ms
-# energy envelope; + 0.2 s gives the shot times below:
-#   "Mrs Chan is made up." 0.2-1.44 | "The crowds are not." 1.74-2.78 | "This Golden Week," 3.02-4.06 |
-#   "police briefly imposed crowd control" 4.37-6.64 | "at the" 6.70 | "Ruins" 6.86 | "on" 7.22 |
-#   "three" 7.38 | "afternoons." 7.78-8.62 | pause | "In a crush," 8.85-9.59 ("crush" 9.04) |
-#   "victims" 9.80 | "typically" 10.34 | "suffocate" 10.82 | "standing up," 11.46-12.09 |
-#   "from chest compression." 12.39-13.71 ("chest" 12.60) | silence to 15.0.
-# [MEMBER 4] stays on camera to the cut on "Ruins" (no graphic: the card, then nothing).
-# The date chips come in fast (0.25 s fades, all three up by "three", ~7.65 s) so the full stack reads
-# for over a second before the map leaves on "In a crush" (8.85 s); the map cannot stay longer, since
-# assemble.py's medical-sentence caption arrives at 8.85 s.
-# re-key to the real voice take (the team reads at about 140 wpm, so everything moves ~5% later)
+# The guide prepends the spoken question and starts the original answer 2.4 s into its audio
+# (2.6 s into the shot, including the 0.2 s voice offset). All original answer beats move by 2.4 s.
+# The central question docks by 2.4 s and remains as a header over camera, map and body diagram.
+# Answer clauses: Mrs Chan 2.6–3.84; crowds 4.14–5.18; Golden Week 5.42–6.46;
+# police control 6.77–9.04; Ruins 9.26; three afternoons 9.78–11.02;
+# crush 11.25–11.99; victims 12.20; suffocate 13.22; chest compression 14.79–16.11.
+# Re-key to the real take.
+QUESTION_END = 2.4
 BEATS = {
-    "card_in": 0.0,       # chapter card over the camera take (2 s), on "Mrs Chan is made up."
-    "card_out": 2.0,
-    "schematic": 6.9,     # cut from camera to the zone schematic, on "...the Ruins"; badge on
-    "chip_0": 6.9,        # the first chip, with the cut, as "Ruins" lands
-    "chip_1": 7.22,       # "on": second chip
-    "chip_2": 7.38,       # "three": third chip (all three fully up by ~7.65 s)
-    "pile_full": 8.6,     # end of "afternoons": the pile on Rua de S. Paulo is complete
-    "map_out": 8.85,      # "In a crush," starts: map, chips and footer fade out (gone by 9.15)
-    "body_in": 9.15,      # map gone; the body outline appears on plain navy ("crush")
-    "arrows": 9.75,       # "victims": the two arrows press in, "front-to-back pressure"
-    "label_2": 10.3,      # "typically": "→ chest can't fully expand"
-    "label_3": 10.8,      # "suffocate": "→ asphyxia"
-    "press": 12.55,       # "chest compression": the arrows press once more
+    "camera": QUESTION_END,
+    "schematic": 9.3,
+    "chip_0": 9.3,
+    "chip_1": 9.62,
+    "chip_2": 9.78,
+    "pile_full": 11.0,
+    "map_out": 11.25,
+    "body_in": 11.55,
+    "arrows": 12.15,
+    "label_2": 12.7,
+    "label_3": 13.2,
+    "press": 14.95,
 }
+assert BEATS["body_in"] < DURATION and BEATS["press"] + 0.7 < DURATION
 CHIP_FADE = 0.25          # date-chip fade-in (s): quick, so the stack is readable before map_out
 
 # Text, verbatim from the shot list (on_screen_text, narration), checked against the storyboard row.
-NARRATION = ("Mrs Chan is made up. The crowds are not. "
+NARRATION = ("Why does it matter? Mrs Chan is made up. The crowds are not. "
              "This Golden Week, police briefly imposed crowd control at the Ruins on three afternoons. "
              "In a crush, victims typically suffocate standing up, from chest compression.")
 CARD = "Why does it matter?"
@@ -92,10 +85,10 @@ BADGE = "ILLUSTRATION"
 _ost = dict(item.split(": ", 1) for item in _shot["on_screen_text"].split(" | "))
 assert _shot["narration"] == NARRATION, _shot["narration"]
 assert NARRATION in _row
-_SPEC = (("Chapter card (top-left, 2 s)", CARD), ("Map label (6.9-9 s)", MAP_LABEL),
-         ("Date chips (6.9-9 s, beside the Ruins)", CHIPS_TEXT), ("Footer (6.9-9 s)", FOOTER_MAP),
-         ("Body label (9-15 s)", BODY_LABEL), ("Citation (9-15 s, footer slot)", CITATION),
-         ("Badge (top-right, from 6.9 s, over the schematic and the body diagram)", BADGE))
+_SPEC = (("Chapter question (central then persistent header)", CARD), ("Map label (9.3-11.55 s)", MAP_LABEL),
+         ("Date chips (9.3-11.55 s, beside the Ruins)", CHIPS_TEXT), ("Footer (9.3-11.55 s)", FOOTER_MAP),
+         ("Body label (11.55-17 s)", BODY_LABEL), ("Citation (11.55-17 s, footer slot)", CITATION),
+         ("Badge (top-right, from 9.3 s, over the schematic and the body diagram)", BADGE))
 assert list(_ost) == [k for k, _ in _SPEC], list(_ost)      # 19 Oct declutter: nothing else on screen
 for _key, _txt in _SPEC:
     assert _ost.get(_key) == _txt, (_key, _ost.get(_key))
@@ -483,7 +476,7 @@ def build_map():
 
 
 def build_slate():
-    """Camera slate (0-6.9 s): stands in for the [MEMBER 4] take."""
+    """Camera slate (2.4–9.3 s): stands in for the answer after the chapter question."""
     sl = canvas()
     box = (240, 150, 1680, 770)
     d = ImageDraw.Draw(sl)
@@ -501,7 +494,7 @@ def build_slate():
     x0 = (W - fw) / 2
     draw_text(sl, (x0, 500), SLATE_TAG, 46, 700, WARNING, anchor="lm")
     draw_text(sl, (x0 + tag_w, 500), SLATE_WHAT, 46, 700, INK, anchor="lm")
-    t_in, t_out = START_S, START_S + BEATS["schematic"]
+    t_in, t_out = START_S + BEATS["camera"], START_S + BEATS["schematic"]
     sub = f"{SHOT} · {int(t_in // 60)}:{t_in % 60:04.1f}-{int(t_out // 60)}:{t_out % 60:04.1f} · on camera, then voice-over · replace this slate with the take"
     draw_text(sl, (W / 2, 580), sub, 26, 500, INK_2, anchor="mm")
     return sl
@@ -612,15 +605,15 @@ def wipe_mask(h: int, k: float) -> Image.Image:
 
 # ---------- frame ----------
 
-def camera_chrome(img: Image.Image, t: float) -> None:
-    """0-6.9 s, over the camera: the chapter card (2 s), then the take alone."""
-    chapter_card(img, CARD, fade(t, BEATS["card_in"], BEATS["card_out"], 0.25))
+def chapter_chrome(img: Image.Image, t: float) -> None:
+    """Draw last: opaque question focus, then the persistent header above the answer."""
+    chapter_question(img, CARD, t)
 
 
 def draw_frame(t: float) -> Image.Image:
-    if t < BEATS["schematic"]:                       # 0-6.9 s: [MEMBER 4] on camera (slate for now)
+    if t < BEATS["schematic"]:                       # question focus, then [MEMBER 4] answering on camera
         img = SLATE.copy()
-        camera_chrome(img, t)
+        chapter_chrome(img, t)
         return img
 
     img = canvas()
@@ -628,7 +621,7 @@ def draw_frame(t: float) -> Image.Image:
     a_in = 0.45 + 0.55 * (1 - (1 - clamp((t - BEATS["schematic"]) / 0.3)) ** 3)   # quick ease-out: no empty frame at the cut
     a_map = a_in * (1 - progress(t, BEATS["map_out"], 0.3))
 
-    if a_map > 0:                                    # 6.9-9.15 s: the schematic, the pile and the date chips
+    if a_map > 0:                                    # 9.3–11.55 s: schematic, pile and date chips
         put_sprite(img, STATIC["graph"], a_map, dx)
         put_sprite(img, STATIC["glow"], a_map * ease(arrived_fraction(t)), dx)
         put(img, dots_layer(t), DX0 + dx, DY0, a_map)
@@ -645,7 +638,7 @@ def draw_frame(t: float) -> Image.Image:
             put_sprite(img, chip, a_map * k, dx, -(1 - k) * 16)
         footer(img, FOOTER_MAP, a_map)
 
-    u_body = clamp((t - BEATS["body_in"]) / 0.55)     # from 9.15 s: the body diagram on plain navy (never over the map)
+    u_body = clamp((t - BEATS["body_in"]) / 0.55)     # from 11.55 s: body diagram on plain navy (never over the map)
     k_body = 1 - (1 - u_body) ** 2 if t >= BEATS["body_in"] else 0.0   # ease-out wipe: no empty beat after the map
     if k_body > 0:
         b = BODY["body"]
@@ -671,19 +664,23 @@ def draw_frame(t: float) -> Image.Image:
         footer(img, CITATION, progress(t, BEATS["body_in"], 0.3))
 
     badge(img, BADGE, alpha=progress(t, BEATS["schematic"], 0.3))
+    chapter_chrome(img, t)
     return img
 
 
 def cam_overlay(t: float) -> Image.Image:
-    """0-6.9 s overlay (the chapter card) to lay over the real camera take."""
+    """0–9.3 s overlay: chapter focus, then persistent header over the camera answer."""
     img = transparent()
-    camera_chrome(img, t)
+    chapter_chrome(img, t)
     return img
 
 
-STILLS = {"card": 1.0, "gap": 2.6, "camera": 5.0, "cut": 7.0, "chips": 7.3, "chips_full": 7.7, "pile": 8.4,
-          "map_full": 8.8, "fade": 9.0, "body": 9.4,
-          "arrows": 10.5, "label": 11.4, "press": 12.9, "end": DURATION - 1 / FPS}
+STILLS = {
+    "question_focus": 1.0, "question_docking": 2.2, "header_answer": 2.6,
+    "camera": 7.4, "cut": 9.4, "chips": 9.7, "chips_full": 10.1, "pile": 10.8,
+    "map_full": 11.2, "fade": 11.4, "body": 11.8,
+    "arrows": 12.9, "label": 13.8, "press": 15.3, "end": DURATION - 1 / FPS,
+}
 
 if __name__ == "__main__":
     for name, ts in STILLS.items():
