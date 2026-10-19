@@ -255,12 +255,28 @@ def mix_audio(shots: list[dict], total: float, out: Path) -> None:
     run(args)
 
 
+def check_voice_timing(shots: list[dict]) -> None:
+    """Reject overlapping takes instead of silently spilling speech into the next shot."""
+    overruns = []
+    for shot in shots:
+        voice = voice_file(shot["id"])
+        if not voice:
+            continue
+        end = probe_duration(voice) + VOICE_START.get(shot["id"], 0.2)
+        slot = shot["end_s"] - shot["start_s"]
+        if end > slot + 1 / FPS:
+            overruns.append(f"{shot['id']}: speech ends at {end:.2f}s, slot is {slot:.2f}s")
+    if overruns:
+        raise SystemExit("Retiming required before assembly:\n" + "\n".join(overruns))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--only", nargs="*", help="rebuild only these shots before joining")
     args = ap.parse_args()
     import recipes  # video/recipes.py: per-shot sources and overlays
     shots = json.loads(SHOTLIST.read_text())
+    check_voice_timing(shots)
     CUT.mkdir(parents=True, exist_ok=True)
     clips = []
     for s in shots:
