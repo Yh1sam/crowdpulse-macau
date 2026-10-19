@@ -1,4 +1,4 @@
-"""Shot S01 (0:00.0-0:11.0, 11.0 s): the Mrs Chan hook. Voice from 0.2 s: "This is Mrs Chan, going to see the
+"""Shot S01 (0:00.0-0:12.0, 12.0 s): the Mrs Chan hook. Voice from 0.2 s: "This is Mrs Chan, going to see the
 Ruins of St. Paul's. From her wheelchair, she sees only backs, not the crowd building ahead."
 
 The shot opens straight on the map (no title; since 19 Oct the 3 s fact title and its footer are gone, so the voice
@@ -8,11 +8,18 @@ Jesus Square (the square below the Ruins; she is never put on the St. Paul's ste
 armrest in the foreground, a wall of grey silhouettes swaying ahead; then a crane back up to the map as Senado's
 disc goes amber to red. Map labels only for the three places the story needs (the Ruins, Senado, Almeida); no pin
 label and no small "Illustrative story" line (the badge carries it, and S06's voice says "Mrs Chan is made up").
+After the voice (8.55-11.85 s, the second review of 19 Oct) the real event the old title card carried comes back as
+a short overlay over the settled map, Senado red: a two-line fact ("Crowd control lifted, reimposed 45 minutes
+later") and its source, on the empty left half of the frame, bridging into S06's "Mrs Chan is made up. The crowds
+are not." It is two text elements, so the three place labels and her tag dim while it shows (declutter rule 1) and
+are back before the last frame: S18 opens on this shot's final map state, so the overlay is gone by 11.85 s.
 
 Data sources (read here, never retyped):
-  - docs/video/shotlist.json, shot S01: DURATION (end_s - start_s) and every on-screen line (labels, tag, badge),
-    asserted against the storyboard row in docs/video/script.md section 3. The voice start is video/assemble.py's
-    (VOICE_START, the default 0.2 s for this shot).
+  - docs/video/shotlist.json, shot S01: DURATION (end_s - start_s) and every on-screen line (labels, tag, badge,
+    the fact line and its source), asserted against the storyboard row in docs/video/script.md section 3. The
+    voice start is video/assemble.py's (VOICE_START, the default 0.2 s for this shot).
+  - docs/research/brief-evidence.md, section 1, row 3: the two crowd-control windows on Rua de S. Paulo, 4 Oct 2025
+    (13:00-15:40, again 16:25-17:25), whose gap is the fact line's "45 minutes" (asserted below).
   - shared/zones.json (via ahpo.py): zone lat/lon (linear projection), the 7 links, has_stairs / steep
     (the hatched steps; her dotted step-free route Senado -> St. Dominic's -> Rua de S. Paulo -> Company of
     Jesus Square is found by search over links without stairs or steep sections), Chinese place names.
@@ -46,7 +53,8 @@ from PIL import Image  # noqa: E402
 
 SHOT = "S01"
 _shot = next(s for s in json.loads((ROOT / "docs" / "video" / "shotlist.json").read_text()) if s["id"] == SHOT)
-DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 11.0 s
+DURATION = round(_shot["end_s"] - _shot["start_s"], 3)          # 12.0 s
+assert DURATION == 12.0, DURATION                                # 11.0 -> 12.0 s in the second review (19 Oct)
 
 # ---------- text: the shotlist's on-screen items, checked against the storyboard ----------
 
@@ -55,13 +63,37 @@ for _it in _shot["on_screen_text"].split(" | "):
     _m = re.match(r"^([^:(]+?)(?: \(([^)]*)\))?: (.*)$", _it)
     assert _m, _it
     _ITEMS[_m.group(1)] = (_m.group(2) or "", _m.group(3))
-# 19 Oct declutter: labels, her tag and the badge only (no fact title, footer, small line or pin label)
-assert set(_ITEMS) == {"Labels", "Tag on her icon", "Badge"}, sorted(_ITEMS)
+# 19 Oct declutter: labels, her tag and the badge (no fact title, footer, small line or pin label); second review:
+# the fact line and its source, after the voice
+assert set(_ITEMS) == {"Labels", "Tag on her icon", "Badge", "Fact line", "Source"}, sorted(_ITEMS)
 TAG = _ITEMS["Tag on her icon"][1]
 BADGE = _ITEMS["Badge"][1]
 assert BADGE == "ILLUSTRATION" and BADGE in BADGES, BADGE
 assert "from 0 s" in _ITEMS["Badge"][0], _ITEMS["Badge"]          # the story is labelled from its first frame
 assert TAG == "Mrs Chan", TAG
+FACT = _ITEMS["Fact line"][1]                                      # "Crowd control lifted, reimposed 45 minutes later"
+SOURCE = _ITEMS["Source"][1]                                       # "Golden Week 2025 · Macao Daily News"
+def n_words(text: str) -> int:
+    """Words for the reading rule: tokens with a letter or digit (the "·" separator is not one)."""
+    return sum(any(c.isalnum() for c in w) for w in text.split())
+
+
+assert n_words(FACT) <= 10 and n_words(SOURCE) <= 6, (FACT, SOURCE)   # declutter: short line, ~6-word source
+assert "Macao Daily News" in SOURCE and "2025" in SOURCE, SOURCE   # an outside fact wears its source and its year
+for _w in ("dangerous", "crush", "partner"):                       # honesty rules, script.md section 6
+    assert _w not in (FACT + SOURCE).lower(), (FACT, SOURCE)
+
+# the fact must be brief-evidence.md section 1, row 3 (4 Oct 2025: control 13:00-15:40, then again 16:25-17:25):
+# the "45 minutes" is the gap between the two windows, read from that row, never retyped
+_ev = (ROOT / "docs" / "research" / "brief-evidence.md").read_text()
+_sec1 = _ev.split("\n## 1. ")[1].split("\n## ")[0]
+_row3 = next(l for l in _sec1.splitlines() if l.startswith("| 3 |"))
+_cells = [c.strip() for c in _row3.strip().strip("|").split("|")]
+assert "4 Oct 2025" in _cells[2] and "Macao Daily News, 2025-10-05" in _cells[3], _row3
+_wins = re.findall(r"(\d\d):(\d\d)[–-](\d\d):(\d\d)", _cells[2].split("19 Feb")[0])   # the 4 Oct 2025 windows only
+assert len(_wins) == 2, _wins
+_gap_min = (int(_wins[1][0]) * 60 + int(_wins[1][1])) - (int(_wins[0][2]) * 60 + int(_wins[0][3]))   # 16:25 - 15:40
+assert _gap_min == 45 and f"{_gap_min} minutes" in FACT, (_wins, _gap_min, FACT)
 
 # the voice starts where video/assemble.py lays it (no title any more: its default, 0.2 s)
 sys.path.insert(0, str(ROOT / "video"))
@@ -80,6 +112,7 @@ assert _labels.count(" · ") == len(ahpo.LABEL_EN) - 1 and "pin" not in _labels,
 _row = next(l for l in (ROOT / "docs" / "video" / "script.md").read_text().splitlines() if l.startswith(f"| {SHOT} |"))
 _on_screen = _row.split(" | ")[5]                                 # the storyboard's on-screen cell
 assert f'"{TAG}"' in _on_screen and BADGE in _on_screen and _labels in _on_screen, _on_screen
+assert f'"{FACT}"' in _on_screen and f'"{SOURCE}"' in _on_screen, _on_screen
 assert _on_screen.count("<br>") == len(_ITEMS) - 1, "storyboard row S01 shows more on-screen items than the shotlist"
 
 # ---------- beats ----------
@@ -88,7 +121,9 @@ assert _on_screen.count("<br>") == len(_ITEMS) - 1, "storyboard row S01 shows mo
 #   "This is Mrs Chan," 0.20-1.50 ("Mrs" from 0.84, "Chan" about 1.26) | "going to see the Ruins of St. Paul's."
 #   1.72-4.02 ("the Ruins" about 2.63-3.42, "of St. Paul's" 3.50) | "From her wheelchair," 4.28-5.24 |
 #   "she sees only backs," 5.45-6.78 | "not the crowd building ahead." 7.00-8.38 (8.28 s file, the same audio as
-#   when the voice started at 3.0 s behind the old fact title: every beat moved 2.8 s earlier). The shot ends at 11.0 s.
+#   when the voice started at 3.0 s behind the old fact title: every beat moved 2.8 s earlier). The shot ends at
+#   12.0 s (11.0 -> 12.0 s in the second review): after the voice the fact overlay reads 8.55-11.85 s over the settled
+#   map, and the last frames hold the map alone, as S18 opens on it.
 # re-key to the real voice take
 BEATS = {
     "map_in": 0.0,        # first frame: map paper; streets, steps and zone discs draw in (done by about 1.05 s)
@@ -108,6 +143,8 @@ BEATS = {
     "crane": 6.93,        # "not the crowd building ahead": crane back up ...
     "map_back": 7.18,     # ... the map returns, zoomed on her, and pulls out
     "map_home": 8.13,
+    "fact_in": 8.55,      # after the last word (8.38) and the guide's end (8.48): the fact line and its source fade in
+    "fact_out": 11.55,    # ... and fade out, gone by 11.85: the last frames are the map alone (S18 opens on them)
 }
 assert abs(BEATS["voice"] - 0.2) < 1e-9 and BEATS["ahpo_in"] > BEATS["voice"]
 # Shot time -> sim time across the two map beats (Senado's colour): beat 1 starts at the first recorded row,
@@ -153,6 +190,47 @@ LT_BOX = _lt.getbbox()                                        # (60, 800, x1, 89
 for _s in (0.0, AHPO_S01_END):
     _x, _y = tag_box(MAIN_PATH.at(_s), 21, 1.0)
     assert _x >= LT_BOX[2] + 12 or _y + TAG_SPRITE.height <= LT_BOX[1] - 8, (_s, _x, _y, LT_BOX)
+
+
+# ---------- the fact overlay: the real 2025 event, after the voice ----------
+# Second review (19 Oct): the Golden Week 2025 fact that the old 3 s title card carried returns as a short overlay
+# over the settled map (Senado red), after the last word, never as a title. Two text elements (the fact line, wrapped
+# to two lines, and its source), so the three place labels and her tag dim with it (declutter rule 1: at most two
+# text elements beside the badge) and are back before the last frame. It sits on the empty left half of the frame:
+# the map's nearest feature there is the Tercena disc (x ~830, y ~570), Senado's area starts at x ~930, y ~690, the
+# caption band is y 920-990 and the speaker lower-third (0.2-3.2 s) is long gone.
+
+FACT_FADE_IN, FACT_FADE_OUT = 0.25, 0.3
+
+
+def fact_alpha(t: float) -> float:
+    return progress(t, BEATS["fact_in"], FACT_FADE_IN) * (1 - progress(t, BEATS["fact_out"], FACT_FADE_OUT))
+
+
+_fully = BEATS["fact_out"] - (BEATS["fact_in"] + FACT_FADE_IN)                 # fully readable: 2.75 s
+for _txt in (FACT, SOURCE):
+    assert _fully >= 0.3 * n_words(_txt) + 0.5, (_txt, _fully)                # declutter rule 5, at full opacity
+assert BEATS["fact_out"] + FACT_FADE_OUT - BEATS["fact_in"] >= 3.0            # the brief: at least 3 s on screen
+assert BEATS["fact_in"] >= VOICE_START + 8.28 and BEATS["fact_in"] >= BEATS["map_home"]   # after the guide and the pull-out
+assert fact_alpha(DURATION - 3 / FPS) == 0.0 == fact_alpha(DURATION - 1 / FPS)  # the last frames are the map alone
+
+FACT_X, FACT_Y = 100, 440
+FACT_SIZE, SOURCE_SIZE = 44, 26
+FACT_W = 680                                                       # the free left half, short of the map
+FACT_LINES = wrap(FACT, FACT_SIZE, 700, FACT_W)
+assert len(FACT_LINES) == 2 and all(text_size(l, FACT_SIZE, 700)[0] <= FACT_W for l in FACT_LINES), FACT_LINES
+assert text_size(SOURCE, SOURCE_SIZE, 500)[0] <= FACT_W, SOURCE
+FACT_H = int(len(FACT_LINES) * FACT_SIZE * 1.25) + 10 + SOURCE_SIZE            # block height: 440-592, above Senado's area
+assert FACT_Y + FACT_H <= 690 and FACT_X + FACT_W <= 800, (FACT_Y + FACT_H, FACT_X + FACT_W)
+
+
+def fact_overlay(img: Image.Image, t: float) -> None:
+    a = fact_alpha(t)
+    if a <= 0:
+        return
+    rise = (1 - a) * 8                                             # settles 8 px as it fades in, like the labels
+    h = draw_text(img, (FACT_X, FACT_Y + rise), FACT, FACT_SIZE, 700, INK, a, max_width=FACT_W)
+    draw_text(img, (FACT_X, FACT_Y + rise + h + 10), SOURCE, SOURCE_SIZE, 500, INK_2, a)
 
 
 # ---------- the map beats ----------
@@ -207,6 +285,7 @@ def map_frame(t: float) -> Image.Image:
               "ruins_st_paul": progress(t, BEATS["ruins_label"], 0.4)}       # the storyboard's three, no more
     zoomed = 0.0 if cam.home else clamp((cam.zoom - 1) / 0.3)    # labels and tag are gone before the push carries them off frame
     label_fade = 1 - zoomed
+    dim = 1 - fact_alpha(t)                                       # labels and tag give way to the fact overlay, then return
     route_k = progress(t, BEATS["route_hint"], 1.3)
     route = None
     if route_k > 0:
@@ -228,9 +307,9 @@ def map_frame(t: float) -> Image.Image:
               "ring": clamp((t - BEATS["ahpo_in"] - 0.05) / 0.9) if t < BEATS["ahpo_in"] + 0.95 else 0.0,
               "tag": 0.0},                       # S01 draws the tag itself, on its own beat (below)
         route=route,
-        label_fade=label_fade,
+        label_fade=label_fade * dim,
     ).convert("RGBA")
-    ta = progress(t, BEATS["tag_in"], 0.35) * label_fade * (1.0 if ahpo_a >= 0.999 else ahpo_a)
+    ta = progress(t, BEATS["tag_in"], 0.35) * label_fade * dim * (1.0 if ahpo_a >= 0.999 else ahpo_a)
     if ta > 0:
         r = 21 * cam.zoom ** 0.6 * ahpo_scale
         paste(img, TAG_SPRITE, tag_box(cam(MAIN_PATH.at(s_her)), r, ta), ta)
@@ -275,12 +354,13 @@ def draw_frame(t: float) -> Image.Image:
         img = Image.blend(map_frame(t), eye_frame(t), eye_k)
     if eye_k > 0:
         paste(img, SCRIM, (0, 0), eye_k)
+    fact_overlay(img, t)                           # after the voice: the real 2025 event, sourced
     badge(img, BADGE)                              # from the first frame: the story is an illustration
     return img
 
 
 STILLS = {"open": 0.0, "story_in": 0.5, "tag": 1.8, "walk": 3.4, "pin": 4.1, "eye": 6.1, "crane": 7.5, "red": 9.2,
-          "end": DURATION - 1 / FPS}
+          "fact": 9.7, "fact_fading": 11.7, "end": DURATION - 1 / FPS}
 
 if __name__ == "__main__":
     for name, ts in STILLS.items():
@@ -289,5 +369,7 @@ if __name__ == "__main__":
     crit = next(t / 100 for t in range(int(SIM_KEYS[0][0] * 100), int(DURATION * 100))
                 if ahpo.state_of(ahpo.senado_density(sim_of(t / 100))) == "CRITICAL")
     print(f"Senado turns CRITICAL at shot {crit:.2f} s; tag {TAG_SPRITE.size}; lower-third {LT_BOX}")
+    print(f"fact overlay {BEATS['fact_in']}-{BEATS['fact_out'] + FACT_FADE_OUT} s, lines {FACT_LINES}; "
+          f"labels back for the last frame: dim {1 - fact_alpha(DURATION - 1 / FPS):.2f}")
     if "--stills" not in sys.argv:
         print(render(SHOT, DURATION, draw_frame))

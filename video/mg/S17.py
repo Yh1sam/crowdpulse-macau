@@ -1,4 +1,4 @@
-"""Shot S17 (3:46.0-4:05.0, 19.0 s): "Can it happen?" Feasibility and the intended user.
+"""Shot S17 (3:50.5-4:09.5, 19.0 s): "Can it happen?" Feasibility and the intended user.
 
 Storyboard: docs/video/script.md section 3, row S17; claims table section 4, rows S17; section 6
 "motion_graphic" (S17: the cost panel appears only after the team approves docs/cost-estimate.md,

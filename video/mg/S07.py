@@ -1,4 +1,4 @@
-"""Shot S07, "How is ours different?" (0:39.5-1:00.0, 20.5 s), [MEMBER 4] voice-over. Motion graphic.
+"""Shot S07, "How is ours different?" (0:40.5-1:01.0, 20.5 s), [MEMBER 4] voice-over. Motion graphic.
 
 The WHY -> HOW hinge. Credits the police crowd warning system and its planned expansion (on screen),
 states the team's two aims (privacy, no one left behind), then claims only what CrowdPulse proposes, as

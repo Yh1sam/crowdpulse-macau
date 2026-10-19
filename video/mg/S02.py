@@ -1,4 +1,4 @@
-"""Shot S02 OVERLAY (1:18.0-1:25.0, 7.0 s): "Here's what we built. Our phone app counts people on the
+"""Shot S02 OVERLAY (1:19.0-1:26.0, 7.0 s): "Here's what we built. Our phone app counts people on the
 device, and sends only numbers." It opens the WHAT part of the video.
 
 A transparent overlay composited over the iPhone Simulator recording of the CrowdPulse Sensor app

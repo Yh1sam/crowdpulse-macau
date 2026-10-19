@@ -1,4 +1,4 @@
-"""Shot S06 (0:11.0-0:26.0, 15.0 s): "Why does it matter?"
+"""Shot S06 (0:12.0-0:27.0, 15.0 s): "Why does it matter?"
 
 [MEMBER 4] on camera for 6.9 s (a placeholder slate until the take is filmed): the chapter card for 2 s,
 then nothing over the take (the 210,000-arrivals tag and its footer left on 19 Oct: the voice never says

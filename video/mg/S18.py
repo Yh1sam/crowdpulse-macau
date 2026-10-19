@@ -1,4 +1,4 @@
-"""Shot S18 (4:16.0-4:23.0, 7.0 s): back to Mrs Chan. "Back to Mrs Chan. The system flags the risk; staff check her
+"""Shot S18 (4:21.5-4:28.5, 7.0 s): back to Mrs Chan. "Back to Mrs Chan. The system flags the risk; staff check her
 route and stay beside her."
 
 The system flags, people act. The shot opens on S01's last frame (same map and framing, ahpo.py: her icon stopped

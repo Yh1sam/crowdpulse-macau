@@ -1,4 +1,4 @@
-"""Shot S17b (4:04.0-4:16.0, 12.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
+"""Shot S17b (4:09.5-4:21.5, 12.0 s): "If it fails, who answers?" [MEMBER 3] voice-over. Motion graphic.
 
 A navy card in the S07 / S17 style: a title and three short rows (who may be more vulnerable, who answers,
 how the public is told), each with a plain shape icon, and a short footer ("To be confirmed with the

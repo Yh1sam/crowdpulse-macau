@@ -17,6 +17,7 @@ Imperial College London Hackathon Hong Kong & Macau 2026 · High School track ·
 | **Headline (simulated days)** | +15 min forecasts: macro-F1 **0.865** vs **0.795** for "no change" (persistence); the gain of +0.070 has a 95% interval of +0.049 to +0.089 (paired block bootstrap, [uncertainty summary](experiments/results/uncertainty/summary.md)). Accuracy **96.4%** vs **94.3%**, but a forecast that always says SAFE is already **84.6%** accurate, because most minutes are calm, so F1 is the number we lead with. |
 | **Failure case** | In a recorded simulation the crowd built in about 3 minutes, and the first confident CRITICAL forecast came after the true density had crossed CRITICAL: no early warning ([simulation run](experiments/results/simulation_run/README.md)). |
 | **Pending (real data)** | The same method on real pedestrian counts from Melbourne street sensors, with the rules committed and pushed before the test days ([pre-registration](experiments/datasets/melbourne/README.md#pre-registered-analysis-committed-16-17-oct-2026-before-the-test-window)). The result will be published whatever it shows. |
+| **Corrections** | One so far, published in [Corrections](#corrections): the first street-clip evaluation attached hand counts to the wrong video times; recounted and fixed on 29 Sep 2026 (commit 3abcd7a). |
 | **Read next** | [150-word proposal](docs/proposal.md), with a source for every claim · [evidence sheet](docs/research/brief-evidence.md) · [one-year cost, draft team estimate](docs/cost-estimate.md) · [model card](docs/model-card.md) · [privacy](docs/privacy.md) |
 
 ## How this entry meets the brief
@@ -195,6 +196,14 @@ From a high indoor camera, with people seated, behind a kiosk or far down the wa
 **Correction:** the first version of this evaluation reported 34% / 8% for Apple's detector. Those hand counts were attached to the wrong video times (ffmpeg's sampler takes the last frame of each 5 s interval, 2.4 s after the label), and the near-field definition was not one the detectors could be scored against. The script now verifies frame alignment pixel-for-pixel and uses a stated geometric near-field rule; the table above is the corrected result.
 
 **Licence:** YOLO11 weights are AGPL-3.0 (Ultralytics), so this repository is released under AGPL-3.0 as a whole (see [Licence](#licence)); a closed-source or App Store deployment needs an Ultralytics licence or a permissively licensed detector. Apple's built-in detector remains selectable in the app's Setup page and is the automatic fallback.
+
+## Corrections
+
+Errors we found in our own results, with the fix. The video shows the corrected figures.
+
+| Date | What was wrong | What changed |
+|---|---|---|
+| 29 Sep 2026 (commit 3abcd7a) | The first street-clip evaluation ([real-video result](#real-video-result-not-synthetic)) reported 34% / 8% for Apple's detector. The hand counts were attached to the wrong video times (ffmpeg's sampler takes the last frame of each 5 s interval, 2.4 s after the label), and the near-field definition was not one the detectors could be scored against. | The script now checks frame alignment pixel for pixel and uses a stated geometric near-field rule, and the evaluation was re-run. Apple's detector: 34% / 8% → 55% / 9%. The full note is the **Correction** paragraph under the real-video result. |
 
 ## Limitations (honest summary)
 

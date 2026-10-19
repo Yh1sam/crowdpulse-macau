@@ -1,4 +1,4 @@
-"""Shot S13 (2:20.5-2:42.0, 21.5 s): 2,000 annotated mall frames, a steady under-count, and a
+"""Shot S13 (2:26.0-2:47.5, 21.5 s): 2,000 annotated mall frames, a steady under-count, and a
 post-hoc calibration shown as a lead, not proof, beside a guess that uses no detector.
 
 Storyboard: docs/video/script.md, section 3 row S13, section 4 claims row S13, section 6 ("Global

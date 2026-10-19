@@ -1,4 +1,4 @@
-"""Shot S11 (2:03.5-2:20.5, 17.0 s): two on-device detectors against a careful hand count.
+"""Shot S11 (2:09.0-2:26.0, 17.0 s): two on-device detectors against a careful hand count.
 
 Storyboard: docs/video/script.md, section 3 row S11, section 4 claims row S11, section 6
 ("Global look and tools", "figure" S11). Shot list: docs/video/shotlist.json (id S11).

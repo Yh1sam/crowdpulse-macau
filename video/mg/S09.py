@@ -1,4 +1,4 @@
-"""S09 (1:09.0-1:18.0, 9.0 s), motion-graphics part only: the first 5.0 s, before the cut to the real
+"""S09 (1:10.0-1:19.0, 9.0 s), motion-graphics part only: the first 5.0 s, before the cut to the real
 dashboard crop (C2a Zone detail, its Prediction panel with the dashboard's own LOW CONFIDENCE badge), which
 is added at assembly (video/recipes.py, s09).
 

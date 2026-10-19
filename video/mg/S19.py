@@ -1,4 +1,4 @@
-"""S19 · Relay close (4:23.0-4:34.5, 11.5 s): the four team members on camera, one line each, then all together.
+"""S19 · Relay close (4:28.5-4:40.0, 11.5 s): the four team members on camera, one line each, then all together.
 
 Storyboard: docs/video/script.md section 3, row S19 (narration, visual, on-screen text); section 4, the three S19
 claims rows (the "Next" line is a plan; which approvals apply is to be confirmed, kept for Q&A; "The AI recommends. A person
