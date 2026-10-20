@@ -50,7 +50,7 @@ CrowdPulse follows the changing rhythm of crowds.
 
 **Visual:** The street graph and crowd rhythm form the wordmark. Pulse refers to crowd changes, not a biometric measurement.
 
-## N06 · 0:54.0–1:14.0 · Ieong I Hang
+## N06 · 0:54.0–1:14.0 · Yeung Hou Sam
 
 **A proposed supporting tool**
 

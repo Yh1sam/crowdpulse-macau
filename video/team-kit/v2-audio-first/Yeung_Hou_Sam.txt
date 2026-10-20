@@ -27,6 +27,12 @@ N05 — CrowdPulse
 
 CrowdPulse follows the changing rhythm of crowds.
 
+N06 — A proposed supporting tool
+參考位置：0:54–1:14
+檔名：Sam_N06_take1.m4a
+
+Macau's Public Security Police Force already runs a crowd warning system. CrowdPulse explores a portable workflow for event staff: phones send numbers, forecasts show uncertainty, and suggestions stay under review when evidence is missing.
+
 N07 — Count on the device
 參考位置：1:14–1:28
 檔名：Sam_N07_take1.m4a

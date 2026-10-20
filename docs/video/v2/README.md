@@ -2,6 +2,8 @@
 
 Current cut: **18 scenes, 4:31 (271 seconds)**. CrowdPulse is the sole product. Scenario simulation is one feature. The wheelchair-user story is an anonymous illustration. Roles match the latest allocation: Sam develops the app/integration/privacy; Thomas covers counting tests, forecasting and evaluation; Ean covers users/workflows/video editing; Curtis covers health/accessibility and route limitations.
 
+21 October allocation update: N06 (product positioning and workflow) is now Sam's narration. Individual scene windows total Sam 57 seconds, Thomas 81 seconds, Ean 56 seconds and Curtis 53 seconds, excluding the three shared lines. Narration text and scene timing are unchanged.
+
 ## Outputs and editing
 
 - Reference preview: `video/build/v3/cut/crowdpulse_v3_full_preview_720p.mp4`

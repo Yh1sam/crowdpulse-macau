@@ -61,6 +61,8 @@ def generate():
 最新分工（本包取代先前錄音稿）
 {roster}
 
+10/21 場次調整：N06「CrowdPulse 定位與整體流程」轉交 Sam 配音，Ean 不用再錄這段。
+
 {directions}
 Melbourne 測試窗至 10/22 21:00 港澳時間才結束，之後需資料同步與核對。這兩天先錄音和需要的鏡頭；N15 可先照本包錄，結果另作短插入。不要把測試已登記說成測試已通過。
 
@@ -76,6 +78,8 @@ Melbourne 測試窗至 10/22 21:00 港澳時間才結束，之後需資料同步
 字幕檔：crowdpulse_v3_guide_captions.srt（只供起步，要按真人聲音重新對時）。
 場次表：scene-timeline.csv（標明每場開始、結束、發言人及全文）。
 
+10/21 調整：N06 改由 Sam 配音，使用 Sam 的錄音及姓名標籤。
+
 1. 以真人錄音為準調整畫面停頓和字幕，保持全片在比賽時限內，不要為卡原時間而壓快發言。
 2. N01/N04/N17 收取四人各自錄製的原始影片，每段每人 2–3 個 take，連同現場聲音。用四格同框呈現共同台詞；統一裁切、人物大小和視線高度。個人出鏡可放在本人負責內容開頭，其餘使用旁白和產品畫面。
 3. 先選一條最清楚、節奏最穩定的錄音作主聲，再對齊其他人的句子起點及自然停頓。四條聲音不要同樣大聲疊加；其他三軌降低音量，以整句清晰可懂為準。保持每人的口型與自己聲音同步，明顯不同步的 take 可換另一個或補錄。核心問題必須完整說出。
@@ -87,7 +91,7 @@ Melbourne 測試窗至 10/22 21:00 港澳時間才結束，之後需資料同步
 '''
     (DEST / 'Ean_剪輯交接.txt').write_text(handoff)
     with (DEST / 'scene-timeline.csv').open('w', newline='') as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator='\n')
         writer.writerow(['scene','start_seconds','end_seconds','start_time','end_time','speaker','dialogue'])
         for shot in shots:
             person = PEOPLE.get(shot['speaker'])
@@ -99,6 +103,8 @@ Melbourne 測試窗至 10/22 21:00 港澳時間才結束，之後需資料同步
             assert shot['narration'] in (DEST / f"{person['name'].replace(' ', '_')}.txt").read_text()
     assert 'N11 —' not in (DEST/'Yeung_Hou_Sam.txt').read_text()
     assert 'N11 —' in (DEST/'Wong_U_Hei.txt').read_text()
+    assert 'N06 —' in (DEST/'Yeung_Hou_Sam.txt').read_text()
+    assert 'N06 —' not in (DEST/'Ieong_I_Hang.txt').read_text()
     assert all('Mrs Chan' not in p.read_text() for p in DEST.glob('*.txt') )
     return shots
 

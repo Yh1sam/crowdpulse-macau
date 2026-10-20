@@ -28,7 +28,7 @@ ROWS = [
      'All four camera stand-ins remain visible while the full shared question is spoken. Large readable question; no title animation before the last words.'),
     (4, 'yeung', 'CrowdPulse', 'CrowdPulse follows the changing rhythm of crowds.',
      'The street graph and crowd rhythm form the wordmark. Pulse refers to crowd changes, not a biometric measurement.'),
-    (20, 'ieong', 'A proposed supporting tool', "Macau's Public Security Police Force already runs a crowd warning system. CrowdPulse explores a portable workflow for event staff: phones send numbers, forecasts show uncertainty, and suggestions stay under review when evidence is missing.",
+    (20, 'yeung', 'A proposed supporting tool', "Macau's Public Security Police Force already runs a crowd warning system. CrowdPulse explores a portable workflow for event staff: phones send numbers, forecasts show uncertainty, and suggestions stay under review when evidence is missing.",
      'Credit the existing police system first. Reveal a phone, dashboard and staff role as a coherent product composition. Proposed support; no partner yet. Preserve public-source wording without superiority claims.'),
     (14, 'yeung', 'Count on the device', 'My focus is the phone app, system integration and privacy. Here it counts people from a Toronto test clip in the iPhone Simulator, and sends numerical readings to our server.',
      "Product-style phone reveal, then a magnified crop of the same actual frame's readings. Use only the masked Simulator capture. Smooth movement from full device to numerical readings; no fabricated values. Working prototype / Toronto test clip."),
