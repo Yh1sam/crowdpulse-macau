@@ -1,13 +1,23 @@
 Thomas — Wong U Hei
 最新分工：計數測試、人潮預測、評估、失敗案例
 
-錄音安排
+錄音安排（四人可各自在不同地方錄製）
 
 先理解自己每段的意思，再用自然語速錄製。每個 scene 錄成一個完整音檔，每段兩個 take。安靜房間、同一支手機或麥克風；開始及結束各留 1–2 秒，保留原始 m4a/wav，不加音樂。
 
 畫面時間只是參考。Ean 會按真人聲音調整剪接和字幕，不必追着參考旁白的秒數。
-個人出鏡是選擇性的，其餘可以旁白配產品畫面。現行分鏡有三段共同出鏡／台詞：N01 開場、N04 完整核心問題、N17 結尾，可同一機位一次錄齊。凡嘴部入鏡，畫面和聲音一起錄，避免對嘴問題。
-如只拍兩段共同出鏡，可保留 N01/N04，N17 由 Ean 用字卡配四人合聲；先保留這三段台詞。
+
+共同台詞的分開拍攝方法
+每個人都要完整錄 N01 開場、N04 核心問題、N17 結尾。四人可以各自在不同地方拍，由 Ean 剪成四格同框；不用等大家集合。其他個人場次可以只錄旁白，個人出鏡是選擇性的。
+
+1. 手機橫拍，1080p、30 fps；鏡頭與眼睛同高，固定手機，拍到胸口以上。人物居中，頭頂和左右留空，方便裁成四格。
+2. 找安靜、光線充足的地方，光源放在面前，背景簡單；關閉美顏和人像虛化，盡量避免通知干擾。
+3. 先聽資料包 reference/ 裏對應的三段參考音訊，練習一致的語速和停頓。正式錄製若播放提示，使用耳機，確保提示聲沒有外放被收進去。
+4. 每段分開錄 2–3 個完整 take。可以先說「3、2、1」，停一拍再開始；前後各留兩秒，講完保持望鏡頭。N04 要完整說出整條核心問題。
+5. 畫面和現場聲音一起錄。提交原始 MP4/MOV 檔，不先裁切、不另外配嘴部聲音、不加音樂。檔名例如 Sam_N04_take1.mp4。
+6. 每人交三段共同台詞的影片，再交自己個人場次的音檔。Ean 會選取最合適的 take，對齊起點及停頓。
+
+如最後只用兩段共同出鏡，可保留 N01/N04，N17 用 CrowdPulse 字卡配四人合聲；拍攝時仍先收齊三段，方便選擇。
 
 個人場次（每場一個音檔）
 
@@ -35,10 +45,16 @@ N14 — What the tests taught us
 
 Our tests showed why prediction quality, warning time and route accessibility need separate checks. In CrowdPulse, missing route evidence now blocks approval and leads to a recorded request for an on-site check.
 
-共同台詞（四人一起練習及錄製）
+共同台詞（每人分開完整錄製，之後剪成四格同框）
 
 N01: We are CrowdPulse Macau.
+影片檔名：Thomas_N01_take1.mp4
+參考音訊：reference/N01_reference.wav
 
 N04: Can ordinary phones support crowd forecasts and staff decisions without sending images or identifying passers-by?
+影片檔名：Thomas_N04_take1.mp4
+參考音訊：reference/N04_reference.wav
 
 N17: The AI recommends. A person decides.
+影片檔名：Thomas_N17_take1.mp4
+參考音訊：reference/N17_reference.wav
