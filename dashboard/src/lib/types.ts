@@ -38,6 +38,7 @@ export interface Alert { id: number; zone_id: string; created_at: string; level:
 export interface Route { from: string; to: string; via: string[]; edges: string[]; length_m: number; has_stairs: boolean; steep: boolean; min_capacity_per_min: number; accessibility_penalty: number; score: number }
 
 export interface Intervention {
+  approval_blocked?: boolean; approval_block_reason?: string | null;
   id: number; zone_id: string; created_at: string; status: "pending" | "approved" | "rejected" | "expired" | "superseded"; kind: string; title: string; recommendation: string;
   rationale: string[]; predicted_class: CongestionClass | null; horizon_min: number | null; confidence: number | null; low_confidence: boolean;
   route: Route | null; route_alternatives: Route[]; accessibility: Record<string, unknown> & { note?: string }; messages: Record<string, string>;

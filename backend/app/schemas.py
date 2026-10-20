@@ -4,7 +4,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, computed_field, field_validator
+
+from backend.app.services.route_review import approval_block_reason
 
 
 class IngestResponse(BaseModel):
@@ -148,6 +150,16 @@ class InterventionOut(BaseModel):
     decided_by: Optional[str]
     decision_note: Optional[str]
     effect_applied: bool
+
+    @computed_field
+    @property
+    def approval_blocked(self) -> bool:
+        return approval_block_reason(self.kind) is not None
+
+    @computed_field
+    @property
+    def approval_block_reason(self) -> Optional[str]:
+        return approval_block_reason(self.kind)
 
 
 class DecisionIn(BaseModel):

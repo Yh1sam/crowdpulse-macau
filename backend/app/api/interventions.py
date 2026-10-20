@@ -50,6 +50,16 @@ def reject(iv_id: int, body: DecisionIn, engine: Engine = ENGINE):
     return _decide(iv_id, False, body, engine)
 
 
+@router.post("/interventions/{iv_id}/request-field-check", response_model=InterventionOut)
+def request_field_check(iv_id: int, body: DecisionIn, engine: Engine = ENGINE):
+    try:
+        return engine.request_field_check(iv_id, body.operator, body.note)
+    except KeyError:
+        raise HTTPException(404, "unknown intervention")
+    except ValueError as e:
+        raise HTTPException(409, str(e))
+
+
 @router.get("/audit", response_model=list[AuditOut])
 def audit(limit: int = Query(200, ge=1, le=5000), db: Session = DB):
     # newest-written first: timestamps are simulated time while a simulation runs, and a restarted run starts

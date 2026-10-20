@@ -544,13 +544,13 @@ export default function App() {
         <a
           className="brand"
           href="#workspace"
-          aria-label="SketchFuture 街道實驗室"
+          aria-label="CrowdPulse 方案模擬"
         >
           <span className="brand-mark">
             <Icon name="map" />
           </span>
           <span>
-            SketchFuture<small>澳門街道實驗室</small>
+            CrowdPulse<small>方案模擬 · 澳門街道</small>
           </span>
         </a>
         <div className="header-actions glass">

@@ -1,12 +1,14 @@
 # Round-one proposal (150-word limit)
 
-Draft of 2026-10-16, 149 words (counted with `wc -w`). Submission deadline: 25 October 2026, 23:59 HKT/MST.
+Draft of 2026-10-20, 144 words (counted with `wc -w`). Submission deadline: 25 October 2026, 23:59 HKT/MST.
 
-In Golden Week 2026, the Public Security Police briefly imposed crowd control at the Ruins of St. Paul's on three afternoons. They already run a "crowd forecast and early-warning system" there. CrowdPulse proposes movable phones that count people on-device and send only numbers, never images or identities.
+In Golden Week 2026, police briefly controlled crowds at the Ruins of St. Paul's on three afternoons. They already have a crowd warning system.
 
-A model forecasts congestion 5-15 minutes ahead with a confidence score; uncertain forecasts get human review. Operators approve every action, like stair-minimising detours for elderly and wheelchair users, announced in Chinese, English and Portuguese. Signs would disclose AI use.
+CrowdPulse Macau explores a portable workflow for event staff. Phones count people on-device and send numbers, without images or identities. Forecasts cover 5-15 minutes, show confidence and reasons, and flag uncertainty for review.
 
-On held-out simulated days, 15-minute forecasts beat a "no change" baseline (F1 0.865 vs 0.795; accuracy 96.4% vs 94.3%), but a fast simulated surge turned critical before any confident forecast said so. On 2,000 annotated mall-camera frames, calibrating the camera with 20 labelled frames cut counting error from 13 to about 3 people per frame. Next: real pedestrian-sensor data, then a street pilot.
+CrowdPulse includes scenario simulation to compare street changes. Map data and models are not field verification: unverified diversions cannot be approved. Operators can request a field check or reject suggestions, with actions logged under self-declared names. Draft notices disclose AI use in Chinese, English and Portuguese.
+
+On held-out simulated days, 15-minute forecasts score macro-F1 0.865 versus 0.795 for no change (accuracy 96.4% versus 94.3%). A fast simulated surge produced a confident warning about a minute late. Next: the pre-registered Melbourne test, then a supervised pilot with permission.
 
 ## Where each claim comes from
 
@@ -17,7 +19,9 @@ On held-out simulated days, 15-minute forecasts beat a "no change" baseline (F1 
 | CrowdPulse proposes movable phones (placed temporarily by staff) | Phones on temporary mounts, moved between events, are the design's operating model (`docs/deployment.md`, "Operational model"); not yet field-tested |
 | only numbers leave the phone, never images or identities | closed observation schema (`extra="forbid"`), media uploads refused with 403, iOS payload of numbers only; tests in `backend/tests/test_api.py` |
 | forecasts 5-15 minutes ahead (5, 10, 15) with a confidence score; uncertain forecasts get human review | `backend/app/services/prediction.py`, `shared/config.json` (threshold 0.60), dashboard *LOW CONFIDENCE — HUMAN REVIEW REQUIRED* |
-| operators approve every action; detours minimise stairs; zh/en/pt notices | `backend/app/services/intervention.py` (a stair penalty, not a ban: a card says when its route still has stairs; notices), approve/reject audit log |
+| unverified diversions blocked; field-check requests and rejection logged under self-declared names | `backend/app/services/route_review.py`, `backend/app/services/engine.py`, `backend/tests/test_route_review.py`; the request is not a completed inspection or authenticated identity |
+| scenario simulation is a CrowdPulse feature | Street-change model in `sketchfuture/`; full-closure stress test, not verification of an actual alternative route |
+| draft zh/en/pt notices disclose AI use | `backend/app/services/intervention.py`, dashboard labels them Draft / not for publication |
 | signs would disclose AI use | a plan: the draft trilingual sign in `docs/research/brief-evidence.md`, section 6 (to be confirmed with the Personal Data Protection Bureau and the operating department). Separately, every public notice the system drafts ends "Advice from an AI crowd forecast, approved by staff." (`backend/app/services/intervention.py`) |
 | F1 0.865 vs 0.795; accuracy 96.4% vs 94.3% | `ml/models/metrics.json`, +15 min on synthetic held-out days: macro-F1 0.865 vs persistence 0.795; accuracy 0.9636 vs persistence 0.9426. Most minutes are SAFE, so always guessing SAFE would score 0.846 (SAFE support 14,505 of 17,152); that is why macro-F1 leads. Intervals: `experiments/results/uncertainty/summary.md` |
 | a fast simulated surge turned critical before any confident forecast said so | `experiments/results/simulation_run/README.md`: the first confident (≥ 60%) CRITICAL forecast came at 14:09:08 in run A and 14:13:14 in run B, after the true density crossed CRITICAL at 14:08:09 and 14:09:20 ("No early warning in this scenario") |

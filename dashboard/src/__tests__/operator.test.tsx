@@ -128,3 +128,40 @@ describe("decisions carry the operator's name", () => {
     expect(api.post).toHaveBeenCalledWith("/alerts/3/ack", { operator: "demo-operator-1" });
   });
 });
+
+describe("unverified diversion review", () => {
+  const diversion: Intervention = {
+    ...pendingIv, kind: "redirect_flow", title: "Proposed diversion around Senado Square",
+    approval_blocked: false, // even a legacy/incorrect allow flag must not bypass the route policy
+    accessibility: { note: "Map records no stairs; field evidence is missing." },
+  };
+  it("blocks approval with a valid name while allowing field-check requests and rejection", async () => {
+    api.data['/interventions'] = [diversion];
+    render(<Interventions />);
+    typeName('demo-operator-1');
+    expect(button('APPROVE')).toBeDisabled();
+    expect(button('REJECT')).toBeEnabled();
+    expect(screen.getByTestId('route-review')).toHaveTextContent('ACCESSIBILITY NOT VERIFIED');
+    fireEvent.click(button('APPROVE'));
+    expect(api.post).not.toHaveBeenCalled();
+    await act(async () => { fireEvent.click(button('REQUEST FIELD CHECK')); });
+    expect(api.post).toHaveBeenCalledWith('/interventions/7/request-field-check', {
+      operator: 'demo-operator-1', note: 'Route accessibility not verified; request on-site inspection.',
+    });
+  });
+  it("keeps requested checks visibly unverified and records the reason for rejection", async () => {
+    api.data['/interventions'] = [{ ...diversion, accessibility: {
+      verification_status: 'not_verified', field_check_requested_at: '2026-10-20T04:00:00Z',
+      field_check_requested_by: 'demo-operator-1',
+    } }];
+    render(<Interventions />);
+    typeName('demo-operator-2');
+    expect(screen.getByRole('status')).toHaveTextContent('Request logged; route still not verified');
+    expect(screen.queryByRole('button', { name: 'REQUEST FIELD CHECK' })).toBeNull();
+    expect(button('APPROVE')).toBeDisabled();
+    await act(async () => { fireEvent.click(button('REJECT')); });
+    expect(api.post).toHaveBeenCalledWith('/interventions/7/reject', {
+      operator: 'demo-operator-2', note: 'Rejected: route accessibility not verified; field check required.',
+    });
+  });
+});

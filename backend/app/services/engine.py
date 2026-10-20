@@ -19,6 +19,7 @@ from backend.app.db import session_scope
 from backend.app.models import Alert, AuditLog, Intervention, Observation, Prediction, Sensor, ZoneState
 from backend.app.services.clock import Clock, utc
 from backend.app.services.intervention import build_recommendation
+from backend.app.services.route_review import approval_block_reason
 from backend.app.services.live_sim import LiveSimulation
 from backend.app.services.prediction import ModelBundle, load_models, predict_zone, what_if_prediction
 from ml.pipeline.aggregation import OBS_COLUMNS, aggregate_zone_bins, assign_zone, observation_quality_weight
@@ -386,6 +387,11 @@ class Engine:
                 raise KeyError(iv_id)
             if iv.status != "pending":
                 raise ValueError(f"intervention {iv_id} already {iv.status}")
+            if iv.expires_at is not None and utc(iv.expires_at) <= now:
+                raise ValueError(f"intervention {iv_id} expired")
+            reason = approval_block_reason(iv.kind)
+            if approve and reason:
+                raise ValueError(reason)
             iv.status = "approved" if approve else "rejected"
             iv.decided_at, iv.decided_by, iv.decision_note = now, operator, note
             if approve:
@@ -398,6 +404,33 @@ class Engine:
                 if feat and self.models.loaded and mult < 1.0:
                     iv.projected_after = what_if_prediction(self.models, feat, mult)
             db.add(AuditLog(timestamp=now, actor=operator, action="intervention_approved" if approve else "intervention_rejected", target_type="intervention", target_id=str(iv.id), details={"zone_id": iv.zone_id, "kind": iv.kind, "note": note, "effect_applied_to_simulation": iv.effect_applied}))
+            db.flush()
+            db.refresh(iv)
+            return iv
+
+    def request_field_check(self, iv_id: int, operator: str, note: str | None) -> Intervention:
+        """Record a request, never an inspection result or permission to approve."""
+        now = self.clock.now()
+        with self.lock, session_scope() as db:
+            iv = db.get(Intervention, iv_id)
+            if iv is None:
+                raise KeyError(iv_id)
+            if iv.status != "pending":
+                raise ValueError(f"intervention {iv_id} already {iv.status}")
+            if iv.expires_at is not None and utc(iv.expires_at) <= now:
+                raise ValueError(f"intervention {iv_id} expired")
+            if iv.kind != "redirect_flow":
+                raise ValueError("field checks apply to proposed diversions")
+            access = dict(iv.accessibility or {})
+            if access.get("field_check_requested_at"):
+                return iv  # retry is idempotent; keep the original requester and audit event
+            access.update(verification_status="not_verified", field_check_requested_at=now.isoformat(),
+                          field_check_requested_by=operator, field_check_note=note)
+            iv.accessibility = access
+            db.add(AuditLog(timestamp=now, actor=operator, action="route_field_check_requested",
+                            target_type="intervention", target_id=str(iv.id),
+                            details={"zone_id": iv.zone_id, "note": note, "route_verified": False,
+                                     "approval_blocked": True}))
             db.flush()
             db.refresh(iv)
             return iv

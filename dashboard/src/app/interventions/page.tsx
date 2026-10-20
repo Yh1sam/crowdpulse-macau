@@ -6,12 +6,13 @@ import type { AuditEntry, Config, Intervention, Prediction } from "@/lib/types";
 import { RiskBadge } from "@/components/Badges";
 import { SketchFutureCheck } from "@/components/SketchFutureCheck";
 import { OperatorField } from "@/components/OperatorField";
+import { RouteReview, diversionApprovalBlocked } from "@/components/RouteReview";
 import { useOperatorName } from "@/lib/operator";
 import { auditDetails, localDateTime, localTime, pct } from "@/lib/format";
 
 export default function Interventions() {
   const { data: ivs, mutate } = useApi<Intervention[]>("/interventions?limit=100", 3000);
-  const { data: audit } = useApi<AuditEntry[]>("/audit?limit=50", 5000);
+  const { data: audit, mutate: refreshAudit } = useApi<AuditEntry[]>("/audit?limit=50", 5000);
   const { data: config } = useApi<Config>("/config", 60000);
   const [evidence, setEvidence] = useState<Intervention | null>(null);
   const [busy, setBusy] = useState<number | null>(null);
@@ -20,14 +21,24 @@ export default function Interventions() {
   const others = (ivs ?? []).filter((i) => i.status !== "pending");
   const decide = async (iv: Intervention, approve: boolean) => {
     if (!signer) return;
+    if (approve && diversionApprovalBlocked(iv)) return;
     setBusy(iv.id);
-    try { await post(`/interventions/${iv.id}/${approve ? "approve" : "reject"}`, { operator: signer, note: approve ? "approved from dashboard" : "rejected from dashboard" }); await mutate(); }
+    const note = !approve && iv.kind === "redirect_flow" ? "Rejected: route accessibility not verified; field check required." : approve ? "approved from dashboard" : "rejected from dashboard";
+    try { await post(`/interventions/${iv.id}/${approve ? "approve" : "reject"}`, { operator: signer, note }); await Promise.all([mutate(), refreshAudit()]); }
     catch (e) { alert(String(e)); } finally { setBusy(null); }
+  };
+  const requestCheck = async (iv: Intervention) => {
+    if (!signer) return;
+    setBusy(iv.id);
+    try {
+      await post(`/interventions/${iv.id}/request-field-check`, { operator: signer, note: "Route accessibility not verified; request on-site inspection." });
+      await Promise.all([mutate(), refreshAudit()]);
+    } catch (e) { alert(String(e)); } finally { setBusy(null); }
   };
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Interventions</h1>
-      <p className="text-sm text-zinc-400">The system recommends; you decide. Approvals and rejections are written to the audit log under the name in “Deciding as”. In the live simulation an approved redirect/inflow reduction is applied to the crowd model so the forecast is recalculated.</p>
+      <p className="text-sm text-zinc-400">CrowdPulse recommends; staff review the evidence and decide. Unverified diversions remain blocked. Requests and decisions are logged under the self-declared name in “Deciding as”.</p>
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-zinc-300">Awaiting decision ({pending.length})</h2>
         <OperatorField />
@@ -43,15 +54,16 @@ export default function Interventions() {
               <Link href={`/zones/${iv.zone_id}`} className="ml-auto text-xs text-sky-300 underline">{iv.zone_id}</Link>
             </div>
             <h3 className="mt-2 text-base font-semibold">{iv.title}</h3>
+            <RouteReview iv={iv} disabled={busy === iv.id || !signer} onRequest={() => requestCheck(iv)} />
             <p className="mt-1 text-sm text-zinc-200">{iv.recommendation}</p>
             {iv.route && <p className="mt-1 text-xs text-zinc-400">Route: {iv.route.edges.join(" → ")} · {iv.route.length_m} m · {iv.route.has_stairs ? "has stairs" : "no stairs"} · accessibility penalty {iv.route.accessibility_penalty}</p>}
-            {iv.accessibility?.note && <p className="mt-1 text-xs text-emerald-200">♿ {String(iv.accessibility.note)}</p>}
+            {iv.accessibility?.note && <p className="mt-1 text-xs text-zinc-300">♿ {String(iv.accessibility.note)}</p>}
             {Object.keys(iv.messages).length > 0 && (
-              <details className="mt-2 text-xs text-zinc-300"><summary className="cursor-pointer text-zinc-400">Public notice (中文 / English / Português)</summary>
+              <details className="mt-2 text-xs text-zinc-300"><summary className="cursor-pointer text-zinc-400">Draft public notice — not for publication (中文 / English / Português)</summary>
                 <ul className="mt-1 space-y-1"><li>ZH: {iv.messages.zh}</li><li>EN: {iv.messages.en}</li><li>PT: {iv.messages.pt}</li></ul></details>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <button disabled={busy === iv.id || !signer} title={problem ?? undefined} className="rounded bg-emerald-700 px-3 py-1 text-sm font-semibold hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-700" onClick={() => decide(iv, true)}>APPROVE</button>
+              <button disabled={busy === iv.id || !signer || diversionApprovalBlocked(iv)} title={problem ?? iv.approval_block_reason ?? (diversionApprovalBlocked(iv) ? "Route verification required" : undefined)} className="rounded bg-emerald-700 px-3 py-1 text-sm font-semibold hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-700" onClick={() => decide(iv, true)}>APPROVE</button>
               <button disabled={busy === iv.id || !signer} title={problem ?? undefined} className="rounded bg-red-800 px-3 py-1 text-sm font-semibold hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-red-800" onClick={() => decide(iv, false)}>REJECT</button>
               <button className="rounded border border-zinc-600 px-3 py-1 text-sm hover:bg-zinc-800" onClick={() => setEvidence(evidence?.id === iv.id ? null : iv)}>VIEW EVIDENCE</button>
               {problem ? <span className="text-xs text-amber-200" data-testid="decision-hint">{problem}</span> : <span className="text-xs text-zinc-500">deciding as {signer}</span>}

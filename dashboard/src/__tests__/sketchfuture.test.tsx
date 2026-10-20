@@ -59,16 +59,16 @@ describe("SketchFuture card section", () => {
   it("renders the test button with the plan link and the model caveat", () => {
     render(<SketchFutureCheck iv={redirect} crosswalk={crosswalk} />);
     const link = screen.getByTestId("sketchfuture-link");
-    expect(link).toHaveTextContent("TEST IN SKETCHFUTURE");
+    expect(link).toHaveTextContent("OPEN SCENARIO SIMULATION");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link.getAttribute("href")).toContain("/#plan=");
     expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("Largo de S. Domingos link corridor closed (議事亭前地, 3 segments)");
     expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("grows from 125 m to 216 m");
-    expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("extreme case of the assumed partial redirect");
+    expect(screen.getByTestId("sketchfuture-check")).toHaveTextContent("stress test of the proposed partial diversion");
   });
   it("says why a check is unavailable, and renders nothing for non-redirects", () => {
     const { rerender } = render(<SketchFutureCheck iv={{ ...redirect, route: { ...redirect.route!, from: "almeida_ribeiro" } }} crosswalk={crosswalk} />);
-    expect(screen.getByTestId("sketchfuture-unavailable")).toHaveTextContent("outside SketchFuture's pedestrian map");
+    expect(screen.getByTestId("sketchfuture-unavailable")).toHaveTextContent("outside the scenario model's pedestrian map");
     rerender(<SketchFutureCheck iv={{ ...redirect, kind: "deploy_staff", route: null }} crosswalk={crosswalk} />);
     expect(screen.queryByTestId("sketchfuture-unavailable")).toBeNull();
     expect(screen.queryByTestId("sketchfuture-link")).toBeNull();

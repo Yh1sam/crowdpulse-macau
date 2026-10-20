@@ -145,13 +145,14 @@ def build_recommendation(zone: dict[str, Any], graph: dict[str, Any], states: di
         route_name = " / ".join(route["edges"])
         access = {
             "route_has_stairs": route["has_stairs"], "route_steep": route["steep"], "route_length_m": route["length_m"], "accessibility_penalty": route["accessibility_penalty"],
-            "note": ("Chosen route avoids stairs and steep sections." if not (route["has_stairs"] or route["steep"]) else "Chosen route includes stairs/steep sections: keep the main route open with staff assistance for reduced-mobility visitors.")
-            + " Elderly and reduced-mobility visitors should never be forced onto a long detour; staff escort on the main route is part of this recommendation.",
+            "verification_status": "not_verified",
+            "note": ("The zone map records no stairs or steep sections on this candidate route." if not (route["has_stairs"] or route["steep"]) else "The zone map records stairs or steep sections on this candidate route.")
+            + " These map attributes do not verify accessibility. An on-site check is required before a diversion can be approved.",
         }
         edges_by_name = {e["name"]: e for e in graph["edges"]}
         msgs = public_messages("redirect_flow", zone, [edges_by_name[name] for name in route["edges"]])
         return {**base, "kind": "redirect_flow", "title": f"Redirect part of {direction or 'inbound'} flow around {zone['name']}",
-                "recommendation": f"{zone['name']} is predicted CRITICAL in {horizon} min ({conf:.0%} confidence). Redirect part of the {direction or 'inbound'} flow from {src_name} via {route_name} (to {zones[route['to']]['name']}). Keep the main route open with staff for reduced-mobility visitors. Display multilingual notices at {src_name}.",
+                "recommendation": f"{zone['name']} is predicted CRITICAL in {horizon} min ({conf:.0%} confidence). Proposed diversion: part of the {direction or 'inbound'} flow from {src_name} via {route_name} (to {zones[route['to']]['name']}). Do not implement this diversion until the route and mobility assistance have been checked on site. Request a field check or reject the suggestion.",
                 "rationale": rationale, "route": route, "route_alternatives": alternatives[:4], "accessibility": access, "messages": msgs,
                 "assumed_effect": {"inflow_reduction": reduction, "duration_min": 20, "note": f"Assumed effect (configurable prototype assumption, not validated): the forecast what-if scales the zone's inflow by {1 - reduction:.2f}; the live simulation makes routes into the zone {reduction:.0%} less attractive for 20 min, so its inflow falls by less."}}
     msgs = public_messages("reduce_inflow", zone)

@@ -4,7 +4,7 @@ import { applyEdits, freshWorkspace, MODEL_VERSION, PROFILES } from "./model";
 export const STORAGE_KEY = "sketchfuture.workspace.v1";
 export function parseWorkspace(text: string, map: MapData): Workspace {
   if (text.length > 250_000)
-    throw new Error("方案檔案太大，請使用 SketchFuture 匯出的 JSON。");
+    throw new Error("方案檔案太大，請使用 CrowdPulse 方案模擬匯出的 JSON。");
   const value = JSON.parse(text) as Record<string, unknown>;
   if (
     !value ||
