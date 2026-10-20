@@ -1,8 +1,8 @@
 # Round-one proposal (150-word limit)
 
-Draft of 2026-10-20, 144 words (counted with `wc -w`). Submission deadline: 25 October 2026, 23:59 HKT/MST.
+Draft of 2026-10-20, 148 words (counted with `wc -w`). Submission deadline: 25 October 2026, 23:59 HKT/MST.
 
-In Golden Week 2026, police briefly controlled crowds at the Ruins of St. Paul's on three afternoons. They already have a crowd warning system.
+In Golden Week 2026, Macau's Public Security Police Force briefly controlled crowds at the Ruins of St. Paul's on three afternoons. They already have a crowd warning system.
 
 CrowdPulse Macau explores a portable workflow for event staff. Phones count people on-device and send numbers, without images or identities. Forecasts cover 5-15 minutes, show confidence and reasons, and flag uncertainty for review.
 

@@ -1,13 +1,13 @@
 # CrowdPulse Macau — 18-scene reconstruction
 
-Approved narrative and speakers; reviewed runtime **4:15 (255 s)**. The review uses synthetic guide narration and clearly labelled camera placeholders. Real voices, camera footage and school/supervisor details remain to be supplied.
+Approved narrative and speakers; reviewed runtime **4:31 (271 s)**. The review uses synthetic guide narration and clearly labelled camera placeholders. Real voices, camera footage and school/supervisor details remain to be supplied.
 
 | Speaker | STEMB | Focus |
 |---|---|---|
-| Yeung Hou Sam | ST | Science & Technology |
-| Wong U Hei | SE | Science & Engineering |
-| Ieong I Hang | B | Business & Deployment |
-| Ku Seong Lai | M | Health & Accessibility |
+| Yeung Hou Sam (Sam) | ST | 手機計數、系統整合開發、資料私隱 |
+| Wong U Hei (Thomas) | SE | 計數測試、人潮預測、評估、失敗案例 |
+| Ieong I Hang (Ean) | B | 使用者需要、工作人員操作流程、影片剪輯 |
+| Ku Seong Lai (Curtis) | M | 健康與無障礙、輪椅使用者情境、路線模型限制 |
 
 
 ## N01 · 0:00.0–0:04.0 · ALL
@@ -18,15 +18,15 @@ We are CrowdPulse Macau.
 
 **Visual:** Four neutral camera stand-ins with the confirmed names and roles; wordmark settles with the spoken name. Clearly marked as camera placeholders.
 
-## N02 · 0:04.0–0:25.0 · Ku Seong Lai
+## N02 · 0:04.0–0:24.0 · Ku Seong Lai
 
-**A visitor's view**
+**A wheelchair user's view**
 
-My focus is health and accessibility. Imagine Mrs Chan, a fictional wheelchair user visiting the Ruins of Saint Paul's. From inside the crowd, she cannot see what is building ahead. Staff decisions about redirecting people can also affect which routes she can use.
+My focus is health and accessibility. Imagine a wheelchair user visiting the Ruins of Saint Paul's. From inside the crowd, they cannot see what is building ahead. Staff decisions about redirecting people can also affect which routes they can use.
 
-**Visual:** Reuse the sourced Macau schematic, wheelchair-eye-height view and Mrs Chan choreography. ILLUSTRATION stays visible. Introduce the speaker, then let the map and eye-level view carry the story.
+**Visual:** Anonymous wheelchair-user illustration on the Macau schematic, followed by eye-level silhouettes. Replace the named character tag with Wheelchair user. ILLUSTRATION remains visible; this is not a real person's story.
 
-## N03 · 0:25.0–0:42.0 · Ieong I Hang
+## N03 · 0:24.0–0:41.0 · Ieong I Hang
 
 **Why these decisions matter**
 
@@ -34,7 +34,7 @@ We want to help event staff make informed decisions. Why do these decisions matt
 
 **Visual:** Move from visitor to event staff. Give the spoken question a large focused beat. Show 2/3/4 October 2026 date chips with the police-release citation; do not imply an observed Macau crush injury.
 
-## N04 · 0:42.0–0:51.0 · ALL
+## N04 · 0:41.0–0:50.0 · ALL
 
 **Our question**
 
@@ -42,7 +42,7 @@ Can ordinary phones support crowd forecasts and staff decisions without sending 
 
 **Visual:** All four camera stand-ins remain visible while the full shared question is spoken. Large readable question; no title animation before the last words.
 
-## N05 · 0:51.0–0:55.0 · Yeung Hou Sam
+## N05 · 0:50.0–0:54.0 · Yeung Hou Sam
 
 **CrowdPulse**
 
@@ -50,39 +50,39 @@ CrowdPulse follows the changing rhythm of crowds.
 
 **Visual:** The street graph and crowd rhythm form the wordmark. Pulse refers to crowd changes, not a biometric measurement.
 
-## N06 · 0:55.0–1:13.0 · Ieong I Hang
+## N06 · 0:54.0–1:14.0 · Ieong I Hang
 
 **A proposed supporting tool**
 
-Macau's Public Security Police Force already runs a crowd warning system. Our proposal is a temporary sensing kit and dashboard for event staff, designed to support existing work during busy events.
+Macau's Public Security Police Force already runs a crowd warning system. CrowdPulse explores a portable workflow for event staff: phones send numbers, forecasts show uncertainty, and suggestions stay under review when evidence is missing.
 
 **Visual:** Credit the existing police system first. Reveal a phone, dashboard and staff role as a coherent product composition. Proposed support; no partner yet. Preserve public-source wording without superiority claims.
 
-## N07 · 1:13.0–1:27.0 · Yeung Hou Sam
+## N07 · 1:14.0–1:28.0 · Yeung Hou Sam
 
 **Count on the device**
 
-My focus is the phone app and counting tests. Here it counts people from a Toronto test clip in the iPhone Simulator, and sends numerical readings to our server.
+My focus is the phone app, system integration and privacy. Here it counts people from a Toronto test clip in the iPhone Simulator, and sends numerical readings to our server.
 
 **Visual:** Product-style phone reveal, then a magnified crop of the same actual frame's readings. Use only the masked Simulator capture. Smooth movement from full device to numerical readings; no fabricated values. Working prototype / Toronto test clip.
 
-## N08 · 1:27.0–1:48.0 · Wong U Hei
+## N08 · 1:28.0–1:49.0 · Wong U Hei
 
 **Inspect the forecast**
 
-My focus is forecasting, system integration and evaluation. The phone's test feed is assigned to Almeida Ribeiro. Here, we switch to the simulated Senado scenario. Staff can inspect forecasts, confidence scores and reasons.
+My focus is counting tests, crowd forecasting and evaluation. The phone's test feed is assigned to Almeida Ribeiro. Here, we switch to the simulated Senado scenario. Staff can inspect forecasts, confidence scores and reasons.
 
 **Visual:** Explicit test-feed/Almeida provenance beat before switching to the simulated Senado recording. Carry the phone/readout composition across the cut. Show the live-map recording, then clearly labelled forecast and explanation details captured at separate moments. Keep the simulated-data label visible; do not imply an uninterrupted clock.
 
-## N09 · 1:48.0–2:06.0 · Ieong I Hang
+## N09 · 1:49.0–2:15.0 · Ieong I Hang
 
 **Review before acting**
 
-My focus is deployment and how event staff would use the system. An operator reviews each suggestion, approves or rejects it, and enters a name recorded with the decision. Notices come in three languages and disclose AI use.
+My focus is user needs, staff workflows and video editing. Here, route accessibility is unverified, so CrowdPulse blocks approval. The operator requests an on-site check, then rejects the diversion. Both actions are recorded under a self-declared name. Draft public notices disclose AI use in three languages.
 
-**Visual:** Recorded operator workflow: suggestion, notices, approval and audit record. Large clean screen frame with measured camera moves. Retain Scripted click and fictional demo-operator disclosure; the name is self-declared, not authenticated.
+**Visual:** Real updated dashboard with a seeded synthetic recommendation, explicitly labelled verification test. Show the blocked APPROVE control, request a field check, reject the diversion and show both audit events. The request is not a completed inspection. Separate labelled draft-notice insert; no public notice is issued. The demo name is fictional and self-declared.
 
-## N10 · 2:06.0–2:25.0 · Yeung Hou Sam
+## N10 · 2:15.0–2:34.0 · Yeung Hou Sam
 
 **Privacy by design**
 
@@ -90,7 +90,7 @@ First, privacy. Staff need crowd patterns, so we chose to process video locally 
 
 **Visual:** Local processing diagram gives way to the real recorded terminal. Show recorded 202 / 422 / 403 responses at the relevant narration. Do not manufacture shell responses or claim regulatory approval.
 
-## N11 · 2:25.0–2:43.0 · Yeung Hou Sam
+## N11 · 2:34.0–2:52.0 · Wong U Hei
 
 **Test the counts**
 
@@ -98,47 +98,47 @@ On one mall camera, the detector under-counted. After calibrating with twenty la
 
 **Visual:** Derived scatter/chart only; no Mall imagery. Compare held-out MAE 3.3 with fixed-count baseline 4.8, static numerals, same scale. One camera / 20 labelled frames / offline calibration / not in app.
 
-## N12 · 2:43.0–3:08.0 · Wong U Hei
+## N12 · 2:52.0–3:19.0 · Wong U Hei
 
 **Test the warning time**
 
-Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But a fast simulated surge crossed our alert threshold before a confident warning. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability.
+Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But in a fast simulated surge, the first confident warning came about a minute after the alert threshold was crossed. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability.
 
-**Visual:** First hold the synthetic +15 minute F1 .865/.795 comparison; accuracy96.4/94.3 and critical recall91/79 are secondary, against simulated observed labels. Always-SAFE accuracy84.6 is context. Then show the recorded late-warning example and actual review UI. Prototype threshold, not a validated safety limit. No causal improvement claim.
+**Visual:** Keep the simulated +15-minute scores. Highlight About 1 minute late in the Run A sampled timeline, then show the review UI. Timestamps differ by 59 simulated seconds; sampling is about 30 simulated seconds, so do not imply precise field latency. Prototype threshold is not a safety limit.
 
-## N13 · 3:08.0–3:31.0 · Ku Seong Lai
+## N13 · 3:19.0–3:44.0 · Ku Seong Lai
 
-**Check who can use the route**
+**Compare a street-change scenario**
 
-And what about someone like Mrs Chan? In a full-closure stress test on Macau's mapped streets, twenty-four of forty simulated wheelchair journeys had no mapped step-free route, both before and after the change. We need better map data and on-site checks before treating a modelled route as suitable for real visitors.
+CrowdPulse also includes scenario simulation, to compare street changes for different mobility needs. In one full-closure stress test, twenty-four of forty simulated wheelchair journeys had no mapped step-free route in either plan. The closure did not create those twenty-four unreachable journeys. Map data and on-site checks still matter.
 
-**Visual:** Show the actual SketchFuture model capture first, then dissolve to two equal before/after 40-dot cohorts. Both already show24 unreachable; do not animate them as newly excluded by the closure. Full closure / synthetic cohort / mapped routes, not field certification. Keep OSM attribution.
+**Visual:** Present this as CrowdPulse's Scenario simulation feature, with no separate product logo or pitch. Show the actual branded module before the paired 40-dot cohorts. Both have24 unreachable. Explicitly label the unchanged baseline: no newly unreachable journeys in this cohort. Model results do not verify a real alternative route.
 
-## N14 · 3:31.0–3:43.0 · Wong U Hei
+## N14 · 3:44.0–3:59.0 · Wong U Hei
 
 **What the tests taught us**
 
-Our tests showed why prediction quality, warning time and route accessibility need separate checks. A working prototype is the start of that process.
+Our tests showed why prediction quality, warning time and route accessibility need separate checks. In CrowdPulse, missing route evidence now blocks approval and leads to a recorded request for an on-site check.
 
 **Visual:** Three familiar elements return: prediction comparison, late-warning timeline, wheelchair route. No second full demo or extra metrics.
 
-## N15 · 3:43.0–3:56.0 · Ieong I Hang
+## N15 · 3:59.0–4:12.0 · Ieong I Hang
 
 **The next evidence**
 
-Our pre-registered Melbourne forecasting test is pending. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions.
+We pre-registered our forecasting test on Melbourne pedestrian counts. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions.
 
 **Visual:** Short roadmap: Melbourne test pending / supervised pilot proposed. No held-out analysis or invented result; no claimed partner or field deployment.
 
-## N16 · 3:56.0–4:04.0 · Ku Seong Lai
+## N16 · 4:12.0–4:20.0 · Ku Seong Lai
 
-**Back to Mrs Chan**
+**Return to the wheelchair user**
 
-Back to Mrs Chan: staff would still need to inspect the route and assist her on site.
+For a wheelchair user, staff would still need to inspect the route and provide assistance on site.
 
-**Visual:** Return to the same underlying schematic, risk still present. Staff inspect and stand beside her. No green approved route or automatic safety certification.
+**Visual:** Return to the anonymous wheelchair-user illustration, with staff checking the route. No named character, real-person claim or all-clear stamp.
 
-## N17 · 4:04.0–4:09.0 · ALL
+## N17 · 4:20.0–4:25.0 · ALL
 
 **People decide**
 
@@ -146,10 +146,10 @@ The AI recommends. A person decides.
 
 **Visual:** All four stand-ins share the final line, with names and roles. Clear camera-placeholder label until real footage is supplied.
 
-## N18 · 4:09.0–4:15.0 · NONE
+## N18 · 4:25.0–4:31.0 · NONE
 
 **Credits**
 
 (No narration.)
 
-**Visual:** Wordmark, four confirmed names/roles, code/evidence link, material credits and school/supervisor pending notice. Full six-second hold.
+**Visual:** CrowdPulse wordmark, confirmed names and roles, code/evidence link and material credits. Production notes keep pending school/supervisor details; remove the pending label from the film credits. Guide/camera-placeholder labels stay while the media is still a guide version.
