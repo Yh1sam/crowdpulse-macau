@@ -1,63 +1,38 @@
-# CrowdPulse V2 production guide
+# CrowdPulse current production guide — 20 October 2026
 
-The current reconstruction follows the approved 18-scene story and revised four-person allocation. After the full-sequence pacing review, runtime is **4:15 (255 seconds)**, including six seconds of credits. This is a complete review cut with stock guide narration and labelled camera placeholders, ready for reviewing the sequence and recording the real team takes.
+Current cut: **18 scenes, 4:31 (271 seconds)**. CrowdPulse is the sole product. Scenario simulation is one feature. The wheelchair-user story is an anonymous illustration. Roles match the latest allocation: Sam develops the app/integration/privacy; Thomas covers counting tests, forecasting and evaluation; Ean covers users/workflows/video editing; Curtis covers health/accessibility and route limitations.
 
-## Local outputs
+## Outputs and editing
 
-- Full preview: `video/build/v2/cut/crowdpulse_v2_reviewed_full_preview_720p.mp4`
-- 1080p master: `video/build/v2/cut/crowdpulse_v2_reviewed_full_1080p.mp4`
-- Sequential review frames and motion sheets: `video/build/v2/qa/full-pass-reviewed/` and `video/build/v2/qa/motion-reviewed/`
-- Per-sentence guide timing: `video/build/v2/guide.json`
+- Reference preview: `video/build/v3/cut/crowdpulse_v3_full_preview_720p.mp4`
+- Reference master: `video/build/v3/cut/crowdpulse_v3_full_1080p.mp4`
+- **Silent picture master, without burned narration captions:** `video/build/v3/cut/crowdpulse_v3_picture_only_1080p.mp4`
+- Editable reference subtitles: `video/build/v3/cut/crowdpulse_v3_guide_captions.srt`
+- Recording pack: `video/build/v3/CrowdPulse_錄音包_v3_2026-10-20.zip`
+- Ean editing pack: `video/build/v3/CrowdPulse_Ean剪輯包_v3_2026-10-20.zip`
 
-Derived media is ignored by Git and stays local. The older `docs/video/shotlist.json`, scripts and renderer remain intact for reproducing the previous cut; they are not the V2 narrative source.
+The reference voice remains macOS Daniel, not a member's voice. The lower-right Guide audio label was removed as requested. No real member audio or camera footage has been inserted. Three shared-camera scenes remain as labelled stand-ins: N01 introduction, N04 full question, N17 closing. They can be recorded in one setup. Individual camera footage is optional. If the team uses only two shared camera segments, Ean can use a CrowdPulse text card plus group voice for N17.
 
-## Story and recording
+Use [the exact current lines](voice-lines.md), [scene directions](script.md) and [per-person files](../../../video/team-kit/v2-audio-first/). The picture master retains product UI, speaker/role labels, source/simulation notices and camera stand-ins, with no audio stream or burned dialogue captions. Ean should adjust picture holds and SRT timings to the real voices, then replace camera stand-ins with synchronized footage. It is not yet a final submission film.
 
-[Script and screen direction](script.md), [exact lines and time windows](voice-lines.md), [machine-readable shot list](shotlist.json).
+N15 says the fixed fact that the Melbourne test was pre-registered; pending status stays in the graphic. The test window ends **22 October at 21:00 Hong Kong/Macau time**, after which archive coverage and results still need checking. Record now; a verified result can later be added as a graphic or short additional voice segment. No result is presumed.
 
-| Member | Focus | Scenes |
-|---|---|---|
-| Yeung Hou Sam | Science & Technology: phone, local processing, counting tests | N05, N07, N10, N11 |
-| Wong U Hei | Science & Engineering: forecasts, integration and evaluation | N08, N12, N14 |
-| Ieong I Hang | Business & Deployment: intended use and operating workflow | N03, N06, N09, N15 |
-| Ku Seong Lai | Health & Accessibility: Mrs Chan and route limitations | N02, N13, N16 |
-| All four | Shared introduction, full research question and closing | N01, N04, N17 |
+## Current product demonstration
 
-The guide is the macOS **Daniel** stock voice, not an imitation of any member. The displayed member names assign the planned narration; they do not identify the guide voice. N01/N04/N17 are neutral camera stand-ins. Record the shared question in full with all four members. Record individual scenes with the exact words and natural pauses; allow timing changes if real takes need more room. School and supervisor details remain pending. No real member recordings have been inserted.
+N09 uses the actual updated API/UI with explicit seeded synthetic prediction inputs, then scripted field-check request and rejection. Approval is blocked; a request does not verify the route. Both events are shown from the real audit log. A separate draft-notice insert is labelled not published. See [route review policy and tests](../../route-review.md).
 
-## Rebuild
+N13 presents **CrowdPulse · Scenario simulation**, using the actual branded interface. Its paired cohort still has 24/40 unreachable journeys in each plan. The result is not 24 newly excluded journeys, an actual detour verification or field certification. N12 highlights about one minute of simulated late warning and retains the sampling caveat.
 
-From the repository root, with the existing Python environment, FFmpeg, macOS `say`, bundled fonts, source clips and experiment figures:
+## Reproduction
 
 ```sh
 .venv/bin/python video/v2_story.py
 .venv/bin/python video/pitch_v2.py --guides --stills
 .venv/bin/python video/pitch_v2.py --render --workers 3
 .venv/bin/python video/pitch_v2.py --assemble
+.venv/bin/python video/make_recording_pack.py
 ```
 
-To rebuild a changed scene, use `--render --only N09 --workers 1`, then assemble again. Guide generation caches sentence audio by text, voice, rate and tempo. Changing narration requires regenerating guides and re-rendering affected scenes because captions are burned in. Replacing audio alone would leave guide captions and visual cues out of sync; real voice/camera integration needs a new timing pass.
+The renderer decodes source clips without altering them, renders each frame once for both captioned and clean outputs, then assembles separate masters. Guide utterances are cached by text/voice/rate; changing narration requires regenerating timing and affected scenes. Old 4:15 and 4:37 exports remain under `video/build/v2/`. The older unversioned scripts reproduce earlier cuts and do not define the current recording lines.
 
-The renderer preserves screen aspect ratios, uses bounded sequential video decoding and holds the final frame of a short recording rather than inventing later readings. The phone source is the existing 7.13-second masked excerpt; its final readout is deliberately held and labelled. All original recordings are read-only inputs.
-
-## Product presentation and evidence
-
-N06 introduces the full phone/dashboard/staff composition, then moves the phone into the N07 opening position. N07 moves from the full device to a magnified crop of its actual numerical readout. N08 carries the phone/readout composition across the cut, labels the Almeida Ribeiro test feed, then switches to the simulated Senado recording. Forecast and explanation details are clearly labelled inserts from separate recorded moments. N09 shows suggestion, recorded approval and audit, followed by a separately labelled notice insert. It does not present an earlier notice capture as a later live event.
-
-| Evidence | Treatment in this cut |
-|---|---|
-| Simulator counting | Toronto public-domain test clip, pixelated faces; no Macau field-count claim |
-| Macau dashboard | Working software with simulated crowd/forecast; source labels stay visible |
-| Operator approval | Scripted click; fictional self-declared `demo-operator-1`, no authenticated identity claim |
-| Privacy | Recorded server responses 202 / 422 / 403, timed to the spoken clauses |
-| Counting calibration | One Mall camera, 20 labelled calibration frames, held-out MAE 3.3 vs 4.8 fixed-count baseline; offline and not yet in the app; derived figures only |
-| Forecast quality | Held-out simulated days, +15-minute macro-F1 .865 vs .795; accuracy/recall secondary; always-SAFE accuracy 84.6% visible |
-| Late warning | Run A's 14:08:09 threshold crossing and 14:09:08 first confident warning; threshold .70 is not a validated safety limit |
-| Accessibility | Full-closure stress test, synthetic 40-journey wheelchair cohort; 24 unreachable both before and after; purple dots mean no mapped step-free route, not newly excluded journeys |
-| Melbourne | Pre-registered test pending; no held-out results opened or calculated for this edit |
-
-## Review and verification
-
-See [the full-sequence review and fixes](review.md) for the concrete defects, revised timing and verification evidence. The earlier 4:37 files remain in the local cut folder for comparison. The reviewed files use a distinct name to avoid confusing them with that version.
-
-The cut has not been submitted or published. The review still uses stock guide narration and camera placeholders; real team camera/voice recordings and pending submission details remain separate.
+New source capture recipes are `video/shots/C3_review.json`, `C3_notice.json` and `C3_scenario.json`. `video/seed_review_demo.py` resets only its isolated recording database under `video/build/v3/`; it never reads Melbourne held-out counts. See [current media verification](review-2026-10-20.md).

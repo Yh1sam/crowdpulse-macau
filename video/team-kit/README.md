@@ -1,6 +1,6 @@
 # Team recording kit
 
-**Current package — 20 October 2026:** [V2 audio-first recording files](v2-audio-first/), with the four confirmed names, individual scene scripts and three shared lines to record together later. Use the [4:15 V2 narration](../../docs/video/v2/voice-lines.md) and [production guide](../../docs/video/v2/README.md). Record individual audio now; film camera sections with synchronized sound later.
+**Current package — 20 October 2026:** [V2 audio-first recording files](v2-audio-first/), with the four confirmed names, individual scene scripts and three shared lines to record together later. Use the [current 4:31 narration](../../docs/video/v2/voice-lines.md) and [production guide](../../docs/video/v2/README.md). Record individual audio now; film camera sections with synchronized sound later.
 
 ## Legacy on-camera props and instructions (earlier cut)
 

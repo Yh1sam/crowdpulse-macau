@@ -1,38 +1,41 @@
-Wong U Hei
-SE：人潮預測、系統整合、評估及失敗案例
+Thomas — Wong U Hei
+最新分工：計數測試、人潮預測、評估、失敗案例
 
-先錄旁白，出鏡稍後補
+錄音安排
 
-1. 先看資料包的導讀影片，理解自己每段在講甚麼。導讀聲音只是節奏參考，不用模仿。
-2. 一個 scene 錄成一個完整檔案，不用每句切開。每段交兩個完整 take。
-3. 用安靜房間、同一支手機或麥克風，盡量在同一次錄完。手機約距嘴巴 15–25 cm，避免正對氣流。
-4. 說話自然、清楚；句號稍停。開始及結束各留 1–2 秒，不要為了卡秒而加速。
-5. 保留原始 m4a 或 wav；不要加音樂或自行剪成影片。檔名：姓名_Nxx_take1.m4a、姓名_Nxx_take2.m4a。
-6. 本輪先交個人旁白。N01、N04、N17 三句共同台詞先練習，之後四人同框，連畫面和聲音一起錄。
-7. 之後凡需要嘴部入鏡的片段，也連畫面與聲音重錄；不用對着現在的錄音做口型。
-8. 下方時間只是現有 4:15 導讀版的位置。真人錄音收到後會重新對時，不必逐秒追着影片。
+先理解自己每段的意思，再用自然語速錄製。每個 scene 錄成一個完整音檔，每段兩個 take。安靜房間、同一支手機或麥克風；開始及結束各留 1–2 秒，保留原始 m4a/wav，不加音樂。
 
-個人錄音台詞（按場次分檔）
+畫面時間只是參考。Ean 會按真人聲音調整剪接和字幕，不必追着參考旁白的秒數。
+個人出鏡是選擇性的，其餘可以旁白配產品畫面。現行分鏡有三段共同出鏡／台詞：N01 開場、N04 完整核心問題、N17 結尾，可同一機位一次錄齊。凡嘴部入鏡，畫面和聲音一起錄，避免對嘴問題。
+如只拍兩段共同出鏡，可保留 N01/N04，N17 由 Ean 用字卡配四人合聲；先保留這三段台詞。
+
+個人場次（每場一個音檔）
 
 N08 — Inspect the forecast
-導讀版位置：1:27–1:48
-檔名：Wong_U_Hei_N08_take1.m4a
+參考位置：1:28–1:49
+檔名：Thomas_N08_take1.m4a
 
-My focus is forecasting, system integration and evaluation. The phone's test feed is assigned to Almeida Ribeiro. Here, we switch to the simulated Senado scenario. Staff can inspect forecasts, confidence scores and reasons.
+My focus is counting tests, crowd forecasting and evaluation. The phone's test feed is assigned to Almeida Ribeiro. Here, we switch to the simulated Senado scenario. Staff can inspect forecasts, confidence scores and reasons.
+
+N11 — Test the counts
+參考位置：2:34–2:52
+檔名：Thomas_N11_take1.m4a
+
+On one mall camera, the detector under-counted. After calibrating with twenty labelled frames, held-out error was about three people per frame, versus about five for a fixed guess. This calibration is not yet in the app.
 
 N12 — Test the warning time
-導讀版位置：2:43–3:08
-檔名：Wong_U_Hei_N12_take1.m4a
+參考位置：2:52–3:19
+檔名：Thomas_N12_take1.m4a
 
-Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But a fast simulated surge crossed our alert threshold before a confident warning. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability.
+Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But in a fast simulated surge, the first confident warning came about a minute after the alert threshold was crossed. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability.
 
 N14 — What the tests taught us
-導讀版位置：3:31–3:43
-檔名：Wong_U_Hei_N14_take1.m4a
+參考位置：3:44–3:59
+檔名：Thomas_N14_take1.m4a
 
-Our tests showed why prediction quality, warning time and route accessibility need separate checks. A working prototype is the start of that process.
+Our tests showed why prediction quality, warning time and route accessibility need separate checks. In CrowdPulse, missing route evidence now blocks approval and leads to a recorded request for an on-site check.
 
-共同出鏡台詞（先練習，之後四人一起錄）
+共同台詞（四人一起練習及錄製）
 
 N01: We are CrowdPulse Macau.
 

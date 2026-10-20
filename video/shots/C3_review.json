@@ -1,0 +1,48 @@
+{
+  "url": "http://localhost:3000/interventions",
+  "viewport": [
+    1280,
+    720
+  ],
+  "scale": 1.5,
+  "settle": 2,
+  "steps": [
+    {
+      "eval": "localStorage.setItem('crowdpulse.operatorName','demo-operator-1');window.dispatchEvent(new StorageEvent('storage',{key:'crowdpulse.operatorName'}))"
+    },
+    {
+      "eval": "setInterval(() => { const c=[...document.querySelectorAll('h3')].find(x=>x.textContent.startsWith('Redirect part'))?.parentElement; if(c){c.id='review-candidate'; const b=t=>[...c.querySelectorAll('button')].find(x=>x.textContent.trim()===t); if(b('REQUEST FIELD CHECK')) b('REQUEST FIELD CHECK').id='route-request'; if(b('REJECT')) b('REJECT').id='route-reject'; const s=c.querySelector('summary');if(s)s.id='route-notice';} const a=[...document.querySelectorAll('h2')].find(x=>x.textContent==='Audit log'); if(a)a.id='review-audit'; },200)"
+    },
+    {
+      "wait_for": "#review-candidate"
+    },
+    {
+      "eval": "window.scrollTo({top:document.querySelector('#review-candidate').getBoundingClientRect().top+scrollY-85,behavior:'smooth'})"
+    },
+    {
+      "wait": 1
+    },
+    {
+      "wait": 5
+    },
+    {
+      "click": "#route-request"
+    },
+    {
+      "wait": 4
+    },
+    {
+      "click": "#route-reject"
+    },
+    {
+      "wait": 1
+    },
+    {
+      "scroll_to": "#review-audit"
+    },
+    {
+      "wait": 7
+    }
+  ],
+  "provenance": "Seeded synthetic prediction inputs, real API/UI, scripted request and rejection. No field inspection."
+}

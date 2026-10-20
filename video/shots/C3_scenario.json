@@ -1,0 +1,15 @@
+{
+  "url": "http://localhost:4173/#plan=eyJ3b3Jrc3BhY2UiOiB7InZlcnNpb24iOiAxLCAibWFwVmVyc2lvbiI6ICJtYWNhdS1vc20tMjAyNi0xMC0wOC12MSIsICJ0aXRsZSI6ICJDcm93ZFB1bHNl77ya5bCB6ZaJ5aSn5LiJ5be06KGX6Iez5p2_5qif5aCC6YCa6YGTIiwgImVkaXRzIjogW3sidHlwZSI6ICJjbG9zZSIsICJlZGdlSWQiOiAib3NtLTc3NjU0NzIwOC0wIn0sIHsidHlwZSI6ICJjbG9zZSIsICJlZGdlSWQiOiAib3NtLTcxNzkxMjg1OS0yIn0sIHsidHlwZSI6ICJjbG9zZSIsICJlZGdlSWQiOiAib3NtLTcxNzkxMjg1OS0wIn1dLCAic2V0dGluZ3MiOiB7InBlb3BsZSI6IDEyMCwgInJlbGVhc2VTZWNvbmRzIjogMTIwLCAic3BlZWRGYWN0b3IiOiAxLCAiY2FwYWNpdHlGYWN0b3IiOiAxLCAic2VlZCI6IDQyLCAicmVwZWF0cyI6IDUsICJob3Jpem9uIjogMTgwMH19LCAic291cmNlIjogIkNyb3dkUHVsc2Ug5pa55qGI5qih5pOs77ya5YWo5bCB6Lev5aOT5Yqb5ris6KmmIn0",
+  "viewport": [
+    1280,
+    720
+  ],
+  "scale": 1.5,
+  "settle": 8,
+  "steps": [
+    {
+      "wait": 10
+    }
+  ],
+  "provenance": "Actual CrowdPulse scenario-simulation feature, deterministic default cohort and full-closure scenario."
+}

@@ -1,0 +1,19 @@
+scene,start_seconds,end_seconds,start_time,end_time,speaker,dialogue
+N01,0,4,0:00,0:04,all,We are CrowdPulse Macau.
+N02,4,24,0:04,0:24,Curtis,"My focus is health and accessibility. Imagine a wheelchair user visiting the Ruins of Saint Paul's. From inside the crowd, they cannot see what is building ahead. Staff decisions about redirecting people can also affect which routes they can use."
+N03,24,41,0:24,0:41,Ean,"We want to help event staff make informed decisions. Why do these decisions matter? They affect people with different mobility needs. This Golden Week, police briefly controlled crowds at the Ruins on three afternoons."
+N04,41,50,0:41,0:50,all,Can ordinary phones support crowd forecasts and staff decisions without sending images or identifying passers-by?
+N05,50,54,0:50,0:54,Sam,CrowdPulse follows the changing rhythm of crowds.
+N06,54,74,0:54,1:14,Ean,"Macau's Public Security Police Force already runs a crowd warning system. CrowdPulse explores a portable workflow for event staff: phones send numbers, forecasts show uncertainty, and suggestions stay under review when evidence is missing."
+N07,74,88,1:14,1:28,Sam,"My focus is the phone app, system integration and privacy. Here it counts people from a Toronto test clip in the iPhone Simulator, and sends numerical readings to our server."
+N08,88,109,1:28,1:49,Thomas,"My focus is counting tests, crowd forecasting and evaluation. The phone's test feed is assigned to Almeida Ribeiro. Here, we switch to the simulated Senado scenario. Staff can inspect forecasts, confidence scores and reasons."
+N09,109,135,1:49,2:15,Ean,"My focus is user needs, staff workflows and video editing. Here, route accessibility is unverified, so CrowdPulse blocks approval. The operator requests an on-site check, then rejects the diversion. Both actions are recorded under a self-declared name. Draft public notices disclose AI use in three languages."
+N10,135,154,2:15,2:34,Sam,"First, privacy. Staff need crowd patterns, so we chose to process video locally and send numerical observations. Our server accepts a valid reading, rejects one containing an identity field, and refuses image uploads."
+N11,154,172,2:34,2:52,Thomas,"On one mall camera, the detector under-counted. After calibrating with twenty labelled frames, held-out error was about three people per frame, versus about five for a fixed guess. This calibration is not yet in the app."
+N12,172,199,2:52,3:19,Thomas,"Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But in a fast simulated surge, the first confident warning came about a minute after the alert threshold was crossed. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability."
+N13,199,224,3:19,3:44,Curtis,"CrowdPulse also includes scenario simulation, to compare street changes for different mobility needs. In one full-closure stress test, twenty-four of forty simulated wheelchair journeys had no mapped step-free route in either plan. The closure did not create those twenty-four unreachable journeys. Map data and on-site checks still matter."
+N14,224,239,3:44,3:59,Thomas,"Our tests showed why prediction quality, warning time and route accessibility need separate checks. In CrowdPulse, missing route evidence now blocks approval and leads to a recorded request for an on-site check."
+N15,239,252,3:59,4:12,Ean,"We pre-registered our forecasting test on Melbourne pedestrian counts. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions."
+N16,252,260,4:12,4:20,Curtis,"For a wheelchair user, staff would still need to inspect the route and provide assistance on site."
+N17,260,265,4:20,4:25,all,The AI recommends. A person decides.
+N18,265,271,4:25,4:31,none,

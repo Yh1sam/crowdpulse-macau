@@ -1,0 +1,27 @@
+{
+  "url": "http://localhost:3000/interventions",
+  "viewport": [
+    1280,
+    720
+  ],
+  "scale": 1.5,
+  "settle": 2,
+  "steps": [
+    {
+      "wait_for_js": "[...document.querySelectorAll('h3')].some(x=>x.textContent==='Deploy staff to Senado Square')"
+    },
+    {
+      "eval": "const c=[...document.querySelectorAll('h3')].find(x=>x.textContent==='Deploy staff to Senado Square').parentElement;c.id='notice-card';c.querySelector('summary').id='notice-example';"
+    },
+    {
+      "click": "#notice-example"
+    },
+    {
+      "eval": "window.scrollTo({top:document.querySelector('#notice-card').getBoundingClientRect().top+scrollY-80,behavior:'smooth'})"
+    },
+    {
+      "wait": 7
+    }
+  ],
+  "provenance": "Actual draft trilingual notice for a seeded deploy-staff recommendation. Not approved or published."
+}

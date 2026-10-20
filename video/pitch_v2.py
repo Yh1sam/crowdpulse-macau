@@ -4,7 +4,7 @@ Usage: .venv/bin/python video/pitch_v2.py --stills
        .venv/bin/python video/pitch_v2.py --render --workers 3
        .venv/bin/python video/pitch_v2.py --assemble
 
-Old recordings remain immutable inputs. All derived media lives in video/build/v2.
+Old recordings remain immutable inputs. All derived media lives in video/build/v3.
 The versioned story and recording documents are generated from v2_story.py.
 """
 from __future__ import annotations
@@ -32,7 +32,7 @@ from style import font, text_size, wrap, wheelchair_icon, staff_icon
 from assemble import caption_chunks, caption_bounds, pauses
 
 W, H, FPS = 1920, 1080, 30
-BUILD = ROOT / "video" / "build" / "v2"
+BUILD = ROOT / "video" / "build" / "v3"
 CLIPS = ROOT / "video" / "build" / "clips"
 BG, PANEL, LINE = (8, 14, 25), (17, 27, 43), (43, 60, 79)
 WHITE, MUTED, CYAN = (241, 246, 252), (157, 174, 194), (48, 211, 221)
@@ -40,7 +40,6 @@ RED, AMBER, PURPLE = (239, 91, 103), (246, 187, 78), (167, 135, 235)
 COLOUR = ["-pix_fmt", "yuv420p", "-color_range", "tv", "-colorspace", "bt709",
           "-color_primaries", "bt709", "-color_trc", "bt709"]
 H264_COLOUR = "h264_metadata=colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1:video_full_range_flag=0"
-REVIEW_NOTE = "Guide audio"
 SHOTS = {s["id"]: s for s in scenes()}
 
 
@@ -134,7 +133,10 @@ def footer(img, value):
 
 @lru_cache(maxsize=16)
 def legacy(name):
-    return importlib.import_module(name)
+    module = importlib.import_module(name)
+    if name in {"S01", "S18"}:
+        module.TAG_SPRITE = module.ahpo.tag_sprite("Wheelchair user").reduce(module.ahpo.SS)
+    return module
 
 
 @lru_cache(maxsize=32)
@@ -346,7 +348,7 @@ class Scene:
         for reader in self.readers.values():
             reader.close()
 
-    def finish(self, img, t):
+    def finish(self, img, t, include_captions=True):
         person = PEOPLE.get(self.shot["speaker"])
         if person and t < 4.8:
             a = phase(t, .1, .45) * (1 - phase(t, 4.2, .6))
@@ -356,6 +358,11 @@ class Scene:
             text(tile, 18, 40, person["role"], 17, 450, MUTED)
             text(tile, 602, 22, person["letters"], 21, 650, CYAN, centre=True)
             paste(img, tile, 80, 850, a)
+        if include_captions:
+            img = self.add_captions(img, t)
+        return img.convert("RGB")
+
+    def add_captions(self, img, t):
         for item in self.report["captions"]:
             if item["start"] <= t < item["end"]:
                 lines = wrap(item["text"], 33, 500, 1480)
@@ -366,15 +373,14 @@ class Scene:
                 for j, line in enumerate(lines):
                     text(img, W / 2, y + 10 + j * 40, line, 33, 500, centre=True)
                 break
-        text(img, 1750, 1036, REVIEW_NOTE, 17, 450, MUTED)
-        return img.convert("RGB")
+        return img
 
     def content(self, t):
         img = backdrop().copy()
         getattr(self, f"draw_{self.sid}")(img, t)
         return img
 
-    def draw(self, t):
+    def draw(self, t, include_captions=True):
         img = self.content(t)
         if self.sid != "N01" and t < .3:
             if self.entry_frame is None:
@@ -383,7 +389,7 @@ class Scene:
                 self.entry_frame = previous.content(slot - 1 / FPS)
                 previous.close()
             img = Image.blend(self.entry_frame, img, phase(t, 0, .3))
-        return self.finish(img, t)
+        return self.finish(img, t, include_captions)
 
     def draw_N01(self, img, t):
         group(img, t, "intro")
@@ -464,7 +470,7 @@ class Scene:
         header(product, "A temporary sensing kit", "For event staff · proposed support", t)
         p = snapshot("S02_sim_masked", 0)
         screen = snapshot("C2a", 119)
-        zoom = phase(t, 14.4, 3.2)
+        zoom = phase(t, 17.2, 2.5)
         box = (540, 260, 1710, 795)
         composition = Image.new("RGBA", (W, H))
         window(composition, screen, box, "CrowdPulse dashboard", crop=(280, 65, 1910, 810))
@@ -548,35 +554,38 @@ class Scene:
 
     def approval_view(self, t, stage):
         view = backdrop().copy()
-        header(view, "Review before acting", "Working software · simulated crowd · scripted click", t)
-        start = cue(self.report, 1)
+        header(view, "Review before acting", "CrowdPulse · seeded simulated recommendation · scripted interaction", t)
+        box = (130, 230, 1790, 835)
         if stage == 0:
-            at, crop = 111.8 + min(t, start) * .4, (300, 70, 1880, 940)
+            frame, crop, label = snapshot("C3_review", 2), (300, 40, 1900, 790), "RECORDED VERIFICATION TEST"
         elif stage == 1:
-            at = min(127.5, 125.5 + max(0, t - start) * .5)
-            crop = (335, 100, 1880, 900)
+            frame, crop, label = snapshot("C3_review", 5), (330, 230, 1880, 755), "UNVERIFIED DIVERSION · APPROVAL BLOCKED"
         elif stage == 2:
-            at, crop = 137 + max(0, t - start - 4) * .35, (322, 350, 1880, 780)
+            at = float(np.interp(t, [cue(self.report, 2), cue(self.report, 2) + 1.8, cue(self.report, 3)], [6.5, 10, 14.5]))
+            frame, crop, label = self.footage("C3_review", at), (300, 90, 1900, 920), "REQUEST A CHECK · REJECT THE DIVERSION"
+            if t >= cue(self.report, 3) - .8:
+                frame, crop, label = snapshot("C3_review", 18), (320, 650, 1880, 950), "RECORDED REJECTION · DIVERSION NOT APPLIED"
+        elif stage == 3:
+            frame, crop, label = snapshot("C3_review", 18), (320, 780, 1880, 950), "RECORDED REQUEST AND REJECTION · AUDIT LOG"
         else:
-            window(view, snapshot("C2b2", 116.5), (130, 230, 1790, 780),
-                   "RECORDED NOTICE EXAMPLE", (335, 520, 1880, 745))
-            for i, label in enumerate(("Chinese", "English", "Portuguese")):
-                pill(view, label, 420 + i * 410, 825, CYAN)
-            return view
-        window(view, self.footage("C2b2", at), (130, 230, 1790, 835),
-               "STAFF APPROVAL WORKFLOW" if stage < 2 else "RECORDED DECISION · AUDIT LOG", crop)
+            frame, crop, label = snapshot("C3_notice", 4), (335, 395, 1880, 543), "DRAFT NOTICE EXAMPLE · NOT PUBLISHED"
+            box = (130, 230, 1790, 780)
+        window(view, frame, box, label, crop)
+        if stage == 4:
+            for i, language in enumerate(("Chinese", "English", "Portuguese")):
+                pill(view, language, 420 + i * 410, 825, CYAN)
         return view
 
     def draw_N09(self, img, t):
-        starts = [0, cue(self.report, 1), cue(self.report, 1) + 4, cue(self.report, 2)]
+        starts = [0] + [cue(self.report, i) for i in range(1, 5)]
         stage = sum(t >= point for point in starts[1:])
         current = self.approval_view(t, stage)
-        if stage and t < starts[stage] + .45:
+        if stage and t < starts[stage] + .4:
             previous = self.approval_view(starts[stage] - 1 / FPS, stage - 1)
-            dissolve(img, previous, current, phase(t, starts[stage], .45))
+            dissolve(img, previous, current, phase(t, starts[stage], .4))
         else:
             img.alpha_composite(current)
-        footer(img, "Scripted click · demo-operator-1 is a fictional, self-declared demonstration name")
+        footer(img, "Real API/UI · seeded synthetic input · request is not an inspection · fictional self-declared demo-operator-1")
 
     def draw_N10(self, img, t):
         header(img, "Privacy by design", "Numerical observations · no image uploads", t)
@@ -638,12 +647,13 @@ class Scene:
             if t > 3:
                 roundbox(img, (225, 600, 1695, 790), PANEL, 24)
                 text(img, 270, 630, "Accuracy       96.4%  vs  94.3%", 31, 500)
-                text(img, 270, 685, "Critical recall   91%  vs  79%", 31, 500)
+                text(img, 270, 685, "Held-out simulated days", 28, 450, MUTED)
                 text(img, 1080, 650, "Always SAFE\naccuracy: 84.6%", 25, 450, MUTED)
             footer(img, "SIMULATED · observed-class test labels · these scores do not measure warning lead time")
         elif t < review:
             header(img, "The warning came later", "Recorded simulation · one fast-surge scenario", t)
             d = ImageDraw.Draw(img)
+            text(img, W / 2, 205, "About 1 minute late", 93, 650, AMBER, centre=True)
             d.line((320, 520, 1600, 520), fill=LINE, width=7)
             for x, title, clock, colour in ((490, "Threshold crossed", "14:08:09", RED),
                                            (1390, "First confident warning", "14:09:08", AMBER)):
@@ -651,7 +661,7 @@ class Scene:
                 text(img, x, 360, title, 33, 550, colour, centre=True)
                 text(img, x, 575, clock, 49, 600, centre=True)
             text(img, W / 2, 730, "Prototype threshold 0.70 · not a validated safety limit", 28, 450, MUTED, centre=True)
-            footer(img, "Run A sampled timeline · a high score does not establish useful warning time")
+            footer(img, "Run A · 59 simulated seconds between samples · ~30-second sampling · not field warning latency")
         else:
             header(img, "Uncertainty stays visible", "Adjusted score · staff review cue", t)
             frame = snapshot("C2a", 108)
@@ -666,27 +676,28 @@ class Scene:
                 dissolve(img, previous, img.copy(), phase(t, boundary, .45))
 
     def draw_N13(self, img, t):
-        header(img, "Who can use the route?", "MODEL CHECK · full closure · synthetic wheelchair journeys", t)
-        if t < cue(self.report, 1):
-            text(img, W / 2, 425, "What about Mrs Chan?", 84, 650, centre=True)
-            return
-        source = self.footage("C2c", 7 + min(3, (t - cue(self.report, 1)) * .6))
-        window(img, source, (130, 230, 1790, 835), "RECORDED SKETCHFUTURE MODEL CHECK")
-        grid_start = cue(self.report, 1) + 3.4
+        title, subtitle = "CrowdPulse · Scenario simulation", "Full-closure stress test · synthetic wheelchair journeys"
+        header(img, title, subtitle, t)
+        source = self.footage("C3_scenario", min(9, max(0, t)))
+        window(img, source, (130, 230, 1790, 835), "RECORDED RESULT · ONE CROWDPULSE FEATURE")
+        grid_start = cue(self.report, 1) + 2.3
         if t < grid_start:
-            footer(img, "Map © OpenStreetMap contributors · full-closure stress test, not route certification")
+            footer(img, "Map © OpenStreetMap contributors · model comparison, not verification of an alternative route")
             return
         recorded = img.copy()
         cohort = backdrop().copy()
-        header(cohort, "Who can use the route?", "MODEL CHECK · full closure · synthetic wheelchair journeys", t)
+        header(cohort, title, subtitle, t)
         roundbox(cohort, (160, 260, 1760, 745), PANEL, 32, LINE)
-        for i, title in enumerate(("Before", "After full closure")):
+        for i, label in enumerate(("Before", "After full closure")):
             x = 285 + i * 850
-            text(cohort, x + 190, 300, title, 35, 600, centre=True)
+            text(cohort, x + 190, 300, label, 35, 600, centre=True)
             dot_grid(cohort, x, 405)
             text(cohort, x + 190, 625, "24 / 40", 56, 650, PURPLE, centre=True)
-        text(cohort, W / 2, 795, "Purple: no mapped step-free route in either plan", 32, 550, centre=True)
+        message = "Purple: no mapped step-free route in either plan"
         if t >= cue(self.report, 2):
+            message = "The same map/cohort limitation in both plans"
+        text(cohort, W / 2, 795, message, 32, 550, centre=True)
+        if t >= cue(self.report, 3):
             pill(cohort, "MAP DATA + ON-SITE CHECKS", 660, 862, AMBER)
         dissolve(img, recorded, cohort, phase(t, grid_start, .6))
         footer(img, "Map © OpenStreetMap contributors · model reachability is not field certification")
@@ -700,6 +711,8 @@ class Scene:
             text(img, x + 270, 355, f"0{i + 1}", 85, 650, colour, centre=True)
             text(img, x + 270, 505, label, 32, 600, centre=True)
             text(img, x + 270, 575, sub, 24, 450, MUTED, centre=True)
+        if t >= cue(self.report, 1):
+            pill(img, "Missing route evidence → approval blocked", 650, 795, AMBER, 23)
 
     def draw_N15(self, img, t):
         header(img, "The next milestone is evidence", "Validation before field claims", t)
@@ -711,7 +724,7 @@ class Scene:
             text(img, x + 400, 585, status, 23, 550, colour, centre=True)
 
     def draw_N16(self, img, t):
-        source_t = float(np.interp(t, [0, 1.4, 2, 3.6, 5.4, 8], [0, 1.6, 3.53, 4.3, 5.1, 6.95]))
+        source_t = float(np.interp(t, [0, 1.6, 2.2, 4, 5.9, 8], [0, 1.6, 3.53, 4.3, 5.1, 6.95]))
         frame = legacy("S18").draw_frame(source_t)
         img.alpha_composite(frame)
 
@@ -726,7 +739,7 @@ class Scene:
             roundbox(img, (x, 340, x + 385, 520), PANEL, 22, LINE)
             text(img, x + 192, 375, p["name"], 29, 600, centre=True)
             text(img, x + 192, 440, p["role"], 19, 450, MUTED, centre=True)
-        text(img, W / 2, 575, "School and supervisor details pending", 24, 450, AMBER, centre=True)
+        text(img, W / 2, 575, "Observe. Forecast. Review. Decide.", 29, 550, CYAN, centre=True)
         credits = ["Toronto clip: Raysonho · Wikimedia Commons · CC0", "Map: OpenStreetMap contributors · ODbL",
                    "Mall dataset: Chen et al., BMVC 2012 · derived results", "Melbourne counts: City of Melbourne · CC BY",
                    "YOLO11: Ultralytics · AGPL-3.0", "Fonts: Geist + Noto Sans TC · SIL OFL"]
@@ -737,24 +750,37 @@ class Scene:
 def render_scene(sid):
     shot, scene = SHOTS[sid], Scene(sid)
     slot = shot["end_s"] - shot["start_s"]
-    path = BUILD / "scenes" / f"{sid}.mp4"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    encoder = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
-         "-s", f"{W}x{H}", "-r", str(FPS), "-i", "pipe:0", "-an", "-c:v", "libx264",
-         "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p",
-         "-preset", "fast", "-crf", "18", "-threads", "2", *COLOUR, "-movflags", "+faststart", str(path)], stdin=subprocess.PIPE)
+    folder = BUILD / "scenes"
+    folder.mkdir(parents=True, exist_ok=True)
+    paths = [folder / f"{sid}.mp4", folder / f"{sid}_clean.mp4"]
+    writers = []
     try:
+        for path in paths:
+            writers.append(subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
+                "-s", f"{W}x{H}", "-r", str(FPS), "-i", "pipe:0", "-an", "-c:v", "libx264",
+                "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p",
+                "-preset", "fast", "-crf", "16", "-threads", "2", *COLOUR,
+                "-movflags", "+faststart", str(path)], stdin=subprocess.PIPE))
         for i in range(round(slot * FPS)):
-            encoder.stdin.write(scene.draw(i / FPS).tobytes())
-        encoder.stdin.close()
-        if encoder.wait() != 0:
-            raise RuntimeError(f"Encoder failed: {sid}")
+            t = i / FPS
+            clean = scene.draw(t, include_captions=False)
+            writers[1].stdin.write(clean.tobytes())
+            captioned = scene.add_captions(clean.convert("RGBA"), t).convert("RGB")
+            writers[0].stdin.write(captioned.tobytes())
+        for writer in writers:
+            writer.stdin.close()
+        for writer in writers:
+            if writer.wait() != 0:
+                raise RuntimeError(f"Encoder failed: {sid}")
     finally:
         scene.close()
-        if encoder.poll() is None:
-            encoder.terminate(); encoder.wait()
-    assert abs(duration(path) - slot) < 1 / FPS
-    return f"{sid}: {slot:.1f}s rendered"
+        for writer in writers:
+            if writer.poll() is None:
+                writer.terminate()
+                writer.wait()
+    for path in paths:
+        assert abs(duration(path) - slot) < 1 / FPS
+    return f"{sid}: {slot:.1f}s rendered (preview + clean picture)"
 
 
 def stills():
@@ -767,6 +793,7 @@ def stills():
     for sid, times in points.items():
         scene = Scene(sid)
         for t in times:
+            t = min(t, scene.shot["end_s"] - scene.shot["start_s"] - .1)
             scene.draw(t).save(out / f"{sid}_{t:g}.png")
         scene.close()
         print(f"{sid}: stills", flush=True)
@@ -782,6 +809,21 @@ def assemble():
     listing.write_text("".join(f"file '{p}'\n" for p in paths))
     video = out / "video.mp4"
     run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(listing), "-c", "copy", str(video)])
+    clean_listing = out / "clean-clips.txt"
+    clean_listing.write_text("".join(f"file '{BUILD / 'scenes' / (s['id'] + '_clean.mp4')}'\n" for s in scenes()))
+    clean = out / "crowdpulse_v3_picture_only_1080p.mp4"
+    run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(clean_listing),
+         "-c:v", "copy", "-an", "-bsf:v", H264_COLOUR, "-movflags", "+faststart", str(clean)])
+    guide = json.loads((BUILD / "guide.json").read_text())
+    def srt_time(seconds):
+        ms = round(seconds * 1000)
+        return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}"
+    subtitles = []
+    for shot in scenes():
+        for item in guide[shot["id"]]["captions"]:
+            subtitles.append(f"{len(subtitles) + 1}\n{srt_time(shot['start_s'] + item['start'])} --> "
+                             f"{srt_time(shot['start_s'] + item['end'])}\n{item['text']}\n")
+    (out / "crowdpulse_v3_guide_captions.srt").write_text("\n".join(subtitles))
     audio = out / "narration.wav"
     with wave.open(str(audio), "wb") as dest:
         dest.setnchannels(1); dest.setsampwidth(2); dest.setframerate(48000)
@@ -792,11 +834,11 @@ def assemble():
                     dest.writeframes(src.readframes(src.getnframes()))
             else:
                 dest.writeframes(b"\0" * (shot["end_s"] - shot["start_s"]) * 96000)
-    final = out / "crowdpulse_v2_reviewed_full_1080p.mp4"
+    final = out / "crowdpulse_v3_full_1080p.mp4"
     run(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-i", str(audio), "-c:v", "copy", "-bsf:v", H264_COLOUR,
          "-af", "loudnorm=I=-18:TP=-2:LRA=9", "-ar", "48000", "-ac", "2", "-c:a", "aac", "-b:a", "192k",
          "-t", str(RUNTIME_S), "-movflags", "+faststart", str(final)])
-    preview = out / "crowdpulse_v2_reviewed_full_preview_720p.mp4"
+    preview = out / "crowdpulse_v3_full_preview_720p.mp4"
     run(["ffmpeg", "-v", "error", "-y", "-i", str(final), "-vf", "scale=1280:720", "-c:v", "libx264",
          "-crf", "21", "-preset", "fast", *COLOUR, "-bsf:v", H264_COLOUR,
          "-c:a", "copy", "-movflags", "+faststart", str(preview)])
