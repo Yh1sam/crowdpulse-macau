@@ -1,0 +1,47 @@
+Ieong I Hang
+B：使用場景、工作人員操作流程、部署與下一步
+
+先錄旁白，出鏡稍後補
+
+1. 先看資料包的導讀影片，理解自己每段在講甚麼。導讀聲音只是節奏參考，不用模仿。
+2. 一個 scene 錄成一個完整檔案，不用每句切開。每段交兩個完整 take。
+3. 用安靜房間、同一支手機或麥克風，盡量在同一次錄完。手機約距嘴巴 15–25 cm，避免正對氣流。
+4. 說話自然、清楚；句號稍停。開始及結束各留 1–2 秒，不要為了卡秒而加速。
+5. 保留原始 m4a 或 wav；不要加音樂或自行剪成影片。檔名：姓名_Nxx_take1.m4a、姓名_Nxx_take2.m4a。
+6. 本輪先交個人旁白。N01、N04、N17 三句共同台詞先練習，之後四人同框，連畫面和聲音一起錄。
+7. 之後凡需要嘴部入鏡的片段，也連畫面與聲音重錄；不用對着現在的錄音做口型。
+8. 下方時間只是現有 4:15 導讀版的位置。真人錄音收到後會重新對時，不必逐秒追着影片。
+
+個人錄音台詞（按場次分檔）
+
+N03 — Why these decisions matter
+導讀版位置：0:25–0:42
+檔名：Ieong_I_Hang_N03_take1.m4a
+
+We want to help event staff make informed decisions. Why do these decisions matter? They affect people with different mobility needs. This Golden Week, police briefly controlled crowds at the Ruins on three afternoons.
+
+N06 — A proposed supporting tool
+導讀版位置：0:55–1:13
+檔名：Ieong_I_Hang_N06_take1.m4a
+
+Macau's Public Security Police Force already runs a crowd warning system. Our proposal is a temporary sensing kit and dashboard for event staff, designed to support existing work during busy events.
+
+N09 — Review before acting
+導讀版位置：1:48–2:06
+檔名：Ieong_I_Hang_N09_take1.m4a
+
+My focus is deployment and how event staff would use the system. An operator reviews each suggestion, approves or rejects it, and enters a name recorded with the decision. Notices come in three languages and disclose AI use.
+
+N15 — The next evidence
+導讀版位置：3:43–3:56
+檔名：Ieong_I_Hang_N15_take1.m4a
+
+Our pre-registered Melbourne forecasting test is pending. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions.
+
+共同出鏡台詞（先練習，之後四人一起錄）
+
+N01: We are CrowdPulse Macau.
+
+N04: Can ordinary phones support crowd forecasts and staff decisions without sending images or identifying passers-by?
+
+N17: The AI recommends. A person decides.

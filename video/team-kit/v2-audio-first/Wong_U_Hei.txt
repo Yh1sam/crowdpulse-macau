@@ -1,0 +1,41 @@
+Wong U Hei
+SE：人潮預測、系統整合、評估及失敗案例
+
+先錄旁白，出鏡稍後補
+
+1. 先看資料包的導讀影片，理解自己每段在講甚麼。導讀聲音只是節奏參考，不用模仿。
+2. 一個 scene 錄成一個完整檔案，不用每句切開。每段交兩個完整 take。
+3. 用安靜房間、同一支手機或麥克風，盡量在同一次錄完。手機約距嘴巴 15–25 cm，避免正對氣流。
+4. 說話自然、清楚；句號稍停。開始及結束各留 1–2 秒，不要為了卡秒而加速。
+5. 保留原始 m4a 或 wav；不要加音樂或自行剪成影片。檔名：姓名_Nxx_take1.m4a、姓名_Nxx_take2.m4a。
+6. 本輪先交個人旁白。N01、N04、N17 三句共同台詞先練習，之後四人同框，連畫面和聲音一起錄。
+7. 之後凡需要嘴部入鏡的片段，也連畫面與聲音重錄；不用對着現在的錄音做口型。
+8. 下方時間只是現有 4:15 導讀版的位置。真人錄音收到後會重新對時，不必逐秒追着影片。
+
+個人錄音台詞（按場次分檔）
+
+N08 — Inspect the forecast
+導讀版位置：1:27–1:48
+檔名：Wong_U_Hei_N08_take1.m4a
+
+My focus is forecasting, system integration and evaluation. The phone's test feed is assigned to Almeida Ribeiro. Here, we switch to the simulated Senado scenario. Staff can inspect forecasts, confidence scores and reasons.
+
+N12 — Test the warning time
+導讀版位置：2:43–3:08
+檔名：Wong_U_Hei_N12_take1.m4a
+
+Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But a fast simulated surge crossed our alert threshold before a confident warning. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability.
+
+N14 — What the tests taught us
+導讀版位置：3:31–3:43
+檔名：Wong_U_Hei_N14_take1.m4a
+
+Our tests showed why prediction quality, warning time and route accessibility need separate checks. A working prototype is the start of that process.
+
+共同出鏡台詞（先練習，之後四人一起錄）
+
+N01: We are CrowdPulse Macau.
+
+N04: Can ordinary phones support crowd forecasts and staff decisions without sending images or identifying passers-by?
+
+N17: The AI recommends. A person decides.
