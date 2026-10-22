@@ -13,7 +13,7 @@ N11,154,172,2:34,2:52,Thomas,"On one mall camera, the detector under-counted. Af
 N12,172,199,2:52,3:19,Thomas,"Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But in a fast simulated surge, the first confident warning came about a minute after the alert threshold was crossed. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability."
 N13,199,224,3:19,3:44,Curtis,"CrowdPulse also includes scenario simulation, to compare street changes for different mobility needs. In one full-closure stress test, twenty-four of forty simulated wheelchair journeys had no mapped step-free route in either plan. The closure did not create those twenty-four unreachable journeys. Map data and on-site checks still matter."
 N14,224,239,3:44,3:59,Thomas,"Our tests showed why prediction quality, warning time and route accessibility need separate checks. In CrowdPulse, missing route evidence now blocks approval and leads to a recorded request for an on-site check."
-N15,239,252,3:59,4:12,Ean,"We pre-registered our forecasting test on Melbourne pedestrian counts. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions."
-N16,252,260,4:12,4:20,Curtis,"For a wheelchair user, staff would still need to inspect the route and provide assistance on site."
-N17,260,265,4:20,4:25,all,The AI recommends. A person decides.
-N18,265,271,4:25,4:31,none,
+N15,239,258,3:59,4:18,Ean,"We pre-registered our forecasting test on Melbourne pedestrian counts. On real counts, fifteen-minute F1 was 0.553, against 0.551 for no change: no clear difference. We then want a supervised pilot, with permission."
+N16,258,266,4:18,4:26,Curtis,"For a wheelchair user, staff would still need to inspect the route and provide assistance on site."
+N17,266,271,4:26,4:31,all,The AI recommends. A person decides.
+N18,271,277,4:31,4:37,none,

@@ -1,6 +1,6 @@
 # CrowdPulse Macau — 18-scene reconstruction
 
-Approved narrative and speakers; reviewed runtime **4:31 (271 s)**. The review uses synthetic guide narration and clearly labelled camera placeholders. Real voices, camera footage and school/supervisor details remain to be supplied.
+Approved narrative and speakers; reviewed runtime **4:37 (277 s)**. The review uses synthetic guide narration and clearly labelled camera placeholders. Real voices, camera footage and school/supervisor details remain to be supplied.
 
 | Speaker | STEMB | Focus |
 |---|---|---|
@@ -26,7 +26,7 @@ Approved narrative and speakers; reviewed runtime **4:31 (271 s)**. The review u
 | N12 | 2:52.0–3:19.0 | Wong U Hei | Counting accuracy doesn't guarantee warning time. On held-out simulated days, our fifteen-minute model beat the no-change baseline. But in a fast simulated surge, the first confident warning came about a minute after the alert threshold was crossed. Staff review remains essential. Our adjusted confidence score is a review cue, not a calibrated probability. |
 | N13 | 3:19.0–3:44.0 | Ku Seong Lai | CrowdPulse also includes scenario simulation, to compare street changes for different mobility needs. In one full-closure stress test, twenty-four of forty simulated wheelchair journeys had no mapped step-free route in either plan. The closure did not create those twenty-four unreachable journeys. Map data and on-site checks still matter. |
 | N14 | 3:44.0–3:59.0 | Wong U Hei | Our tests showed why prediction quality, warning time and route accessibility need separate checks. In CrowdPulse, missing route evidence now blocks approval and leads to a recorded request for an on-site check. |
-| N15 | 3:59.0–4:12.0 | Ieong I Hang | We pre-registered our forecasting test on Melbourne pedestrian counts. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions. |
-| N16 | 4:12.0–4:20.0 | Ku Seong Lai | For a wheelchair user, staff would still need to inspect the route and provide assistance on site. |
-| N17 | 4:20.0–4:25.0 | ALL | The AI recommends. A person decides. |
-| N18 | 4:25.0–4:31.0 | NONE |  |
+| N15 | 3:59.0–4:18.0 | Ieong I Hang | We pre-registered our forecasting test on Melbourne pedestrian counts. On real counts, fifteen-minute F1 was 0.553, against 0.551 for no change: no clear difference. We then want a supervised pilot, with permission. |
+| N16 | 4:18.0–4:26.0 | Ku Seong Lai | For a wheelchair user, staff would still need to inspect the route and provide assistance on site. |
+| N17 | 4:26.0–4:31.0 | ALL | The AI recommends. A person decides. |
+| N18 | 4:31.0–4:37.0 | NONE |  |

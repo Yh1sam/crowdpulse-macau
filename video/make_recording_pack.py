@@ -6,7 +6,7 @@ from v2_story import PEOPLE, ROOT, RUNTIME_S, scenes
 
 DEST = ROOT / 'video/team-kit/v2-audio-first'
 BUILD = ROOT / 'video/build/v3'
-PACK_DATE = '2026-10-21'
+PACK_DATE = '2026-10-22'
 
 
 def timecode(n):

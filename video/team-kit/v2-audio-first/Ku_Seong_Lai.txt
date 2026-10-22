@@ -34,7 +34,7 @@ N13 — Compare a street-change scenario
 CrowdPulse also includes scenario simulation, to compare street changes for different mobility needs. In one full-closure stress test, twenty-four of forty simulated wheelchair journeys had no mapped step-free route in either plan. The closure did not create those twenty-four unreachable journeys. Map data and on-site checks still matter.
 
 N16 — Return to the wheelchair user
-參考位置：4:12–4:20
+參考位置：4:18–4:26
 檔名：Curtis_N16_take1.m4a
 
 For a wheelchair user, staff would still need to inspect the route and provide assistance on site.

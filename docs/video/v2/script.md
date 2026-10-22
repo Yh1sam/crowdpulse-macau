@@ -1,6 +1,6 @@
 # CrowdPulse Macau — 18-scene reconstruction
 
-Approved narrative and speakers; reviewed runtime **4:31 (271 s)**. The review uses synthetic guide narration and clearly labelled camera placeholders. Real voices, camera footage and school/supervisor details remain to be supplied.
+Approved narrative and speakers; reviewed runtime **4:37 (277 s)**. The review uses synthetic guide narration and clearly labelled camera placeholders. Real voices, camera footage and school/supervisor details remain to be supplied.
 
 | Speaker | STEMB | Focus |
 |---|---|---|
@@ -122,15 +122,15 @@ Our tests showed why prediction quality, warning time and route accessibility ne
 
 **Visual:** Three familiar elements return: prediction comparison, late-warning timeline, wheelchair route. No second full demo or extra metrics.
 
-## N15 · 3:59.0–4:12.0 · Ieong I Hang
+## N15 · 3:59.0–4:18.0 · Ieong I Hang
 
 **The next evidence**
 
-We pre-registered our forecasting test on Melbourne pedestrian counts. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions.
+We pre-registered our forecasting test on Melbourne pedestrian counts. On real counts, fifteen-minute F1 was 0.553, against 0.551 for no change: no clear difference. We then want a supervised pilot, with permission.
 
-**Visual:** Short roadmap: Melbourne test pending / supervised pilot proposed. No held-out analysis or invented result; no claimed partner or field deployment.
+**Visual:** Short roadmap: Melbourne test result / supervised pilot proposed. The result is the pre-registered one, run once after the window closed on 22 Oct (experiments/results/melbourne/summary.md): +15 min macro-F1 model 0.553 vs no change 0.551, interval [-0.003, +0.007], so no clear difference; a moving-average baseline (0.560) led at all three horizons; the model led no-change at +5 and +10 min. Stated whichever way it came out; no claimed partner or field deployment.
 
-## N16 · 4:12.0–4:20.0 · Ku Seong Lai
+## N16 · 4:18.0–4:26.0 · Ku Seong Lai
 
 **Return to the wheelchair user**
 
@@ -138,7 +138,7 @@ For a wheelchair user, staff would still need to inspect the route and provide a
 
 **Visual:** Return to the anonymous wheelchair-user illustration, with staff checking the route. No named character, real-person claim or all-clear stamp.
 
-## N17 · 4:20.0–4:25.0 · ALL
+## N17 · 4:26.0–4:31.0 · ALL
 
 **People decide**
 
@@ -146,7 +146,7 @@ The AI recommends. A person decides.
 
 **Visual:** All four stand-ins share the final line, with names and roles. Clear camera-placeholder label until real footage is supplied.
 
-## N18 · 4:25.0–4:31.0 · NONE
+## N18 · 4:31.0–4:37.0 · NONE
 
 **Credits**
 

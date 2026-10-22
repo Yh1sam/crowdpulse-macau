@@ -716,12 +716,23 @@ class Scene:
 
     def draw_N15(self, img, t):
         header(img, "The next milestone is evidence", "Validation before field claims", t)
-        for i, (title, status, colour) in enumerate((("Melbourne forecasting test", "PRE-REGISTERED · PENDING", AMBER),
+        result = t >= cue(self.report, 1)   # "On real counts, ...": the pre-registered result lands with the words
+        for i, (title, status, colour) in enumerate((("Melbourne forecasting test", "PRE-REGISTERED · RUN ONCE AFTER THE WINDOW", AMBER),
                       ("Supervised pilot", "PROPOSED · WITH PERMISSION", CYAN))):
             x = 120 + i * 880
             roundbox(img, (x, 300, x + 800, 735), PANEL, 30, LINE)
-            text(img, x + 400, 400, title, 39, 600, width=700, centre=True)
-            text(img, x + 400, 585, status, 23, 550, colour, centre=True)
+            if i == 0 and result:
+                # experiments/results/melbourne/summary.md (run 22 Oct, after the window): +15 min macro-F1 model 0.553,
+                # no-change persistence 0.551, difference +0.002 [-0.003, +0.007]; moving average 0.560 led at all horizons
+                text(img, x + 400, 360, title, 39, 600, width=700, centre=True)
+                text(img, x + 400, 430, "+15 min macro-F1 · real counts · 5 test days", 22, 450, MUTED, centre=True)
+                text(img, x + 400, 485, "model 0.553   ·   no change 0.551", 36, 650, centre=True)
+                text(img, x + 400, 570, "NO CLEAR DIFFERENCE", 25, 600, CYAN, centre=True)
+                text(img, x + 400, 635, "At +5 and +10 min the model led slightly; a moving average led at all three.",
+                     20, 450, MUTED, width=720, centre=True)
+            else:
+                text(img, x + 400, 400, title, 39, 600, width=700, centre=True)
+                text(img, x + 400, 585, status, 23, 550, colour, centre=True)
 
     def draw_N16(self, img, t):
         source_t = float(np.interp(t, [0, 1.6, 2.2, 4, 5.9, 8], [0, 1.6, 3.53, 4.3, 5.1, 6.95]))

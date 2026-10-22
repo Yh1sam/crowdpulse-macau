@@ -236,6 +236,8 @@ Section questions are spoken and foregrounded, rather than briefly appearing as 
 
 ### B. Melbourne status and eventual result (S16)
 
+**Result (22 Oct 2026):** the pre-registered analysis was run once after the window closed (`experiments/results/melbourne/summary.md`, commit 517f911): +15 min macro-F1 model 0.553 vs no-change persistence 0.551, difference +0.002 [-0.003, +0.007], verdict **no clear difference**; moving-average persistence (0.560) led at all three horizons. The current production film (docs/video/v2, scene N15) carries this result; this older shot list's S16 is left at its pending fallback and is not re-rendered.
+
 - **Current complete fallback:** an 8.0-second scene with the exact line in the storyboard: "Our next test uses real Melbourne pedestrian counts under pre-registered rules. Results are still pending." It shows the source, initial99-sensor scope, pre-registration status and Not Macau qualification. No editing placeholder or silent result slot appears.
 - The frozen rules remain `experiments/datasets/melbourne/README.md`, committed in 95057e2 before the test window. Do not change its classification target or replace its primary macro-F1 comparison with a new count-prediction MAE task.
 - Test days are 18–22 October Melbourne time. The full window ends 22 October 21:00 Macau time; use the real analysis only once its archived coverage is available. The committed dry run is not a forecasting result.

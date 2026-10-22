@@ -34,10 +34,10 @@ N09 — Review before acting
 My focus is user needs, staff workflows and video editing. Here, route accessibility is unverified, so CrowdPulse blocks approval. The operator requests an on-site check, then rejects the diversion. Both actions are recorded under a self-declared name. Draft public notices disclose AI use in three languages.
 
 N15 — The next evidence
-參考位置：3:59–4:12
+參考位置：3:59–4:18
 檔名：Ean_N15_take1.m4a
 
-We pre-registered our forecasting test on Melbourne pedestrian counts. We then want a supervised pilot, with permission. Our next milestone is evidence from real operating conditions.
+We pre-registered our forecasting test on Melbourne pedestrian counts. On real counts, fifteen-minute F1 was 0.553, against 0.551 for no change: no clear difference. We then want a supervised pilot, with permission.
 
 共同台詞（每人分開完整錄製，之後剪成四格同框）
 
