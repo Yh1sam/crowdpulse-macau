@@ -1,0 +1,79 @@
+{
+  "mode": "REAL TEST",
+  "generated_at_utc": "2026-10-22 14:08",
+  "git_head": "44c5ab546df7f88dfe9bcac041845b195f1acb38",
+  "prereg_sha256": "36f6ff9f99ecdd610f5b74ca433d9bea8317b2f4360cdaf9436fb33b7664f66e",
+  "prereg_commit": "95057e2ef9418acd6d9dc32a4c5778ee7f89e12c",
+  "prereg_pushed_to_remote": true,
+  "prereg_remote_branches": [
+    "origin/codex/sketchfuture",
+    "origin/main"
+  ],
+  "allow_short_window": null,
+  "files": [
+    {
+      "file": "minute/2026-10-11.csv.gz",
+      "sha256": "63881027114dd6794c44093e243a83935624bfdb5a0ec5b127452664b00a9b35"
+    },
+    {
+      "file": "minute/2026-10-12.csv.gz",
+      "sha256": "b4da1663a081b295e2387180ec95c1e05daaf957a851698a715cf3777adef3bc"
+    },
+    {
+      "file": "minute/2026-10-13.csv.gz",
+      "sha256": "8d22d76929e8ec5d448e4ec516314729a7caa3f221dce47b127454cebcc34345"
+    },
+    {
+      "file": "minute/2026-10-14.csv.gz",
+      "sha256": "fe836327829792f83fd8b921a95544953532680f4f16b9b9716f42a7edb147bc"
+    },
+    {
+      "file": "minute/2026-10-15.csv.gz",
+      "sha256": "4749ae4b77366b07e23980cad73e38797a92dbf4b434c632266c74416034f132"
+    },
+    {
+      "file": "minute/2026-10-16.csv.gz",
+      "sha256": "2c5201066b71441619380be2499729ef8e76569386d143e70cd6133b52fe0696"
+    },
+    {
+      "file": "minute/2026-10-17.csv.gz",
+      "sha256": "a53dba2f434a01e0321cd8d86926e47e94270966b520958e6119a56be80c8897"
+    },
+    {
+      "file": "minute/2026-10-18.csv.gz",
+      "sha256": "29ebf83c990c54156a1ed7c9f8cdfeff5e649fcffd1452ee8f5219e0c976bb41"
+    },
+    {
+      "file": "minute/2026-10-19.csv.gz",
+      "sha256": "ca3e468c9cf47048235343757cdf40db620645cfd3da971d784111055acb75a8"
+    },
+    {
+      "file": "minute/2026-10-20.csv.gz",
+      "sha256": "f68b4d252d8f2fd424fe50a745d09ea1e28658c324a13e967d25ae434e00282e"
+    },
+    {
+      "file": "minute/2026-10-21.csv.gz",
+      "sha256": "9f6bace2ceafd8939d9c3422c4dba935961513f6c14c22481071e66f566bf16c"
+    },
+    {
+      "file": "minute/2026-10-22.csv.gz",
+      "sha256": "7eaebe2e390a88dc489a325841d9c69e4791f410382e00827983d838bd3792f3"
+    },
+    {
+      "file": "archive_log.jsonl",
+      "sha256": "eaef05977d23c16f4570d6fcc910687f8158e92449f71ac1162224b7ab6eebb6"
+    },
+    {
+      "file": "archive_log.mac.jsonl",
+      "sha256": "d7fb0278ce7b9bf67756347778392cb919a0751bf43593503f0b8f4a6c1e2814"
+    },
+    {
+      "file": "sensors.csv",
+      "sha256": "58333c536b2ed3806ed7ef7ffc957e202f73bdd457b106b8266c66df8852e470"
+    }
+  ],
+  "python": "3.12.13",
+  "numpy": "2.5.3",
+  "pandas": "3.0.6",
+  "scikit_learn": "1.9.1"
+}
