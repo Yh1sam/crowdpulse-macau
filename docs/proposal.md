@@ -2,11 +2,11 @@
 
 Submitted text of 2026-10-25, 149 words (counted with `wc -w`). Submission deadline: 25 October 2026, 23:59 HKT/MST. It matches the final film (docs/video/v2).
 
-In Golden Week 2026, Macau's Public Security Police Force briefly controlled crowds at the Ruins of St. Paul's on three afternoons. They already run a crowd warning system.
+Every Golden Week, Macau's old streets fill. In 2026 the Public Security Police Force briefly controlled crowds at the Ruins of St. Paul's on three afternoons, despite a crowd warning system. Could ordinary phones help staff at any crowded event decide earlier, without identifying anyone?
 
-CrowdPulse Macau explores a portable workflow for event staff. Phones count people on-device with an open detector and send only numbers, never images. A random-forest classifier on recent counts rates each zone's crowding 5-15 minutes ahead, with a confidence score; low confidence triggers staff review. Operators cannot approve a diversion until its route is checked on site, every action is logged, and draft notices disclose AI use in Chinese, English and Portuguese.
+CrowdPulse is a portable workflow for event staff. Phones count people on-device and send only numbers, never images. A random-forest classifier on recent counts rates crowding 5-15 minutes ahead with a confidence score; low confidence triggers staff review. No diversion is approved until its route is checked on site; every action is logged; draft notices disclose AI use in three languages.
 
-We report results either way. On held-out simulated days, 15-minute macro-F1 was 0.865 versus 0.795 for no change, yet a fast surge gave a confident warning a minute late. On real Melbourne pedestrian counts, pre-registered, it was 0.553 versus 0.551: no clear difference. Next: a supervised pilot, with permission.
+We report results either way: on held-out simulated days, 15-minute macro-F1 0.865 versus 0.795 for no change, yet a fast surge warned a minute late; on real Melbourne pedestrian counts, pre-registered, 0.553 versus 0.551: no clear difference. Next: a supervised pilot, with permission.
 
 ## Where each claim comes from
 
